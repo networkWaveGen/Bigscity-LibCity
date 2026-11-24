@@ -67,10 +67,10 @@ class TrafficAccidentEvaluator(TrafficStateEvaluator):
                             loss.masked_mape_torch(y_pred[:, :i], y_true[:, :i]).item())
                     elif metric == 'R2':
                         self.intermediate_result[metric + '@' + str(i)].append(
-                            loss.r2_score_torch(y_pred[:, :i], y_true[:, :i]).item())
+                            float(loss.r2_score_torch(y_pred[:, :i], y_true[:, :i])))
                     elif metric == 'EVAR':
                         self.intermediate_result[metric + '@' + str(i)].append(
-                            loss.explained_variance_score_torch(y_pred[:, :i], y_true[:, :i]).item())
+                            float(loss.explained_variance_score_torch(y_pred[:, :i], y_true[:, :i])))
         elif self.mode.lower() == 'single':  # 第i个时间步的loss
             for i in range(1, self.len_timeslots + 1):
                 for metric in self.metrics:
@@ -100,10 +100,10 @@ class TrafficAccidentEvaluator(TrafficStateEvaluator):
                             loss.masked_mape_torch(y_pred[:, i - 1], y_true[:, i - 1]).item())
                     elif metric == 'R2':
                         self.intermediate_result[metric + '@' + str(i)].append(
-                            loss.r2_score_torch(y_pred[:, i - 1], y_true[:, i - 1]).item())
+                            float(loss.r2_score_torch(y_pred[:, i - 1], y_true[:, i - 1])))
                     elif metric == 'EVAR':
                         self.intermediate_result[metric + '@' + str(i)].append(
-                            loss.explained_variance_score_torch(y_pred[:, i - 1], y_true[:, i - 1]).item())
+                            float(loss.explained_variance_score_torch(y_pred[:, i - 1], y_true[:, i - 1])))
                     elif metric == 'Precision':
                         self.intermediate_result[metric + '@' + str(i)].append(
                             eval_funcs.Precision_torch(y_pred[:, i - 1], y_true[:, i - 1], self.topk))

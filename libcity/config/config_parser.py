@@ -1,6 +1,7 @@
-import os
 import json
 import torch
+from importlib.resources import files
+from pathlib import Path
 
 
 class ConfigParser(object):
@@ -51,21 +52,22 @@ class ConfigParser(object):
     def _parse_config_file(self, config_file):
         if config_file is not None:
             # TODO: 对 config file 的格式进行检查
-            if os.path.exists('./{}.json'.format(config_file)):
-                with open('./{}.json'.format(config_file), 'r') as f:
+            config_path = Path(config_file)
+            if not config_path.name.endswith('.json'):
+                config_path = config_path.with_name(config_path.name + '.json')
+            if config_path.is_file():
+                with config_path.open('r', encoding='utf-8') as f:
                     x = json.load(f)
                     for key in x:
                         if key not in self.config:
                             self.config[key] = x[key]
             else:
-                raise FileNotFoundError(
-                    'Config file {}.json is not found. Please ensure \
-                    the config file is in the root dir and is a JSON \
-                    file.'.format(config_file))
+                raise FileNotFoundError(f'Config file {config_path} is not found.')
 
     def _load_default_config(self):
+        config_files = files(__package__)
         # 首先加载 task config
-        with open('./libcity/config/task_config.json', 'r') as f:
+        with config_files.joinpath('task_config.json').open('r', encoding='utf-8') as f:
             task_config = json.load(f)
             if self.config['task'] not in task_config:
                 raise ValueError(
@@ -106,7 +108,7 @@ class ConfigParser(object):
         default_file_list.append('evaluator/{}.json'.format(self.config['evaluator']))
         # 加载所有默认配置
         for file_name in default_file_list:
-            with open('./libcity/config/{}'.format(file_name), 'r') as f:
+            with config_files.joinpath(file_name).open('r', encoding='utf-8') as f:
                 x = json.load(f)
                 for key in x:
                     if key not in self.config:
@@ -126,7 +128,7 @@ class ConfigParser(object):
     def _init_device(self):
         use_gpu = self.config.get('gpu', True)
         gpu_id = self.config.get('gpu_id', 0)
-        if use_gpu:
+        if use_gpu and torch.cuda.is_available():
             torch.cuda.set_device(gpu_id)
         self.config['device'] = torch.device(
             "cuda:%d" % gpu_id if torch.cuda.is_available() and use_gpu else "cpu")
