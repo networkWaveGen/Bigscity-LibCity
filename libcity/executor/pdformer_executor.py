@@ -208,7 +208,8 @@ class PDFormerExecutor(TrafficStateExecutor):
 
     def load_model_with_initial_ckpt(self, initial_ckpt):
         assert os.path.exists(initial_ckpt), 'Weights at %s not found' % initial_ckpt
-        model_state, optimizer_state = torch.load(initial_ckpt, map_location=torch.device('cpu'))
+        from libcity.utils.checkpoint import load_checkpoint, unpack_checkpoint
+        model_state, _, _ = unpack_checkpoint(load_checkpoint(initial_ckpt, 'cpu'))
         model_keys = self.model.state_dict()
         state_dict_load = {}
         unexpect_keys = []

@@ -1,3 +1,4 @@
+from libcity.utils.checkpoint import load_checkpoint, restore_checkpoint
 import torch
 import torch.optim as optim
 import numpy as np
@@ -67,7 +68,7 @@ class TrajLocPredExecutor(AbstractExecutor):
             best = np.argmax(metrics['accuracy'])  # 这个不是最好的一次吗？
             load_name_tmp = 'ep_' + str(best) + '.m'
             self.model.load_state_dict(
-                torch.load(self.tmp_path + load_name_tmp))
+                load_checkpoint(self.tmp_path + load_name_tmp, self.config['device']))
         # 删除之前创建的临时文件夹
         for rt, dirs, files in os.walk(self.tmp_path):
             for name in files:
@@ -76,9 +77,7 @@ class TrajLocPredExecutor(AbstractExecutor):
         os.rmdir(self.tmp_path)
 
     def load_model(self, cache_name):
-        model_state, optimizer_state = torch.load(cache_name)
-        self.model.load_state_dict(model_state)
-        self.optimizer.load_state_dict(optimizer_state)
+        restore_checkpoint(cache_name, self.model, self.optimizer, self.config['device'])
 
     def save_model(self, cache_name):
         if not os.path.exists(self.cache_dir):

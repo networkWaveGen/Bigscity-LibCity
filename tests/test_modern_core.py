@@ -152,6 +152,33 @@ def test_factory_does_not_hide_constructor_errors(monkeypatch):
         get_model({'task': 'traffic_state_pred', 'model': 'RNN'}, {})
 
 
+@pytest.mark.parametrize('model_name', ['GRU', 'STGCN'])
+def test_forecast_forward_backward_and_checkpoint(tmp_path, model_name):
+    torch.manual_seed(17)
+    config = {'task': 'traffic_state_pred', 'model': model_name,
+              'device': torch.device('cpu'), 'input_window': 12, 'output_window': 2,
+              'hidden_size': 4, 'num_layers': 1, 'dropout': 0,
+              'rnn_type': 'GRU', 'max_epoch': 1, 'Ks': 2, 'Kt': 2,
+              'blocks': [[1, 4, 4], [4, 4, 4]]}
+    if model_name == 'GRU':
+        config['model'] = 'RNN'
+    features = {'num_nodes': 3, 'feature_dim': 1, 'output_dim': 1,
+                'scaler': NoneScaler(), 'adj_mx': np.ones((3, 3), dtype=np.float32)}
+    model = get_model(config, features)
+    batch = {'X': torch.rand(2, 12, 3, 1) + 1, 'y': torch.rand(2, 2, 3, 1) + 1}
+    prediction = model.predict(batch)
+    assert prediction.shape == (2, 2, 3, 1)
+    value = model.calculate_loss(batch)
+    assert torch.isfinite(value)
+    value.backward()
+    assert any(p.grad is not None and torch.isfinite(p.grad).all() for p in model.parameters())
+    from libcity.utils.checkpoint import load_checkpoint
+    path = tmp_path / 'checkpoint.pt'
+    torch.save((model.state_dict(), torch.optim.Adam(model.parameters()).state_dict()), path)
+    restored, _ = load_checkpoint(path)
+    model.load_state_dict(restored)
+
+
 @pytest.mark.parametrize('mode', ['single', 'average'])
 @pytest.mark.parametrize('save_predictions', [False, True])
 def test_evaluation_preserves_global_metrics_and_prediction_archive(

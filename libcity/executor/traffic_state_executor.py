@@ -8,6 +8,7 @@ from libcity.executor.abstract_executor import AbstractExecutor
 from libcity.registry import get_evaluator
 from libcity.utils.filesystem import ensure_dir
 from libcity.model import loss
+from libcity.utils.checkpoint import restore_checkpoint
 from functools import partial
 
 
@@ -94,9 +95,7 @@ class TrafficStateExecutor(AbstractExecutor):
             cache_name(str): 保存的文件名
         """
         self._logger.info("Loaded model at " + cache_name)
-        model_state, optimizer_state = torch.load(cache_name)
-        self.model.load_state_dict(model_state)
-        self.optimizer.load_state_dict(optimizer_state)
+        restore_checkpoint(cache_name, self.model, self.optimizer, self.device)
 
     def save_model_with_epoch(self, epoch):
         """
@@ -124,9 +123,7 @@ class TrafficStateExecutor(AbstractExecutor):
         """
         model_path = self.cache_dir + '/' + self.config['model'] + '_' + self.config['dataset'] + '_epoch%d.tar' % epoch
         assert os.path.exists(model_path), 'Weights at epoch %d not found' % epoch
-        checkpoint = torch.load(model_path, map_location='cpu')
-        self.model.load_state_dict(checkpoint['model_state_dict'])
-        self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+        restore_checkpoint(model_path, self.model, self.optimizer, self.device)
         self._logger.info("Loaded model at {}".format(epoch))
 
     def _build_optimizer(self):
