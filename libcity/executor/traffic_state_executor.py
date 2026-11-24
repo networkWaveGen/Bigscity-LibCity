@@ -258,20 +258,22 @@ class TrafficStateExecutor(AbstractExecutor):
                 output = self.model.predict(batch)
                 y_true = self._scaler.inverse_transform(batch['y'][..., :self.output_dim])
                 y_pred = self._scaler.inverse_transform(output[..., :self.output_dim])
-                y_truths.append(y_true.cpu().numpy())
-                y_preds.append(y_pred.cpu().numpy())
+                y_truths.append(y_true.detach().cpu())
+                y_preds.append(y_pred.detach().cpu())
                 # evaluate_input = {'y_true': y_true, 'y_pred': y_pred}
                 # self.evaluator.collect(evaluate_input)
             # self.evaluator.save_result(self.evaluate_res_dir)
-            y_preds = np.concatenate(y_preds, axis=0)
-            y_truths = np.concatenate(y_truths, axis=0)  # concatenate on batch
-            outputs = {'prediction': y_preds, 'truth': y_truths}
+            y_preds = torch.cat(y_preds, dim=0)
+            y_truths = torch.cat(y_truths, dim=0)  # concatenate on batch
             filename = \
                 time.strftime("%Y_%m_%d_%H_%M_%S", time.localtime(time.time())) + '_' \
                 + self.config['model'] + '_' + self.config['dataset'] + '_predictions.npz'
-            np.savez_compressed(os.path.join(self.evaluate_res_dir, filename), **outputs)
+            if self.config.get('save_predictions', True):
+                np.savez_compressed(
+                    os.path.join(self.evaluate_res_dir, filename),
+                    prediction=y_preds.numpy(), truth=y_truths.numpy())
             self.evaluator.clear()
-            self.evaluator.collect({'y_true': torch.tensor(y_truths), 'y_pred': torch.tensor(y_preds)})
+            self.evaluator.collect({'y_true': y_truths, 'y_pred': y_preds})
             test_result = self.evaluator.save_result(self.evaluate_res_dir)
             return test_result
 

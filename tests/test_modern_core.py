@@ -14,6 +14,8 @@ import torch
 from libcity.config.config_parser import ConfigParser
 from libcity.data.batch import Batch, BatchPAD
 from libcity.data.utils import BatchCollator, generate_dataloader, generate_dataloader_pad
+from libcity.evaluator.traffic_state_evaluator import TrafficStateEvaluator
+from libcity.executor.traffic_state_executor import TrafficStateExecutor
 from libcity.utils.normalization import NoneScaler
 from libcity.registry import get_model
 
@@ -148,3 +150,49 @@ def test_factory_does_not_hide_constructor_errors(monkeypatch):
     monkeypatch.setattr(rnn, 'RNN', Broken)
     with pytest.raises(AttributeError, match='specific constructor failure'):
         get_model({'task': 'traffic_state_pred', 'model': 'RNN'}, {})
+
+
+@pytest.mark.parametrize('mode', ['single', 'average'])
+@pytest.mark.parametrize('save_predictions', [False, True])
+def test_evaluation_preserves_global_metrics_and_prediction_archive(
+        tmp_path, monkeypatch, mode, save_predictions):
+    monkeypatch.chdir(tmp_path)
+    truth = torch.tensor([0., 2., 3., 4., 5., 6., 7., 8., 9., 10., 11., 12.]).reshape(3, 2, 2, 1)
+    prediction = truth + torch.tensor([1., -1., 2.]).reshape(3, 1, 1, 1)
+    config = {'evaluator': 'TrafficStateEvaluator', 'evaluator_mode': mode,
+              'metrics': ['MAE', 'MSE', 'RMSE', 'MAPE', 'masked_MAE', 'masked_MSE',
+                          'masked_RMSE', 'masked_MAPE', 'R2', 'EVAR'],
+              'save_mode': ['csv'], 'device': torch.device('cpu'), 'exp_id': 101,
+              'model': 'fixture', 'dataset': 'fixture', 'save_predictions': save_predictions}
+
+    class Identity(torch.nn.Module):
+        def __init__(self):
+            super().__init__()
+            self.bias = torch.nn.Parameter(torch.zeros(()))
+
+        def predict(self, batch):
+            return batch['X'] + self.bias
+
+        def calculate_loss(self, batch):
+            return (self.predict(batch) - batch['y']).square().mean()
+
+    reference = TrafficStateEvaluator(config)
+    reference.collect({'y_true': truth.clone(), 'y_pred': prediction.clone()})
+    expected = reference.evaluate()
+    samples = [(x.numpy(), y.numpy()) for x, y in zip(prediction, truth)]
+    _, _, loader = generate_dataloader(samples, samples, samples,
+                                       {'X': 'float', 'y': 'float'}, 2, 0)
+    executor = TrafficStateExecutor(config, Identity(), {'scaler': NoneScaler()})
+    try:
+        actual = executor.evaluate(loader)
+    finally:
+        executor._writer.close()
+    for key, value in expected.items():
+        name, step = key.rsplit('@', 1)
+        assert actual[name].iloc[int(step) - 1] == pytest.approx(value, nan_ok=True)
+    files = list((tmp_path / 'libcity/cache/101/evaluate_cache').glob('*.npz'))
+    assert bool(files) == save_predictions
+    if files:
+        with np.load(files[0]) as data:
+            np.testing.assert_array_equal(data['prediction'], prediction.numpy())
+            np.testing.assert_array_equal(data['truth'], truth.numpy())
