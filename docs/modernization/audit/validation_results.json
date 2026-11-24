@@ -1,0 +1,232 @@
+{
+  "date": "2026-11-24",
+  "tested_code_commit": "6be3388299f009e3c32b782b81697a71614b38f9",
+  "command": "python -B -m pytest tests -q --disable-warnings --maxfail=2 --basetemp ../.runtime-tests/modernization-acceptance --junitxml ../.runtime-tests/modernization-acceptance.xml",
+  "total": 39,
+  "passed": 39,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "pytest_reported_seconds": 18.82,
+  "junit_testsuite_seconds": 18.819,
+  "warning_count": 1,
+  "dependency_check": "uv pip check: all 41 installed packages compatible",
+  "environment": {
+    "python": "3.12.13",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 198 Stepping 2, GenuineIntel",
+    "torch": "2.15.0+cpu",
+    "cuda_available": false,
+    "packages": {
+      "numpy": "2.5.5",
+      "pandas": "3.1.1",
+      "scipy": "1.18.1",
+      "scikit-learn": "1.9.1",
+      "pytest": "9.2.0",
+      "packaging": "26.4"
+    }
+  },
+  "models": [
+    {
+      "task": "traffic_state_pred",
+      "model": "GRU",
+      "validation": "factory, forward, backward, synthetic_one_epoch_pipeline"
+    },
+    {
+      "task": "traffic_state_pred",
+      "model": "STGCN",
+      "validation": "forward, backward, checkpoint_weights"
+    },
+    {
+      "task": "traj_loc_pred",
+      "model": "GRU",
+      "validation": "dataset_encoder_factory, model_executor_evaluator_factory, forward, backward"
+    },
+    {
+      "task": "eta",
+      "model": "DeepTTE",
+      "validation": "dataset_encoder_factory, model_executor_evaluator_factory, forward, backward"
+    },
+    {
+      "task": "map_matching",
+      "model": "HMMM",
+      "validation": "model_executor_evaluator_factory"
+    },
+    {
+      "task": "road_representation",
+      "model": "LINE",
+      "validation": "model_executor_evaluator_factory, loss, backward"
+    }
+  ],
+  "tests": [
+    {
+      "test": "tests.test_checkpoint_resume::test_adam_resume_matches_uninterrupted_next_step[traffic]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_checkpoint_resume::test_adam_resume_matches_uninterrupted_next_step[trajectory]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_checkpoint_resume::test_adam_resume_matches_uninterrupted_next_step[epoch]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_checkpoint_resume::test_device_forwarding_and_weights_only_default",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_checkpoint_resume::test_model_only_checkpoint_cannot_silently_reset_optimizer",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_checkpoint_resume::test_checkpoint_migration_keeps_values_and_optimizer[pair]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_checkpoint_resume::test_checkpoint_migration_keeps_values_and_optimizer[epoch]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_checkpoint_resume::test_checkpoint_migration_keeps_values_and_optimizer[state_dict]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_checkpoint_resume::test_checkpoint_migration_keeps_values_and_optimizer[weights]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_checkpoint_resume::test_checkpoint_migration_keeps_values_and_optimizer[object]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_component_entrypoints::test_real_model_executor_and_evaluator_factories[traffic_state_pred-GRU]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_component_entrypoints::test_real_model_executor_and_evaluator_factories[traj_loc_pred-GRU]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_component_entrypoints::test_real_model_executor_and_evaluator_factories[eta-DeepTTE]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_component_entrypoints::test_real_model_executor_and_evaluator_factories[map_matching-HMMM]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_component_entrypoints::test_real_model_executor_and_evaluator_factories[road_representation-LINE]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_component_entrypoints::test_real_dataset_and_encoder_factories[traj_loc_pred-GRU]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_component_entrypoints::test_real_dataset_and_encoder_factories[eta-DeepTTE]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_component_entrypoints::test_trajectory_gru_forward_and_backward",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_component_entrypoints::test_eta_deeptte_forward_and_backward",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_component_entrypoints::test_road_line_loss_and_backward",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_modern_core::test_core_imports_do_not_load_optional_stacks",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_modern_core::test_dense_batch_values_and_source_ownership[False]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_modern_core::test_dense_batch_values_and_source_ownership[True]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_modern_core::test_padding_and_ragged_fields_do_not_mutate_samples",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_modern_core::test_padded_loader_keeps_batch_type_without_padding_fields",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_modern_core::test_padded_collator_rejects_extra_sample_fields",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_modern_core::test_loader_works_with_spawn_worker",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_modern_core::test_last_sample_padding_handles_different_input_and_target_shapes",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_modern_core::test_cpu_device_selection[False]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_modern_core::test_cpu_device_selection[True]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_modern_core::test_packaged_defaults_and_explicit_json_path",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_modern_core::test_factory_does_not_hide_constructor_errors",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_modern_core::test_forecast_forward_backward_and_checkpoint[GRU]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_modern_core::test_forecast_forward_backward_and_checkpoint[STGCN]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_modern_core::test_evaluation_preserves_global_metrics_and_prediction_archive[False-single]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_modern_core::test_evaluation_preserves_global_metrics_and_prediction_archive[False-average]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_modern_core::test_evaluation_preserves_global_metrics_and_prediction_archive[True-single]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_modern_core::test_evaluation_preserves_global_metrics_and_prediction_archive[True-average]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_modern_core::test_atomic_files_to_training_and_evaluation",
+      "status": "passed"
+    }
+  ],
+  "limits": [
+    "No historical real-data accuracy baseline found",
+    "No real CUDA or Linux run",
+    "Optional legacy model stacks remain isolated, not runtime-certified",
+    "No end-to-end training speedup measured"
+  ],
+  "wheel_validation": {
+    "build": "passed",
+    "packaged_json_configs": 174,
+    "template_mapping_present": true,
+    "isolated_mode_import_from_wheel": "passed",
+    "scope": "Built wheel imported directly in isolated Python mode using the existing validated dependency environment, not a separate dependency installation."
+  }
+}

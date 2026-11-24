@@ -1,3 +1,5 @@
+> 现代化改造分支：本轮只改造 LibCity 核心。参见[安装与可选依赖](docs/modernization/README.md)、[集中验证记录](docs/modernization/validation.md)和[模型兼容状态](docs/modernization/audit/model_compatibility.csv)。
+
 ![](https://bigscity-libcity-docs.readthedocs.io/en/latest/_images/logo.png)
 
 ------

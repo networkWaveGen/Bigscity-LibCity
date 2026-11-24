@@ -1,3 +1,5 @@
+> Modernization branch: see [core installation, optional components and compatibility](docs/modernization/README.md) and [validation results](docs/modernization/validation.md).
+
 ![](https://bigscity-libcity-docs.readthedocs.io/en/latest/_images/logo.png)
 
 ------

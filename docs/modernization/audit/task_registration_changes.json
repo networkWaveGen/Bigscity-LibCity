@@ -1,0 +1,23 @@
+{
+  "baseline": "5a6391d41944e937f2c15e9be85ab7f40ac8b23e",
+  "changes": [
+    {
+      "task": "traj_loc_pred",
+      "model": "TemplateTLP",
+      "before": null,
+      "after": {
+        "dataset_class": "TrajectoryDataset",
+        "executor": "TrajLocPredExecutor",
+        "evaluator": "TrajLocPredEvaluator",
+        "traj_encoder": "StandardTrajectoryEncoder"
+      }
+    }
+  ],
+  "removed_allowed": {
+    "traj_loc_pred": [],
+    "traffic_state_pred": [],
+    "eta": [],
+    "map_matching": [],
+    "road_representation": []
+  }
+}

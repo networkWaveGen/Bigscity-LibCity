@@ -1,0 +1,28 @@
+{
+  "searched": [
+    {
+      "path": "LibCity的github代码",
+      "exists": true,
+      "files_examined": 421
+    },
+    {
+      "path": "LibCity2.0-main\\LibCity",
+      "exists": true,
+      "files_examined": 401
+    },
+    {
+      "path": "LibCity-modernization\\libcity\\cache",
+      "exists": false,
+      "files_examined": 0
+    },
+    {
+      "path": "LibCity-modernization\\libcity\\log",
+      "exists": false,
+      "files_examined": 0
+    }
+  ],
+  "existing_candidates": [],
+  "conclusion": "No existing historical experiment artifacts found in searched LibCity directories.",
+  "exclusions": "AgentCity excluded as agreed. .runtime-tests contains newly generated synthetic checks, not historical real-data experiments. No historical results were fabricated.",
+  "historical_accuracy_baseline_available": false
+}

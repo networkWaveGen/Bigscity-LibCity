@@ -1,0 +1,101 @@
+task,model,module,optional_extras,status,validation,issues
+traj_loc_pred,DeepMove,libcity.model.trajectory_loc_prediction.DeepMove,,import_passed,config_and_import_passed,
+traj_loc_pred,RNN,libcity.model.trajectory_loc_prediction.RNN,,import_passed,config_and_import_passed,
+traj_loc_pred,LSTM,libcity.model.trajectory_loc_prediction.RNN,,import_passed,config_and_import_passed,
+traj_loc_pred,GRU,libcity.model.trajectory_loc_prediction.RNN,,import_passed,config_and_import_passed,
+traj_loc_pred,FPMC,libcity.model.trajectory_loc_prediction.FPMC,,import_passed,config_and_import_passed,
+traj_loc_pred,LSTPM,libcity.model.trajectory_loc_prediction.LSTPM,,import_passed,config_and_import_passed,
+traj_loc_pred,STRNN,libcity.model.trajectory_loc_prediction.STRNN,,import_passed,config_and_import_passed,
+traj_loc_pred,SERM,libcity.model.trajectory_loc_prediction.SERM,,import_passed,config_and_import_passed,
+traj_loc_pred,TemplateTLP,libcity.model.trajectory_loc_prediction.TemplateTLP,,template_only,config_and_import_passed,"Developer template, not an implemented trainable model"
+traj_loc_pred,ATSTLSTM,libcity.model.trajectory_loc_prediction.ATSTLSTM,,import_passed,config_and_import_passed,
+traj_loc_pred,HSTLSTM,libcity.model.trajectory_loc_prediction.HSTLSTM,,import_passed,config_and_import_passed,
+traj_loc_pred,STAN,libcity.model.trajectory_loc_prediction.STAN,,import_passed,config_and_import_passed,
+traj_loc_pred,CARA,libcity.model.trajectory_loc_prediction.CARA,,import_passed,config_and_import_passed,
+traj_loc_pred,GeoSAN,libcity.model.trajectory_loc_prediction.GeoSAN,geosan,optional_dependency_missing,config_passed_import_attempted,dataset_class=GeoSANDataset: missing torchtext (geosan)
+traffic_state_pred,DCRNN,libcity.model.traffic_speed_prediction.DCRNN,,import_passed,config_and_import_passed,
+traffic_state_pred,STGCN,libcity.model.traffic_speed_prediction.STGCN,,import_passed,config_and_import_passed,
+traffic_state_pred,GWNET,libcity.model.traffic_speed_prediction.GWNET,,import_passed,config_and_import_passed,
+traffic_state_pred,AGCRN,libcity.model.traffic_flow_prediction.AGCRN,,import_passed,config_and_import_passed,
+traffic_state_pred,TGCLSTM,libcity.model.traffic_speed_prediction.TGCLSTM,,import_passed,config_and_import_passed,
+traffic_state_pred,TGCN,libcity.model.traffic_speed_prediction.TGCN,,import_passed,config_and_import_passed,
+traffic_state_pred,TemplateTSP,libcity.model.traffic_speed_prediction.TemplateTSP,,template_only,config_and_import_passed,"Developer template, not an implemented trainable model"
+traffic_state_pred,ASTGCN,libcity.model.traffic_flow_prediction.ASTGCN,,import_passed,config_and_import_passed,
+traffic_state_pred,MSTGCN,libcity.model.traffic_flow_prediction.MSTGCN,,import_passed,config_and_import_passed,
+traffic_state_pred,MTGNN,libcity.model.traffic_speed_prediction.MTGNN,,import_passed,config_and_import_passed,
+traffic_state_pred,ACFM,libcity.model.traffic_flow_prediction.ACFM,,import_passed,config_and_import_passed,
+traffic_state_pred,STResNet,libcity.model.traffic_flow_prediction.STResNet,,import_passed,config_and_import_passed,
+traffic_state_pred,RNN,libcity.model.traffic_speed_prediction.RNN,,import_passed,config_and_import_passed,
+traffic_state_pred,LSTM,libcity.model.traffic_speed_prediction.RNN,,import_passed,config_and_import_passed,
+traffic_state_pred,GRU,libcity.model.traffic_speed_prediction.RNN,,import_passed,config_and_import_passed,
+traffic_state_pred,AutoEncoder,libcity.model.traffic_speed_prediction.AutoEncoder,,import_passed,config_and_import_passed,
+traffic_state_pred,Seq2Seq,libcity.model.traffic_speed_prediction.Seq2Seq,,import_passed,config_and_import_passed,
+traffic_state_pred,STResNetCommon,libcity.model.traffic_flow_prediction.STResNetCommon,,import_passed,config_and_import_passed,
+traffic_state_pred,ACFMCommon,libcity.model.traffic_flow_prediction.ACFMCommon,,import_passed,config_and_import_passed,
+traffic_state_pred,ASTGCNCommon,libcity.model.traffic_flow_prediction.ASTGCNCommon,,import_passed,config_and_import_passed,
+traffic_state_pred,MSTGCNCommon,libcity.model.traffic_flow_prediction.MSTGCNCommon,,import_passed,config_and_import_passed,
+traffic_state_pred,ToGCN,libcity.model.traffic_flow_prediction.ToGCN,,import_passed,config_and_import_passed,
+traffic_state_pred,CONVGCN,libcity.model.traffic_flow_prediction.CONVGCN,,import_passed,config_and_import_passed,
+traffic_state_pred,STG2Seq,libcity.model.traffic_demand_prediction.STG2Seq,,import_passed,config_and_import_passed,
+traffic_state_pred,DMVSTNet,libcity.model.traffic_demand_prediction.DMVSTNet,dtw,optional_dependency_missing,config_passed_import_attempted,dataset_class=DMVSTNetDataset: missing fastdtw (dtw)
+traffic_state_pred,ATDM,libcity.model.traffic_speed_prediction.ATDM,,import_passed,config_and_import_passed,
+traffic_state_pred,GMAN,libcity.model.traffic_speed_prediction.GMAN,embeddings,optional_dependency_missing,config_passed_import_attempted,dataset_class=GMANDataset: missing gensim (embeddings)
+traffic_state_pred,GTS,libcity.model.traffic_speed_prediction.GTS,,import_passed,config_and_import_passed,
+traffic_state_pred,STDN,libcity.model.traffic_flow_prediction.STDN,,import_passed,config_and_import_passed,
+traffic_state_pred,HGCN,libcity.model.traffic_speed_prediction.HGCN,,import_passed,config_and_import_passed,
+traffic_state_pred,STSGCN,libcity.model.traffic_flow_prediction.STSGCN,,import_passed,config_and_import_passed,
+traffic_state_pred,STAGGCN,libcity.model.traffic_speed_prediction.STAGGCN,dtw,optional_dependency_missing,config_passed_import_attempted,dataset_class=STAGGCNDataset: missing fastdtw (dtw)
+traffic_state_pred,STNN,libcity.model.traffic_flow_prediction.STNN,,import_passed,config_and_import_passed,
+traffic_state_pred,ResLSTM,libcity.model.traffic_flow_prediction.ResLSTM,,import_passed,config_and_import_passed,
+traffic_state_pred,DGCN,libcity.model.traffic_flow_prediction.DGCN,,import_passed,config_and_import_passed,
+traffic_state_pred,MultiSTGCnet,libcity.model.traffic_flow_prediction.MultiSTGCnet,,import_passed,config_and_import_passed,
+traffic_state_pred,STMGAT,libcity.model.traffic_speed_prediction.STMGAT,graph,optional_dependency_missing,config_passed_import_attempted,model=STMGAT: missing dgl (graph)
+traffic_state_pred,CRANN,libcity.model.traffic_flow_prediction.CRANN,,import_passed,config_and_import_passed,
+traffic_state_pred,STTN,libcity.model.traffic_speed_prediction.STTN,,import_passed,config_and_import_passed,
+traffic_state_pred,CONVGCNCommon,libcity.model.traffic_flow_prediction.CONVGCNCommon,,import_passed,config_and_import_passed,
+traffic_state_pred,DSAN,libcity.model.traffic_flow_prediction.DSAN,,import_passed,config_and_import_passed,
+traffic_state_pred,DKFN,libcity.model.traffic_speed_prediction.DKFN,,import_passed,config_and_import_passed,
+traffic_state_pred,CCRNN,libcity.model.traffic_demand_prediction.CCRNN,,import_passed,config_and_import_passed,
+traffic_state_pred,MultiSTGCnetCommon,libcity.model.traffic_flow_prediction.MultiSTGCnetCommon,,import_passed,config_and_import_passed,
+traffic_state_pred,GEML,libcity.model.traffic_od_prediction.GEML,,import_passed,config_and_import_passed,
+traffic_state_pred,FNN,libcity.model.traffic_speed_prediction.FNN,,import_passed,config_and_import_passed,
+traffic_state_pred,GSNet,libcity.model.traffic_accident_prediction.GSNet,,import_passed,config_and_import_passed,
+traffic_state_pred,CSTN,libcity.model.traffic_od_prediction.CSTN,,import_passed,config_and_import_passed,
+traffic_state_pred,D2STGNN,libcity.model.traffic_speed_prediction.D2STGNN,,import_passed,config_and_import_passed,
+traffic_state_pred,STID,libcity.model.traffic_speed_prediction.STID,,import_passed,config_and_import_passed,
+traffic_state_pred,STGODE,libcity.model.traffic_flow_prediction.STGODE,dtw;ode,optional_dependency_missing,config_passed_import_attempted,model=STGODE: missing torchdiffeq (ode); dataset_class=STGODEDataset: missing fastdtw (dtw)
+traffic_state_pred,STNorm,libcity.model.traffic_flow_prediction.STNorm,,import_passed,config_and_import_passed,
+traffic_state_pred,DMSTGCN,libcity.model.traffic_speed_prediction.DMSTGCN,,import_passed,config_and_import_passed,
+traffic_state_pred,ESG,libcity.model.traffic_flow_prediction.ESG,,import_passed,config_and_import_passed,
+traffic_state_pred,SSTBAN,libcity.model.traffic_flow_prediction.SSTBAN,,import_passed,config_and_import_passed,
+traffic_state_pred,STTSNet,libcity.model.traffic_flow_prediction.STTSNet,transformer,optional_dependency_missing,config_passed_import_attempted,model=STTSNet: missing einops (transformer)
+traffic_state_pred,FOGS,libcity.model.traffic_flow_prediction.FOGS,embeddings,optional_dependency_missing,config_passed_import_attempted,dataset_class=FOGSDataset: missing gensim (embeddings)
+traffic_state_pred,RGSL,libcity.model.traffic_flow_prediction.RGSL,,import_passed,config_and_import_passed,
+traffic_state_pred,DSTAGNN,libcity.model.traffic_flow_prediction.DSTAGNN,,import_passed,config_and_import_passed,
+traffic_state_pred,STPGCN,libcity.model.traffic_flow_prediction.STPGCN,,import_passed,config_and_import_passed,
+traffic_state_pred,HIEST,libcity.model.traffic_speed_prediction.HIEST,,import_passed,config_and_import_passed,
+traffic_state_pred,STAEformer,libcity.model.traffic_speed_prediction.STAEformer,,import_passed,config_and_import_passed,
+traffic_state_pred,TESTAM,libcity.model.traffic_speed_prediction.TESTAM,,import_passed,config_and_import_passed,
+traffic_state_pred,MultiSPANS,libcity.model.traffic_flow_prediction.MultiSPANS,multispans,optional_dependency_missing,config_passed_import_attempted,model=MultiSPANS: missing infomap (multispans)
+traffic_state_pred,SimST,libcity.model.traffic_flow_prediction.SimST,,import_passed,config_and_import_passed,
+traffic_state_pred,TimeMixer,libcity.model.traffic_flow_prediction.TimeMixer,,import_passed,config_and_import_passed,
+traffic_state_pred,MegaCRN,libcity.model.traffic_speed_prediction.MegaCRN,,import_passed,config_and_import_passed,
+traffic_state_pred,Trafformer,libcity.model.traffic_speed_prediction.Trafformer,transformer,optional_dependency_missing,config_passed_import_attempted,model=Trafformer: missing einops (transformer)
+traffic_state_pred,STSSL,libcity.model.traffic_flow_prediction.STSSL,,import_passed,config_and_import_passed,
+traffic_state_pred,STWave,libcity.model.traffic_flow_prediction.STWave,dtw;wavelet,optional_dependency_missing,config_passed_import_attempted,model=STWave: missing pywt (wavelet); dataset_class=STWaveDataset: missing fastdtw (dtw)
+traffic_state_pred,PDFormer,libcity.model.traffic_flow_prediction.PDFormer,dtw;pdformer,optional_dependency_missing,config_passed_import_attempted,dataset_class=PDFormerDataset: missing fastdtw (dtw)
+traffic_state_pred,STGNCDE,libcity.model.traffic_flow_prediction.STGNCDE,ode,optional_dependency_missing,config_passed_import_attempted,model=STGNCDE: missing torchdiffeq (ode)
+traffic_state_pred,ASTGNN,libcity.model.traffic_flow_prediction.ASTGNN,,import_passed,config_and_import_passed,
+traffic_state_pred,ASTGNNCommon,libcity.model.traffic_flow_prediction.ASTGNNCommon,,import_passed,config_and_import_passed,
+traffic_state_pred,FreTS,libcity.model.traffic_flow_prediction.FreTS,,import_passed,config_and_import_passed,
+eta,DeepTTE,libcity.model.eta.DeepTTE,,import_passed,config_and_import_passed,
+eta,TTPNet,libcity.model.eta.TTPNet,,import_passed,config_and_import_passed,
+map_matching,STMatching,libcity.model.map_matching.STMatching,,import_passed,config_and_import_passed,
+map_matching,IVMM,libcity.model.map_matching.IVMM,,import_passed,config_and_import_passed,
+map_matching,HMMM,libcity.model.map_matching.HMMM,,import_passed,config_and_import_passed,
+road_representation,ChebConv,libcity.model.road_representation.ChebConv,,import_passed,config_and_import_passed,
+road_representation,LINE,libcity.model.road_representation.LINE,,import_passed,config_and_import_passed,
+road_representation,GAT,libcity.model.road_representation.GAT,,import_passed,config_and_import_passed,
+road_representation,Node2Vec,libcity.model.road_representation.Node2Vec,embeddings,optional_dependency_missing,config_passed_import_attempted,model=Node2Vec: missing gensim (embeddings)
+road_representation,DeepWalk,libcity.model.road_representation.DeepWalk,embeddings,optional_dependency_missing,config_passed_import_attempted,model=DeepWalk: missing gensim (embeddings)
+road_representation,GeomGCN,libcity.model.road_representation.GeomGCN,graph,optional_dependency_missing,config_passed_import_attempted,model=GeomGCN: missing dgl (graph)

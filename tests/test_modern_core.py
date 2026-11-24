@@ -8,6 +8,7 @@ import subprocess
 import sys
 
 import numpy as np
+import pandas as pd
 import pytest
 import torch
 
@@ -223,3 +224,40 @@ def test_evaluation_preserves_global_metrics_and_prediction_archive(
         with np.load(files[0]) as data:
             np.testing.assert_array_equal(data['prediction'], prediction.numpy())
             np.testing.assert_array_equal(data['truth'], truth.numpy())
+
+
+def test_atomic_files_to_training_and_evaluation(tmp_path, monkeypatch):
+    """Exercise the real data loader, config defaults, runner and saved checkpoint."""
+    from datetime import datetime, timedelta
+    from libcity.pipeline.pipeline import run_model
+
+    monkeypatch.chdir(tmp_path)
+    folder = tmp_path / 'raw_data' / 'Tiny'
+    folder.mkdir(parents=True)
+    (folder / 'config.json').write_text(json.dumps({
+        'info': {'data_col': ['speed'], 'output_dim': 1, 'time_intervals': 300}}),
+        encoding='utf-8')
+    pd.DataFrame({'geo_id': [0, 1, 2], 'type': ['Point'] * 3,
+                  'coordinates': ['[0,0]', '[1,0]', '[2,0]']}).to_csv(folder / 'Tiny.geo', index=False)
+    pd.DataFrame({'rel_id': [0, 1, 2], 'type': ['geo'] * 3,
+                  'origin_id': [0, 1, 2], 'destination_id': [1, 2, 0]}).to_csv(
+                      folder / 'Tiny.rel', index=False)
+    start = datetime(2024, 1, 1)
+    rows = [{'dyna_id': node * 48 + t, 'type': 'state',
+             'time': (start + timedelta(minutes=t * 5)).strftime('%Y-%m-%dT%H:%M:%SZ'),
+             'entity_id': node, 'speed': 10 + node + np.sin(t / 4)}
+            for node in range(3) for t in range(48)]
+    pd.DataFrame(rows).to_csv(folder / 'Tiny.dyna', index=False)
+    run_model('traffic_state_pred', 'GRU', 'Tiny', other_args={
+        'gpu': False, 'exp_id': 202, 'max_epoch': 1, 'batch_size': 8,
+        'num_workers': 0, 'input_window': 4, 'output_window': 2,
+        'hidden_size': 4, 'num_layers': 1, 'dropout': 0,
+        'train_rate': 0.6, 'eval_rate': 0.2, 'cache_dataset': False,
+        'load_external': False, 'add_time_in_day': False, 'add_day_in_week': False,
+        'log_level': 'WARNING', 'scaler': 'standard'})
+    directory = tmp_path / 'libcity/cache/202'
+    assert (directory / 'model_cache/GRU_Tiny.m').is_file()
+    result_file = next((directory / 'evaluate_cache').glob('*.csv'))
+    frame = pd.read_csv(result_file)
+    assert len(frame) == 2
+    assert np.isfinite(frame[['MAE', 'RMSE']].to_numpy()).all()

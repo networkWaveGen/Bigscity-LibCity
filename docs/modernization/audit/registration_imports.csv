@@ -1,0 +1,101 @@
+task,model,status,issues,checked_components
+traj_loc_pred,DeepMove,import_passed,,model=DeepMove; dataset_class=TrajectoryDataset; executor=TrajLocPredExecutor; evaluator=TrajLocPredEvaluator; traj_encoder=StandardTrajectoryEncoder
+traj_loc_pred,RNN,import_passed,,model=RNN; dataset_class=TrajectoryDataset; executor=TrajLocPredExecutor; evaluator=TrajLocPredEvaluator; traj_encoder=StandardTrajectoryEncoder
+traj_loc_pred,LSTM,import_passed,,model=RNN; dataset_class=TrajectoryDataset; executor=TrajLocPredExecutor; evaluator=TrajLocPredEvaluator; traj_encoder=StandardTrajectoryEncoder
+traj_loc_pred,GRU,import_passed,,model=RNN; dataset_class=TrajectoryDataset; executor=TrajLocPredExecutor; evaluator=TrajLocPredEvaluator; traj_encoder=StandardTrajectoryEncoder
+traj_loc_pred,FPMC,import_passed,,model=FPMC; dataset_class=TrajectoryDataset; executor=TrajLocPredExecutor; evaluator=TrajLocPredEvaluator; traj_encoder=StandardTrajectoryEncoder
+traj_loc_pred,LSTPM,import_passed,,model=LSTPM; dataset_class=TrajectoryDataset; executor=TrajLocPredExecutor; evaluator=TrajLocPredEvaluator; traj_encoder=LstpmEncoder
+traj_loc_pred,STRNN,import_passed,,model=STRNN; dataset_class=TrajectoryDataset; executor=TrajLocPredExecutor; evaluator=TrajLocPredEvaluator; traj_encoder=StrnnEncoder
+traj_loc_pred,SERM,import_passed,,model=SERM; dataset_class=TrajectoryDataset; executor=TrajLocPredExecutor; evaluator=TrajLocPredEvaluator; traj_encoder=SermEncoder
+traj_loc_pred,TemplateTLP,import_passed,,model=TemplateTLP; dataset_class=TrajectoryDataset; executor=TrajLocPredExecutor; evaluator=TrajLocPredEvaluator; traj_encoder=StandardTrajectoryEncoder
+traj_loc_pred,ATSTLSTM,import_passed,,model=ATSTLSTM; dataset_class=PBSTrajectoryDataset; executor=TrajLocPredExecutor; evaluator=TrajLocPredEvaluator; traj_encoder=AtstlstmEncoder
+traj_loc_pred,HSTLSTM,import_passed,,model=HSTLSTM; dataset_class=TrajectoryDataset; executor=TrajLocPredExecutor; evaluator=TrajLocPredEvaluator; traj_encoder=HstlstmEncoder
+traj_loc_pred,STAN,import_passed,,model=STAN; dataset_class=TrajectoryDataset; executor=TrajLocPredExecutor; evaluator=TrajLocPredEvaluator; traj_encoder=StanEncoder
+traj_loc_pred,CARA,import_passed,,model=CARA; dataset_class=TrajectoryDataset; executor=TrajLocPredExecutor; evaluator=CARALocPredEvaluator; traj_encoder=CARATrajectoryEncoder
+traj_loc_pred,GeoSAN,optional_dependency_missing,dataset_class=GeoSANDataset: missing torchtext (geosan),model=GeoSAN; executor=GeoSANExecutor; evaluator=GeoSANEvaluator; traj_encoder=StandardTrajectoryEncoder
+traffic_state_pred,DCRNN,import_passed,,model=DCRNN; dataset_class=TrafficStatePointDataset; executor=DCRNNExecutor; evaluator=TrafficStateEvaluator
+traffic_state_pred,STGCN,import_passed,,model=STGCN; dataset_class=TrafficStatePointDataset; executor=TrafficStateExecutor; evaluator=TrafficStateEvaluator
+traffic_state_pred,GWNET,import_passed,,model=GWNET; dataset_class=TrafficStatePointDataset; executor=TrafficStateExecutor; evaluator=TrafficStateEvaluator
+traffic_state_pred,AGCRN,import_passed,,model=AGCRN; dataset_class=TrafficStatePointDataset; executor=TrafficStateExecutor; evaluator=TrafficStateEvaluator
+traffic_state_pred,TGCLSTM,import_passed,,model=TGCLSTM; dataset_class=TGCLSTMDataset; executor=TrafficStateExecutor; evaluator=TrafficStateEvaluator
+traffic_state_pred,TGCN,import_passed,,model=TGCN; dataset_class=TrafficStatePointDataset; executor=TrafficStateExecutor; evaluator=TrafficStateEvaluator
+traffic_state_pred,TemplateTSP,import_passed,,model=TemplateTSP; dataset_class=TrafficStatePointDataset; executor=TrafficStateExecutor; evaluator=TrafficStateEvaluator
+traffic_state_pred,ASTGCN,import_passed,,model=ASTGCN; dataset_class=ASTGCNDataset; executor=TrafficStateExecutor; evaluator=TrafficStateEvaluator
+traffic_state_pred,MSTGCN,import_passed,,model=MSTGCN; dataset_class=ASTGCNDataset; executor=TrafficStateExecutor; evaluator=TrafficStateEvaluator
+traffic_state_pred,MTGNN,import_passed,,model=MTGNN; dataset_class=TrafficStatePointDataset; executor=MTGNNExecutor; evaluator=TrafficStateEvaluator
+traffic_state_pred,ACFM,import_passed,,model=ACFM; dataset_class=ACFMDataset; executor=TrafficStateExecutor; evaluator=TrafficStateEvaluator
+traffic_state_pred,STResNet,import_passed,,model=STResNet; dataset_class=STResNetDataset; executor=TrafficStateExecutor; evaluator=TrafficStateEvaluator
+traffic_state_pred,RNN,import_passed,,model=RNN; dataset_class=TrafficStatePointDataset; executor=TrafficStateExecutor; evaluator=TrafficStateEvaluator
+traffic_state_pred,LSTM,import_passed,,model=RNN; dataset_class=TrafficStatePointDataset; executor=TrafficStateExecutor; evaluator=TrafficStateEvaluator
+traffic_state_pred,GRU,import_passed,,model=RNN; dataset_class=TrafficStatePointDataset; executor=TrafficStateExecutor; evaluator=TrafficStateEvaluator
+traffic_state_pred,AutoEncoder,import_passed,,model=AutoEncoder; dataset_class=TrafficStatePointDataset; executor=TrafficStateExecutor; evaluator=TrafficStateEvaluator
+traffic_state_pred,Seq2Seq,import_passed,,model=Seq2Seq; dataset_class=TrafficStatePointDataset; executor=TrafficStateExecutor; evaluator=TrafficStateEvaluator
+traffic_state_pred,STResNetCommon,import_passed,,model=STResNetCommon; dataset_class=TrafficStateGridDataset; executor=TrafficStateExecutor; evaluator=TrafficStateEvaluator
+traffic_state_pred,ACFMCommon,import_passed,,model=ACFMCommon; dataset_class=TrafficStateGridDataset; executor=TrafficStateExecutor; evaluator=TrafficStateEvaluator
+traffic_state_pred,ASTGCNCommon,import_passed,,model=ASTGCNCommon; dataset_class=TrafficStatePointDataset; executor=TrafficStateExecutor; evaluator=TrafficStateEvaluator
+traffic_state_pred,MSTGCNCommon,import_passed,,model=MSTGCNCommon; dataset_class=TrafficStatePointDataset; executor=TrafficStateExecutor; evaluator=TrafficStateEvaluator
+traffic_state_pred,ToGCN,import_passed,,model=ToGCN; dataset_class=TrafficStatePointDataset; executor=TrafficStateExecutor; evaluator=TrafficStateEvaluator
+traffic_state_pred,CONVGCN,import_passed,,model=CONVGCN; dataset_class=CONVGCNDataset; executor=TrafficStateExecutor; evaluator=TrafficStateEvaluator
+traffic_state_pred,STG2Seq,import_passed,,model=STG2Seq; dataset_class=STG2SeqDataset; executor=TrafficStateExecutor; evaluator=TrafficStateEvaluator
+traffic_state_pred,DMVSTNet,optional_dependency_missing,dataset_class=DMVSTNetDataset: missing fastdtw (dtw),model=DMVSTNet; executor=TrafficStateExecutor; evaluator=TrafficStateEvaluator
+traffic_state_pred,ATDM,import_passed,,model=ATDM; dataset_class=TrafficStatePointDataset; executor=TrafficStateExecutor; evaluator=TrafficStateEvaluator
+traffic_state_pred,GMAN,optional_dependency_missing,dataset_class=GMANDataset: missing gensim (embeddings),model=GMAN; executor=TrafficStateExecutor; evaluator=TrafficStateEvaluator
+traffic_state_pred,GTS,import_passed,,model=GTS; dataset_class=GTSDataset; executor=DCRNNExecutor; evaluator=TrafficStateEvaluator
+traffic_state_pred,STDN,import_passed,,model=STDN; dataset_class=STDNDataset; executor=TrafficStateExecutor; evaluator=TrafficStateEvaluator
+traffic_state_pred,HGCN,import_passed,,model=HGCN; dataset_class=HGCNDataset; executor=TrafficStateExecutor; evaluator=TrafficStateEvaluator
+traffic_state_pred,STSGCN,import_passed,,model=STSGCN; dataset_class=TrafficStatePointDataset; executor=TrafficStateExecutor; evaluator=TrafficStateEvaluator
+traffic_state_pred,STAGGCN,optional_dependency_missing,dataset_class=STAGGCNDataset: missing fastdtw (dtw),model=STAGGCN; executor=TrafficStateExecutor; evaluator=TrafficStateEvaluator
+traffic_state_pred,STNN,import_passed,,model=STNN; dataset_class=TrafficStatePointDataset; executor=TrafficStateExecutor; evaluator=TrafficStateEvaluator
+traffic_state_pred,ResLSTM,import_passed,,model=ResLSTM; dataset_class=RESLSTMDataset; executor=TrafficStateExecutor; evaluator=TrafficStateEvaluator
+traffic_state_pred,DGCN,import_passed,,model=DGCN; dataset_class=ASTGCNDataset; executor=TrafficStateExecutor; evaluator=TrafficStateEvaluator
+traffic_state_pred,MultiSTGCnet,import_passed,,model=MultiSTGCnet; dataset_class=MultiSTGCnetDataset; executor=TrafficStateExecutor; evaluator=TrafficStateEvaluator
+traffic_state_pred,STMGAT,optional_dependency_missing,model=STMGAT: missing dgl (graph),dataset_class=TrafficStatePointDataset; executor=TrafficStateExecutor; evaluator=TrafficStateEvaluator
+traffic_state_pred,CRANN,import_passed,,model=CRANN; dataset_class=CRANNDataset; executor=TrafficStateExecutor; evaluator=TrafficStateEvaluator
+traffic_state_pred,STTN,import_passed,,model=STTN; dataset_class=TrafficStatePointDataset; executor=TrafficStateExecutor; evaluator=TrafficStateEvaluator
+traffic_state_pred,CONVGCNCommon,import_passed,,model=CONVGCNCommon; dataset_class=TrafficStatePointDataset; executor=TrafficStateExecutor; evaluator=TrafficStateEvaluator
+traffic_state_pred,DSAN,import_passed,,model=DSAN; dataset_class=TrafficStateGridDataset; executor=TrafficStateExecutor; evaluator=TrafficStateEvaluator
+traffic_state_pred,DKFN,import_passed,,model=DKFN; dataset_class=TrafficStatePointDataset; executor=TrafficStateExecutor; evaluator=TrafficStateEvaluator
+traffic_state_pred,CCRNN,import_passed,,model=CCRNN; dataset_class=CCRNNDataset; executor=DCRNNExecutor; evaluator=TrafficStateEvaluator
+traffic_state_pred,MultiSTGCnetCommon,import_passed,,model=MultiSTGCnetCommon; dataset_class=TrafficStatePointDataset; executor=TrafficStateExecutor; evaluator=TrafficStateEvaluator
+traffic_state_pred,GEML,import_passed,,model=GEML; dataset_class=TrafficStateOdDataset; executor=GEMLExecutor; evaluator=TrafficStateEvaluator
+traffic_state_pred,FNN,import_passed,,model=FNN; dataset_class=TrafficStatePointDataset; executor=TrafficStateExecutor; evaluator=TrafficStateEvaluator
+traffic_state_pred,GSNet,import_passed,,model=GSNet; dataset_class=GSNetDataset; executor=TrafficStateExecutor; evaluator=TrafficAccidentEvaluator
+traffic_state_pred,CSTN,import_passed,,model=CSTN; dataset_class=CSTNDataset; executor=TrafficStateExecutor; evaluator=TrafficStateEvaluator
+traffic_state_pred,D2STGNN,import_passed,,model=D2STGNN; dataset_class=TrafficStatePointDataset; executor=DCRNNExecutor; evaluator=TrafficStateEvaluator
+traffic_state_pred,STID,import_passed,,model=STID; dataset_class=TrafficStatePointDataset; executor=TrafficStateExecutor; evaluator=TrafficStateEvaluator
+traffic_state_pred,STGODE,optional_dependency_missing,model=STGODE: missing torchdiffeq (ode); dataset_class=STGODEDataset: missing fastdtw (dtw),executor=TrafficStateExecutor; evaluator=TrafficStateEvaluator
+traffic_state_pred,STNorm,import_passed,,model=STNorm; dataset_class=TrafficStatePointDataset; executor=TrafficStateExecutor; evaluator=TrafficStateEvaluator
+traffic_state_pred,DMSTGCN,import_passed,,model=DMSTGCN; dataset_class=DMSTGCNDataset; executor=TrafficStateExecutor; evaluator=TrafficStateEvaluator
+traffic_state_pred,ESG,import_passed,,model=ESG; dataset_class=ESGDataset; executor=TrafficStateExecutor; evaluator=TrafficStateEvaluator
+traffic_state_pred,SSTBAN,import_passed,,model=SSTBAN; dataset_class=SSTBANDataset; executor=SSTBANExecutor; evaluator=TrafficStateEvaluator
+traffic_state_pred,STTSNet,optional_dependency_missing,model=STTSNet: missing einops (transformer),dataset_class=STTSNetDataset; executor=STTSNetExecutor; evaluator=TrafficStateEvaluator
+traffic_state_pred,FOGS,optional_dependency_missing,dataset_class=FOGSDataset: missing gensim (embeddings),model=FOGS; executor=FOGSExecutor; evaluator=TrafficStateEvaluator
+traffic_state_pred,RGSL,import_passed,,model=RGSL; dataset_class=TrafficStatePointDataset; executor=TrafficStateExecutor; evaluator=TrafficStateEvaluator
+traffic_state_pred,DSTAGNN,import_passed,,model=DSTAGNN; dataset_class=DSTAGNNDataset; executor=TrafficStateExecutor; evaluator=TrafficStateEvaluator
+traffic_state_pred,STPGCN,import_passed,,model=STPGCN; dataset_class=STPGCNDataset; executor=TrafficStateExecutor; evaluator=TrafficStateEvaluator
+traffic_state_pred,HIEST,import_passed,,model=HIEST; dataset_class=HIESTDataset; executor=TrafficStateExecutor; evaluator=TrafficStateEvaluator
+traffic_state_pred,STAEformer,import_passed,,model=STAEformer; dataset_class=STAEformerDataset; executor=TrafficStateExecutor; evaluator=TrafficStateEvaluator
+traffic_state_pred,TESTAM,import_passed,,model=TESTAM; dataset_class=TrafficStatePointDataset; executor=TESTAMExecutor; evaluator=TrafficStateEvaluator
+traffic_state_pred,MultiSPANS,optional_dependency_missing,model=MultiSPANS: missing infomap (multispans),dataset_class=TrafficStatePointDataset; executor=TrafficStateExecutor; evaluator=TrafficStateEvaluator
+traffic_state_pred,SimST,import_passed,,model=SimST; dataset_class=SimSTDataset; executor=TrafficStateExecutor; evaluator=TrafficStateEvaluator
+traffic_state_pred,TimeMixer,import_passed,,model=TimeMixer; dataset_class=TrafficStatePointDataset; executor=TimeMixerExecutor; evaluator=TrafficStateEvaluator
+traffic_state_pred,MegaCRN,import_passed,,model=MegaCRN; dataset_class=TrafficStatePointDataset; executor=MegaCRNExecutor; evaluator=TrafficStateEvaluator
+traffic_state_pred,Trafformer,optional_dependency_missing,model=Trafformer: missing einops (transformer),dataset_class=TrafficStatePointDataset; executor=TrafformerExecutor; evaluator=TrafficStateEvaluator
+traffic_state_pred,STSSL,import_passed,,model=STSSL; dataset_class=ACFMDataset; executor=STSSLExecutor; evaluator=TrafficStateEvaluator
+traffic_state_pred,STWave,optional_dependency_missing,model=STWave: missing pywt (wavelet); dataset_class=STWaveDataset: missing fastdtw (dtw),executor=TrafficStateExecutor; evaluator=TrafficStateEvaluator
+traffic_state_pred,PDFormer,optional_dependency_missing,dataset_class=PDFormerDataset: missing fastdtw (dtw),model=PDFormer; executor=PDFormerExecutor; evaluator=TrafficStateEvaluator
+traffic_state_pred,STGNCDE,optional_dependency_missing,model=STGNCDE: missing torchdiffeq (ode),dataset_class=TrafficStatePointDataset; executor=TrafficStateExecutor; evaluator=TrafficStateEvaluator
+traffic_state_pred,ASTGNN,import_passed,,model=ASTGNN; dataset_class=ASTGCNDataset; executor=ASTGNNExecutor; evaluator=TrafficStateEvaluator
+traffic_state_pred,ASTGNNCommon,import_passed,,model=ASTGNNCommon; dataset_class=TrafficStatePointDataset; executor=ASTGNNExecutor; evaluator=TrafficStateEvaluator
+traffic_state_pred,FreTS,import_passed,,model=FreTS; dataset_class=TrafficStatePointDataset; executor=TrafficStateExecutor; evaluator=TrafficStateEvaluator
+eta,DeepTTE,import_passed,,model=DeepTTE; dataset_class=ETADataset; executor=ETAExecutor; evaluator=ETAEvaluator; eta_encoder=DeeptteEncoder
+eta,TTPNet,import_passed,,model=TTPNet; dataset_class=ETADataset; executor=ETAExecutor; evaluator=ETAEvaluator; eta_encoder=TtpnetEncoder
+map_matching,STMatching,import_passed,,model=STMatching; dataset_class=MapMatchingDataset; executor=MapMatchingExecutor; evaluator=MapMatchingEvaluator
+map_matching,IVMM,import_passed,,model=IVMM; dataset_class=MapMatchingDataset; executor=MapMatchingExecutor; evaluator=MapMatchingEvaluator
+map_matching,HMMM,import_passed,,model=HMMM; dataset_class=MapMatchingDataset; executor=MapMatchingExecutor; evaluator=MapMatchingEvaluator
+road_representation,ChebConv,import_passed,,model=ChebConv; dataset_class=ChebConvDataset; executor=ChebConvExecutor; evaluator=RoadRepresentationEvaluator
+road_representation,LINE,import_passed,,model=LINE; dataset_class=LINEDataset; executor=LINEExecutor; evaluator=RoadRepresentationEvaluator
+road_representation,GAT,import_passed,,model=GAT; dataset_class=ChebConvDataset; executor=ChebConvExecutor; evaluator=RoadRepresentationEvaluator
+road_representation,Node2Vec,optional_dependency_missing,model=Node2Vec: missing gensim (embeddings),dataset_class=RoadNetWorkDataset; executor=GensimExecutor; evaluator=RoadRepresentationEvaluator
+road_representation,DeepWalk,optional_dependency_missing,model=DeepWalk: missing gensim (embeddings),dataset_class=RoadNetWorkDataset; executor=GensimExecutor; evaluator=RoadRepresentationEvaluator
+road_representation,GeomGCN,optional_dependency_missing,model=GeomGCN: missing dgl (graph),dataset_class=ChebConvDataset; executor=ChebConvExecutor; evaluator=RoadRepresentationEvaluator

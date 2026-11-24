@@ -1,0 +1,16 @@
+{
+  "registrations": {
+    "public_components": 220,
+    "packages": 19,
+    "task_model_registrations": 100,
+    "removed_exports": 0
+  },
+  "dependencies": {
+    "legacy_requirements": 26,
+    "missing_core_distributions": [],
+    "unclassified": []
+  },
+  "history": {
+    "existing_experiment_candidates": 0
+  }
+}

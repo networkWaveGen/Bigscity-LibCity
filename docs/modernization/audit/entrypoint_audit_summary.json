@@ -1,0 +1,37 @@
+{
+  "public_exports": {
+    "import_passed": 200,
+    "optional_dependency_missing": 20
+  },
+  "registrations": {
+    "import_passed": 84,
+    "optional_dependency_missing": 16
+  },
+  "script_imports": {
+    "optional_dependency_missing": 3,
+    "import_passed": 19
+  },
+  "cli_help": {
+    "run_model.py": {
+      "status": "passed",
+      "returncode": 0
+    },
+    "visualize.py": {
+      "status": "passed",
+      "returncode": 0
+    }
+  },
+  "tasks": [
+    "eta",
+    "map_matching",
+    "road_representation",
+    "traffic_state_pred",
+    "traj_loc_pred"
+  ],
+  "syntax_errors": [],
+  "templates": [
+    "traj_loc_pred/TemplateTLP",
+    "traffic_state_pred/TemplateTSP"
+  ],
+  "scope": "Actual public and legacy direct-import identity, config loading and component resolution. Optional dependency absence is isolated; model training is separately validated."
+}

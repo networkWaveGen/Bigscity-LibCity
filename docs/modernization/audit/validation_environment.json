@@ -1,0 +1,28 @@
+{
+  "date": "2026-11-24",
+  "python": "3.12.13",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "packages": {
+    "torch": "2.15.0",
+    "numpy": "2.5.5",
+    "pandas": "3.1.1",
+    "scipy": "1.18.1",
+    "scikit-learn": "1.9.1",
+    "pytest": "9.2.0"
+  },
+  "benchmark": {
+    "workload": "64 float32 samples; X=(12,128,2), y=(3,128,1); CPU; one Torch thread",
+    "runs": 20,
+    "results": {
+      "upstream": {
+        "median_ms": 0.227,
+        "python_numpy_peak_bytes": 1693296
+      },
+      "modernized": {
+        "median_ms": 0.057,
+        "python_numpy_peak_bytes": 888064
+      }
+    },
+    "scope": "collation and tensor conversion only; tracemalloc excludes native Torch allocator and GPU memory"
+  }
+}
