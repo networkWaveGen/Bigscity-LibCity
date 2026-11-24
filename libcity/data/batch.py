@@ -2,6 +2,13 @@ import torch
 import numpy as np
 
 
+def _to_tensor(value, dtype, device):
+    """Stack ordinary features once and avoid converting existing tensors to NumPy."""
+    if isinstance(value, torch.Tensor):
+        return value.to(device=device, dtype=dtype)
+    return torch.as_tensor(np.asarray(value), dtype=dtype).to(device)
+
+
 class Batch(object):
 
     def __init__(self, feature_name):
@@ -49,9 +56,9 @@ class Batch(object):
         """
         for key in self.data:
             if self.feature_name[key] == 'int':
-                self.data[key] = torch.LongTensor(np.array(self.data[key])).to(device)
+                self.data[key] = _to_tensor(self.data[key], torch.long, device)
             elif self.feature_name[key] == 'float':
-                self.data[key] = torch.FloatTensor(np.array(self.data[key])).to(device)
+                self.data[key] = _to_tensor(self.data[key], torch.float32, device)
             else:
                 raise TypeError(
                     'Batch to_tensor, only support int, float but you give {}'.format(self.feature_name[key]))
@@ -123,13 +130,15 @@ class BatchPAD(Batch):
             if key in self.pad_max_len:
                 max_len = min(self.pad_max_len[key], max_len)
             for i in range(len(self.data[key])):
-                if len(self.data[key][i]) < max_len:
-                    self.data[key][i] += [self.pad_item[key]] * \
-                        (max_len - len(self.data[key][i]))
+                # Padding owns its list; the dataset's sequence is never modified.
+                values = list(self.data[key][i])
+                if len(values) < max_len:
+                    self.data[key][i] = values + [self.pad_item[key]] * \
+                        (max_len - len(values))
                 else:
                     # 截取的原则是，抛弃前面的点
                     # 因为是时间序列嘛
-                    self.data[key][i] = self.data[key][i][-max_len:]
+                    self.data[key][i] = values[-max_len:]
                     # 对于剪切了的，我们没办法还原，但至少不要使他出错
                     self.origin_len[key][i] = max_len
 
@@ -145,9 +154,9 @@ class BatchPAD(Batch):
         """
         for key in self.data:
             if self.feature_name[key] == 'int':
-                self.data[key] = torch.LongTensor(np.array(self.data[key])).to(device)
+                self.data[key] = _to_tensor(self.data[key], torch.long, device)
             elif self.feature_name[key] == 'float':
-                self.data[key] = torch.FloatTensor(np.array(self.data[key])).to(device)
+                self.data[key] = _to_tensor(self.data[key], torch.float32, device)
             elif self.feature_name[key] == 'array of int':
                 for i in range(len(self.data[key])):
                     for j in range(len(self.data[key][i])):

@@ -8,6 +8,7 @@ import torch
 
 from libcity.config.config_parser import ConfigParser
 from libcity.data.utils import get_dataset
+from libcity.data.utils import BatchCollator
 from libcity.utils.normalization import NoneScaler
 from libcity.registry import get_evaluator, get_executor, get_model
 
@@ -59,6 +60,20 @@ def test_real_dataset_and_encoder_factories(task, model):
     assert dataset.config is config
     assert dataset.encoder.config is config
     assert callable(dataset.get_data)
+
+
+def test_trajectory_gru_forward_and_backward():
+    config = config_for('traj_loc_pred', 'GRU')
+    model = get_model(config, features_for('traj_loc_pred'))
+    batch = BatchCollator({'current_loc': 'int', 'current_tim': 'int', 'target': 'int'},
+                          {'current_loc': 5, 'current_tim': 48})([
+                              ([0, 1, 2], [1, 2, 3], 3), ([1, 2], [2, 3], 4)])
+    batch.to_tensor('cpu')
+    assert model.predict(batch).shape == (2, 6)
+    value = model.calculate_loss(batch)
+    value.backward()
+    assert torch.isfinite(value)
+    assert any(p.grad is not None and torch.isfinite(p.grad).all() for p in model.parameters())
 
 
 def test_eta_deeptte_forward_and_backward():

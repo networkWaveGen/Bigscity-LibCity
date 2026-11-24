@@ -12,6 +12,49 @@ def get_dataset(config):
     return dataset(config)
 
 
+class BatchCollator:
+    """A spawn-picklable collator that only copies fields mutated in-place."""
+
+    def __init__(self, feature_name, pad_item=None, pad_max_len=None, padded=False):
+        self.feature_name = feature_name
+        self.pad_item = pad_item
+        self.pad_max_len = pad_max_len
+        self.padded = padded or pad_item is not None
+
+    def __call__(self, samples):
+        if not self.padded:
+            batch = Batch(self.feature_name)
+            for item in samples:
+                if len(item) != len(self.feature_name):
+                    raise KeyError('sample does not match feature_name')
+                batch.append(item)
+        else:
+            batch = BatchPAD(self.feature_name, self.pad_item, self.pad_max_len)
+            for item in samples:
+                if len(item) != len(self.feature_name):
+                    raise KeyError('sample does not match feature_name')
+                # Ragged/opaque features can be changed by BatchPAD.to_tensor.
+                # Dense int/float features are stacked into new arrays instead.
+                values = [value if kind in ('int', 'float') else copy.deepcopy(value)
+                          for value, kind in zip(item, self.feature_name.values())]
+                batch.append(values)
+            batch.padding()
+        # Own dense storage before handing the batch to consumers. This stacks
+        # each feature once, rather than copying every sample and stacking again.
+        for key, kind in self.feature_name.items():
+            if kind in ('int', 'float'):
+                batch.data[key] = np.asarray(batch.data[key])
+        return batch
+
+
+def _pad_with_last_sample(samples, batch_size):
+    """Pad heterogeneous (X, y) samples without NumPy's object-array coercion."""
+    values = list(samples)
+    if values:
+        values.extend([values[-1]] * ((-len(values)) % batch_size))
+    return values
+
+
 def generate_dataloader(train_data, eval_data, test_data, feature_name,
                         batch_size, num_workers, shuffle=True,
                         pad_with_last_sample=False):
@@ -35,25 +78,15 @@ def generate_dataloader(train_data, eval_data, test_data, feature_name,
             test_dataloader: Dataloader composed of Batch (class)
     """
     if pad_with_last_sample:
-        num_padding = (batch_size - (len(train_data) % batch_size)) % batch_size
-        data_padding = np.repeat(train_data[-1:], num_padding, axis=0)
-        train_data = np.concatenate([train_data, data_padding], axis=0)
-        num_padding = (batch_size - (len(eval_data) % batch_size)) % batch_size
-        data_padding = np.repeat(eval_data[-1:], num_padding, axis=0)
-        eval_data = np.concatenate([eval_data, data_padding], axis=0)
-        num_padding = (batch_size - (len(test_data) % batch_size)) % batch_size
-        data_padding = np.repeat(test_data[-1:], num_padding, axis=0)
-        test_data = np.concatenate([test_data, data_padding], axis=0)
+        train_data = _pad_with_last_sample(train_data, batch_size)
+        eval_data = _pad_with_last_sample(eval_data, batch_size)
+        test_data = _pad_with_last_sample(test_data, batch_size)
 
     train_dataset = ListDataset(train_data)
     eval_dataset = ListDataset(eval_data)
     test_dataset = ListDataset(test_data)
 
-    def collator(indices):
-        batch = Batch(feature_name)
-        for item in indices:
-            batch.append(copy.deepcopy(item))
-        return batch
+    collator = BatchCollator(feature_name)
 
     train_dataloader = DataLoader(dataset=train_dataset, batch_size=batch_size,
                                   num_workers=num_workers, collate_fn=collator,
@@ -94,12 +127,7 @@ def generate_dataloader_pad(train_data, eval_data, test_data, feature_name,
     eval_dataset = ListDataset(eval_data)
     test_dataset = ListDataset(test_data)
 
-    def collator(indices):
-        batch = BatchPAD(feature_name, pad_item, pad_max_len)
-        for item in indices:
-            batch.append(copy.deepcopy(item))
-        batch.padding()
-        return batch
+    collator = BatchCollator(feature_name, pad_item, pad_max_len, padded=True)
 
     train_dataloader = DataLoader(dataset=train_dataset, batch_size=batch_size,
                                   num_workers=num_workers, collate_fn=collator,
