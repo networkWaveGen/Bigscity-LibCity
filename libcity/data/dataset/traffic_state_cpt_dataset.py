@@ -3,9 +3,9 @@ import sys
 import numpy as np
 import datetime
 
-from libcity.data.dataset import TrafficStateDataset
+from libcity.data.dataset.traffic_state_datatset import TrafficStateDataset
 from libcity.data.utils import generate_dataloader
-from libcity.utils import ensure_dir
+from libcity.utils.filesystem import ensure_dir
 
 
 class TrafficStateCPTDataset(TrafficStateDataset):

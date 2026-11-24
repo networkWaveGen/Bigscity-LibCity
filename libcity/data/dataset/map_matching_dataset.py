@@ -1,13 +1,13 @@
 import pickle
 
-from libcity.data.dataset import AbstractDataset
+from libcity.data.dataset.abstract_dataset import AbstractDataset
 import os
 import pandas as pd
 import numpy as np
 from logging import getLogger
 from libcity.utils.dataset import parse_time
 from libcity.utils.GPS_utils import dist, angle2radian
-from libcity.utils.utils import ensure_dir
+from libcity.utils.filesystem import ensure_dir
 import networkx as nx
 
 

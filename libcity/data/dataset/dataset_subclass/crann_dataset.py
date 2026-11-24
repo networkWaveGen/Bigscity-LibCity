@@ -1,7 +1,7 @@
 import os
 import numpy as np
-from libcity.data.dataset import TrafficStatePointDataset
-from libcity.utils import ensure_dir
+from libcity.data.dataset.traffic_state_point_dataset import TrafficStatePointDataset
+from libcity.utils.filesystem import ensure_dir
 from libcity.data.utils import generate_dataloader
 
 """

@@ -2,7 +2,7 @@ import datetime
 import numpy as np
 import pandas as pd
 
-from libcity.data.dataset import TrafficStatePointDataset
+from libcity.data.dataset.traffic_state_point_dataset import TrafficStatePointDataset
 
 
 class STAEformerDataset(TrafficStatePointDataset):

@@ -2,9 +2,9 @@ import os
 
 import numpy as np
 
-from libcity.data.dataset import TrafficStateGridOdDataset
+from libcity.data.dataset.traffic_state_grid_od_dataset import TrafficStateGridOdDataset
 from libcity.data.utils import generate_dataloader
-from libcity.utils import ensure_dir
+from libcity.utils.filesystem import ensure_dir
 
 
 class CSTNDataset(TrafficStateGridOdDataset):

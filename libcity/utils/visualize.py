@@ -1,6 +1,6 @@
 import pandas as pd
 import json
-from libcity.utils.utils import ensure_dir
+from libcity.utils.filesystem import ensure_dir
 import os
 
 

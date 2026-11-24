@@ -2,7 +2,7 @@ import os
 
 import numpy as np
 
-from libcity.data.dataset import TrafficStateDataset
+from libcity.data.dataset.traffic_state_datatset import TrafficStateDataset
 
 
 class TrafficStateOdDataset(TrafficStateDataset):

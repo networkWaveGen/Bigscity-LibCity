@@ -1,4 +1,4 @@
-import importlib
+from libcity.registry import load_component
 import numpy as np
 from torch.utils.data import DataLoader
 import copy
@@ -8,24 +8,8 @@ from libcity.data.batch import Batch, BatchPAD
 
 
 def get_dataset(config):
-    """
-    according the config['dataset_class'] to create the dataset
-
-    Args:
-        config(ConfigParser): config
-
-    Returns:
-        AbstractDataset: the loaded dataset
-    """
-    try:
-        return getattr(importlib.import_module('libcity.data.dataset'),
-                       config['dataset_class'])(config)
-    except AttributeError:
-        try:
-            return getattr(importlib.import_module('libcity.data.dataset.dataset_subclass'),
-                           config['dataset_class'])(config)
-        except AttributeError:
-            raise AttributeError('dataset_class is not found')
+    dataset = load_component('dataset_class', config['dataset_class'])
+    return dataset(config)
 
 
 def generate_dataloader(train_data, eval_data, test_data, feature_name,

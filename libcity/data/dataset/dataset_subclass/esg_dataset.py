@@ -2,7 +2,7 @@ import os
 import numpy as np
 
 from libcity.data.utils import generate_dataloader
-from libcity.data.dataset import TrafficStateGridDataset
+from libcity.data.dataset.traffic_state_grid_dataset import TrafficStateGridDataset
 
 
 class ESGDataset(TrafficStateGridDataset):

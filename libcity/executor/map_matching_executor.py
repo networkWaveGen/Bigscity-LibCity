@@ -1,6 +1,6 @@
 from logging import getLogger
 from libcity.executor.abstract_tradition_executor import AbstractTraditionExecutor
-from libcity.utils import get_evaluator
+from libcity.registry import get_evaluator
 
 
 class MapMatchingExecutor(AbstractTraditionExecutor):

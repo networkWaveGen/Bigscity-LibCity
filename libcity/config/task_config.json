@@ -14,6 +14,12 @@
             "evaluator": "TrajLocPredEvaluator",
             "traj_encoder": "StandardTrajectoryEncoder"
         },
+        "TemplateTLP": {
+            "dataset_class": "TrajectoryDataset",
+            "executor": "TrajLocPredExecutor",
+            "evaluator": "TrajLocPredEvaluator",
+            "traj_encoder": "StandardTrajectoryEncoder"
+        },
         "RNN": {
             "dataset_class": "TrajectoryDataset",
             "executor": "TrajLocPredExecutor",

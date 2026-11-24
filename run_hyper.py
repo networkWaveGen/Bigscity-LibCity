@@ -4,9 +4,10 @@
 
 import argparse
 import random
-from libcity.pipeline import objective_function
-from libcity.executor import HyperTuning
-from libcity.utils import str2bool, get_logger, set_random_seed, add_general_args
+from libcity.pipeline.pipeline import objective_function
+from libcity.executor.hyper_tuning import HyperTuning
+from libcity.utils.argument_list import str2bool, add_general_args
+from libcity.utils.experiment import get_logger, set_random_seed
 
 
 if __name__ == '__main__':

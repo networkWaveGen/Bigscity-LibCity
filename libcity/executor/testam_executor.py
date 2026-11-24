@@ -1,10 +1,9 @@
 import numpy as np
 
-from libcity.executor import TrafficStateExecutor
+from libcity.executor.traffic_state_executor import TrafficStateExecutor
 import os
 import time
 import torch
-from ray import tune
 
 from libcity.model import loss
 
@@ -180,6 +179,7 @@ class TESTAMExecutor(TrafficStateExecutor):
                 self._logger.info(message)
 
             if self.hyper_tune:
+                from ray import tune
                 # use ray tune to checkpoint
                 with tune.checkpoint_dir(step=epoch_idx) as checkpoint_dir:
                     path = os.path.join(checkpoint_dir, "checkpoint")

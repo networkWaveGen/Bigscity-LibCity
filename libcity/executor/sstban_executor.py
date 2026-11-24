@@ -1,4 +1,4 @@
-from libcity.executor import TrafficStateExecutor
+from libcity.executor.traffic_state_executor import TrafficStateExecutor
 import numpy as np
 import torch
 import os

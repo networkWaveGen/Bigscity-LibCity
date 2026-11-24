@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import math
 from libcity.data.dataset.trajectory_encoder.abstract_trajectory_encoder import AbstractTrajectoryEncoder
-from libcity.utils import parse_time
+from libcity.utils.dataset import parse_time
 from libcity.utils.dataset import parse_coordinate
 from collections import defaultdict
 

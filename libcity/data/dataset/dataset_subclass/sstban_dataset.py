@@ -3,9 +3,9 @@ import os
 import numpy as np
 import pandas as pd
 
-from libcity.data.dataset import TrafficStatePointDataset
+from libcity.data.dataset.traffic_state_point_dataset import TrafficStatePointDataset
 from libcity.data.utils import generate_dataloader
-from libcity.utils import ensure_dir
+from libcity.utils.filesystem import ensure_dir
 
 
 def seq2instance_plus(data, num_his, num_pred):

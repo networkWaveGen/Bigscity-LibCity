@@ -6,7 +6,7 @@ from tqdm import tqdm
 import time as Time
 from libcity.executor.abstract_executor import AbstractExecutor
 import random
-from libcity.utils import get_evaluator
+from libcity.registry import get_evaluator
 
 
 class GeoSANExecutor(AbstractExecutor):

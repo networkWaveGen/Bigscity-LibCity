@@ -1,6 +1,7 @@
 from libcity.executor.abstract_executor import AbstractExecutor
 from logging import getLogger
-from libcity.utils import get_evaluator, ensure_dir
+from libcity.registry import get_evaluator
+from libcity.utils.filesystem import ensure_dir
 import numpy as np
 import torch
 import time

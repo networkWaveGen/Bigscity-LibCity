@@ -1,4 +1,3 @@
-from ray import tune
 import torch
 import torch.optim as optim
 import numpy as np
@@ -6,7 +5,7 @@ import os
 from logging import getLogger
 
 from libcity.executor.abstract_executor import AbstractExecutor
-from libcity.utils import get_evaluator
+from libcity.registry import get_evaluator
 
 
 class TrajLocPredExecutor(AbstractExecutor):
@@ -48,6 +47,7 @@ class TrajLocPredExecutor(AbstractExecutor):
             metrics['accuracy'].append(avg_eval_acc)
             metrics['loss'].append(avg_eval_loss)
             if self.config['hyper_tune']:
+                from ray import tune
                 # use ray tune to checkpoint
                 with tune.checkpoint_dir(step=epoch) as checkpoint_dir:
                     path = os.path.join(checkpoint_dir, "checkpoint")

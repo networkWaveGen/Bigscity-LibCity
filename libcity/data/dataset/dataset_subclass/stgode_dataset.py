@@ -6,7 +6,7 @@ import pandas as pd
 from fastdtw import fastdtw
 from tqdm import tqdm
 
-from libcity.data.dataset import TrafficStatePointDataset
+from libcity.data.dataset.traffic_state_point_dataset import TrafficStatePointDataset
 
 
 class STGODEDataset(TrafficStatePointDataset):

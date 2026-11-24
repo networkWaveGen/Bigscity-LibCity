@@ -5,9 +5,9 @@ from datetime import datetime
 import numpy as np
 import pandas as pd
 
-from libcity.data.dataset import TrafficStateGridDataset
+from libcity.data.dataset.traffic_state_grid_dataset import TrafficStateGridDataset
 from libcity.data.utils import generate_dataloader
-from libcity.utils import ensure_dir
+from libcity.utils.filesystem import ensure_dir
 
 
 def string2timestamp(strings, T=48):

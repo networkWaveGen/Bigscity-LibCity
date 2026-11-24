@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 from math import radians, cos, sin, asin, sqrt
 from libcity.data.dataset.trajectory_encoder.abstract_trajectory_encoder import AbstractTrajectoryEncoder
-from libcity.utils import parse_time, cal_timeoff
+from libcity.utils.dataset import parse_time, cal_timeoff
 from libcity.utils.dataset import parse_coordinate
 from tqdm import tqdm
 

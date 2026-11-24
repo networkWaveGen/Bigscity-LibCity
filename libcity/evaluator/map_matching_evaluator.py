@@ -3,7 +3,7 @@ import json
 import datetime
 import pandas as pd
 import networkx as nx
-from libcity.utils import ensure_dir
+from libcity.utils.filesystem import ensure_dir
 from logging import getLogger
 from libcity.evaluator.abstract_evaluator import AbstractEvaluator
 

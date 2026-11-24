@@ -1,7 +1,8 @@
 import os
 import numpy as np
 
-from libcity.data.dataset import TrafficStateCPTDataset, TrafficStateGridDataset
+from libcity.data.dataset.traffic_state_cpt_dataset import TrafficStateCPTDataset
+from libcity.data.dataset.traffic_state_grid_dataset import TrafficStateGridDataset
 from libcity.utils.dataset import timestamp2array, timestamp2vec_origin
 
 

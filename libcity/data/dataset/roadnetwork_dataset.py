@@ -1,5 +1,5 @@
 import os
-from libcity.data.dataset import TrafficStateDataset
+from libcity.data.dataset.traffic_state_datatset import TrafficStateDataset
 
 
 class RoadNetWorkDataset(TrafficStateDataset):

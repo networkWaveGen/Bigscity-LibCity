@@ -7,7 +7,7 @@ from scipy.spatial.distance import euclidean
 import pickle
 import os
 
-from libcity.data.dataset import TrafficStatePointDataset
+from libcity.data.dataset.traffic_state_point_dataset import TrafficStatePointDataset
 # from libcity.data.dataset import TrafficStateGridDataset
 
 

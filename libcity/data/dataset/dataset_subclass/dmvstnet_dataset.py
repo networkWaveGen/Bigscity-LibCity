@@ -9,7 +9,7 @@ from scipy.spatial.distance import euclidean
 import pickle
 import os
 
-from libcity.data.dataset import TrafficStateGridDataset
+from libcity.data.dataset.traffic_state_grid_dataset import TrafficStateGridDataset
 
 
 class DMVSTNetDataset(TrafficStateGridDataset):

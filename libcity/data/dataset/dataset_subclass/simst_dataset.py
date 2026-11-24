@@ -7,9 +7,9 @@ import pandas as pd
 from torch.utils.data import DataLoader
 
 from libcity.data.batch import Batch
-from libcity.data.dataset import TrafficStatePointDataset
+from libcity.data.dataset.traffic_state_point_dataset import TrafficStatePointDataset
 from libcity.data.list_dataset import ListDataset
-from libcity.utils import ensure_dir
+from libcity.utils.filesystem import ensure_dir
 
 
 class SimSTDataset(TrafficStatePointDataset):

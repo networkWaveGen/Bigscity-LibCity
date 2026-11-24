@@ -1,6 +1,6 @@
 import torch
 
-from libcity.executor import TrafficStateExecutor
+from libcity.executor.traffic_state_executor import TrafficStateExecutor
 
 
 class TrafformerExecutor(TrafficStateExecutor):

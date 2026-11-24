@@ -1,6 +1,7 @@
-from libcity.config import ConfigParser
-from libcity.data import get_dataset
-from libcity.utils import get_model, get_executor, get_logger, set_random_seed
+from libcity.config.config_parser import ConfigParser
+from libcity.data.utils import get_dataset
+from libcity.registry import get_model, get_executor
+from libcity.utils.experiment import get_logger, set_random_seed
 import random
 
 """

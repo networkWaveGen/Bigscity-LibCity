@@ -1,4 +1,4 @@
-from libcity.evaluator import TrafficStateEvaluator
+from libcity.evaluator.traffic_state_evaluator import TrafficStateEvaluator
 from libcity.model import loss
 from libcity.evaluator import eval_funcs
 

@@ -2,7 +2,6 @@ import time
 import numpy as np
 import torch
 import os
-from ray import tune
 from libcity.model import loss
 from functools import partial
 from libcity.executor.traffic_state_executor import TrafficStateExecutor
@@ -109,6 +108,7 @@ class DCRNNExecutor(TrafficStateExecutor):
                 self._logger.info(message)
 
             if self.hyper_tune:
+                from ray import tune
                 # use ray tune to checkpoint
                 with tune.checkpoint_dir(step=epoch_idx) as checkpoint_dir:
                     path = os.path.join(checkpoint_dir, "checkpoint")

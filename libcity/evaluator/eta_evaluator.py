@@ -2,7 +2,7 @@ import os
 import json
 import datetime
 import pandas as pd
-from libcity.utils import ensure_dir
+from libcity.utils.filesystem import ensure_dir
 from libcity.model import loss
 from logging import getLogger
 from libcity.evaluator.abstract_evaluator import AbstractEvaluator

@@ -5,7 +5,7 @@ import networkx as nx
 import numpy as np
 from gensim.models import Word2Vec
 
-from libcity.data.dataset import TrafficStatePointDataset
+from libcity.data.dataset.traffic_state_point_dataset import TrafficStatePointDataset
 
 
 class Graph():

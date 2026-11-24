@@ -9,8 +9,8 @@ from scipy.sparse.linalg import eigsh
 from scipy.sparse import csr_matrix
 from scipy.sparse.csgraph import dijkstra
 
-from libcity.data.dataset import TrafficStatePointDataset
-from libcity.utils import ensure_dir
+from libcity.data.dataset.traffic_state_point_dataset import TrafficStatePointDataset
+from libcity.utils.filesystem import ensure_dir
 
 
 class STWaveDataset(TrafficStatePointDataset):

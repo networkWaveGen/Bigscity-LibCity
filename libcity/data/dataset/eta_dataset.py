@@ -1,14 +1,14 @@
 import os
 import pandas as pd
-import importlib
+from libcity.registry import load_component
 import json
 import math
 from tqdm import tqdm
 
 from logging import getLogger
 
-from libcity.data.dataset import AbstractDataset
-from libcity.utils import parse_time, cal_timeoff
+from libcity.data.dataset.abstract_dataset import AbstractDataset
+from libcity.utils.dataset import parse_time, cal_timeoff
 from libcity.data.utils import generate_dataloader_pad
 
 
@@ -38,11 +38,8 @@ class ETADataset(AbstractDataset):
         self.pad_item = None  # 因为若是使用缓存, pad_item 是记录在缓存文件中的而不是 encoder
 
     def _get_encoder(self):
-        try:
-            return getattr(importlib.import_module('libcity.data.dataset.eta_encoder'),
-                           self.config['eta_encoder'])(self.config)
-        except AttributeError:
-            raise AttributeError('eta encoder is not found')
+        encoder = load_component('eta_encoder', self.config['eta_encoder'])
+        return encoder(self.config)
 
     def _load_dyna(self):
         """

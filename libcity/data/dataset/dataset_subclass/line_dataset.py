@@ -5,9 +5,9 @@ from logging import getLogger
 import numpy as np
 import pandas as pd
 
-from libcity.data.dataset import AbstractDataset
+from libcity.data.dataset.abstract_dataset import AbstractDataset
 from libcity.data.utils import generate_dataloader
-from libcity.utils import ensure_dir
+from libcity.utils.filesystem import ensure_dir
 
 
 class Alias:

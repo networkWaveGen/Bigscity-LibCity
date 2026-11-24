@@ -4,7 +4,6 @@ import torch
 import os
 import math
 from logging import getLogger
-from ray import tune
 from libcity.executor.traffic_state_executor import TrafficStateExecutor
 import scipy.sparse as sp
 from tqdm import tqdm
@@ -360,6 +359,7 @@ class PDFormerExecutor(TrafficStateExecutor):
                 self._logger.info(message)
 
             if self.hyper_tune:
+                from ray import tune
                 with tune.checkpoint_dir(step=epoch_idx) as checkpoint_dir:
                     path = os.path.join(checkpoint_dir, "checkpoint")
                     self.save_model(path)

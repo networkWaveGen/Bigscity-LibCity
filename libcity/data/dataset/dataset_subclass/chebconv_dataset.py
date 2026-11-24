@@ -4,9 +4,16 @@ import numpy as np
 import scipy.sparse as sp
 from logging import getLogger
 
-from libcity.utils import StandardScaler, NormalScaler, NoneScaler, \
-    MinMax01Scaler, MinMax11Scaler, LogScaler, ensure_dir
-from libcity.data.dataset import AbstractDataset
+from libcity.utils.normalization import (
+    StandardScaler,
+    NormalScaler,
+    NoneScaler,
+    MinMax01Scaler,
+    MinMax11Scaler,
+    LogScaler,
+)
+from libcity.utils.filesystem import ensure_dir
+from libcity.data.dataset.abstract_dataset import AbstractDataset
 
 
 class ChebConvDataset(AbstractDataset):

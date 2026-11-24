@@ -2,7 +2,7 @@ import os
 import numpy as np
 from fastdtw import fastdtw
 from tqdm import tqdm
-from libcity.data.dataset import TrafficStatePointDataset
+from libcity.data.dataset.traffic_state_point_dataset import TrafficStatePointDataset
 from libcity.data.utils import generate_dataloader
 from tslearn.clustering import TimeSeriesKMeans, KShape
 

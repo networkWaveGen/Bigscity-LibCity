@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 
 
-from libcity.data.dataset import TrafficStateCPTDataset
+from libcity.data.dataset.traffic_state_cpt_dataset import TrafficStateCPTDataset
 
 
 class GSNetDataset(TrafficStateCPTDataset):

@@ -2,7 +2,7 @@ import os
 import sys
 import numpy as np
 
-from libcity.data.dataset import TrafficStatePointDataset
+from libcity.data.dataset.traffic_state_point_dataset import TrafficStatePointDataset
 # from libcity.data.dataset import TrafficStateGridDataset
 
 

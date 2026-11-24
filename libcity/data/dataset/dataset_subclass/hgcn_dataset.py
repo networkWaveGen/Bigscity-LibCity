@@ -1,5 +1,5 @@
 import os
-from libcity.data.dataset import TrafficStatePointDataset
+from libcity.data.dataset.traffic_state_point_dataset import TrafficStatePointDataset
 from sklearn.cluster import SpectralClustering
 import torch
 import numpy as np

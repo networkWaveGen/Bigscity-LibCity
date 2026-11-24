@@ -2,13 +2,13 @@ import os
 import json
 import pandas as pd
 import math
-import importlib
+from libcity.registry import load_component
 import numpy as np
 from logging import getLogger
 from collections import Counter
 from tqdm import tqdm
-from libcity.data.dataset import AbstractDataset
-from libcity.utils import parse_time, cal_basetime, cal_timeoff
+from libcity.data.dataset.abstract_dataset import AbstractDataset
+from libcity.utils.dataset import parse_time, cal_basetime, cal_timeoff
 from libcity.data.utils import generate_dataloader_pad
 
 
@@ -234,8 +234,5 @@ class PBSTrajectoryDataset(AbstractDataset):
         return train_data, eval_data, test_data
 
     def get_encoder(self):
-        try:
-            return getattr(importlib.import_module('libcity.data.dataset.trajectory_encoder'),
-                           self.config['traj_encoder'])(self.config)
-        except AttributeError:
-            raise AttributeError('trajectory encoder is not found')
+        encoder = load_component('traj_encoder', self.config['traj_encoder'])
+        return encoder(self.config)

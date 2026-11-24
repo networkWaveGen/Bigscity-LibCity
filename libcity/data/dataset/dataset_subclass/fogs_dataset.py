@@ -8,10 +8,17 @@ import scipy.sparse as sp
 import torch
 
 from gensim.models import Word2Vec
-from libcity.data.dataset import TrafficStatePointDataset
+from libcity.data.dataset.traffic_state_point_dataset import TrafficStatePointDataset
 from libcity.data.utils import generate_dataloader
-from libcity.utils import NormalScaler, StandardScaler, MinMax01Scaler, MinMax11Scaler, LogScaler, NoneScaler, \
-    ensure_dir
+from libcity.utils.normalization import (
+    NormalScaler,
+    StandardScaler,
+    MinMax01Scaler,
+    MinMax11Scaler,
+    LogScaler,
+    NoneScaler,
+)
+from libcity.utils.filesystem import ensure_dir
 
 
 def alias_setup(probs):

@@ -152,3 +152,37 @@ def timestamp2vec_origin(timestamps):
             v.append(1)  # weekday
         ret.append(v)
     return np.asarray(ret)
+
+
+def preprocess_data(data, config):
+    """
+    split by input_window and output_window
+
+    Args:
+        data: shape (T, ...)
+
+    Returns:
+        np.ndarray: (train_size/test_size, input_window, ...)
+                    (train_size/test_size, output_window, ...)
+
+    """
+    train_rate = config.get('train_rate', 0.7)
+    eval_rate = config.get('eval_rate', 0.1)
+
+    input_window = config.get('input_window', 12)
+    output_window = config.get('output_window', 3)
+
+    x, y = [], []
+    for i in range(len(data) - input_window - output_window):
+        a = data[i: i + input_window + output_window]  # (in+out, ...)
+        x.append(a[0: input_window])  # (in, ...)
+        y.append(a[input_window: input_window + output_window])  # (out, ...)
+    x = np.array(x)  # (num_samples, in, ...)
+    y = np.array(y)  # (num_samples, out, ...)
+
+    train_size = int(x.shape[0] * (train_rate + eval_rate))
+    trainx = x[:train_size]  # (train_size, in, ...)
+    trainy = y[:train_size]  # (train_size, out, ...)
+    testx = x[train_size:x.shape[0]]  # (test_size, in, ...)
+    testy = y[train_size:x.shape[0]]  # (test_size, out, ...)
+    return trainx, trainy, testx, testy

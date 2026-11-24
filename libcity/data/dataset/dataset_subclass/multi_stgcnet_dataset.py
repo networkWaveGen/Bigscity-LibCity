@@ -1,6 +1,6 @@
 import os
-from libcity.data.dataset import TrafficStateCPTDataset
-from libcity.data.dataset import TrafficStatePointDataset
+from libcity.data.dataset.traffic_state_cpt_dataset import TrafficStateCPTDataset
+from libcity.data.dataset.traffic_state_point_dataset import TrafficStatePointDataset
 
 
 class MultiSTGCnetDataset(TrafficStatePointDataset, TrafficStateCPTDataset):
