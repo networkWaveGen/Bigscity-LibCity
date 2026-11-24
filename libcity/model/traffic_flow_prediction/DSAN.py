@@ -112,9 +112,8 @@ def ex_encoding(d, num_hid, input_dim):
     )
 
 
-def create_look_ahead_mask(size):
-    mask = 1 - torch.tril(torch.ones((size, size)), diagonal=-1)
-    return mask.cuda()
+def create_look_ahead_mask(size, device):
+    return 1 - torch.tril(torch.ones((size, size), device=device), diagonal=-1)
 
 
 def create_threshold_mask(inp):
@@ -158,7 +157,7 @@ def create_masks(inp_g, inp_l, tar):
                           [inp_l.shape[0] * inp_l.shape[1] * inp_l.shape[2], inp_l.shape[3], inp_l.shape[4],
                            inp_l.shape[5], inp_l.shape[6]])
     threshold_mask = create_threshold_mask(inp_l).unsqueeze(2)
-    look_ahead_mask = create_look_ahead_mask(tar.shape[1])
+    look_ahead_mask = create_look_ahead_mask(tar.shape[1], device=tar.device)
     tar = tar.permute(0, 2, 1, 3)
     tar = torch.reshape(tar, [tar.shape[0] * tar.shape[1], tar.shape[2], tar.shape[3]])
     dec_target_threshold_mask = create_threshold_mask_tar(
@@ -557,8 +556,7 @@ class SAD(nn.Module):
     def forward(self, x, ex, dae_output, look_ahead_mask):
         ex_enc = self.ex_encoder(ex)
 
-        x = self.li_conv(x)
-        x *= np.sqrt(self.d)
+        x = self.li_conv(x) * np.sqrt(self.d)
 
         ex_enc = torch.reshape(input=ex_enc, shape=[ex_enc.shape[0], ex_enc.shape[1], ex_enc.shape[2] * ex_enc.shape[3],
                                                     ex_enc.shape[4]])

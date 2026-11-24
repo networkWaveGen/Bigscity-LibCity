@@ -180,6 +180,49 @@ def test_forecast_forward_backward_and_checkpoint(tmp_path, model_name):
     model.load_state_dict(restored)
 
 
+@pytest.mark.parametrize('mode', [None, 'refine', 'discover'])
+def test_stnn_forecasts_on_cpu(monkeypatch, mode):
+    monkeypatch.setattr(torch, 'set_default_tensor_type',
+                        lambda *_: pytest.fail('STNN changed the global tensor type'))
+    device = torch.device('cpu')
+    config = {'task': 'traffic_state_pred', 'model': 'STNN', 'device': device,
+              'input_window': 12, 'output_window': 2, 'mode': mode}
+    model = get_model(config, {
+        'scaler': NoneScaler(), 'num_nodes': 41,
+        'adj_mx': np.roll(np.eye(41, dtype=np.float32), 1, axis=1),
+    })
+    batch = {'X': torch.rand(2, 12, 41, 1, device=device),
+             'y': torch.ones(2, 2, 41, 1, device=device)}
+
+    prediction = model.predict(batch)
+    assert prediction.shape == batch['y'].shape
+    assert prediction.device == model.relations.device == device
+    assert torch.isfinite(prediction).all()
+    prediction.mean().backward()
+    assert model.factors.grad is not None
+
+
+def test_dsan_forecasts_and_trains_on_cpu():
+    device = torch.device('cpu')
+    config = {'task': 'traffic_state_pred', 'model': 'DSAN', 'device': device,
+              'input_window': 2, 'output_window': 2, 'L': 1,
+              'l_d': 1, 'r_d': 0}
+    model = get_model(config, {
+        'scaler': NoneScaler(), 'len_row': 2, 'len_column': 2, 'num_nodes': 4,
+        'feature_dim': 3, 'ext_dim': 1, 'output_dim': 2,
+    })
+    batch = {'X': torch.rand(2, 2, 2, 2, 3, device=device),
+             'y': torch.ones(2, 2, 2, 2, 2, device=device)}
+
+    prediction = model.predict(batch)
+    assert prediction.shape == batch['y'].shape
+    assert prediction.device == device
+    loss = model.calculate_loss(batch)
+    assert torch.isfinite(loss)
+    loss.backward()
+    assert model.dsan.final_layer.weight.grad is not None
+
+
 @pytest.mark.parametrize('mode', ['single', 'average'])
 @pytest.mark.parametrize('save_predictions', [False, True])
 def test_evaluation_preserves_global_metrics_and_prediction_archive(

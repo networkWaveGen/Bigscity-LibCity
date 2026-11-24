@@ -40,8 +40,6 @@ class STNN(AbstractTrafficStateModel):
 
         self._logger = getLogger()
 
-        self.device = config.get('device', torch.device('cpu'))
-
         self.input_window = config.get('input_window', 1)
         self.output_window = config.get('output_window', 1)
 
@@ -50,17 +48,18 @@ class STNN(AbstractTrafficStateModel):
         nlayers = config.get("nlayers", 1)
         dropout_f = config.get("dropout_f", 0.1)
         dropout_d = config.get("dropout_d", 0.1)
-        torch.set_default_tensor_type(torch.cuda.FloatTensor)
 
-        relations = torch.Tensor(self.adj_mx).unsqueeze(1)
-        # kernel
+        identity = torch.eye(self.num_nodes)
+        if self.mode == 'discover':
+            neighbors = identity.new_ones((self.num_nodes, 1, self.num_nodes))
+        else:
+            adjacency = torch.as_tensor(self.adj_mx, dtype=identity.dtype, device=identity.device)
+            neighbors = adjacency.unsqueeze(1)
+        relations = torch.cat((identity.unsqueeze(1), neighbors), dim=1)
+        if self.mode == 'refine':
+            relations = relations.ceil().clamp(0, 1).bool()
+        self.register_buffer('relations', relations)
         self.activation = torch.tanh
-        device = self.device
-        if self.mode is None or self.mode == 'refine':
-            self.relations = torch.cat((torch.eye(self.num_nodes).unsqueeze(1), relations), 1)
-        elif self.mode == 'discover':
-            self.relations = torch.cat((torch.eye(self.num_nodes).unsqueeze(1),
-                                        torch.ones(self.num_nodes, 1, self.num_nodes).to(device)), 1)
         self.nr = self.relations.size(1)
         # modules
         self.drop = nn.Dropout(dropout_f)
@@ -71,7 +70,6 @@ class STNN(AbstractTrafficStateModel):
         self.dynamic = MLP(self.feature_dim * self.nr, nhid, self.feature_dim, nlayers, dropout_d)
         self.decoder = nn.Linear(self.feature_dim * self.input_window, self.output_window * self.output_dim, bias=False)
         if self.mode == 'refine':
-            self.relations.data = self.relations.data.ceil().clamp(0, 1).bool()
             self.rel_weights = nn.Parameter(torch.Tensor(self.relations.sum().item() - self.num_nodes))
         elif self.mode == 'discover':
             self.rel_weights = nn.Parameter(torch.Tensor(self.num_nodes, 1, self.num_nodes))
@@ -100,7 +98,7 @@ class STNN(AbstractTrafficStateModel):
             return torch.cat((intra, inter), 1)
 
     def forward(self, batch):
-        x = torch.Tensor(batch['X'])  # shape = (batch_size, input_length, ..., feature_dim)
+        x = batch['X']
         x_size = x.shape
         nowrel = self.get_relations()
         nowrel_size = nowrel.shape
@@ -125,7 +123,7 @@ class STNN(AbstractTrafficStateModel):
         return res
 
     def predict(self, batch):
-        x = torch.Tensor(batch['X'])  # shape = (batch_size, input_length, ..., feature_dim)
+        x = batch['X']
         x_size = x.shape
 
         # step one:Xt to Zt
