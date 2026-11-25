@@ -328,11 +328,12 @@ class CSTN(AbstractTrafficStateModel):
         )
 
     def forward(self, batch):
+        batch_size = batch['X'].shape[0]
         x = batch['X'][..., 0]
         # x : (B, T, H, W, H, W)
         x = self.LSC(x)
         # x : (B * T, 32, H, W)
-        x = x.reshape((self.batch_size, self.input_window, 32, self.height, self.width))
+        x = x.reshape((batch_size, self.input_window, 32, self.height, self.width))
         # x : (B, T, 32, H, W)
 
         w = batch['W']
@@ -340,7 +341,7 @@ class CSTN(AbstractTrafficStateModel):
         w = self.MLP(w)
         # w : (B, T, 8)
         w = w.repeat(1, 1, self.height * self.width)
-        w = w.reshape((self.batch_size, self.input_window, 8, self.height, self.width))
+        w = w.reshape((batch_size, self.input_window, 8, self.height, self.width))
         # w : (B, T, 8, H, W)
         x = torch.cat([x, w], dim=2)
         x = self.TEC(x)
@@ -349,7 +350,7 @@ class CSTN(AbstractTrafficStateModel):
         # x : (B, 2 * c_lt, H, W)
         x = self.OUT(x)
         # x : (B, H * W, H, W)
-        x = x.reshape((self.batch_size, 1, self.height, self.width, self.height, self.width, 1))
+        x = x.reshape((batch_size, 1, self.height, self.width, self.height, self.width, 1))
         # x : (B, 1, H, W, H, W, 1)
         return x
 

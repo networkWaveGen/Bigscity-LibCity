@@ -1,6 +1,13 @@
 import numpy as np
 
 
+def _nonzero_scale(value):
+    """Use unit scale for constant data, preserving an invertible transform."""
+    scale = np.asarray(value)
+    safe = np.where(scale == 0, 1, scale)
+    return safe.item() if safe.ndim == 0 else safe
+
+
 class Scaler:
     """
     归一化接口
@@ -51,12 +58,13 @@ class NormalScaler(Scaler):
 
     def __init__(self, maxx):
         self.max = maxx
+        self.scale = _nonzero_scale(maxx)
 
     def transform(self, data):
-        return data / self.max
+        return data / self.scale
 
     def inverse_transform(self, data):
-        return data * self.max
+        return data * self.scale
 
 
 class StandardScaler(Scaler):
@@ -68,12 +76,13 @@ class StandardScaler(Scaler):
     def __init__(self, mean, std):
         self.mean = mean
         self.std = std
+        self.scale = _nonzero_scale(std)
 
     def transform(self, data):
-        return (data - self.mean) / self.std
+        return (data - self.mean) / self.scale
 
     def inverse_transform(self, data):
-        return (data * self.std) + self.mean
+        return (data * self.scale) + self.mean
 
 
 class MinMax01Scaler(Scaler):
@@ -85,12 +94,13 @@ class MinMax01Scaler(Scaler):
     def __init__(self, minn, maxx):
         self.min = minn
         self.max = maxx
+        self.scale = _nonzero_scale(maxx - minn)
 
     def transform(self, data):
-        return (data - self.min) / (self.max - self.min)
+        return (data - self.min) / self.scale
 
     def inverse_transform(self, data):
-        return data * (self.max - self.min) + self.min
+        return data * self.scale + self.min
 
 
 class MinMax11Scaler(Scaler):
@@ -103,12 +113,13 @@ class MinMax11Scaler(Scaler):
     def __init__(self, minn, maxx):
         self.min = minn
         self.max = maxx
+        self.scale = _nonzero_scale(maxx - minn)
 
     def transform(self, data):
-        return ((data - self.min) / (self.max - self.min)) * 2. - 1.
+        return ((data - self.min) / self.scale) * 2. - 1.
 
     def inverse_transform(self, data):
-        return ((data + 1.) / 2.) * (self.max - self.min) + self.min
+        return ((data + 1.) / 2.) * self.scale + self.min
 
 
 class LogScaler(Scaler):

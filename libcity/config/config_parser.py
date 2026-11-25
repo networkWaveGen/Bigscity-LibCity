@@ -13,7 +13,7 @@ class ConfigParser(object):
     """
 
     def __init__(self, task, model, dataset, config_file=None,
-                 saved_model=True, train=True, other_args=None, hyper_config_dict=None):
+                 saved_model=None, train=None, other_args=None, hyper_config_dict=None):
         """
         Args:
             task, model, dataset (str): 用户在命令行必须指明的三个参数
@@ -24,10 +24,20 @@ class ConfigParser(object):
         self._parse_external_config(task, model, dataset, saved_model, train, other_args, hyper_config_dict)
         self._parse_config_file(config_file)
         self._load_default_config()
+        # None means the caller did not explicitly choose a mode. Defaults are
+        # filled only after user JSON and component/data configurations are read.
+        for name in ('train', 'saved_model'):
+            value = self.config.get(name)
+            if value is None:
+                self.config[name] = True
+            elif not isinstance(value, bool):
+                raise TypeError(f'{name} must be a JSON boolean or an explicit boolean argument.')
+        if self.config['task'] == 'map_matching':
+            self.config['train'] = False
         self._init_device()
 
     def _parse_external_config(self, task, model, dataset,
-                               saved_model=True, train=True, other_args=None, hyper_config_dict=None):
+                               saved_model=None, train=None, other_args=None, hyper_config_dict=None):
         if task is None:
             raise ValueError('the parameter task should not be None!')
         if model is None:
@@ -38,15 +48,18 @@ class ConfigParser(object):
         self.config['task'] = task
         self.config['model'] = model
         self.config['dataset'] = dataset
-        self.config['saved_model'] = saved_model
-        self.config['train'] = False if task == 'map_matching' else train
         if hyper_config_dict is not None:
             # 超参数调整时传入的待调整的参数，优先级低于命令行参数
             for key in hyper_config_dict:
                 self.config[key] = hyper_config_dict[key]
+        if saved_model is not None:
+            self.config['saved_model'] = saved_model
+        if train is not None:
+            self.config['train'] = train
         if other_args is not None:
             for key in other_args:
-                self.config[key] = other_args[key]
+                if key not in ('train', 'saved_model') or other_args[key] is not None:
+                    self.config[key] = other_args[key]
 
     def _parse_config_file(self, config_file):
         if config_file is not None:

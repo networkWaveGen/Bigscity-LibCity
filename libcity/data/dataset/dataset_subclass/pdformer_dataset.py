@@ -12,8 +12,7 @@ class PDFormerDataset(TrafficStatePointDataset):
     def __init__(self, config):
         self.type_short_path = config.get('type_short_path', 'hop')
         super().__init__(config)
-        self.cache_file_name = os.path.join('./libcity/cache/dataset_cache/',
-                                            'pdformer_point_based_{}.npz'.format(self.parameters_str))
+        self.cache_file_name = self._get_cache_file_name('pdformer_point_based')
         self.points_per_hour = 3600 // self.time_intervals
         self.dtw_matrix = self._get_dtw()
         self.points_per_day = 24 * 3600 // self.time_intervals

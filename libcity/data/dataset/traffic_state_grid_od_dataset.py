@@ -9,8 +9,7 @@ class TrafficStateGridOdDataset(TrafficStateDataset):
         super().__init__(config)
         self.use_row_column = self.config.get('use_row_column', True)
         self.parameters_str = self.parameters_str + '_' + str(self.use_row_column)
-        self.cache_file_name = os.path.join('./libcity/cache/dataset_cache/',
-                                            'grid_od_based_{}.npz'.format(self.parameters_str))
+        self.cache_file_name = self._get_cache_file_name('grid_od_based')
         self._load_rel()  # don't care whether there is a .rel file
 
     def _load_geo(self):

@@ -2,6 +2,8 @@ import os
 import pandas as pd
 import numpy as np
 import datetime
+import hashlib
+import json
 from logging import getLogger
 
 from libcity.data.dataset.abstract_dataset import AbstractDataset
@@ -53,8 +55,7 @@ class TrafficStateDataset(AbstractDataset):
             + str(self.train_rate) + '_' + str(self.eval_rate) + '_' + str(self.scaler_type) + '_' \
             + str(self.batch_size) + '_' + str(self.load_external) + '_' + str(self.add_time_in_day) + '_' \
             + str(self.add_day_in_week) + '_' + str(self.pad_with_last_sample)
-        self.cache_file_name = os.path.join('./libcity/cache/dataset_cache/',
-                                            'traffic_state_{}.npz'.format(self.parameters_str))
+        self.cache_file_name = self._get_cache_file_name('traffic_state')
         self.cache_file_folder = './libcity/cache/dataset_cache/'
         ensure_dir(self.cache_file_folder)
         self.data_path = './raw_data/' + self.dataset + '/'
@@ -97,6 +98,34 @@ class TrafficStateDataset(AbstractDataset):
             self._load_rel()
         else:
             self.adj_mx = np.zeros((len(self.geo_ids), len(self.geo_ids)), dtype=np.float32)
+
+    def _cache_config_json(self):
+        """Describe data selection and preprocessing without hashing input files."""
+        config = getattr(self, 'config', {})
+        defaults = dict(
+            dataset='', data_col='', ext_col='', weight_col='', output_dim=1,
+            input_window=12, output_window=12, train_rate=0.7, eval_rate=0.1,
+            scaler='none', ext_scaler='none', load_external=False, normal_external=False,
+            add_time_in_day=False, add_day_in_week=False, time_intervals=300,
+            init_weight_inf_or_zero='inf', set_weight_link_or_dist='dist',
+            bidir_adj_mx=False, calculate_weight_adj=False,
+            weight_adj_epsilon=0.1, distance_inverse=False,
+            use_row_column=True, external_time=True,
+            len_closeness=3, len_period=4, len_trend=0,
+            pad_forward_period=0, pad_back_period=0,
+            pad_forward_trend=0, pad_back_trend=0, interval_period=1, interval_trend=7)
+        dataset = config.get('dataset', '')
+        for name in ('geo_file', 'rel_file', 'data_files', 'ext_file'):
+            defaults[name] = dataset
+        payload = dict(version=2, dataset_class=type(self).__module__ + '.' + type(self).__qualname__,
+                       parameters=getattr(self, 'parameters_str', None),
+                       inputs={name: config.get(name, default) for name, default in defaults.items()})
+        return json.dumps(payload, sort_keys=True, separators=(',', ':'), ensure_ascii=True)
+
+    def _get_cache_file_name(self, prefix):
+        # Only the configuration string is hashed. No file contents are read.
+        identity = hashlib.sha256(self._cache_config_json().encode('utf-8')).hexdigest()
+        return os.path.join('./libcity/cache/dataset_cache/', f'{prefix}_v2_{identity}.npz')
 
     def _load_geo(self):
         """
@@ -863,6 +892,7 @@ class TrafficStateDataset(AbstractDataset):
                 y_test=y_test,
                 x_val=x_val,
                 y_val=y_val,
+                cache_config=np.asarray(self._cache_config_json()),
             )
             self._logger.info('Saved at ' + self.cache_file_name)
         return x_train, y_train, x_val, y_val, x_test, y_test
@@ -897,13 +927,17 @@ class TrafficStateDataset(AbstractDataset):
                 y_test: (num_samples, input_length, ..., feature_dim)
         """
         self._logger.info('Loading ' + self.cache_file_name)
-        cat_data = np.load(self.cache_file_name)
-        x_train = cat_data['x_train']
-        y_train = cat_data['y_train']
-        x_test = cat_data['x_test']
-        y_test = cat_data['y_test']
-        x_val = cat_data['x_val']
-        y_val = cat_data['y_val']
+        with np.load(self.cache_file_name, allow_pickle=False) as cat_data:
+            metadata = cat_data.get('cache_config')
+            matches = (metadata is not None and metadata.shape == ()
+                       and metadata.item() == self._cache_config_json())
+            if matches:
+                arrays = tuple(cat_data[name] for name in (
+                    'x_train', 'y_train', 'x_val', 'y_val', 'x_test', 'y_test'))
+        if not matches:
+            self._logger.warning('Cache configuration is missing or mismatched; rebuilding %s', self.cache_file_name)
+            return self._generate_train_val_test()
+        x_train, y_train, x_val, y_val, x_test, y_test = arrays
         self._logger.info("train\t" + "x: " + str(x_train.shape) + ", y: " + str(y_train.shape))
         self._logger.info("eval\t" + "x: " + str(x_val.shape) + ", y: " + str(y_val.shape))
         self._logger.info("test\t" + "x: " + str(x_test.shape) + ", y: " + str(y_test.shape))
@@ -976,10 +1010,14 @@ class TrafficStateDataset(AbstractDataset):
                 eval_dataloader: Dataloader composed of Batch (class) \n
                 test_dataloader: Dataloader composed of Batch (class)
         """
-        # 加载数据集
+        loaders = tuple(getattr(self, name, None) for name in (
+            'train_dataloader', 'eval_dataloader', 'test_dataloader'))
+        if all(loader is not None for loader in loaders):
+            return loaders
+        # Publish the loaded flag only after preprocessing succeeds, so a
+        # failed first attempt can be retried instead of leaving partial state.
         x_train, y_train, x_val, y_val, x_test, y_test = [], [], [], [], [], []
         if self.data is None:
-            self.data = {}
             if self.cache_dataset and os.path.exists(self.cache_file_name):
                 x_train, y_train, x_val, y_val, x_test, y_test = self._load_cache_train_val_test()
             else:
@@ -1018,6 +1056,7 @@ class TrafficStateDataset(AbstractDataset):
             generate_dataloader(train_data, eval_data, test_data, self.feature_name,
                                 self.batch_size, self.num_workers, pad_with_last_sample=self.pad_with_last_sample)
         self.num_batches = len(self.train_dataloader)
+        self.data = {}
         return self.train_dataloader, self.eval_dataloader, self.test_dataloader
 
     def get_data_feature(self):

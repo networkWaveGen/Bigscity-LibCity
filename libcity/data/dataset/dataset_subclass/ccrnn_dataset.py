@@ -24,8 +24,7 @@ class CCRNNDataset(TrafficStatePointDataset):
         self.hidden_size = config.get('hidden_size', 20)
         self.method = config.get('method', 'big')
         self.parameters_str += '_save_adj'
-        self.cache_file_name = os.path.join('./libcity/cache/dataset_cache/',
-                                            'point_based_{}.npz'.format(self.parameters_str))
+        self.cache_file_name = self._get_cache_file_name('point_based')
 
     def _load_rel(self):
         """

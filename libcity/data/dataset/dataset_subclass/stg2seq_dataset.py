@@ -25,8 +25,7 @@ class STG2SeqDataset(TrafficStatePointDataset):
         super().__init__(config)
         self.use_row_column = False
         self.parameters_str += '_save_adj'
-        self.cache_file_name = os.path.join('./libcity/cache/dataset_cache/',
-                                            'point_based_{}.npz'.format(self.parameters_str))
+        self.cache_file_name = self._get_cache_file_name('point_based')
 
     def _load_rel(self):
         """

@@ -11,6 +11,13 @@ The follow-up [runtime fixes](runtime-fixes_zh.md) address evaluation sample
 accounting, checkpoint/mode controls and CPU placement. That work has its own
 70-case validation record; the earlier audit reports below remain archived.
 
+The subsequent [follow-up fixes](followup-fixes_zh.md) cover CSTN tail batches,
+validation overrides, JSON mode flags, trajectory best-state restoration and
+repeated dataset access. The amended change also isolates data cache configurations,
+preserves repeated-user ETA exports and handles zero normalization scales.
+The latest record contains 129 passing cases, including 27 additional regressions;
+the prior 102-case and 70-case records are unchanged.
+
 ## Core installation
 
 Use Python 3.12 for the primary development environment; Python 3.11 is also

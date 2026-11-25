@@ -1,3 +1,4 @@
+from libcity.utils.training import SampleWeightedMean
 import os
 import time
 import numpy as np
@@ -55,7 +56,7 @@ class FOGSExecutor(TrafficStateExecutor):
         """
         with torch.no_grad():
             self.model.eval()
-            losses = []
+            losses = SampleWeightedMean()
             for batch in eval_dataloader:
                 batch.to_tensor(self.device)
                 valx = batch['X']
@@ -65,8 +66,8 @@ class FOGSExecutor(TrafficStateExecutor):
                 predict = self.adjust_output(output, valx, valy_slot)
                 val_loss = loss.masked_mae_torch(predict, valy, 0.0)
                 self._logger.debug(val_loss.item())
-                losses.append(val_loss.item())
-            mean_loss = np.mean(losses)
+                losses.update(val_loss, batch)
+            mean_loss = losses.mean()
             self._writer.add_scalar('eval loss', mean_loss, epoch_idx)
             return mean_loss
 

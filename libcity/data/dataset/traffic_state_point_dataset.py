@@ -1,4 +1,3 @@
-import os
 
 from libcity.data.dataset.traffic_state_datatset import TrafficStateDataset
 
@@ -7,8 +6,7 @@ class TrafficStatePointDataset(TrafficStateDataset):
 
     def __init__(self, config):
         super().__init__(config)
-        self.cache_file_name = os.path.join('./libcity/cache/dataset_cache/',
-                                            'point_based_{}.npz'.format(self.parameters_str))
+        self.cache_file_name = self._get_cache_file_name('point_based')
 
     def _load_geo(self):
         """

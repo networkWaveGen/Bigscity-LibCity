@@ -118,7 +118,7 @@ class HyperTuning:
 
     def __init__(self, objective_function, space=None, params_file=None, algo='grid_search',
                  max_evals=100, task=None, model_name=None, dataset_name=None, config_file=None,
-                 saved_model=True, train=True, other_args=None):
+                 saved_model=None, train=None, other_args=None):
         self.task = task
         self.model_name = model_name
         self.dataset_name = dataset_name

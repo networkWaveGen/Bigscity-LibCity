@@ -1,3 +1,4 @@
+from libcity.utils.training import SampleWeightedMean
 import time
 import numpy as np
 import torch
@@ -425,15 +426,15 @@ class PDFormerExecutor(TrafficStateExecutor):
             self.model.eval()
             if loss_func is None:
                 loss_func = self.model.calculate_loss_without_predict
-            losses = []
+            losses = SampleWeightedMean()
             for batch in eval_dataloader:
                 batch.to_tensor(self.device)
                 y_true = batch['y']
                 y_predicted = self.model(batch, self.lap_mx)
                 loss = loss_func(y_true, y_predicted, batches_seen=batches_seen, set_loss=self.set_loss)
                 self._logger.debug(loss.item())
-                losses.append(loss.item())
-            mean_loss = np.mean(losses)
+                losses.update(loss, batch)
+            mean_loss = losses.mean()
             self._writer.add_scalar('eval loss', mean_loss, batches_seen)
             return mean_loss
 

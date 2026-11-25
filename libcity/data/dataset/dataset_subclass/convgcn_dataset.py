@@ -1,4 +1,3 @@
-import os
 import numpy as np
 
 from libcity.data.dataset.traffic_state_point_dataset import TrafficStatePointDataset
@@ -17,8 +16,7 @@ class CONVGCNDataset(TrafficStatePointDataset):
             + '_' + str(self.TG) + '_' + str(self.time_lag) + '_' + str(self.output_window) \
             + '_' + str(self.TG_in_one_day) \
             + '_' + str(self.TG_in_one_week)
-        self.cache_file_name = os.path.join('./libcity/cache/dataset_cache/',
-                                            'point_based_{}.npz'.format(self.parameters_str))
+        self.cache_file_name = self._get_cache_file_name('point_based')
 
     def _generate_input_data(self, df):
         # (TG_all,num_nodes, 2)

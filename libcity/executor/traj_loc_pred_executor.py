@@ -1,4 +1,5 @@
-from libcity.utils.checkpoint import load_checkpoint, restore_checkpoint
+from libcity.utils.checkpoint import copy_state_to_cpu, restore_checkpoint
+from libcity.utils.training import SampleWeightedMean
 import torch
 import torch.optim as optim
 import numpy as np
@@ -19,7 +20,6 @@ class TrajLocPredExecutor(AbstractExecutor):
             self.metrics = 'Recall@{}'.format(config['topk'][0])
         self.config = config
         self.model = model.to(self.config['device'])
-        self.tmp_path = './libcity/tmp/checkpoint/'
         self.exp_id = self.config.get('exp_id', None)
         self.cache_dir = './libcity/cache/{}/model_cache'.format(self.exp_id)
         self.evaluate_res_dir = './libcity/cache/{}/evaluate_cache'.format(self.exp_id)
@@ -29,52 +29,40 @@ class TrajLocPredExecutor(AbstractExecutor):
         self.scheduler = self._build_scheduler()
 
     def train(self, train_dataloader, eval_dataloader):
-        if not os.path.exists(self.tmp_path):
-            os.makedirs(self.tmp_path)
-        metrics = {}
-        metrics['accuracy'] = []
-        metrics['loss'] = []
+        best_accuracy = -float('inf')
+        best_state = None
         lr = self.config['learning_rate']
         for epoch in range(self.config['max_epoch']):
             self._logger.info('start train')
-            self.model, avg_loss = self.run(train_dataloader, self.model,
-                                            self.config['learning_rate'], self.config['clip'])
-            self._logger.info('==>Train Epoch:{:4d} Loss:{:.5f} learning_rate:{}'.format(
-                epoch, avg_loss, lr))
-            # eval stage
-            self._logger.info('start evaluate')
+            self.model, avg_loss = self.run(
+                train_dataloader, self.model, self.config['learning_rate'], self.config['clip'])
+            self._logger.info('Train epoch %s loss %.5f learning_rate %s', epoch, avg_loss, lr)
             avg_eval_acc, avg_eval_loss = self._valid_epoch(eval_dataloader, self.model)
-            self._logger.info('==>Eval Acc:{:.5f} Eval Loss:{:.5f}'.format(avg_eval_acc, avg_eval_loss))
-            metrics['accuracy'].append(avg_eval_acc)
-            metrics['loss'].append(avg_eval_loss)
+            if not np.isfinite(avg_eval_acc):
+                raise ValueError('Trajectory validation accuracy must be finite.')
+            self._logger.info('Eval accuracy %.5f loss %.5f', avg_eval_acc, avg_eval_loss)
             if self.config['hyper_tune']:
                 from ray import tune
-                # use ray tune to checkpoint
                 with tune.checkpoint_dir(step=epoch) as checkpoint_dir:
-                    path = os.path.join(checkpoint_dir, "checkpoint")
-                    self.save_model(path)
-                # ray tune use loss to determine which params are best
+                    self.save_model(os.path.join(checkpoint_dir, 'checkpoint'))
                 tune.report(loss=avg_eval_loss, accuracy=avg_eval_acc)
-            else:
-                save_name_tmp = 'ep_' + str(epoch) + '.m'
-                torch.save(self.model.state_dict(), self.tmp_path + save_name_tmp)
             self.scheduler.step(avg_eval_acc)
-            # scheduler 会根据 avg_eval_acc 减小学习率
-            # 若当前学习率小于特定值，则 early stop
+            if (not self.config['hyper_tune'] and self.config['load_best_epoch']
+                    and avg_eval_acc > best_accuracy):
+                best_accuracy = avg_eval_acc
+                best_state = (
+                    copy_state_to_cpu(self.model.state_dict()),
+                    copy_state_to_cpu(self.optimizer.state_dict()),
+                    copy_state_to_cpu(self.scheduler.state_dict()))
             lr = self.optimizer.param_groups[0]['lr']
             if lr < self.config['early_stop_lr']:
                 break
         if not self.config['hyper_tune'] and self.config['load_best_epoch']:
-            best = np.argmax(metrics['accuracy'])  # 这个不是最好的一次吗？
-            load_name_tmp = 'ep_' + str(best) + '.m'
-            self.model.load_state_dict(
-                load_checkpoint(self.tmp_path + load_name_tmp, self.config['device']))
-        # 删除之前创建的临时文件夹
-        for rt, dirs, files in os.walk(self.tmp_path):
-            for name in files:
-                remove_path = os.path.join(rt, name)
-                os.remove(remove_path)
-        os.rmdir(self.tmp_path)
+            if best_state is None:
+                raise ValueError('No trajectory epoch was trained; cannot restore the best state.')
+            self.model.load_state_dict(best_state[0])
+            self.optimizer.load_state_dict(copy_state_to_cpu(best_state[1]))
+            self.scheduler.load_state_dict(best_state[2])
 
     def load_model(self, cache_name):
         restore_checkpoint(cache_name, self.model, self.optimizer, self.config['device'])
@@ -100,7 +88,7 @@ class TrajLocPredExecutor(AbstractExecutor):
             else:
                 # negative sample
                 # loc_true is always 0
-                loc_true = [0] * self.config['batch_size']
+                loc_true = [0] * len(scores)
                 evaluate_input = {
                     'uid': batch['uid'].tolist(),
                     'loc_true': loc_true,
@@ -137,13 +125,13 @@ class TrajLocPredExecutor(AbstractExecutor):
     def _valid_epoch(self, data_loader, model):
         model.train(False)
         self.evaluator.clear()
-        total_loss = []
+        total_loss = SampleWeightedMean()
         loss_func = self.loss_func or model.calculate_loss
         for batch in data_loader:
             batch.to_tensor(device=self.config['device'])
             scores = model.predict(batch)
             loss = loss_func(batch)
-            total_loss.append(loss.data.cpu().numpy().tolist())
+            total_loss.update(loss, batch)
             if self.config['evaluate_method'] == 'popularity':
                 evaluate_input = {
                     'uid': batch['uid'].tolist(),
@@ -153,7 +141,7 @@ class TrajLocPredExecutor(AbstractExecutor):
             else:
                 # negative sample
                 # loc_true is always 0
-                loc_true = [0] * self.config['batch_size']
+                loc_true = [0] * len(scores)
                 evaluate_input = {
                     'uid': batch['uid'].tolist(),
                     'loc_true': loc_true,
@@ -161,7 +149,7 @@ class TrajLocPredExecutor(AbstractExecutor):
                 }
             self.evaluator.collect(evaluate_input)
         avg_acc = self.evaluator.evaluate()[self.metrics]  # 随便选一个就行
-        avg_loss = np.mean(total_loss, dtype=np.float64)
+        avg_loss = total_loss.mean()
         return avg_acc, avg_loss
 
     def _build_optimizer(self):

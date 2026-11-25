@@ -1,4 +1,3 @@
-import os
 from libcity.data.dataset.traffic_state_cpt_dataset import TrafficStateCPTDataset
 from libcity.data.dataset.traffic_state_point_dataset import TrafficStatePointDataset
 
@@ -13,8 +12,7 @@ class MultiSTGCnetDataset(TrafficStatePointDataset, TrafficStateCPTDataset):
             + '_' + str(self.pad_forward_period) + '_' + str(self.pad_back_period) \
             + '_' + str(self.pad_forward_trend) + '_' + str(self.pad_back_trend) \
             + '_' + str(self.interval_period) + '_' + str(self.interval_trend)
-        self.cache_file_name = os.path.join('./libcity/cache/dataset_cache/',
-                                            'point_based_{}.npz'.format(self.parameters_str))
+        self.cache_file_name = self._get_cache_file_name('point_based')
 
     def get_data_feature(self):
         """

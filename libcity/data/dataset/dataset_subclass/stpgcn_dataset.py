@@ -34,8 +34,7 @@ class STPGCNDataset(TrafficStatePointDataset):
     def __init__(self, config):
         super().__init__(config)
         self.parameters_str += "_STPGCN"
-        self.cache_file_name = os.path.join('./libcity/cache/dataset_cache/',
-                                            'point_based_{}.npz'.format(self.parameters_str))
+        self.cache_file_name = self._get_cache_file_name('point_based')
 
         self.feature_name = {'X': 'float', 'y': 'float', 'pos_w': 'int', 'pos_d': 'int'}
         self.points_per_hour = self.time_intervals // 60

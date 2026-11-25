@@ -22,8 +22,8 @@ if __name__ == '__main__':
     parser.add_argument('--config_file', type=str,
                         default=None, help='the file name of config file')
     parser.add_argument('--saved_model', type=str2bool,
-                        default=True, help='whether save the trained model')
-    parser.add_argument('--train', type=str2bool, default=True,
+                        default=None, help='whether save the trained model (otherwise use config)')
+    parser.add_argument('--train', type=str2bool, default=None,
                         help='whether re-train model if the model is \
                              trained before')
     parser.add_argument('--params_file', type=str,

@@ -1,3 +1,4 @@
+from libcity.utils.training import SampleWeightedMean
 import time
 import numpy as np
 import torch
@@ -43,13 +44,13 @@ class ASTGNNExecutor(TrafficStateExecutor):
         with torch.no_grad():
             self.model.eval()
             loss_func = self.model.calculate_val_loss
-            losses = []
+            losses = SampleWeightedMean()
             for batch in eval_dataloader:
                 batch.to_tensor(self.device)
                 loss = loss_func(batch)
                 self._logger.debug(loss.item())
-                losses.append(loss.item())
-            mean_loss = np.mean(losses)
+                losses.update(loss, batch)
+            mean_loss = losses.mean()
             self._writer.add_scalar('eval loss', mean_loss, epoch_idx)
             return mean_loss
         

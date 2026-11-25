@@ -1,3 +1,4 @@
+from libcity.utils.training import SampleWeightedMean
 import os
 import time
 import numpy as np
@@ -401,17 +402,12 @@ class TrafficStateExecutor(AbstractExecutor):
         with torch.no_grad():
             self.model.eval()
             loss_func = loss_func if loss_func is not None else self.model.calculate_loss
-            total_loss = 0.0
-            num_samples = 0
+            losses = SampleWeightedMean()
             for batch in eval_dataloader:
                 batch.to_tensor(self.device)
                 loss = loss_func(batch)
                 self._logger.debug(loss.item())
-                batch_size = len(next(iter(batch.data.values())))
-                total_loss += loss.item() * batch_size
-                num_samples += batch_size
-            if not num_samples:
-                raise ValueError('Validation data must contain at least one sample.')
-            mean_loss = total_loss / num_samples
+                losses.update(loss, batch)
+            mean_loss = losses.mean()
             self._writer.add_scalar('eval loss', mean_loss, epoch_idx)
             return mean_loss

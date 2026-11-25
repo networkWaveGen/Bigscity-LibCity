@@ -1,4 +1,3 @@
-import os
 from libcity.data.dataset.traffic_state_point_dataset import TrafficStatePointDataset
 from sklearn.cluster import SpectralClustering
 import torch
@@ -9,8 +8,7 @@ class HGCNDataset(TrafficStatePointDataset):
 
     def __init__(self, config):
         super().__init__(config)
-        self.cache_file_name = os.path.join('./libcity/cache/dataset_cache/',
-                                            'point_based_{}.npz'.format(self.parameters_str))
+        self.cache_file_name = self._get_cache_file_name('point_based')
 
         # 聚类中心（区域）的个数
         self.cluster_nodes = self.config.get('cluster_nodes', 40)

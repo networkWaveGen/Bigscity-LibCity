@@ -17,8 +17,7 @@ class STResNetDataset(TrafficStateGridDataset, TrafficStateCPTDataset):
             self.parameters_str + '_' + str(self.len_closeness) \
             + '_' + str(self.len_period) + '_' + str(self.len_trend) \
             + '_' + str(self.interval_period) + '_' + str(self.interval_trend)
-        self.cache_file_name = os.path.join('./libcity/cache/dataset_cache/',
-                                            'grid_based_{}.npz'.format(self.parameters_str))
+        self.cache_file_name = self._get_cache_file_name('grid_based')
         self.pad_forward_period = 0
         self.pad_back_period = 0
         self.pad_forward_trend = 0

@@ -7,7 +7,7 @@ from libcity.utils.experiment import get_logger, set_random_seed
 
 
 def run_model(task=None, model_name=None, dataset_name=None, config_file=None,
-              saved_model=True, train=True, other_args=None):
+              saved_model=None, train=None, other_args=None):
     """
     Args:
         task(str): task name
@@ -64,9 +64,11 @@ def run_model(task=None, model_name=None, dataset_name=None, config_file=None,
 
 
 def objective_function(task=None, model_name=None, dataset_name=None, config_file=None,
-                       saved_model=True, train=True, other_args=None, hyper_config_dict=None):
+                       saved_model=None, train=None, other_args=None, hyper_config_dict=None):
     config = ConfigParser(task, model_name, dataset_name,
                           config_file, saved_model, train, other_args, hyper_config_dict)
+    if not config['train']:
+        raise ValueError('Hyperparameter trials require train=true; use run_model for evaluation-only runs.')
     dataset = get_dataset(config)
     train_data, valid_data, test_data = dataset.get_data()
     data_feature = dataset.get_data_feature()

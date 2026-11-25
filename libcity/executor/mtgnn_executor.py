@@ -1,3 +1,4 @@
+from libcity.utils.training import SampleWeightedMean
 import time
 import numpy as np
 import torch
@@ -217,12 +218,12 @@ class MTGNNExecutor(TrafficStateExecutor):
         with torch.no_grad():
             self.model.eval()
             loss_func = loss_func if loss_func is not None else self.model.calculate_loss
-            losses = []
+            losses = SampleWeightedMean()
             for batch in eval_dataloader:
                 batch.to_tensor(self.device)
                 loss = loss_func(batch)
                 self._logger.debug(loss.item())
-                losses.append(loss.item())
-            mean_loss = np.mean(losses)
+                losses.update(loss, batch)
+            mean_loss = losses.mean()
             self._writer.add_scalar('eval loss', mean_loss, batches_seen)
             return mean_loss

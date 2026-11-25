@@ -1,0 +1,567 @@
+{
+  "date": "2026-11-25",
+  "base_commit": "4a2002cf99b5f0ce2b6daa1f6f4cb107359f46eb",
+  "amended_original_commit": "829be26ff7ce722412918c8fe8e91e4c82b19c1e",
+  "scope": "Amend the original tip with the existing changes and three additional fixes; preserve its parent and earlier commits.",
+  "command": "python -B -m pytest tests -q --maxfail=3 --basetemp ../.runtime-tests/amend-cache-eta-scalers --junitxml ../.runtime-tests/amend-cache-eta-scalers.xml",
+  "total": 129,
+  "passed": 129,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "pytest_reported_seconds": 17.48,
+  "junit_suite_seconds": 17.476,
+  "additional_regression_cases": 27,
+  "module_counts": {
+    "tests.test_cache_eta_scalers": 27,
+    "tests.test_checkpoint_resume": 10,
+    "tests.test_component_entrypoints": 10,
+    "tests.test_followup_regressions": 32,
+    "tests.test_modern_core": 24,
+    "tests.test_runtime_regressions": 26
+  },
+  "environment": {
+    "python": "3.12.13",
+    "torch": "2.15.0+cpu",
+    "numpy": "2.5.5",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "cuda_available": false
+  },
+  "coverage": [
+    "Real geo/dyna reads: distinct columns and source files use distinct cache paths; matching configurations reuse caches",
+    "Missing or mismatched common npz cache metadata triggers regeneration; legacy cache remains intact",
+    "Real ETAExecutor and ETAEvaluator preserve repeated-user trajectories within and across batches",
+    "Four scalers, NumPy and Torch inputs, zero and nonzero scales, inverse round trips and finite gradients",
+    "Constant input through real dataset preprocessing remains finite in all splits",
+    "All previous 102 checks pass with the updated cache fixture metadata"
+  ],
+  "warnings": [
+    "Existing invalid escape sequence in a dataset docstring",
+    "Existing RGSL small fixture zero-element tensor initialization warning"
+  ],
+  "limits": [
+    "Windows CPU, synthetic fixtures only; no actual CUDA, Linux or real traffic benchmark accuracy comparison",
+    "Configuration JSON is hashed only to name cache files; no source or data file content hashing",
+    "Input files changed in place still require an explicit cache refresh",
+    "Non-traffic-state and independent auxiliary cache systems are outside this cache change",
+    "Repeated-experiment logging issue remains deferred per user scope"
+  ],
+  "tests": [
+    {
+      "test": "tests.test_cache_eta_scalers::test_cache_separates_selected_columns_and_source_files[selection0-109.0]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_cache_eta_scalers::test_cache_separates_selected_columns_and_source_files[selection1-209.0]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_cache_eta_scalers::test_cache_rebuilds_missing_or_mismatched_metadata[missing]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_cache_eta_scalers::test_cache_rebuilds_missing_or_mismatched_metadata[mismatched]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_cache_eta_scalers::test_legacy_cache_is_preserved_and_not_reused",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_cache_eta_scalers::test_eta_export_keeps_all_trajectories_for_repeated_users[1]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_cache_eta_scalers::test_eta_export_keeps_all_trajectories_for_repeated_users[2]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_cache_eta_scalers::test_scaler_finite_roundtrip_and_nonconstant_behavior[numpy-False-normal]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_cache_eta_scalers::test_scaler_finite_roundtrip_and_nonconstant_behavior[numpy-False-standard]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_cache_eta_scalers::test_scaler_finite_roundtrip_and_nonconstant_behavior[numpy-False-minmax01]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_cache_eta_scalers::test_scaler_finite_roundtrip_and_nonconstant_behavior[numpy-False-minmax11]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_cache_eta_scalers::test_scaler_finite_roundtrip_and_nonconstant_behavior[numpy-True-normal]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_cache_eta_scalers::test_scaler_finite_roundtrip_and_nonconstant_behavior[numpy-True-standard]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_cache_eta_scalers::test_scaler_finite_roundtrip_and_nonconstant_behavior[numpy-True-minmax01]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_cache_eta_scalers::test_scaler_finite_roundtrip_and_nonconstant_behavior[numpy-True-minmax11]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_cache_eta_scalers::test_scaler_finite_roundtrip_and_nonconstant_behavior[torch-False-normal]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_cache_eta_scalers::test_scaler_finite_roundtrip_and_nonconstant_behavior[torch-False-standard]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_cache_eta_scalers::test_scaler_finite_roundtrip_and_nonconstant_behavior[torch-False-minmax01]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_cache_eta_scalers::test_scaler_finite_roundtrip_and_nonconstant_behavior[torch-False-minmax11]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_cache_eta_scalers::test_scaler_finite_roundtrip_and_nonconstant_behavior[torch-True-normal]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_cache_eta_scalers::test_scaler_finite_roundtrip_and_nonconstant_behavior[torch-True-standard]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_cache_eta_scalers::test_scaler_finite_roundtrip_and_nonconstant_behavior[torch-True-minmax01]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_cache_eta_scalers::test_scaler_finite_roundtrip_and_nonconstant_behavior[torch-True-minmax11]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_cache_eta_scalers::test_constant_data_is_finite_through_real_dataset[normal]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_cache_eta_scalers::test_constant_data_is_finite_through_real_dataset[standard]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_cache_eta_scalers::test_constant_data_is_finite_through_real_dataset[minmax01]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_cache_eta_scalers::test_constant_data_is_finite_through_real_dataset[minmax11]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_checkpoint_resume::test_adam_resume_matches_uninterrupted_next_step[traffic]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_checkpoint_resume::test_adam_resume_matches_uninterrupted_next_step[trajectory]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_checkpoint_resume::test_adam_resume_matches_uninterrupted_next_step[epoch]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_checkpoint_resume::test_device_forwarding_and_weights_only_default",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_checkpoint_resume::test_model_only_checkpoint_cannot_silently_reset_optimizer",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_checkpoint_resume::test_checkpoint_migration_keeps_values_and_optimizer[pair]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_checkpoint_resume::test_checkpoint_migration_keeps_values_and_optimizer[epoch]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_checkpoint_resume::test_checkpoint_migration_keeps_values_and_optimizer[state_dict]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_checkpoint_resume::test_checkpoint_migration_keeps_values_and_optimizer[weights]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_checkpoint_resume::test_checkpoint_migration_keeps_values_and_optimizer[object]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_component_entrypoints::test_real_model_executor_and_evaluator_factories[traffic_state_pred-GRU]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_component_entrypoints::test_real_model_executor_and_evaluator_factories[traj_loc_pred-GRU]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_component_entrypoints::test_real_model_executor_and_evaluator_factories[eta-DeepTTE]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_component_entrypoints::test_real_model_executor_and_evaluator_factories[map_matching-HMMM]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_component_entrypoints::test_real_model_executor_and_evaluator_factories[road_representation-LINE]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_component_entrypoints::test_real_dataset_and_encoder_factories[traj_loc_pred-GRU]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_component_entrypoints::test_real_dataset_and_encoder_factories[eta-DeepTTE]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_component_entrypoints::test_trajectory_gru_forward_and_backward",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_component_entrypoints::test_eta_deeptte_forward_and_backward",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_component_entrypoints::test_road_line_loss_and_backward",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_followup_regressions::test_cstn_actual_batch_size_and_gradient[1]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_followup_regressions::test_cstn_actual_batch_size_and_gradient[2]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_followup_regressions::test_cstn_actual_batch_size_and_gradient[3]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_followup_regressions::test_all_batched_validation_overrides_account_for_real_samples[False-traffic_state_executor-TrafficStateExecutor]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_followup_regressions::test_all_batched_validation_overrides_account_for_real_samples[False-dcrnn_executor-DCRNNExecutor]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_followup_regressions::test_all_batched_validation_overrides_account_for_real_samples[False-mtgnn_executor-MTGNNExecutor]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_followup_regressions::test_all_batched_validation_overrides_account_for_real_samples[False-pdformer_executor-PDFormerExecutor]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_followup_regressions::test_all_batched_validation_overrides_account_for_real_samples[False-astgnn_executor-ASTGNNExecutor]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_followup_regressions::test_all_batched_validation_overrides_account_for_real_samples[False-sstban_executor-SSTBANExecutor]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_followup_regressions::test_all_batched_validation_overrides_account_for_real_samples[False-fogs_executor-FOGSExecutor]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_followup_regressions::test_all_batched_validation_overrides_account_for_real_samples[True-traffic_state_executor-TrafficStateExecutor]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_followup_regressions::test_all_batched_validation_overrides_account_for_real_samples[True-dcrnn_executor-DCRNNExecutor]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_followup_regressions::test_all_batched_validation_overrides_account_for_real_samples[True-mtgnn_executor-MTGNNExecutor]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_followup_regressions::test_all_batched_validation_overrides_account_for_real_samples[True-pdformer_executor-PDFormerExecutor]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_followup_regressions::test_all_batched_validation_overrides_account_for_real_samples[True-astgnn_executor-ASTGNNExecutor]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_followup_regressions::test_all_batched_validation_overrides_account_for_real_samples[True-sstban_executor-SSTBANExecutor]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_followup_regressions::test_all_batched_validation_overrides_account_for_real_samples[True-fogs_executor-FOGSExecutor]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_followup_regressions::test_real_config_json_flags_and_explicit_overrides[json_flags0-explicit0-extra0-expected0]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_followup_regressions::test_real_config_json_flags_and_explicit_overrides[json_flags1-explicit1-extra1-expected1]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_followup_regressions::test_real_config_json_flags_and_explicit_overrides[json_flags2-explicit2-extra2-expected2]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_followup_regressions::test_real_config_json_flags_and_explicit_overrides[json_flags3-explicit3-extra3-expected3]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_followup_regressions::test_real_config_json_flags_and_explicit_overrides[json_flags4-explicit4-extra4-expected4]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_followup_regressions::test_real_cli_leaves_omitted_flags_to_json[arguments0]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_followup_regressions::test_real_cli_leaves_omitted_flags_to_json[arguments1]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_followup_regressions::test_json_evaluation_mode_does_not_start_data_preparation",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_followup_regressions::test_search_objective_rejects_disabled_training",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_followup_regressions::test_real_dataset_get_data_twice_preserves_loaders_values_and_scaler[False]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_followup_regressions::test_real_dataset_get_data_twice_preserves_loaders_values_and_scaler[True]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_followup_regressions::test_trajectory_best_model_optimizer_scheduler_and_export_agree[False]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_followup_regressions::test_trajectory_best_model_optimizer_scheduler_and_export_agree[True]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_followup_regressions::test_trajectory_sample_mode_tail_has_matching_targets[validation]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_followup_regressions::test_trajectory_sample_mode_tail_has_matching_targets[evaluation]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_modern_core::test_core_imports_do_not_load_optional_stacks",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_modern_core::test_dense_batch_values_and_source_ownership[False]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_modern_core::test_dense_batch_values_and_source_ownership[True]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_modern_core::test_padding_and_ragged_fields_do_not_mutate_samples",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_modern_core::test_padded_loader_keeps_batch_type_without_padding_fields",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_modern_core::test_padded_collator_rejects_extra_sample_fields",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_modern_core::test_loader_works_with_spawn_worker",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_modern_core::test_last_sample_padding_handles_different_input_and_target_shapes",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_modern_core::test_cpu_device_selection[False]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_modern_core::test_cpu_device_selection[True]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_modern_core::test_config_name_preserves_dotted_stem",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_modern_core::test_packaged_defaults_and_explicit_json_path",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_modern_core::test_factory_does_not_hide_constructor_errors",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_modern_core::test_forecast_forward_backward_and_checkpoint[GRU]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_modern_core::test_forecast_forward_backward_and_checkpoint[STGCN]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_modern_core::test_stnn_forecasts_on_cpu[None]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_modern_core::test_stnn_forecasts_on_cpu[refine]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_modern_core::test_stnn_forecasts_on_cpu[discover]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_modern_core::test_dsan_forecasts_and_trains_on_cpu",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_modern_core::test_evaluation_preserves_global_metrics_and_prediction_archive[False-single]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_modern_core::test_evaluation_preserves_global_metrics_and_prediction_archive[False-average]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_modern_core::test_evaluation_preserves_global_metrics_and_prediction_archive[True-single]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_modern_core::test_evaluation_preserves_global_metrics_and_prediction_archive[True-average]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_modern_core::test_atomic_files_to_training_and_evaluation",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_runtime_regressions::test_evaluation_and_validation_use_only_real_samples[False]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_runtime_regressions::test_evaluation_and_validation_use_only_real_samples[True]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_runtime_regressions::test_no_disk_save_restores_best_model_and_nonempty_adam",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_runtime_regressions::test_cpu_snapshot_owns_optimizer_tensors_and_state_metadata",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_runtime_regressions::test_invalid_or_empty_splits_fail_before_caching[0.7-0.1-2]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_runtime_regressions::test_invalid_or_empty_splits_fail_before_caching[1.0-0.0-10]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_runtime_regressions::test_invalid_or_empty_splits_fail_before_caching[0.9-0.2-10]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_runtime_regressions::test_invalid_or_empty_splits_fail_before_caching[-0.1-0.2-10]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_runtime_regressions::test_invalid_or_empty_splits_fail_before_caching[nan-0.2-10]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_runtime_regressions::test_invalid_or_empty_splits_fail_before_caching[0.7-0.0-10]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_runtime_regressions::test_time_splits_are_nonempty_ordered_and_disjoint",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_runtime_regressions::test_explicit_arguments_override_search_but_search_overrides_json_defaults[external0]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_runtime_regressions::test_explicit_arguments_override_search_but_search_overrides_json_defaults[external1]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_runtime_regressions::test_pipeline_uses_resolved_mode_and_never_silently_trains[False-False-traffic_state_pred]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_runtime_regressions::test_pipeline_uses_resolved_mode_and_never_silently_trains[False-True-traffic_state_pred]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_runtime_regressions::test_pipeline_uses_resolved_mode_and_never_silently_trains[True-False-traffic_state_pred]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_runtime_regressions::test_pipeline_uses_resolved_mode_and_never_silently_trains[False-False-map_matching]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_runtime_regressions::test_convolution_recurrent_states_follow_cpu_and_dtype[False-ACFM]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_runtime_regressions::test_convolution_recurrent_states_follow_cpu_and_dtype[False-ACFMCommon]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_runtime_regressions::test_convolution_recurrent_states_follow_cpu_and_dtype[True-ACFM]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_runtime_regressions::test_convolution_recurrent_states_follow_cpu_and_dtype[True-ACFMCommon]",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_runtime_regressions::test_dstagnn_constructs_forecasts_and_backpropagates_on_cpu",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_runtime_regressions::test_stssl_temporal_loss_accepts_real_short_cpu_batch",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_runtime_regressions::test_stssl_graph_is_a_device_following_nonpersistent_buffer",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_runtime_regressions::test_sstban_temporal_embedding_and_masked_attention_stay_on_cpu",
+      "status": "passed"
+    },
+    {
+      "test": "tests.test_runtime_regressions::test_rgsl_graph_forecast_and_gradient_on_cpu",
+      "status": "passed"
+    }
+  ]
+}
