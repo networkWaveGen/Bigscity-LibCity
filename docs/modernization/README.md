@@ -93,6 +93,11 @@ checks run after a coherent batch; forward/backward and training checks are
 collected after the main changes. Model compatibility status distinguishes
 static registration, import, construction and actual execution.
 
+Test shared behavior once at its common entry point. Where a model, dataset, or
+executor overrides that behavior, exercise a representative override with the
+same assertions. The traffic split regression covers both the common dataset
+and CRANN's separate split for temporal, spatial, and external inputs.
+
 Deferred work includes TorchText replacement, tuning-backend replacement,
 AgentCity integration, a new result API, broad path/config redesign, memory
 mapping, rewritten window sampling and compiler/distributed-training changes.

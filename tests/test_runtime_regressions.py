@@ -10,6 +10,7 @@ import pytest
 import torch
 
 from libcity.config.config_parser import ConfigParser
+from libcity.data.dataset.dataset_subclass.crann_dataset import CRANNDataset
 from libcity.data.dataset.traffic_state_datatset import TrafficStateDataset
 from libcity.data.utils import generate_dataloader
 from libcity.executor.chebconv_executor import ChebConvExecutor
@@ -124,29 +125,42 @@ def test_cpu_snapshot_owns_optimizer_tensors_and_state_metadata():
     assert all(tensor.device.type == 'cpu' for tensor in saved.values())
 
 
-@pytest.mark.parametrize(('train_rate', 'eval_rate', 'count'), [
-    (.7, .1, 2), (1., 0., 10), (.9, .2, 10), (-.1, .2, 10),
-    (float('nan'), .2, 10), (.7, 0., 10),
+@pytest.mark.parametrize(('train_rate', 'eval_rate'), [
+    (1., 0.), (.9, .2), (-.1, .2), (float('nan'), .2), (.7, 0.),
 ])
-def test_invalid_or_empty_splits_fail_before_caching(train_rate, eval_rate, count):
+def test_invalid_split_ratios_fail(train_rate, eval_rate):
     dataset = object.__new__(TrafficStateDataset)
     dataset.train_rate, dataset.eval_rate = train_rate, eval_rate
     dataset.cache_dataset = False
-    data = np.arange(count).reshape(count, 1, 1, 1)
+    data = np.arange(10).reshape(10, 1, 1, 1)
     with pytest.raises(ValueError, match='train_rate|empty'):
         dataset._split_train_val_test(data, data.copy())
 
 
-def test_time_splits_are_nonempty_ordered_and_disjoint():
-    dataset = object.__new__(TrafficStateDataset)
+@pytest.mark.parametrize(('dataset_class', 'field_count'), [
+    (TrafficStateDataset, 2),
+    (CRANNDataset, 4),
+])
+def test_time_splits_reject_empty_test_and_keep_fields_aligned(dataset_class, field_count, tmp_path):
+    dataset = object.__new__(dataset_class)
     dataset.train_rate, dataset.eval_rate = .6, .2
-    dataset.cache_dataset = False
     dataset._logger = logging.getLogger(__name__)
+    dataset.cache_dataset = True
+    cache_file = tmp_path / 'split.npz'
+    dataset.cache_file_folder = tmp_path
+    dataset.cache_file_name = str(cache_file)
     data = np.arange(10).reshape(10, 1, 1, 1)
-    train, _, valid, _, test, _ = dataset._split_train_val_test(data, data.copy())
-    assert train.reshape(-1).tolist() == list(range(6))
-    assert valid.reshape(-1).tolist() == [6, 7]
-    assert test.reshape(-1).tolist() == [8, 9]
+    fields = [data + 100 * index for index in range(field_count)]
+
+    with pytest.raises(ValueError, match='empty train/validation/test splits'):
+        dataset._split_train_val_test(*(field[:2] for field in fields))
+    assert not cache_file.exists()
+
+    actual = dataset._split_train_val_test(*fields)
+    assert cache_file.is_file()
+    expected = [field[start:stop] for start, stop in ((0, 6), (6, 8), (8, 10)) for field in fields]
+    for result, wanted in zip(actual, expected, strict=True):
+        np.testing.assert_array_equal(result, wanted)
 
 
 @pytest.mark.parametrize('external', [{}, {'learning_rate': .1}])
