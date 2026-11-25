@@ -27,10 +27,9 @@ class ConfigParser(object):
         # None means the caller did not explicitly choose a mode. Defaults are
         # filled only after user JSON and component/data configurations are read.
         for name in ('train', 'saved_model'):
-            value = self.config.get(name)
-            if value is None:
+            if name not in self.config:
                 self.config[name] = True
-            elif not isinstance(value, bool):
+            elif not isinstance(self.config[name], bool):
                 raise TypeError(f'{name} must be a JSON boolean or an explicit boolean argument.')
         if self.config['task'] == 'map_matching':
             self.config['train'] = False
