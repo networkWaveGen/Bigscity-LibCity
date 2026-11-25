@@ -322,7 +322,7 @@ class PDFormerExecutor(TrafficStateExecutor):
         self._logger.info('Start training ...')
         min_val_loss = float('inf')
         wait = 0
-        best_epoch = 0
+        best_epoch = None
         train_time = []
         eval_time = []
         num_batches = len(train_dataloader)
@@ -367,7 +367,7 @@ class PDFormerExecutor(TrafficStateExecutor):
                     self.save_model(path)
                 tune.report(loss=val_loss)
 
-            if val_loss < min_val_loss:
+            if float('-inf') < val_loss < min_val_loss:
                 wait = 0
                 if self.saved or self.load_best_epoch:
                     model_file_name = self.save_model_with_epoch(epoch_idx)

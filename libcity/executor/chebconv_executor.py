@@ -39,7 +39,8 @@ class ChebConvExecutor(TrafficStateExecutor):
         self._logger.info('Start training ...')
         min_val_loss = float('inf')
         wait = 0
-        best_epoch = 0
+        best_epoch = None
+        saved_checkpoints = []
         train_time = []
         eval_time = []
 
@@ -78,10 +79,12 @@ class ChebConvExecutor(TrafficStateExecutor):
                 # ray tune use loss to determine which params are best
                 tune.report(loss=val_loss)
 
-            if val_loss < min_val_loss:
+            if float('-inf') < val_loss < min_val_loss:
                 wait = 0
                 if self.saved or self.load_best_epoch:
                     model_file_name = self.save_model_with_epoch(epoch_idx)
+                    if self.saved:
+                        saved_checkpoints.append(model_file_name)
                     self._logger.info('Val loss decrease from {:.4f} to {:.4f}, '
                                       'saving to {}'.format(min_val_loss, val_loss, model_file_name))
                 min_val_loss = val_loss
@@ -98,10 +101,8 @@ class ChebConvExecutor(TrafficStateExecutor):
                                      sum(eval_time) / len(eval_time)))
         if self.load_best_epoch:
             self.load_model_with_epoch(best_epoch)
-            save_list = os.listdir(self.cache_dir)
-            for save_file in save_list:
-                if '.tar' in save_file:
-                    os.remove(self.cache_dir + '/' + save_file)
+            for checkpoint in saved_checkpoints:
+                os.remove(checkpoint)
         return min_val_loss
 
     def _train_epoch(self, train_dataloader, epoch_idx, loss_func=None):

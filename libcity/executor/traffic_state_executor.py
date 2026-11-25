@@ -127,6 +127,8 @@ class TrafficStateExecutor(AbstractExecutor):
         Args:
             epoch(int): 轮数
         """
+        if epoch is None:
+            raise ValueError('No epoch with finite validation loss is available to restore.')
         memory = getattr(self, '_memory_checkpoint', None)
         if memory is not None and memory[0] == epoch:
             self.model.load_state_dict(memory[1])
@@ -297,7 +299,7 @@ class TrafficStateExecutor(AbstractExecutor):
         self._logger.info('Start training ...')
         min_val_loss = float('inf')
         wait = 0
-        best_epoch = 0
+        best_epoch = None
         train_time = []
         eval_time = []
         num_batches = len(train_dataloader)
@@ -338,7 +340,7 @@ class TrafficStateExecutor(AbstractExecutor):
                 # ray tune use loss to determine which params are best
                 tune.report(loss=val_loss)
 
-            if val_loss < min_val_loss:
+            if float('-inf') < val_loss < min_val_loss:
                 wait = 0
                 if self.saved or self.load_best_epoch:
                     model_file_name = self.save_model_with_epoch(epoch_idx)

@@ -12,6 +12,7 @@ import torch
 from libcity.config.config_parser import ConfigParser
 from libcity.data.dataset.traffic_state_datatset import TrafficStateDataset
 from libcity.data.utils import generate_dataloader
+from libcity.executor.chebconv_executor import ChebConvExecutor
 from libcity.executor.traffic_state_executor import TrafficStateExecutor
 from libcity.utils.checkpoint import copy_state_to_cpu
 from libcity.utils.normalization import NoneScaler
@@ -38,14 +39,14 @@ class Forecast(torch.nn.Module):
         return (self.predict(batch) - batch['y']).abs().mean()
 
 
-def executor(**overrides):
+def executor(executor_class=TrafficStateExecutor, **overrides):
     config = dict(evaluator='TrafficStateEvaluator', metrics=['MAE'],
                   evaluator_mode='single', save_mode=['csv'], device=torch.device('cpu'),
                   exp_id=1, model='Forecast', dataset='fixture', max_epoch=2,
                   learning_rate=0.1, saved_model=False, load_best_epoch=True,
                   save_predictions=True)
     config.update(overrides)
-    return TrafficStateExecutor(config, Forecast(), {'scaler': NoneScaler()})
+    return executor_class(config, Forecast(), {'scaler': NoneScaler()})
 
 
 def samples():
@@ -93,6 +94,20 @@ def test_no_disk_save_restores_best_model_and_nonempty_adam(tmp_path):
                 torch.testing.assert_close(restored[key][field], states[0][1]['state'][key][field])
         assert not list((tmp_path / 'libcity/cache/1/model_cache').iterdir())
         assert states[0][0]['weight'].item() != states[1][0]['weight'].item()
+    finally:
+        runner._writer.close()
+
+
+def test_chebconv_without_disk_save_keeps_existing_checkpoint(tmp_path):
+    runner = executor(ChebConvExecutor, max_epoch=1)
+    checkpoint = tmp_path / runner.cache_dir / 'previous-run.tar'
+    checkpoint.write_bytes(b'previous checkpoint')
+    runner._train_epoch = lambda *_: 0.
+    runner._valid_epoch = lambda *_: 0.1
+    try:
+        runner.train([], [])
+        assert list(checkpoint.parent.iterdir()) == [checkpoint]
+        assert checkpoint.read_bytes() == b'previous checkpoint'
     finally:
         runner._writer.close()
 
