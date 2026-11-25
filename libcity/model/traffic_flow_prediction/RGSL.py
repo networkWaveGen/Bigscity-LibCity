@@ -568,7 +568,7 @@ class RGSL(AbstractTrafficStateModel):
             adj = gumbel_softmax(learned_graph, tau=1, hard=True)
         adj = adj[:, :, 0].clone().reshape(node_num, -1)
         # mask = torch.eye(self.num_nodes, self.num_nodes).to(device).byte()
-        mask = torch.eye(node_num, node_num).bool().cuda()
+        mask = torch.eye(node_num, dtype=torch.bool, device=node_embeddings.device)
         adj.masked_fill_(mask, 0)
 
         # d ->  diagonal degree matrix
@@ -585,7 +585,7 @@ class RGSL(AbstractTrafficStateModel):
             lambda_max = 1.0
 
         # pesudo laplacian matrix, lambda_max = eigs(L.cpu().detach().numpy(), k=1, which='LR')[0][0].real
-        tilde = (2 * L / lambda_max - torch.eye(n).cuda())
+        tilde = 2 * L / lambda_max - torch.eye(n, dtype=L.dtype, device=L.device)
         self.adj = adj
         self.tilde = tilde
         return adj, tilde

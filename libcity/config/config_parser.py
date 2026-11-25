@@ -9,7 +9,7 @@ class ConfigParser(object):
     use to parse the user defined parameters and use these to modify the
     pipeline's parameter setting.
     值得注意的是，目前各阶段的参数是放置于同一个 dict 中的，因此需要编程时保证命名空间不冲突。
-    config 优先级：命令行 > config file > default config
+    config 优先级：命令行/other_args > 调参参数 > config file > default config
     """
 
     def __init__(self, task, model, dataset, config_file=None,
@@ -40,14 +40,13 @@ class ConfigParser(object):
         self.config['dataset'] = dataset
         self.config['saved_model'] = saved_model
         self.config['train'] = False if task == 'map_matching' else train
-        if other_args is not None:
-            # TODO: 这里可以设计加入参数检查，哪些参数是允许用户通过命令行修改的
-            for key in other_args:
-                self.config[key] = other_args[key]
         if hyper_config_dict is not None:
             # 超参数调整时传入的待调整的参数，优先级低于命令行参数
             for key in hyper_config_dict:
                 self.config[key] = hyper_config_dict[key]
+        if other_args is not None:
+            for key in other_args:
+                self.config[key] = other_args[key]
 
     def _parse_config_file(self, config_file):
         if config_file is not None:

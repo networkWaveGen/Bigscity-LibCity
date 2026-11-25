@@ -7,6 +7,10 @@ Existing model names continue to work in experiment configuration. Python
 callers should import components from their implementation modules.
 AgentCity is outside this change.
 
+The follow-up [runtime fixes](runtime-fixes_zh.md) address evaluation sample
+accounting, checkpoint/mode controls and CPU placement. That work has its own
+70-case validation record; the earlier audit reports below remain archived.
+
 ## Core installation
 
 Use Python 3.12 for the primary development environment; Python 3.11 is also

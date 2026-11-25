@@ -98,11 +98,7 @@ class STEmbedding(nn.Module):
         TE = torch.cat((dayofweek, timeofday), dim=-1)
         TE = TE.unsqueeze(dim=2)
         # print("TE: ", TE)
-        if self.gpu:
-            if self.gpu == 1:
-                TE = TE.cuda()
-            else:
-                TE = TE.to(device)
+        TE = TE.to(SE.device)
         TE = self.FC_te(TE)
         del dayofweek, timeofday
         return SE + TE
@@ -151,10 +147,10 @@ class MAB(nn.Module):
                 value = value.permute(0, 2, 1, 3)
                 mask = mask.permute(0, 2, 1, 3)
             if mask.shape == query.shape:
-                set_mask = torch.ones_like(key).cuda()
+                set_mask = torch.ones_like(key)
                 mask = torch.matmul(mask, set_mask.transpose(2, 3))
             elif mask.shape == key.shape:
-                set_mask = torch.ones_like(query).cuda()
+                set_mask = torch.ones_like(query)
                 mask = torch.matmul(set_mask, mask.transpose(2, 3))
             attention = torch.matmul(query, key.transpose(2, 3))
             attention /= (self.d ** 0.5)
@@ -258,7 +254,7 @@ class STAttBlock_self(nn.Module):
 
     def forward(self, X, STE, mask):
         if mask != None:
-            zero_shape = torch.zeros_like(X).cuda()
+            zero_shape = torch.zeros_like(X)
             mask_value = zero_shape + self.mask_token
             X = mask * X + (1 - mask) * mask_value
         HS = self.spatialAttention(X, STE, mask)
@@ -403,8 +399,8 @@ class SSTBAN(AbstractTrafficStateModel):
 
             batch_mask_matrix = np.random.rand(X.shape[0], int(X.shape[1] / T_miss_len), X.shape[2],
                                                X.shape[3]) < self.node_miss_rate
-            batch_mask_matrix = torch.from_numpy(np.repeat(batch_mask_matrix, T_miss_len, axis=1)).to(
-                torch.float32).cuda()
+            batch_mask_matrix = torch.as_tensor(
+                np.repeat(batch_mask_matrix, T_miss_len, axis=1), dtype=X.dtype, device=X.device)
             X_miss = X
             # encoder
             for net in self.STAttBlock_1:

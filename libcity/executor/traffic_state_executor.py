@@ -8,7 +8,7 @@ from libcity.executor.abstract_executor import AbstractExecutor
 from libcity.registry import get_evaluator
 from libcity.utils.filesystem import ensure_dir
 from libcity.model import loss
-from libcity.utils.checkpoint import restore_checkpoint
+from libcity.utils.checkpoint import copy_state_to_cpu, restore_checkpoint
 from functools import partial
 
 
@@ -104,6 +104,11 @@ class TrafficStateExecutor(AbstractExecutor):
         Args:
             epoch(int): 轮数
         """
+        if not getattr(self, 'saved', True):
+            self._memory_checkpoint = (
+                epoch, copy_state_to_cpu(self.model.state_dict()),
+                copy_state_to_cpu(self.optimizer.state_dict()))
+            return f'in-memory best checkpoint (epoch {epoch})'
         ensure_dir(self.cache_dir)
         config = dict()
         config['model_state_dict'] = self.model.state_dict()
@@ -121,6 +126,12 @@ class TrafficStateExecutor(AbstractExecutor):
         Args:
             epoch(int): 轮数
         """
+        memory = getattr(self, '_memory_checkpoint', None)
+        if memory is not None and memory[0] == epoch:
+            self.model.load_state_dict(memory[1])
+            self.optimizer.load_state_dict(copy_state_to_cpu(memory[2]))
+            self._logger.info('Loaded in-memory best model at epoch %s', epoch)
+            return
         model_path = self.cache_dir + '/' + self.config['model'] + '_' + self.config['dataset'] + '_epoch%d.tar' % epoch
         assert os.path.exists(model_path), 'Weights at epoch %d not found' % epoch
         restore_checkpoint(model_path, self.model, self.optimizer, self.device)
@@ -328,7 +339,7 @@ class TrafficStateExecutor(AbstractExecutor):
 
             if val_loss < min_val_loss:
                 wait = 0
-                if self.saved:
+                if self.saved or self.load_best_epoch:
                     model_file_name = self.save_model_with_epoch(epoch_idx)
                     self._logger.info('Val loss decrease from {:.4f} to {:.4f}, '
                                       'saving to {}'.format(min_val_loss, val_loss, model_file_name))
@@ -390,12 +401,17 @@ class TrafficStateExecutor(AbstractExecutor):
         with torch.no_grad():
             self.model.eval()
             loss_func = loss_func if loss_func is not None else self.model.calculate_loss
-            losses = []
+            total_loss = 0.0
+            num_samples = 0
             for batch in eval_dataloader:
                 batch.to_tensor(self.device)
                 loss = loss_func(batch)
                 self._logger.debug(loss.item())
-                losses.append(loss.item())
-            mean_loss = np.mean(losses)
+                batch_size = len(next(iter(batch.data.values())))
+                total_loss += loss.item() * batch_size
+                num_samples += batch_size
+            if not num_samples:
+                raise ValueError('Validation data must contain at least one sample.')
+            mean_loss = total_loss / num_samples
             self._writer.add_scalar('eval loss', mean_loss, epoch_idx)
             return mean_loss

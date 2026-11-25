@@ -80,7 +80,7 @@ class ChebConvExecutor(TrafficStateExecutor):
 
             if val_loss < min_val_loss:
                 wait = 0
-                if self.saved:
+                if self.saved or self.load_best_epoch:
                     model_file_name = self.save_model_with_epoch(epoch_idx)
                     self._logger.info('Val loss decrease from {:.4f} to {:.4f}, '
                                       'saving to {}'.format(min_val_loss, val_loss, model_file_name))

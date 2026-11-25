@@ -69,7 +69,8 @@ def generate_dataloader(train_data, eval_data, test_data, feature_name,
         batch_size(int): batch_size
         num_workers(int): num_workers
         shuffle(bool): shuffle
-        pad_with_last_sample(bool): 对于若最后一个 batch 不满足 batch_size的情况，是否进行补齐（使用最后一个元素反复填充补齐）。
+        pad_with_last_sample(bool): Only pad training batches by repeating the last
+            sample. Validation/test keep their real final batch and sample count.
 
     Returns:
         tuple: tuple contains:
@@ -79,8 +80,6 @@ def generate_dataloader(train_data, eval_data, test_data, feature_name,
     """
     if pad_with_last_sample:
         train_data = _pad_with_last_sample(train_data, batch_size)
-        eval_data = _pad_with_last_sample(eval_data, batch_size)
-        test_data = _pad_with_last_sample(test_data, batch_size)
 
     train_dataset = ListDataset(train_data)
     eval_dataset = ListDataset(eval_data)
@@ -93,7 +92,7 @@ def generate_dataloader(train_data, eval_data, test_data, feature_name,
                                   shuffle=shuffle)
     eval_dataloader = DataLoader(dataset=eval_dataset, batch_size=batch_size,
                                  num_workers=num_workers, collate_fn=collator,
-                                 shuffle=shuffle)
+                                 shuffle=False)
     test_dataloader = DataLoader(dataset=test_dataset, batch_size=batch_size,
                                  num_workers=num_workers, collate_fn=collator,
                                  shuffle=False)

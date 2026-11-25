@@ -27,6 +27,15 @@ def run_model(task=None, model_name=None, dataset_name=None, config_file=None,
         # Make a new experiment ID
         exp_id = int(random.SystemRandom().random() * 100000)
         config['exp_id'] = exp_id
+    train = config.get('train', train)
+    saved_model = config.get('saved_model', saved_model)
+    requires_checkpoint = config['task'] != 'map_matching'
+    model_cache_file = './libcity/cache/{}/model_cache/{}_{}.m'.format(
+        exp_id, model_name, dataset_name)
+    if not train and requires_checkpoint and not os.path.isfile(model_cache_file):
+        raise FileNotFoundError(
+            f'Evaluation-only mode requires checkpoint {model_cache_file}. '
+            'Select the matching exp_id or enable training explicitly.')
     # logger
     logger = get_logger(config)
     logger.info('Begin pipeline, task={}, model_name={}, dataset_name={}, exp_id={}'.
@@ -41,16 +50,14 @@ def run_model(task=None, model_name=None, dataset_name=None, config_file=None,
     train_data, valid_data, test_data = dataset.get_data()
     data_feature = dataset.get_data_feature()
     # 加载执行器
-    model_cache_file = './libcity/cache/{}/model_cache/{}_{}.m'.format(
-        exp_id, model_name, dataset_name)
     model = get_model(config, data_feature)
     executor = get_executor(config, model, data_feature)
     # 训练
-    if train or not os.path.exists(model_cache_file):
+    if train:
         executor.train(train_data, valid_data)
         if saved_model:
             executor.save_model(model_cache_file)
-    else:
+    elif requires_checkpoint:
         executor.load_model(model_cache_file)
     # 评估，评估结果将会放在 cache/evaluate_cache 下
     executor.evaluate(test_data)

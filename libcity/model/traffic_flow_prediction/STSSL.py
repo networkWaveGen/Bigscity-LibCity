@@ -205,14 +205,6 @@ class TemporalHeteroModel(nn.Module):
         self.disc = Discriminator(c_in)
         self.b_xent = nn.BCEWithLogitsLoss()
 
-        lbl_rl = torch.ones(batch_size, num_nodes)
-        lbl_fk = torch.zeros(batch_size, num_nodes)
-        lbl = torch.cat((lbl_rl, lbl_fk), dim=1)
-        if device == 'cuda' or device.type == 'cuda':
-            self.lbl = lbl.cuda()
-
-        self.n = batch_size
-
     def forward(self, z1, z2):
         '''
         :param z1, z2 (tensor): shape nlvc, i.e., (batch_size, seq_len, num_nodes, feat_dim)
@@ -222,11 +214,14 @@ class TemporalHeteroModel(nn.Module):
         s = self.read(h)  # s: summary of h, nc
 
         # select another region in batch
-        idx = torch.randperm(self.n)
+        idx = torch.randperm(h.size(0), device=h.device)
         shuf_h = h[idx]
 
         logits = self.disc(s, h, shuf_h)
-        loss = self.b_xent(logits, self.lbl)
+        nodes = h.size(1)
+        labels = torch.cat((torch.ones_like(logits[:, :nodes]),
+                            torch.zeros_like(logits[:, :nodes])), dim=1)
+        loss = self.b_xent(logits, labels)
         return loss
 
 
@@ -546,8 +541,8 @@ class STSSL(AbstractTrafficStateModel):
                                       config.get('batch_size', 32), config.get('shm_temp', 0.5))
         self.mae = lambda x, y: loss.masked_mae_torch(x, y, 0, mask_val=5.001)
 
-        self.graph = torch.from_numpy(self.data_feature.get('adj_mx'))
-        self.graph = self.graph.cuda()
+        self.register_buffer('graph', torch.as_tensor(self.data_feature.get('adj_mx'),
+                             device=config.get('device', 'cpu')), persistent=False)
         self.scaler = self.data_feature.get('scaler')
 
         self.W = self.data_feature.get('len_row')

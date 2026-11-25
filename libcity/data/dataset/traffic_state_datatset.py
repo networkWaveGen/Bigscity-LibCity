@@ -827,18 +827,28 @@ class TrafficStateDataset(AbstractDataset):
                 x_test: (num_samples, input_length, ..., feature_dim) \n
                 y_test: (num_samples, input_length, ..., feature_dim)
         """
+        if (not np.isfinite(self.train_rate) or not np.isfinite(self.eval_rate)
+                or not 0 < self.train_rate < 1 or not 0 < self.eval_rate < 1
+                or self.train_rate + self.eval_rate >= 1):
+            raise ValueError('train_rate and eval_rate must be positive, with their sum below 1.')
         test_rate = 1 - self.train_rate - self.eval_rate
         num_samples = x.shape[0]
         num_test = round(num_samples * test_rate)
         num_train = round(num_samples * self.train_rate)
         num_val = num_samples - num_test - num_train
+        if min(num_train, num_val, num_test) <= 0:
+            raise ValueError(
+                f'{num_samples} window samples produce empty train/validation/test splits '
+                f'({num_train}, {num_val}, {num_test}). Add data, shorten the windows, '
+                'or adjust train_rate/eval_rate.')
 
         # train
         x_train, y_train = x[:num_train], y[:num_train]
         # val
         x_val, y_val = x[num_train: num_train + num_val], y[num_train: num_train + num_val]
         # test
-        x_test, y_test = x[-num_test:], y[-num_test:]
+        test_start = num_train + num_val
+        x_test, y_test = x[test_start:], y[test_start:]
         self._logger.info("train\t" + "x: " + str(x_train.shape) + ", y: " + str(y_train.shape))
         self._logger.info("eval\t" + "x: " + str(x_val.shape) + ", y: " + str(y_val.shape))
         self._logger.info("test\t" + "x: " + str(x_test.shape) + ", y: " + str(y_test.shape))

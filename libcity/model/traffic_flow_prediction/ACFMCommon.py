@@ -84,6 +84,7 @@ class ConvGate(nn.Module):
             self.w = nn.Parameter(torch.Tensor(lstm_channels, height, width))
             self.b = nn.Parameter(torch.Tensor(lstm_channels, 1, 1))
             nn.init.kaiming_normal_(self.w.data, a=0, mode='fan_in')
+            nn.init.zeros_(self.b)
 
     def _linear(self, x):
         return x * self.w + self.b
@@ -189,10 +190,10 @@ class ConvLSTM(nn.Module):
     def lstm_layer(self, inputs):
         n_in, c_in, h_in, w_in = inputs.size()
         if self.gru:
-            state = torch.zeros(n_in, self.lstm_channels, h_in, w_in).cuda()
+            state = inputs.new_zeros(n_in, self.lstm_channels, h_in, w_in)
         else:
-            state = (torch.zeros(n_in, self.lstm_channels, h_in, w_in).cuda(),
-                     torch.zeros(n_in, self.lstm_channels, h_in, w_in).cuda())
+            state = (inputs.new_zeros(n_in, self.lstm_channels, h_in, w_in),
+                     inputs.new_zeros(n_in, self.lstm_channels, h_in, w_in))
         seq = torch.split(inputs, self.in_channels, dim=1)
         hiddent_list = []
         for idx, input in enumerate(seq[::-1]):  # using reverse order

@@ -95,14 +95,16 @@ def test_loader_works_with_spawn_worker():
 
 def test_last_sample_padding_handles_different_input_and_target_shapes():
     samples = [(np.full((4, 2, 1), i), np.full((1, 2, 1), i)) for i in range(3)]
-    _, _, loader = generate_dataloader(samples, samples, samples,
+    loader, valid_loader, test_loader = generate_dataloader(samples, samples, samples,
                                        {'X': 'float', 'y': 'float'}, 2, 0,
-                                       pad_with_last_sample=True)
+                                       shuffle=False, pad_with_last_sample=True)
     batches = list(loader)
     batches[-1].to_tensor('cpu')
     assert batches[-1]['X'].shape == (2, 4, 2, 1)
     assert batches[-1]['y'].shape == (2, 1, 2, 1)
     assert batches[-1]['X'][:, 0, 0, 0].tolist() == [2, 2]
+    assert sum(len(batch['X']) for batch in valid_loader) == 3
+    assert sum(len(batch['X']) for batch in test_loader) == 3
 
 
 @pytest.mark.parametrize('use_gpu', [False, True])
