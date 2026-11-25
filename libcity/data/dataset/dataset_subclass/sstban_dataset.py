@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 
 from libcity.data.dataset.traffic_state_point_dataset import TrafficStatePointDataset
-from libcity.data.utils import generate_dataloader
+from libcity.data.utils import generate_dataloader, split_counts
 from libcity.utils.filesystem import ensure_dir
 
 
@@ -51,19 +51,16 @@ class SSTBANDataset(TrafficStatePointDataset):
         df = []
         for filename in data_files:
             df = super()._load_dyna(filename)
-        test_rate = 1 - self.train_rate - self.eval_rate
-        num_samples = df.shape[0]
-        num_test = round(num_samples * test_rate)
-        num_train = round(num_samples * self.train_rate)
-        num_val = num_samples - num_test - num_train
+        num_train, num_val, _ = split_counts(df.shape[0], self.train_rate, self.eval_rate)
+        test_start = num_train + num_val
 
         train_set = df[:num_train]
         val_set = df[num_train: num_train + num_val]
-        test_set = df[-num_test:]
+        test_set = df[test_start:]
 
         te_train_set = self.timesolts[:num_train]
         te_val_set = self.timesolts[num_train: num_train + num_val]
-        te_test_set = self.timesolts[-num_test:]
+        te_test_set = self.timesolts[test_start:]
         data_sets = {"train": train_set, "val": val_set, "test": test_set}
         te_sets = {"train": te_train_set, "val": te_val_set, "test": te_test_set}
         return data_sets, te_sets

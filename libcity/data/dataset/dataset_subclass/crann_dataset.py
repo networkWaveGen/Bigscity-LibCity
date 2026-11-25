@@ -2,7 +2,7 @@ import os
 import numpy as np
 from libcity.data.dataset.traffic_state_point_dataset import TrafficStatePointDataset
 from libcity.utils.filesystem import ensure_dir
-from libcity.data.utils import generate_dataloader
+from libcity.data.utils import generate_dataloader, split_counts
 
 """
 需要有.ext文件！
@@ -53,11 +53,8 @@ class CRANNDataset(TrafficStatePointDataset):
         return x_time, x_space, x_ext, y_space
 
     def _split_train_val_test(self, x_time, x_space, x_ext, y):
-        test_rate = 1 - self.train_rate - self.eval_rate
-        num_samples = x_time.shape[0]
-        num_test = round(num_samples * test_rate)
-        num_train = round(num_samples * self.train_rate)
-        num_val = num_samples - num_test - num_train
+        num_train, num_val, _ = split_counts(x_time.shape[0], self.train_rate, self.eval_rate)
+        test_start = num_train + num_val
 
         # train
         x_time_train, x_space_train, x_ext_train, y_train = \
@@ -68,7 +65,7 @@ class CRANNDataset(TrafficStatePointDataset):
             x_ext[num_train: num_train + num_val], y[num_train: num_train + num_val]
         # test
         x_time_test, x_space_test, x_ext_test, y_test = \
-            x_time[-num_test:], x_space[-num_test:], x_ext[-num_test:], y[-num_test:]
+            x_time[test_start:], x_space[test_start:], x_ext[test_start:], y[test_start:]
         self._logger.info("train\t" + "x_time: " + str(x_time_train.shape) + ", x_space: " + str(x_space_train.shape)
                           + ", x_ext: " + str(x_ext_train.shape) + ", y: " + str(y_train.shape))
         self._logger.info("eval\t" + "x_time: " + str(x_time_val.shape) + ", x_space: " + str(x_space_val.shape)

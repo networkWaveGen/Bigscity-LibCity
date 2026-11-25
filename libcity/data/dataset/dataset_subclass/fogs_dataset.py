@@ -9,7 +9,7 @@ import torch
 
 from gensim.models import Word2Vec
 from libcity.data.dataset.traffic_state_point_dataset import TrafficStatePointDataset
-from libcity.data.utils import generate_dataloader
+from libcity.data.utils import generate_dataloader, split_counts
 from libcity.utils.normalization import (
     NormalScaler,
     StandardScaler,
@@ -534,10 +534,8 @@ class FOGSDataset(TrafficStatePointDataset):
         pickle_mean_data = np.mean(pickle_mean_data, axis=1)  # (num_nodes, 288)  # 每个结点在288个时间段的均值
 
         # 划分
-        num_samples = x.shape[0]
-        num_test = round(num_samples * (1 - self.train_rate - self.eval_rate))
-        num_train = round(num_samples * self.train_rate)
-        num_val = num_samples - num_train - num_test
+        num_train, num_val, _ = split_counts(x.shape[0], self.train_rate, self.eval_rate)
+        test_start = num_train + num_val
 
         # 训练集
         x_train, y_train = x[:num_train], y[:num_train]
@@ -550,9 +548,9 @@ class FOGSDataset(TrafficStatePointDataset):
         x_timeslot_val = x_timeslot[num_train: num_train + num_val]
 
         # 测试集
-        x_test, y_test = x[num_train + num_val:], y[num_train + num_val:]
-        y_timeslot_test = y_timeslot[-num_test:]
-        x_timeslot_test = x_timeslot[-num_test:]
+        x_test, y_test = x[test_start:], y[test_start:]
+        y_timeslot_test = y_timeslot[test_start:]
+        x_timeslot_test = x_timeslot[test_start:]
 
         constant = 5
         # 改训练集的标签，转换为趋势
@@ -700,18 +698,18 @@ class FOGSDataset(TrafficStatePointDataset):
             Scaler: 归一化对象
         """
         if scaler_type == "normal":
-            scaler = NormalScaler(maxx=max(x_train.max()))
+            scaler = NormalScaler(maxx=x_train.max())
             self._logger.info('NormalScaler max: ' + str(scaler.max))
         elif scaler_type == "standard":
             scaler = StandardScaler(mean=x_train.mean(), std=x_train.std())
             self._logger.info('StandardScaler mean: ' + str(scaler.mean) + ', std: ' + str(scaler.std))
         elif scaler_type == "minmax01":
             scaler = MinMax01Scaler(
-                maxx=max(x_train.max()), minn=min(x_train.min()))
+                maxx=x_train.max(), minn=x_train.min())
             self._logger.info('MinMax01Scaler max: ' + str(scaler.max) + ', min: ' + str(scaler.min))
         elif scaler_type == "minmax11":
             scaler = MinMax11Scaler(
-                maxx=max(x_train.max()), minn=min(x_train.min()))
+                maxx=x_train.max(), minn=x_train.min())
             self._logger.info('MinMax11Scaler max: ' + str(scaler.max) + ', min: ' + str(scaler.min))
         elif scaler_type == "log":
             scaler = LogScaler()

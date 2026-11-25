@@ -3,6 +3,7 @@ import os
 import numpy as np
 from scipy.optimize import linprog
 
+from libcity.data.utils import split_counts
 from libcity.data.dataset.traffic_state_point_dataset import TrafficStatePointDataset
 from libcity.utils.filesystem import ensure_dir
 
@@ -151,18 +152,14 @@ class DSTAGNNDataset(TrafficStatePointDataset):
                 x_test: (num_samples, input_length, ..., feature_dim) \n
                 y_test: (num_samples, input_length, ..., feature_dim)
         """
-        test_rate = 1 - self.train_rate - self.eval_rate
-        num_samples = x.shape[0]
-        num_test = round(num_samples * test_rate)
-        num_train = round(num_samples * self.train_rate)
-        num_val = num_samples - num_test - num_train
+        num_train, num_val, _ = split_counts(x.shape[0], self.train_rate, self.eval_rate)
 
         # train
         x_train, y_train = x[:num_train], y[:num_train]
         # val
         x_val, y_val = x[num_train: num_train + num_val], y[num_train: num_train + num_val]
         # test
-        x_test, y_test = x[-num_test:], y[-num_test:]
+        x_test, y_test = x[num_train + num_val:], y[num_train + num_val:]
         self._logger.info("train\t" + "x: " + str(x_train.shape) + ", y: " + str(y_train.shape))
         self._logger.info("eval\t" + "x: " + str(x_val.shape) + ", y: " + str(y_val.shape))
         self._logger.info("test\t" + "x: " + str(x_test.shape) + ", y: " + str(y_test.shape))

@@ -182,6 +182,7 @@ class SimSTDataset(TrafficStatePointDataset):
                 y_test=y_test,
                 x_val=x_val,
                 y_val=y_val,
+                cache_config=np.asarray(self._cache_config_json()),
             )
             self._logger.info('Saved at ' + self.cache_file_name)
         return x_train, y_train, x_val, y_val, x_test, y_test
@@ -305,13 +306,12 @@ class SimSTDataset(TrafficStatePointDataset):
             return neighbor_record
 
         # 加载数据集
-        x_train, y_train, x_val, y_val, x_test, y_test = [], [], [], [], [], []
-        if self.data is None:
-            self.data = {}
-            if self.cache_dataset and os.path.exists(self.cache_file_name):
-                x_train, y_train, x_val, y_val, x_test, y_test = self._load_cache_train_val_test()
-            else:
-                x_train, y_train, x_val, y_val, x_test, y_test = self._generate_train_val_test()
+        if getattr(self, 'test_dataloader', None) is not None:
+            return self.train_dataloader, self.eval_dataloader, self.test_dataloader
+        if self.cache_dataset and os.path.exists(self.cache_file_name):
+            x_train, y_train, x_val, y_val, x_test, y_test = self._load_cache_train_val_test()
+        else:
+            x_train, y_train, x_val, y_val, x_test, y_test = self._generate_train_val_test()
         # 数据归一化
         self.feature_dim = x_train.shape[-1]
         self.ext_dim = self.feature_dim - self.output_dim
@@ -338,10 +338,10 @@ class SimSTDataset(TrafficStatePointDataset):
         # adjust dataset
         x_train, y_train, node_idx_train = adjust_dataset(x_train, y_train, self.batch_size, neighbor_record,
                                                           self.pad_with_last_sample)
-        x_val, y_val, node_idx_val = adjust_dataset(x_val, y_val, self.infer_bs, neighbor_record,
-                                                    self.pad_with_last_sample)
-        x_test, y_test, node_idx_test = adjust_dataset(x_test, y_test, self.infer_bs, neighbor_record,
-                                                       self.pad_with_last_sample)
+        x_val, y_val, node_idx_val = adjust_dataset(
+            x_val, y_val, self.infer_bs, neighbor_record, False)
+        x_test, y_test, node_idx_test = adjust_dataset(
+            x_test, y_test, self.infer_bs, neighbor_record, False)
         self._logger.info("final dataset shape")
         self._logger.info("train\t" + "x: " + str(x_train.shape) + ", y: " + str(y_train.shape))
         self._logger.info("eval\t" + "x: " + str(x_val.shape) + ", y: " + str(y_val.shape))

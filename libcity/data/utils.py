@@ -12,6 +12,21 @@ def get_dataset(config):
     return dataset(config)
 
 
+def split_counts(num_samples, train_rate, eval_rate):
+    if (not 0 < train_rate < 1 or not 0 < eval_rate < 1
+            or train_rate + eval_rate >= 1):
+        raise ValueError('train_rate and eval_rate must be positive, with their sum below 1.')
+    num_train = round(num_samples * train_rate)
+    num_test = round(num_samples * (1 - train_rate - eval_rate))
+    num_val = num_samples - num_train - num_test
+    if min(num_train, num_val, num_test) <= 0:
+        raise ValueError(
+            f'{num_samples} window samples produce empty train/validation/test splits '
+            f'({num_train}, {num_val}, {num_test}). Add data, shorten the windows, '
+            'or adjust train_rate/eval_rate.')
+    return num_train, num_val, num_test
+
+
 class BatchCollator:
     """A spawn-picklable collator that only copies fields mutated in-place."""
 

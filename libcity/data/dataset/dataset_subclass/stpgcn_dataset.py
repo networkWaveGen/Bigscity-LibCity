@@ -3,7 +3,7 @@ import os
 import numpy as np
 
 from libcity.data.dataset.traffic_state_point_dataset import TrafficStatePointDataset
-from libcity.data.utils import generate_dataloader
+from libcity.data.utils import generate_dataloader, split_counts
 from libcity.utils.filesystem import ensure_dir
 
 
@@ -89,11 +89,8 @@ class STPGCNDataset(TrafficStatePointDataset):
             pos_d = idx % (self.points_per_hour * 24)  # time of day
             return pos_w, pos_d
 
-        test_rate = 1 - self.train_rate - self.eval_rate
-        num_samples = x.shape[0]
-        num_test = round(num_samples * test_rate)
-        num_train = round(num_samples * self.train_rate)
-        num_val = num_samples - num_test - num_train
+        num_train, num_val, _ = split_counts(x.shape[0], self.train_rate, self.eval_rate)
+        test_start = num_train + num_val
 
         # generate pos_w pos_d
         pos_w_list, pos_d_list = [], []
@@ -113,8 +110,8 @@ class STPGCNDataset(TrafficStatePointDataset):
         x_val, y_val = x[num_train: num_train + num_val], y[num_train: num_train + num_val]
         val_pos_w, val_pos_d = pos_w_list[num_train: num_train + num_val], pos_d_list[num_train: num_train + num_val]
         # test
-        x_test, y_test = x[-num_test:], y[-num_test:]
-        test_pos_w, test_pos_d = pos_w_list[-num_test:], pos_d_list[-num_test:]
+        x_test, y_test = x[test_start:], y[test_start:]
+        test_pos_w, test_pos_d = pos_w_list[test_start:], pos_d_list[test_start:]
 
         self._logger.info("train\t" + "x: " + str(x_train.shape) + ", y: " + str(y_train.shape))
         self._logger.info("eval\t" + "x: " + str(x_val.shape) + ", y: " + str(y_val.shape))

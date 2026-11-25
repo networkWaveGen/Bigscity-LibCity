@@ -76,13 +76,12 @@ class PDFormerDataset(TrafficStatePointDataset):
                         self.sd_mx[i, j] = min(self.sd_mx[i, j], self.sd_mx[i, k] + self.sd_mx[k, j])
 
     def get_data(self):
-        x_train, y_train, x_val, y_val, x_test, y_test = [], [], [], [], [], []
-        if self.data is None:
-            self.data = {}
-            if self.cache_dataset and os.path.exists(self.cache_file_name):
-                x_train, y_train, x_val, y_val, x_test, y_test = self._load_cache_train_val_test()
-            else:
-                x_train, y_train, x_val, y_val, x_test, y_test = self._generate_train_val_test()
+        if getattr(self, 'test_dataloader', None) is not None:
+            return self.train_dataloader, self.eval_dataloader, self.test_dataloader
+        if self.cache_dataset and os.path.exists(self.cache_file_name):
+            x_train, y_train, x_val, y_val, x_test, y_test = self._load_cache_train_val_test()
+        else:
+            x_train, y_train, x_val, y_val, x_test, y_test = self._generate_train_val_test()
         self.feature_dim = x_train.shape[-1]
         self.ext_dim = self.feature_dim - self.output_dim
         self.scaler = self._get_scalar(self.scaler_type,
@@ -105,10 +104,6 @@ class PDFormerDataset(TrafficStatePointDataset):
         train_data = list(zip(x_train, y_train))
         eval_data = list(zip(x_val, y_val))
         test_data = list(zip(x_test, y_test))
-        self.train_dataloader, self.eval_dataloader, self.test_dataloader = \
-            generate_dataloader(train_data, eval_data, test_data, self.feature_name,
-                                self.batch_size, self.num_workers, pad_with_last_sample=self.pad_with_last_sample)
-        self.num_batches = len(self.train_dataloader)
         self.pattern_key_file = os.path.join(
             './libcity/cache/dataset_cache/', 'pattern_keys_{}_{}_{}_{}_{}_{}'.format(
                 self.cluster_method, self.dataset, self.cand_key_days, self.s_attn_size, self.n_cluster, self.cluster_max_iter))
@@ -126,6 +121,10 @@ class PDFormerDataset(TrafficStatePointDataset):
         else:
             self.pattern_keys = np.load(self.pattern_key_file + ".npy")
             self._logger.info("Loaded file " + self.pattern_key_file + ".npy")
+        self.train_dataloader, self.eval_dataloader, self.test_dataloader = \
+            generate_dataloader(train_data, eval_data, test_data, self.feature_name,
+                                self.batch_size, self.num_workers, pad_with_last_sample=self.pad_with_last_sample)
+        self.num_batches = len(self.train_dataloader)
         return self.train_dataloader, self.eval_dataloader, self.test_dataloader
 
     def get_data_feature(self):

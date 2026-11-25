@@ -7,7 +7,7 @@ import json
 from logging import getLogger
 
 from libcity.data.dataset.abstract_dataset import AbstractDataset
-from libcity.data.utils import generate_dataloader
+from libcity.data.utils import generate_dataloader, split_counts
 from libcity.utils.normalization import (
     StandardScaler,
     NormalScaler,
@@ -111,13 +111,13 @@ class TrafficStateDataset(AbstractDataset):
             bidir_adj_mx=False, calculate_weight_adj=False,
             weight_adj_epsilon=0.1, distance_inverse=False,
             use_row_column=True, external_time=True,
-            len_closeness=3, len_period=4, len_trend=0,
+            len_closeness=3, len_period=4, len_trend=0, y_start=1,
             pad_forward_period=0, pad_back_period=0,
             pad_forward_trend=0, pad_back_trend=0, interval_period=1, interval_trend=7)
         dataset = config.get('dataset', '')
         for name in ('geo_file', 'rel_file', 'data_files', 'ext_file'):
             defaults[name] = dataset
-        payload = dict(version=2, dataset_class=type(self).__module__ + '.' + type(self).__qualname__,
+        payload = dict(version=3, dataset_class=type(self).__module__ + '.' + type(self).__qualname__,
                        parameters=getattr(self, 'parameters_str', None),
                        inputs={name: config.get(name, default) for name, default in defaults.items()})
         return json.dumps(payload, sort_keys=True, separators=(',', ':'), ensure_ascii=True)
@@ -125,7 +125,7 @@ class TrafficStateDataset(AbstractDataset):
     def _get_cache_file_name(self, prefix):
         # Only the configuration string is hashed. No file contents are read.
         identity = hashlib.sha256(self._cache_config_json().encode('utf-8')).hexdigest()
-        return os.path.join('./libcity/cache/dataset_cache/', f'{prefix}_v2_{identity}.npz')
+        return os.path.join('./libcity/cache/dataset_cache/', f'{prefix}_v3_{identity}.npz')
 
     def _load_geo(self):
         """
@@ -856,20 +856,7 @@ class TrafficStateDataset(AbstractDataset):
                 x_test: (num_samples, input_length, ..., feature_dim) \n
                 y_test: (num_samples, input_length, ..., feature_dim)
         """
-        if (not np.isfinite(self.train_rate) or not np.isfinite(self.eval_rate)
-                or not 0 < self.train_rate < 1 or not 0 < self.eval_rate < 1
-                or self.train_rate + self.eval_rate >= 1):
-            raise ValueError('train_rate and eval_rate must be positive, with their sum below 1.')
-        test_rate = 1 - self.train_rate - self.eval_rate
-        num_samples = x.shape[0]
-        num_test = round(num_samples * test_rate)
-        num_train = round(num_samples * self.train_rate)
-        num_val = num_samples - num_test - num_train
-        if min(num_train, num_val, num_test) <= 0:
-            raise ValueError(
-                f'{num_samples} window samples produce empty train/validation/test splits '
-                f'({num_train}, {num_val}, {num_test}). Add data, shorten the windows, '
-                'or adjust train_rate/eval_rate.')
+        num_train, num_val, _ = split_counts(x.shape[0], self.train_rate, self.eval_rate)
 
         # train
         x_train, y_train = x[:num_train], y[:num_train]

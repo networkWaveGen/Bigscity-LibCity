@@ -3,7 +3,7 @@ import os
 import numpy as np
 
 from libcity.data.dataset.traffic_state_grid_od_dataset import TrafficStateGridOdDataset
-from libcity.data.utils import generate_dataloader
+from libcity.data.utils import generate_dataloader, split_counts
 from libcity.utils.filesystem import ensure_dir
 
 
@@ -63,11 +63,8 @@ class CSTNDataset(TrafficStateGridOdDataset):
         return X, W, y
 
     def _split_train_val_test(self, X, W, y):
-        test_rate = 1 - self.train_rate - self.eval_rate
-        num_samples = X.shape[0]
-        num_test = round(num_samples * test_rate)
-        num_train = round(num_samples * self.train_rate)
-        num_eval = num_samples - num_test - num_train
+        num_train, num_eval, _ = split_counts(X.shape[0], self.train_rate, self.eval_rate)
+        test_start = num_train + num_eval
         # train
         x_train, w_train, y_train = X[:num_train], W[:num_train], y[:num_train]
 
@@ -75,7 +72,7 @@ class CSTNDataset(TrafficStateGridOdDataset):
         x_eval, w_eval, y_eval = X[num_train: num_train + num_eval], \
                                  W[num_train: num_train + num_eval], y[num_train: num_train + num_eval]
         # test
-        x_test, w_test, y_test = X[-num_test:], W[-num_test:], y[-num_test:]
+        x_test, w_test, y_test = X[test_start:], W[test_start:], y[test_start:]
 
         # log
         self._logger.info(

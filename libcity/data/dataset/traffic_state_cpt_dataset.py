@@ -4,7 +4,7 @@ import numpy as np
 import datetime
 
 from libcity.data.dataset.traffic_state_datatset import TrafficStateDataset
-from libcity.data.utils import generate_dataloader
+from libcity.data.utils import generate_dataloader, split_counts
 from libcity.utils.filesystem import ensure_dir
 
 
@@ -275,16 +275,13 @@ class TrafficStateCPTDataset(TrafficStateDataset):
                 ext_x_test: (num_samples, T_c+T_p+T_t, ext_dim) \n
                 ext_y_test: (num_samples, ext_dim)
         """
-        test_rate = 1 - self.train_rate - self.eval_rate
-        num_samples = x.shape[0]
-        num_test = round(num_samples * test_rate)
-        num_train = round(num_samples * self.train_rate)
-        num_val = num_samples - num_test - num_train
+        num_train, num_val, _ = split_counts(x.shape[0], self.train_rate, self.eval_rate)
+        test_start = num_train + num_val
 
-        x_train, x_val, x_test = x[:num_train], x[num_train: num_train + num_val], x[-num_test:]
-        y_train, y_val, y_test = y[:num_train], y[num_train: num_train + num_val], y[-num_test:]
-        ext_x_train, ext_x_val, ext_x_test = ext_x[:num_train], ext_x[num_train: num_train + num_val], ext_x[-num_test:]
-        ext_y_train, ext_y_val, ext_y_test = ext_y[:num_train], ext_y[num_train: num_train + num_val], ext_y[-num_test:]
+        x_train, x_val, x_test = x[:num_train], x[num_train: num_train + num_val], x[test_start:]
+        y_train, y_val, y_test = y[:num_train], y[num_train: num_train + num_val], y[test_start:]
+        ext_x_train, ext_x_val, ext_x_test = ext_x[:num_train], ext_x[num_train: num_train + num_val], ext_x[test_start:]
+        ext_y_train, ext_y_val, ext_y_test = ext_y[:num_train], ext_y[num_train: num_train + num_val], ext_y[test_start:]
         self._logger.info("train\t" + "x: " + str(x_train.shape) + ", y: " + str(y_train.shape)
                           + ", x_ext: " + str(ext_x_train.shape) + ", y_ext: " + str(ext_y_train.shape))
         self._logger.info("eval\t" + "x: " + str(x_val.shape) + ", y: " + str(y_val.shape)

@@ -10,6 +10,7 @@ import pytest
 import torch
 
 from libcity.data.dataset.traffic_state_point_dataset import TrafficStatePointDataset
+from libcity.data.dataset.dataset_subclass.simst_dataset import SimSTDataset
 from libcity.data.utils import generate_dataloader
 from libcity.evaluator.eta_evaluator import ETAEvaluator
 from libcity.executor.eta_executor import ETAExecutor
@@ -66,6 +67,39 @@ def test_cache_rebuilds_missing_or_mismatched_metadata(traffic_data, metadata):
     assert rebuilt.get_data()[2].dataset[0][0].item() == 9.
     with np.load(rebuilt.cache_file_name, allow_pickle=False) as cached:
         assert cached['cache_config'].item() == rebuilt._cache_config_json()
+
+
+def test_simst_reuses_cache_and_keeps_real_evaluation_tail(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    dataset = SimSTDataset.__new__(SimSTDataset)
+    dataset.config = {'data_files': 'fixture', 'output_window': 3, 'y_start': 1}
+    dataset.cache_file_name = dataset._get_cache_file_name('point_based')
+    dataset.config['y_start'] = 2
+    assert dataset._get_cache_file_name('point_based') != dataset.cache_file_name
+    dataset.config['y_start'] = 1
+    dataset.cache_file_folder = str(Path(dataset.cache_file_name).parent)
+    dataset.cache_dataset = dataset.pad_with_last_sample = True
+    dataset.data_files = 'fixture'
+    dataset.input_window, dataset.output_window, dataset.y_start = 12, 3, 1
+    dataset.train_rate, dataset.eval_rate = .5, .25
+    dataset.timesolts = np.arange(116)
+    dataset.add_time_in_day = dataset.add_day_in_week = False
+    dataset._load_dyna = lambda _: np.arange(232, dtype=float).reshape(116, 2, 1)
+    dataset._logger = logging.getLogger(__name__)
+    dataset._generate_train_val_test()
+    monkeypatch.setattr(dataset, '_generate_train_val_test',
+                        lambda: pytest.fail('Matching cache should be reused'))
+    dataset.output_dim, dataset.num_nodes = 1, 2
+    dataset.scaler_type = dataset.ext_scaler_type = 'none'
+    dataset.normal_external = False
+    dataset.adj_mx, dataset.in_neighbor_num = np.ones((2, 2)), 1
+    dataset.batch_size = dataset.infer_bs = 7
+    dataset.num_workers = 0
+    dataset.feature_name = {'X': 'float', 'y': 'float', 'node_idx': 'int'}
+
+    loaders = dataset.get_data()
+    assert [len(loader.dataset) for loader in loaders] == [49, 15, 15]
+    assert dataset.get_data() == loaders
 
 
 def test_legacy_cache_is_preserved_and_not_reused(traffic_data):

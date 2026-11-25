@@ -3,7 +3,7 @@ import os
 import pandas as pd
 
 from libcity.data.dataset.traffic_state_datatset import TrafficStateDataset
-from libcity.data.utils import generate_dataloader
+from libcity.data.utils import generate_dataloader, split_counts
 from libcity.utils.normalization import (
     StandardScaler,
     NormalScaler,
@@ -350,11 +350,8 @@ class STDNDataset(TrafficStateDataset):
                 x_test: (num_samples, input_length, ..., feature_dim) \n
                 y_test: (num_samples, input_length, ..., feature_dim)
         """
-        test_rate = 1 - self.train_rate - self.eval_rate
-        num_samples = x.shape[0]
-        num_test = round(num_samples * test_rate)
-        num_train = round(num_samples * self.train_rate)
-        num_val = num_samples - num_test - num_train
+        num_train, num_val, _ = split_counts(x.shape[0], self.train_rate, self.eval_rate)
+        test_start = num_train + num_val
 
         # train
         x_train = x[:num_train]
@@ -375,14 +372,14 @@ class STDNDataset(TrafficStateDataset):
         flow_inputs_val = flow_inputs[num_train: num_train + num_val]
         lstm_inputs_val = lstm_inputs[num_train: num_train + num_val]
         # test
-        x_test = x[-num_test:]
-        y_test = y[-num_test:]
-        flatten_att_nbhd_inputs_test = flatten_att_nbhd_inputs[-num_test:]
-        flatten_att_flow_inputs_test = flatten_att_flow_inputs[-num_test:]
-        att_lstm_inputs_test = att_lstm_inputs[-num_test:]
-        nbhd_inputs_test = nbhd_inputs[-num_test:]
-        flow_inputs_test = flow_inputs[-num_test:]
-        lstm_inputs_test = lstm_inputs[-num_test:]
+        x_test = x[test_start:]
+        y_test = y[test_start:]
+        flatten_att_nbhd_inputs_test = flatten_att_nbhd_inputs[test_start:]
+        flatten_att_flow_inputs_test = flatten_att_flow_inputs[test_start:]
+        att_lstm_inputs_test = att_lstm_inputs[test_start:]
+        nbhd_inputs_test = nbhd_inputs[test_start:]
+        flow_inputs_test = flow_inputs[test_start:]
+        lstm_inputs_test = lstm_inputs[test_start:]
         self._logger.info(
             "train\t" + "x: " + str(x_train.shape) + "y: " + str(y_train.shape) + "flatten_att_nbhd_inputs: " + str(
                 flatten_att_nbhd_inputs_train.shape) + "flatten_att_flow_inputs: " + str(
