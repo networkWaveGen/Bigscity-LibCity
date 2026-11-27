@@ -61,6 +61,33 @@ or `--model MSTGCN`. The published hourly fixture covers weekly, daily and recen
 segments. Runs record the CPT sampling layout and `history_span_points`; the
 number of input samples differs from their span on the original timeline.
 
+For grid forecasts, generate with `--model STResNet` or `--model ACFM` and use
+the resulting `stresnet.json` / `acfm.json` with the common train/evaluate/resume
+commands. Atomic `.geo` rows need unique IDs and zero-based `row_id`/`column_id`
+covering a complete rectangle. `.grid` observations are aligned by time/cell;
+`.dyna` with `entity_id` is also accepted. Neither CSV row order nor ID magnitude
+defines the convolution layout. Predictions follow the original node order.
+
+The named `grid_cpt` protocol defaults to one prediction step and three recent
+frames plus the previous day's matching frame. Closeness counts raw frames,
+period counts days, and trend counts weeks; `interval_period`/`interval_trend`
+multiply those day/week spacings. Inputs list closeness/period/trend, nearest
+first. Explicit `output_window` supports direct multistep prediction. This differs
+from the hourly CPT protocol of the graph models and is recorded in run metadata.
+
+`X` contains observed history. Global `history_features` contain historical
+calendar/external values; global `future_features` contain only calendar values
+and explicitly declared `known_future_columns`. ACFM accepts different historical
+and future external widths. Actual future observations never become model input.
+External values remain unscaled; target scaling fits the training interval only.
+The raw-array cache is shared across horizon/split changes, checks `.grid` source
+versions, and rebuilds missing/malformed arrays. Changing source data rejects
+full-state resume. Singleton 1x1-grid tail batches use running BatchNorm statistics.
+ACFM supports `split`, `split-chans`, `concat`, `cpt` and compatible
+`cpt-sameoutput` residual modes; the last requires each active count times hidden
+width to equal two. The unused legacy `merge_mode` option is removed. Common
+variants remain deferred. Tiny runs validate execution rather than city accuracy.
+
 `--model MegaCRN` creates a memory-augmented forecast example with explicit known
 future time features. Its auxiliary memory losses and curriculum targets are
 used only by the training step; ordinary forward/evaluation returns predictions

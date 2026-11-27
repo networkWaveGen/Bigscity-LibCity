@@ -1,0 +1,5 @@
+{
+  "data": {"output_window": 1, "sampling": {"name": "grid_cpt", "closeness": 3, "period": 1, "trend": 0,
+    "interval_period": 1, "interval_trend": 1}},
+  "training": {"loss": {"name": "masked_mse"}}
+}

@@ -1,0 +1,7 @@
+{
+  "data": {"dataset": "GridTiny", "data_dir": "data", "cache_dir": "cache", "pad_training": false,
+    "features": {"load_external": true, "time_in_day": true, "day_in_week": true, "known_future_columns": ["holiday"]}},
+  "model": {"name": "STResNet", "params": {"nb_residual_unit": 1, "filters": 8}},
+  "training": {"epochs": 2, "batch_size": 16},
+  "runtime": {"device": "cpu", "seed": 17, "output_dir": "runs"}
+}

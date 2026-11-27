@@ -131,11 +131,13 @@ def validate(config, preset):
                 raise ValueError('data.graph.reachability_column is a TGCLSTM column name or null')
         _known(data['sampling'], ('name','closeness','period','trend','interval_period','interval_trend',
                                   'temporal_history'), 'data.sampling')
-        if data['sampling'].get('name') not in ('window','cpt','crann'):
+        if data['sampling'].get('name') not in ('window','cpt','crann','grid_cpt'):
             raise ValueError('Unknown data.sampling.name')
+        if (spec.protocol=='grid_cpt') != (data['sampling']['name']=='grid_cpt'):
+            raise ValueError('grid_cpt sampling requires a registered grid_cpt model and vice versa')
         if data['sampling']['name']=='crann':
             _positive(data['sampling'].get('temporal_history'), 'data.sampling.temporal_history')
-        if data['sampling']['name']=='cpt':
+        if data['sampling']['name'] in ('cpt','grid_cpt'):
             for key in ('closeness','period','trend'):
                 _positive(data['sampling'].get(key,0),f'data.sampling.{key}',zero=True)
             if not sum(data['sampling'].get(key,0) for key in ('closeness','period','trend')):

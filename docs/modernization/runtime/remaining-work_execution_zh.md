@@ -37,7 +37,8 @@
 | commit29 | 4fc8211 | feat: migrate GeoSAN with native geography and bounded sampling |
 | commit30 | cf56fa4 | feat: migrate TTPNet with departure-known traffic and cumulative ETA training |
 | commit31 | a87159c | feat: migrate Node2Vec and DeepWalk with explicit external training |
-| commit32 | 随本节交付的提交 | feat: migrate GeomGCN with native partitioned reconstruction |
+| commit32 | 1ceae72 | feat: migrate GeomGCN with native partitioned reconstruction |
+| commit33 | 随本节交付的提交 | feat: migrate grid forecasts with causal CPT inputs |
 
 ## commit1：修复基础交通缓存（670b325）
 
@@ -334,6 +335,20 @@ GeomGCN 复用 road_reconstruction 具名协议、公共数据适配/损失/评�
 验证：新增 **28 项通过**，包括全部 16 种分区/通道合并设置下修正后原公式的独立稠密前向、嵌入及全部参数梯度对照；诱导子图混边的专门反例、完整图入度、各层真实参数更新、阻止 DGL 导入后的训练/独立评估/嵌入与 ID 导出、dropout/优化器/调度器/早停/RNG/下一轮状态精确续训、无标签/全图与单节点子集/float64/输入和图状态不变、空图/单节点/自环去重、2,000 节点稀疏图、CPU AMP、缺失目标及双精度损失梯度。与既有道路重建/清单检查合计 **41 项通过**；之后当前源码完整回归 **508 passed，0 failed，0 errors，0 skipped**，见 [汇总](remaining-validation.json)。仓库外实际夹具、训练、独立评估及续训第三轮共 **4 条成功命令**，独立指标/向量完全一致，见 [CLI](geomgcn-cli-validation.json)。
 
 迁移表更新为 **56/100**，44 条 pending。道路表征全部 **6 个模型**已接入；排除 7 个延期 Common 和 2 个模板后，本期仍有 **35 个交通预测模型**及最终全量验收待完成，不能据此宣布全部主线完成。
+
+## commit33：迁移 STResNet/ACFM 与原子网格数据
+
+问题：旧网格输入/输出通过 view 混排空间与特征轴；STResNet/ACFM 的预测通道固定为 2，ACFM 注意力输入还硬编码为 2，使默认 lstm_channels=16 无法正确装配。旧网格数据与外部特征紧耦合，外部数据全时间轴归一化会使用测试区间信息；普通点数据入口不能完整读取 .grid，来源版本也未覆盖该格式。网格真实 1x1 单样本尾批的 BatchNorm 无法计算方差。
+
+修改：新增具名 grid_cpt 协议和轻量原子适配，保留 STResNet/ACFM 的逐帧最近/日/周三段含义，与图模型的逐小时 CPT 区分。使用 .geo 的 row_id/column_id 和真实 geo_id 显式映射完整矩形，支持乱序 .grid 及 entity_id 型 .dyna，不分配无用途稠密图；切分、原尺度掩码、训练区间归一化、字典 Tensor 批次与公共评估格式复用既有契约。历史与未来外部输入分离，只允许日历和显式 known_future_columns 进入未来；外部观测不再按全时间轴归一化，也不把目标时刻真实外部观测自动当预测输入。缺失历史观测在输入侧以零填补，原始标签不变。
+
+模型均为标准 nn.Module，网格排列使用 buffer；显式 permute 空间/特征/时间轴并恢复 [batch,horizon,node,feature] 输出，任意目标数与显式多步回归不再受固定 2 通道限制。STResNet 保留三分支残差、矩阵融合、外部网络及 tanh，删除未启用 BN 时的无用参数。ACFM 保留逐帧共享残差、逆序 ConvLSTM、两级注意力和时刻门控，按真实隐藏宽度装配注意力；支持纯 local、纯 global 及两者并用，历史和未来外部宽度可不同。五种原可运行残差模式有明确维度条件，未使用的 merge_mode 不保留。单样本 1x1 尾批使用 BN 运行统计，不复制样本或污染运行方差。
+
+原始数组缓存继续使用公共原子缓存机制，增加网格命名空间、来源列表与字段/形状校验；窗口/切分变化可复用原始缓存，损坏数组会自动重建，历史输入不会越过缺失时间片或原子文件边界。来源版本加入 .grid，并识别外部显式 grid 文件，文件大小/修改时间变化时拒绝续训，没有源文件内容哈希校验。公共预测输入提取增加 history_features；公共 ForecastLoss 仅提升半精度，不再无条件丢失 float64 精度。发布两个配置、乱序原子网格夹具和 --model STResNet/ACFM 命令；Common 变体与深层数据缓存重构仍延期。
+
+验证：新增网格 **43 项通过**，包括修正轴顺序后的旧 STResNet BN/外部分支与 ACFM 五种有效残差模式的预测/全部梯度对照、全流程训练/独立评估/BN/dropout/优化器/调度器/早停/RNG 精确续训、多变量/多步/单分支/batch=1/float64、原子 ID/行顺序/CPT 时间、目标区间互斥/训练统计、真实未来目标及未声明外部观测变化后的输入与预测隔离、原始缓存跨预测窗复用及缺失/损坏形状重建、时间缺口/文件边界、.grid 修改后续训拒绝、单节点尾批 BN/CPU AMP、无效模式与协议校验、双精度原尺度损失。当前源码完整回归 **551 passed，0 failed，0 errors，0 skipped**，见 [汇总](remaining-validation.json)。仓库外两个夹具、两次训练、两次独立评估及两次续训共 **8 条成功命令**，评估指标/预测逐元素一致，续训第三轮且缓存复用，见 [CLI](grid-cli-validation.json)。
+
+迁移表更新为 **58/100**，42 条 pending；排除 7 个延期 Common 和 2 个模板后，本期仍有 **33 个交通预测模型**及最终全量验收待完成。
 
 ## 持续完成的清单
 

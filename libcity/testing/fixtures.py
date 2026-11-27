@@ -42,6 +42,26 @@ def multiscale_fixture(root, name='Tiny'):
     return atomic_fixture(root,name=name,steps=400,interval_minutes=60)
 
 
+def grid_fixture(root, name='GridTiny', steps=400, rows=2, columns=3, features=3, outputs=2):
+    folder = Path(root)/name
+    folder.mkdir(parents=True,exist_ok=True)
+    order = np.random.default_rng(19).permutation(rows*columns)
+    pd.DataFrame(dict(geo_id=100+order,type='Polygon',coordinates='[]',row_id=order//columns,
+        column_id=order%columns)).to_csv(folder/f'{name}.geo',index=False)
+    clock = pd.date_range('2024-01-01',periods=steps,freq='h',tz='UTC')
+    frame = pd.DataFrame([dict(dyna_id=step*rows*columns+node,type='state',
+        time=clock[step].strftime('%Y-%m-%dT%H:%M:%SZ'),row_id=node//columns,column_id=node%columns,
+        **{f'value_{feature}':20+node*2+feature*4+np.sin(step/12) for feature in range(features)})
+        for step in range(steps) for node in range(rows*columns)])
+    frame.loc[(frame['dyna_id']%37)==0,'value_0'] = 0.
+    frame.sample(frac=1,random_state=11).to_csv(folder/f'{name}.grid',index=False)
+    pd.DataFrame(dict(ext_id=range(steps),time=clock.strftime('%Y-%m-%dT%H:%M:%SZ'),
+        temperature=10+np.arange(steps)*.01,holiday=(clock.day_of_week>=5).astype(float))).to_csv(folder/f'{name}.ext',index=False)
+    (folder/'config.json').write_text(json.dumps(dict(geo_file=name,data_files=name,ext_file=name,
+        time_intervals=3600,data_col=[f'value_{index}' for index in range(features)],output_dim=outputs)),encoding='utf-8')
+    return folder
+
+
 def road_feature_fixture(root, name='RoadFeatures', nodes=12):
     folder = Path(root)/name
     folder.mkdir(parents=True,exist_ok=True)

@@ -1,5 +1,5 @@
 {
-  "scope": "Remaining-work commits 1-32; whole-library migration remains in progress",
+  "scope": "Remaining-work commits 1-33; whole-library migration remains in progress",
   "environment": {
     "python": "3.12.13",
     "torch": "2.15.0+cpu",
@@ -8,7 +8,7 @@
     "gensim": "4.4.0"
   },
   "full_tests": {
-    "tests": 508,
+    "tests": 551,
     "failures": 0,
     "errors": 0,
     "skipped": 0
@@ -254,6 +254,49 @@
     "test_simst_large_batch_has_same_node_semantics_and_causal_buffer[3]",
     "test_neighbor_projection_is_directional_normalized_and_handles_isolated_nodes",
     "test_togcn_teacher_is_explicit_and_constructor_has_no_global_side_effect",
+    "test_original_math_with_explicit_input_output_axis_corrections_and_all_gradients[STResNet-False-False-split]",
+    "test_original_math_with_explicit_input_output_axis_corrections_and_all_gradients[STResNet-False-True-split]",
+    "test_original_math_with_explicit_input_output_axis_corrections_and_all_gradients[STResNet-True-False-split]",
+    "test_original_math_with_explicit_input_output_axis_corrections_and_all_gradients[STResNet-True-True-split]",
+    "test_original_math_with_explicit_input_output_axis_corrections_and_all_gradients[ACFM-False-False-split]",
+    "test_original_math_with_explicit_input_output_axis_corrections_and_all_gradients[ACFM-False-False-split-chans]",
+    "test_original_math_with_explicit_input_output_axis_corrections_and_all_gradients[ACFM-False-False-concat]",
+    "test_original_math_with_explicit_input_output_axis_corrections_and_all_gradients[ACFM-False-False-cpt]",
+    "test_original_math_with_explicit_input_output_axis_corrections_and_all_gradients[ACFM-False-False-cpt-sameoutput]",
+    "test_original_math_with_explicit_input_output_axis_corrections_and_all_gradients[ACFM-False-True-split]",
+    "test_original_math_with_explicit_input_output_axis_corrections_and_all_gradients[ACFM-False-True-split-chans]",
+    "test_original_math_with_explicit_input_output_axis_corrections_and_all_gradients[ACFM-False-True-concat]",
+    "test_original_math_with_explicit_input_output_axis_corrections_and_all_gradients[ACFM-False-True-cpt]",
+    "test_original_math_with_explicit_input_output_axis_corrections_and_all_gradients[ACFM-False-True-cpt-sameoutput]",
+    "test_full_train_evaluate_and_exact_bn_dropout_optimizer_rng_resume[STResNet]",
+    "test_full_train_evaluate_and_exact_bn_dropout_optimizer_rng_resume[ACFM]",
+    "test_atomic_row_order_cpt_timestamps_target_splits_scaler_and_cache_identity",
+    "test_target_and_unavailable_future_external_changes_do_not_change_inputs_or_forecast[STResNet]",
+    "test_target_and_unavailable_future_external_changes_do_not_change_inputs_or_forecast[ACFM]",
+    "test_variable_dimensions_single_branches_multistep_and_label_free_float64[counts0-STResNet]",
+    "test_variable_dimensions_single_branches_multistep_and_label_free_float64[counts0-ACFM]",
+    "test_variable_dimensions_single_branches_multistep_and_label_free_float64[counts1-STResNet]",
+    "test_variable_dimensions_single_branches_multistep_and_label_free_float64[counts1-ACFM]",
+    "test_variable_dimensions_single_branches_multistep_and_label_free_float64[counts2-STResNet]",
+    "test_variable_dimensions_single_branches_multistep_and_label_free_float64[counts2-ACFM]",
+    "test_actual_singleton_grid_tail_batchnorm_cpu_amp[STResNet]",
+    "test_actual_singleton_grid_tail_batchnorm_cpu_amp[ACFM]",
+    "test_dyna_entity_id_fallback_and_missing_input_value_raw_target_separation",
+    "test_grid_source_file_change_is_rejected_before_resume",
+    "test_invalid_grid_geometry_or_observations_are_rejected[duplicate-cell]",
+    "test_invalid_grid_geometry_or_observations_are_rejected[missing-observation]",
+    "test_invalid_grid_geometry_or_observations_are_rejected[duplicate-observation]",
+    "test_invalid_grid_geometry_or_observations_are_rejected[unknown-future-column]",
+    "test_double_precision_raw_forecast_loss_does_not_round_small_residuals",
+    "test_history_never_crosses_missing_timestamps_or_atomic_file_boundaries[gap]",
+    "test_history_never_crosses_missing_timestamps_or_atomic_file_boundaries[separate-files]",
+    "test_shared_grid_cache_handles_horizon_changes_and_missing_fields[missing]",
+    "test_shared_grid_cache_handles_horizon_changes_and_missing_fields[shape]",
+    "test_incompatible_residual_modes_fail_with_specific_error[params0]",
+    "test_incompatible_residual_modes_fail_with_specific_error[params1]",
+    "test_incompatible_residual_modes_fail_with_specific_error[params2]",
+    "test_grid_sampling_and_model_must_be_selected_together[STResNet-window]",
+    "test_grid_sampling_and_model_must_be_selected_together[GRU-grid_cpt]",
     "test_memory_recurrence_matches_independent_gates_and_depends_on_previous_cell",
     "test_original_classifier_and_gradients_with_explicitly_corrected_memory",
     "test_full_training_ranking_export_and_exact_resume",
@@ -526,8 +569,8 @@
   ],
   "inventory": {
     "total": 100,
-    "migrated": 56,
-    "pending": 44
+    "migrated": 58,
+    "pending": 42
   },
   "history": [
     {
@@ -865,6 +908,20 @@
         "migrated": 55,
         "pending": 45
       }
+    },
+    {
+      "scope": "commits 1-32, through 1ceae72",
+      "full_tests": {
+        "tests": 508,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "inventory": {
+        "total": 100,
+        "migrated": 56,
+        "pending": 44
+      }
     }
   ],
   "current_cli": {
@@ -1014,5 +1071,18 @@
     "format_version": 3,
     "legacy_DGL_required": false,
     "graph_partitions": 2
+  },
+  "grid_cli": {
+    "report": "grid-cli-validation.json",
+    "commands": 6,
+    "fixture_commands": 2,
+    "format_version": 3,
+    "models": [
+      "STResNet",
+      "ACFM"
+    ],
+    "atomic_format": "grid_or_dyna",
+    "protocol": "grid_cpt",
+    "cache_reuse": true
   }
 }

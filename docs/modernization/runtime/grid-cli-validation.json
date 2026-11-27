@@ -1,0 +1,281 @@
+{
+  "passed": true,
+  "source": "D:\\LibCity 2.0\\LibCity-modernization",
+  "directory": "D:\\LibCity 2.0\\.runtime-tests\\grid-cli-pv1mvonn",
+  "commands": [
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\tools\\make_runtime_fixture.py",
+        "--directory",
+        "D:\\LibCity 2.0\\.runtime-tests\\grid-cli-pv1mvonn\\STResNet",
+        "--model",
+        "STResNet"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\grid-cli-pv1mvonn",
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "train",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\grid-cli-pv1mvonn\\STResNet\\stresnet.json",
+        "--set",
+        "runtime.exp_id=train"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\grid-cli-pv1mvonn",
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "evaluate",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\grid-cli-pv1mvonn\\STResNet\\stresnet.json",
+        "--checkpoint",
+        "D:\\LibCity 2.0\\.runtime-tests\\grid-cli-pv1mvonn\\STResNet\\runs\\train\\checkpoints\\best.pt",
+        "--set",
+        "runtime.exp_id=evaluated"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\grid-cli-pv1mvonn",
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "train",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\grid-cli-pv1mvonn\\STResNet\\stresnet.json",
+        "--resume",
+        "D:\\LibCity 2.0\\.runtime-tests\\grid-cli-pv1mvonn\\STResNet\\runs\\train\\checkpoints\\last.pt",
+        "--set",
+        "training.epochs=3",
+        "--set",
+        "runtime.exp_id=resumed"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\grid-cli-pv1mvonn",
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\tools\\make_runtime_fixture.py",
+        "--directory",
+        "D:\\LibCity 2.0\\.runtime-tests\\grid-cli-pv1mvonn\\ACFM",
+        "--model",
+        "ACFM"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\grid-cli-pv1mvonn",
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "train",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\grid-cli-pv1mvonn\\ACFM\\acfm.json",
+        "--set",
+        "runtime.exp_id=train"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\grid-cli-pv1mvonn",
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "evaluate",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\grid-cli-pv1mvonn\\ACFM\\acfm.json",
+        "--checkpoint",
+        "D:\\LibCity 2.0\\.runtime-tests\\grid-cli-pv1mvonn\\ACFM\\runs\\train\\checkpoints\\best.pt",
+        "--set",
+        "runtime.exp_id=evaluated"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\grid-cli-pv1mvonn",
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "train",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\grid-cli-pv1mvonn\\ACFM\\acfm.json",
+        "--resume",
+        "D:\\LibCity 2.0\\.runtime-tests\\grid-cli-pv1mvonn\\ACFM\\runs\\train\\checkpoints\\last.pt",
+        "--set",
+        "training.epochs=3",
+        "--set",
+        "runtime.exp_id=resumed"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\grid-cli-pv1mvonn",
+      "exit_code": 0
+    }
+  ],
+  "models": {
+    "STResNet": {
+      "passed": true,
+      "metrics": {
+        "MAE@1": 10.073026003593377,
+        "RMSE@1": 14.322105689118608,
+        "loss": 205.1227193024745,
+        "best_validation": 204.74851374238446
+      },
+      "protocol": "grid_cpt",
+      "prediction_shape": [
+        80,
+        1,
+        6,
+        2
+      ],
+      "independent_metrics_identical": true,
+      "independent_predictions_identical": true,
+      "resumed_epoch": 3,
+      "optimizer_steps": 42,
+      "source_grid_recorded": true,
+      "cache_statuses": {
+        "train": "miss",
+        "evaluate": "hit",
+        "resume": "hit"
+      },
+      "split": {
+        "semantics": "target_time_v1",
+        "adapter": "grid_cpt",
+        "grid_shape": [
+          2,
+          3
+        ],
+        "input_window": 4,
+        "history_span_points": 24,
+        "requested_input_window": 12,
+        "offsets": [
+          -1,
+          -2,
+          -3,
+          -24
+        ],
+        "intervals": {
+          "train": {
+            "samples": 216,
+            "target_index_start": 24,
+            "target_index_end": 239
+          },
+          "val": {
+            "samples": 80,
+            "target_index_start": 240,
+            "target_index_end": 319
+          },
+          "test": {
+            "samples": 80,
+            "target_index_start": 320,
+            "target_index_end": 399
+          }
+        },
+        "train": 216,
+        "val": 80,
+        "test": 80,
+        "train_end": "2024-01-11T00:00:00.000000000",
+        "val_end": "2024-01-14T08:00:00.000000000",
+        "scaler_fit_end_exclusive": "2024-01-11T00:00:00.000000000",
+        "train_padded": false,
+        "cache": {
+          "status": "miss",
+          "path": "D:\\LibCity 2.0\\.runtime-tests\\grid-cli-pv1mvonn\\STResNet\\cache\\traffic-raw-v1\\5010bd0c16b46cc33a64f13a.npz"
+        },
+        "external_scaling": "none",
+        "input_missing_observations": "zero"
+      }
+    },
+    "ACFM": {
+      "passed": true,
+      "metrics": {
+        "MAE@1": 6.712911370185763,
+        "RMSE@1": 7.661119662331079,
+        "loss": 58.692754799863984,
+        "best_validation": 59.35167385129516
+      },
+      "protocol": "grid_cpt",
+      "prediction_shape": [
+        80,
+        1,
+        6,
+        2
+      ],
+      "independent_metrics_identical": true,
+      "independent_predictions_identical": true,
+      "resumed_epoch": 3,
+      "optimizer_steps": 42,
+      "source_grid_recorded": true,
+      "cache_statuses": {
+        "train": "miss",
+        "evaluate": "hit",
+        "resume": "hit"
+      },
+      "split": {
+        "semantics": "target_time_v1",
+        "adapter": "grid_cpt",
+        "grid_shape": [
+          2,
+          3
+        ],
+        "input_window": 4,
+        "history_span_points": 24,
+        "requested_input_window": 12,
+        "offsets": [
+          -1,
+          -2,
+          -3,
+          -24
+        ],
+        "intervals": {
+          "train": {
+            "samples": 216,
+            "target_index_start": 24,
+            "target_index_end": 239
+          },
+          "val": {
+            "samples": 80,
+            "target_index_start": 240,
+            "target_index_end": 319
+          },
+          "test": {
+            "samples": 80,
+            "target_index_start": 320,
+            "target_index_end": 399
+          }
+        },
+        "train": 216,
+        "val": 80,
+        "test": 80,
+        "train_end": "2024-01-11T00:00:00.000000000",
+        "val_end": "2024-01-14T08:00:00.000000000",
+        "scaler_fit_end_exclusive": "2024-01-11T00:00:00.000000000",
+        "train_padded": false,
+        "cache": {
+          "status": "miss",
+          "path": "D:\\LibCity 2.0\\.runtime-tests\\grid-cli-pv1mvonn\\ACFM\\cache\\traffic-raw-v1\\3c4161b919921230b0494c11.npz"
+        },
+        "external_scaling": "none",
+        "input_missing_observations": "zero"
+      }
+    }
+  },
+  "limitations": [
+    "synthetic atomic grid lifecycle, not real-city accuracy certification",
+    "Common variants and deeper dataset refactoring remain deferred"
+  ]
+}

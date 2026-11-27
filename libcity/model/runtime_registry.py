@@ -29,6 +29,10 @@ class ModelSpec:
 
 
 MODELS = {
+    'STResNet': ModelSpec('libcity.model.traffic_flow_prediction.runtime_grid:STResNet',protocol='grid_cpt',
+        prepare_data='libcity.data.grid_traffic:prepare_grid'),
+    'ACFM': ModelSpec('libcity.model.traffic_flow_prediction.runtime_grid:ACFM',protocol='grid_cpt',
+        prepare_data='libcity.data.grid_traffic:prepare_grid'),
     'GeomGCN': ModelSpec('libcity.model.road_representation.runtime_geomgcn:GeomGCN',task='road_representation',
         protocol='road_reconstruction',prepare_data='libcity.data.road_reconstruction:prepare_reconstruction',
         loss='libcity.executor.road_reconstruction:ReconstructionLoss',

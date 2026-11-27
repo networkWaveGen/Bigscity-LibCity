@@ -1,0 +1,5 @@
+{
+  "model": {"params": {"nb_residual_unit": 12, "batch_norm": false, "filters": 64}},
+  "data": {"scaler": {"name": "minmax11"}},
+  "training": {"optimizer": {"lr": 0.0002}, "clip_grad_norm": 0.1}
+}

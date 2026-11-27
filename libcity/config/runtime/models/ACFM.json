@@ -1,0 +1,7 @@
+{
+  "model": {"params": {"res_repetation": 12, "res_nbfilter": 16, "res_bn": true,
+    "res_split_mode": "split", "first_extnn_inter_channels": 40, "first_extnn_dropout": 0.5,
+    "lstm_channels": 16, "lstm_dropout": 0.0}},
+  "data": {"scaler": {"name": "minmax11"}},
+  "training": {"optimizer": {"lr": 0.0003}, "clip_grad_norm": 0.1}
+}

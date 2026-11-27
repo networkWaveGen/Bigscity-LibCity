@@ -28,6 +28,8 @@ def move_batch(batch, device):
 
 def model_inputs(batch, output_dim):
     inputs = {'X': batch['X']}
+    if 'history_features' in batch:
+        inputs['history_features'] = batch['history_features']
     if 'future_features' in batch:
         inputs['future_features'] = batch['future_features']
     return inputs
@@ -43,8 +45,10 @@ class ForecastLoss:
 
     def raw(self, prediction, target, raw_target=None):
         target = target[..., :self.output_dim]
-        return self.scaler.inverse_transform(prediction.float()), (raw_target[..., :self.output_dim]
-            if raw_target is not None else self.scaler.inverse_transform(target.float()))
+        prediction = prediction.float() if prediction.dtype in (torch.float16,torch.bfloat16) else prediction
+        target = target.float() if target.dtype in (torch.float16,torch.bfloat16) else target
+        return self.scaler.inverse_transform(prediction), (raw_target[..., :self.output_dim]
+            if raw_target is not None else self.scaler.inverse_transform(target))
 
     def __call__(self, prediction, target, raw_target=None):
         prediction, target = self.raw(prediction, target, raw_target)
