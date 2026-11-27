@@ -30,7 +30,7 @@ def train(context, *,until_teacher_epoch=None,until_fine_epoch=None):
         context.state.stage='teacher'
     if context.state.stage=='teacher':
         def teacher_step(model,batch,state):
-            return context.loss_fn(model.forward_with_teacher({'X':batch['X']},batch['y']),batch['y'])
+            return context.loss_fn(model.forward_with_teacher({'X':batch['X']},batch['y']),batch['y'],batch.get('y_raw'))
         score = train_loop(context,teacher_step,until_epoch=until_teacher_epoch)
         if until_teacher_epoch is not None and context.state.epoch<context.config['training']['epochs']:
             return score

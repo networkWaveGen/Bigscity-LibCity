@@ -31,6 +31,7 @@ class Trafformer(nn.Module):
                  mix=True,d_layers=1):
         super().__init__()
         self.output_dim,self.output_window = metadata.output_dim,output_window
+        self.future_indices = tuple(metadata.input_layout.get('future_feature_indices', range(metadata.output_dim,metadata.feature_dim)))
         self.xformer = ForecastInformer(pred_len=output_window,output_attention=False,
             enc_in=self.output_dim,d_model=d_model,embed=embed,freq=freq,dropout=dropout,
             dec_in=self.output_dim,enc_attn=enc_attn,factor=factor,n_heads=n_heads,d_ff=d_ff,
@@ -43,10 +44,10 @@ class Trafformer(nn.Module):
         encoder = history[...,:self.output_dim]
         decoder = torch.cat((encoder,encoder.new_zeros(count,nodes,self.output_window,self.output_dim)),dim=2)
         mark_encoder = mark_decoder = None
-        if features>self.output_dim:
+        if self.future_indices:
             if 'future_features' not in batch:
                 raise ValueError('Trafformer calendar channels require future_features')
-            mark_encoder = history[...,self.output_dim:].reshape(count*nodes,length,-1)
+            mark_encoder = history[...,list(self.future_indices)].reshape(count*nodes,length,-1)
             future = batch['future_features'].transpose(1,2).reshape(count*nodes,self.output_window,-1)
             mark_decoder = torch.cat((mark_encoder,future),dim=1)
         return self.xformer(encoder,mark_encoder,decoder,mark_decoder)

@@ -139,5 +139,5 @@ def curriculum_step(loss_fn):
     def step(model,batch,state):
         prediction = model.forward_with_teacher({'X':batch['X']},batch['y'],state.batches_seen)
         state.task_state['curriculum_batches_seen'] = state.batches_seen
-        return loss_fn(prediction,batch['y'])
+        return loss_fn(prediction,batch['y'],batch.get('y_raw'))
     return step

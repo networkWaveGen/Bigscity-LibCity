@@ -51,10 +51,13 @@ def test_forward_loss_and_short_updates_match_legacy_computation(data,name):
     assert not loaded.unexpected_keys
     assert all('support_' in key or key.endswith('Lk') for key in loaded.missing_keys)
     batches = list(context.bundle.train)[:2]
+    # Only the old reference packs known calendar channels into its y tensor.
+    def legacy_batch(batch):
+        return {**batch,'y':torch.cat((batch['y'],batch['future_features']),dim=-1)} if name=='Trafformer' else batch
     legacy.eval()
     context.model.eval()
     with torch.no_grad():
-        expected = legacy.predict(batches[0])
+        expected = legacy.predict(legacy_batch(batches[0]))
         actual = context.model(model_inputs(batches[0],1))
     torch.testing.assert_close(actual,expected,rtol=1e-5,atol=1e-6)
     legacy_optimizer = torch.optim.Adam(legacy.parameters(),lr=.001)
@@ -66,7 +69,7 @@ def test_forward_loss_and_short_updates_match_legacy_computation(data,name):
     for index,batch in enumerate(batches):
         random_state = np.random.get_state()
         legacy_optimizer.zero_grad()
-        expected = legacy.calculate_loss(batch,index) if name=='DCRNN' else legacy.calculate_loss(batch)
+        expected = legacy.calculate_loss(batch,index) if name=='DCRNN' else legacy.calculate_loss(legacy_batch(batch))
         expected.backward()
         legacy_optimizer.step()
         np.random.set_state(random_state)

@@ -54,9 +54,11 @@ def train(context, *,until_epoch=None):
                 with autocast_context(context):
                     prediction = context.model({'X':batch['X'][:,:,nodes], 'node_idx':nodes})
                     target = batch['y'][:,:,nodes]
+                    raw_target = batch['y_raw'][:,:,nodes] if 'y_raw' in batch else None
                     if strategy['use_curriculum_learning']:
                         prediction,target = prediction[:,:level],target[:,:level]
-                    result = context.loss_fn(prediction,target)
+                        raw_target = raw_target[:,:level] if raw_target is not None else None
+                    result = context.loss_fn(prediction,target,raw_target)
                 if not torch.isfinite(result.loss):
                     raise ValueError('MTGNN training loss must be finite')
                 context.amp_scaler.scale(result.loss*result.weight).backward()

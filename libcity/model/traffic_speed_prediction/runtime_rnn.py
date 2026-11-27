@@ -9,6 +9,7 @@ class GRU(nn.Module):
         super().__init__()
         self.num_nodes, self.feature_dim, self.output_dim = metadata.num_nodes, metadata.feature_dim, metadata.output_dim
         self.input_window, self.output_window = input_window, output_window
+        self.future_indices = tuple(metadata.input_layout.get('future_feature_indices', range(self.output_dim,self.feature_dim)))
         self.rnn = nn.GRU(self.num_nodes * self.feature_dim, hidden_size, num_layers,
                           dropout=dropout, bidirectional=bidirectional)
         self.fc = nn.Linear(hidden_size * (2 if bidirectional else 1), self.num_nodes * self.output_dim)
@@ -22,10 +23,11 @@ class GRU(nn.Module):
             output, _ = self.rnn(source)
             prediction = self.fc(output[-1]).reshape(count, self.num_nodes, self.output_dim)
             predictions.append(prediction)
-            following = prediction
-            if self.feature_dim > self.output_dim:
+            following = source[-1].reshape(count,self.num_nodes,self.feature_dim).clone()
+            following[...,:self.output_dim] = prediction
+            if self.future_indices:
                 if 'future_features' not in batch:
                     raise ValueError('Autoregressive extra channels require explicit future_features')
-                following = torch.cat((prediction, batch['future_features'][:, step]), dim=-1)
+                following[...,list(self.future_indices)] = batch['future_features'][:, step]
             source = torch.cat((source[1:], following.reshape(1, count, -1)), dim=0)
         return torch.stack(predictions, dim=1)

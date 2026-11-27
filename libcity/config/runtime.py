@@ -109,11 +109,16 @@ def validate(config, preset):
                 or any(name not in ('RMF','AN','AL') for name in evaluation['metrics'])):
             raise ValueError('Map-matching metrics must be a nonempty list of RMF/AN/AL')
         return
-    _known(data['split'], ('train', 'val'), 'data.split')
+    _known(data['split'], ('train', 'val', 'train_end', 'val_end'), 'data.split')
     rates = [data['split'].get(name) for name in ('train', 'val')]
     if any(type(rate) not in (int, float) or not math.isfinite(rate) or not 0 < rate < 1 for rate in rates) or sum(rates) >= 1:
         raise ValueError('data.split requires positive train and val rates whose sum is below 1')
-    _known(data['features'], ('load_external', 'time_in_day', 'day_in_week'), 'data.features')
+    if ('train_end' in data['split']) != ('val_end' in data['split']):
+        raise ValueError('Explicit splitting requires train_end and val_end')
+    for key in ('train_end','val_end'):
+        if key in data['split'] and not isinstance(data['split'][key],str):
+            raise TypeError(f'data.split.{key} must be an ISO timestamp')
+    _known(data['features'], ('load_external', 'time_in_day', 'day_in_week', 'known_future_columns'), 'data.features')
     _known(data['scaler'], ('name',), 'data.scaler')
     _known(data['graph'], ('name', 'symmetric', 'self_loops', 'epsilon'), 'data.graph')
     _known(data['sampling'], ('name','closeness','period','trend','interval_period','interval_trend'), 'data.sampling')
@@ -146,6 +151,10 @@ def validate(config, preset):
         if type(value) is not bool:
             raise TypeError(f'{name} must be a JSON boolean')
     for name, value in data['features'].items():
+        if name=='known_future_columns':
+            if not isinstance(value,list) or any(not isinstance(item,str) for item in value) or len(set(value))!=len(value):
+                raise TypeError('known_future_columns must be a list of unique column names')
+            continue
         if type(value) is not bool:
             raise TypeError(f'data.features.{name} must be a JSON boolean')
     if training['direction'] not in ('min', 'max'):

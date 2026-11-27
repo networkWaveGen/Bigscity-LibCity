@@ -2,7 +2,8 @@ import os
 import numpy as np
 from libcity.data.dataset.traffic_state_point_dataset import TrafficStatePointDataset
 from libcity.utils.filesystem import ensure_dir
-from libcity.data.utils import generate_dataloader, split_counts
+from libcity.data.utils import generate_dataloader
+from libcity.data.timeline import boundaries, partition_windows
 
 """
 需要有.ext文件！
@@ -14,6 +15,7 @@ class CRANNDataset(TrafficStatePointDataset):
     def __init__(self, config):
         super().__init__(config)
         self.feature_name = {'x_time': 'float', 'x_space': 'float', 'x_ext': 'float', 'y': 'float'}
+        self.cache_file_name = self._get_cache_file_name('crann_target_time_v1')
         self.n_timesteps = self.config.get('n_timesteps', 24*14)
         self.dim_x = self.config.get('dim_x', 5)
         self.dim_y = self.config.get('dim_y', 6)
@@ -23,13 +25,14 @@ class CRANNDataset(TrafficStatePointDataset):
             data_files = self.data_files.copy()
         else:  # str
             data_files = [self.data_files].copy()
-        df = self._load_dyna(data_files[0]).squeeze()  # (T, N)
+        df = self._load_dyna(data_files[0])[..., 0]  # (T, N)
         ext_data = self._load_ext()  # (T, F)
 
         data_time = []
         data_space = []
         data_ext = []
-        n_data = len(df) - 1 - (self.n_timesteps + self.output_window)
+        n_data = len(df) - self.n_timesteps - self.output_window + 1
+        self.target_starts = np.arange(n_data) + self.n_timesteps
         indexes1 = np.arange(n_data)
         indexes2 = indexes1 + (self.n_timesteps + self.output_window) - (self.input_window + self.output_window)
         for index1, index2 in zip(indexes1, indexes2):
@@ -53,19 +56,20 @@ class CRANNDataset(TrafficStatePointDataset):
         return x_time, x_space, x_ext, y_space
 
     def _split_train_val_test(self, x_time, x_space, x_ext, y):
-        num_train, num_val, _ = split_counts(x_time.shape[0], self.train_rate, self.eval_rate)
-        test_start = num_train + num_val
-
-        # train
-        x_time_train, x_space_train, x_ext_train, y_train = \
-            x_time[:num_train], x_space[:num_train], x_ext[:num_train], y[:num_train]
-        # val
-        x_time_val, x_space_val, x_ext_val, y_val = \
-            x_time[num_train: num_train + num_val], x_space[num_train: num_train + num_val], \
-            x_ext[num_train: num_train + num_val], y[num_train: num_train + num_val]
-        # test
-        x_time_test, x_space_test, x_ext_test, y_test = \
-            x_time[test_start:], x_space[test_start:], x_ext[test_start:], y[test_start:]
+        horizon = getattr(self, 'output_window', 1)
+        history = getattr(self, 'n_timesteps', 0)
+        starts = getattr(self, 'target_starts', np.arange(len(y)) + history)
+        length = int(starts[-1]) + horizon if len(starts) else 0
+        cuts = boundaries(length, dict(train=self.train_rate, val=self.eval_rate))
+        selections = partition_windows(starts, horizon, cuts, length)
+        if any(not len(indices) for indices in selections):
+            raise ValueError('Time split produces empty train/validation/test splits')
+        self.split_target_starts = [starts[indices] for indices in selections]
+        fields = (x_time, x_space, x_ext, y)
+        train, val, test = [tuple(field[indices] for field in fields) for indices in selections]
+        x_time_train, x_space_train, x_ext_train, y_train = train
+        x_time_val, x_space_val, x_ext_val, y_val = val
+        x_time_test, x_space_test, x_ext_test, y_test = test
         self._logger.info("train\t" + "x_time: " + str(x_time_train.shape) + ", x_space: " + str(x_space_train.shape)
                           + ", x_ext: " + str(x_ext_train.shape) + ", y: " + str(y_train.shape))
         self._logger.info("eval\t" + "x_time: " + str(x_time_val.shape) + ", x_space: " + str(x_space_val.shape)

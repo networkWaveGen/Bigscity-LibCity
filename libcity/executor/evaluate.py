@@ -28,9 +28,8 @@ def move_batch(batch, device):
 
 def model_inputs(batch, output_dim):
     inputs = {'X': batch['X']}
-    if batch['X'].shape[-1] > output_dim:
-        # Transitional legacy extra channels; feature semantics move in stage 3.
-        inputs['future_features'] = batch['y'][..., output_dim:]
+    if 'future_features' in batch:
+        inputs['future_features'] = batch['future_features']
     return inputs
 
 
@@ -39,12 +38,13 @@ class ForecastLoss:
         self.name, self.mask_value = config['name'], config.get('mask_value', 0.)
         self.scaler, self.output_dim = scaler, output_dim
 
-    def raw(self, prediction, target):
+    def raw(self, prediction, target, raw_target=None):
         target = target[..., :self.output_dim]
-        return self.scaler.inverse_transform(prediction.float()), self.scaler.inverse_transform(target.float())
+        return self.scaler.inverse_transform(prediction.float()), (raw_target[..., :self.output_dim]
+            if raw_target is not None else self.scaler.inverse_transform(target.float()))
 
-    def __call__(self, prediction, target):
-        prediction, target = self.raw(prediction, target)
+    def __call__(self, prediction, target, raw_target=None):
+        prediction, target = self.raw(prediction, target, raw_target)
         if prediction.shape != target.shape:
             raise ValueError(f'Loss shape mismatch: prediction {prediction.shape}, target {target.shape}')
         valid = torch.isfinite(target)
@@ -62,7 +62,7 @@ class ForecastLoss:
 
 def supervised_step(loss_fn):
     def step(model, batch, state):
-        return loss_fn(model(model_inputs(batch, loss_fn.output_dim)), batch['y'])
+        return loss_fn(model(model_inputs(batch, loss_fn.output_dim)), batch['y'], batch.get('y_raw'))
     return step
 
 
@@ -91,10 +91,10 @@ def evaluate_loop(model, loader, *, device, loss_fn, evaluation, directory=None,
         for batch in loader:
             batch = move_batch(batch, device)
             prediction = model(model_inputs(batch, loss_fn.output_dim))
-            step = loss_fn(prediction, batch['y'])
+            step = loss_fn(prediction, batch['y'], batch.get('y_raw'))
             total += step.loss.item() * step.weight
             weight += step.weight
-            raw_prediction, raw_target = loss_fn.raw(prediction, batch['y'])
+            raw_prediction, raw_target = loss_fn.raw(prediction, batch['y'], batch.get('y_raw'))
             accumulator.update(raw_prediction, raw_target)
             if export:
                 predictions.append(raw_prediction.cpu().numpy())
