@@ -13,6 +13,7 @@
 | commit5 | 0c0a20d | feat: migrate calendar spectral and normalization forecasts |
 | commit6 | 2a085e1 | feat: migrate direct map matchers with isolated trajectory state |
 | commit7 | c626860 | feat: migrate FPMC with personalized inputs and valid ranking loss |
+| commit8 | b60ca0e | feat: migrate sparse road autoencoders with explicit reconstruction protocol |
 
 ## commit1：修复基础交通缓存（670b325）
 
@@ -87,6 +88,14 @@ Seq2Seq 旧实现推理仍读取 y 且随机生成解码起点，现使用固定
 修复：ChebConv 的双图高阶递推错误地沿用上一图的状态，以及 0 阶分支；稀疏乘法在 AMP 中保持匹配的 FP32/FP64 运算，稠密投影仍使用 autocast。GAT 按目标邻域与头分别做稳定 softmax，支持空边集并修复混合精度聚合类型。自动设备选择尊重模型能力，ChebConv 在仅有 MPS 的机器可回退 CPU，显式不支持的设备仍报错。
 
 验证：新增 **12 项通过**，包含旧前向/梯度、双图独立多项式与 0 阶、完整训练/独立评估/精确续训及嵌入导出、归一化统计与缺失值/所有权、float64/CPU AMP、空图、协议指标校验、2,000 节点/4,000 边稀疏前向和设备选择。完整回归 **235 passed，0 failed，0 errors，0 skipped**。从仓库外执行两个发布夹具生成命令及 6 条训练/评估/续训 CLI，独立评估一致且续训到第三轮，见 [道路重建 CLI 记录](road-reconstruction-cli-validation.json)。迁移表为 32/100，68 条 pending。
+
+## commit9：迁移 ASTGCN/MSTGCN 三周期预测
+
+新增标准 nn.Module 三周期模型，通过元信息将 trend/period/closeness 输入明确映射到周/日/小时分支，保留时空注意力、切比雪夫图卷积、残差/层归一化及矩阵融合数学逻辑。图谱基注册 buffer，临时张量随输入设备/类型创建，移除模型内 scaler/logger/device。复用公共训练、原尺度掩码与检查点，未操作延期 Common 变体。
+
+修复：MSTGCN 后续块把图过滤器宽度当成时间过滤器输出宽度，在二者不相等时维度错误；图谱归一化对单节点/零拉普拉斯图除零。谱基构造不再依赖随机特征值迭代；图卷积沿时间轴批量计算。周期采样差异写入 protocol_changes，摘要增加 history_span_points，避免把输入样本数误认为实际历史跨度。
+
+验证：新增 **8 项通过**，覆盖三分支旧前向/梯度对照、明确周期顺序、完整训练/独立评估/精确续训、不同过滤器宽度与多目标、batch=1/float64/无标签和输入所有权、CPU AMP 与单节点图。完整回归 **243 passed，0 failed，0 errors，0 skipped**。两个发布夹具及仓库外 6 条 CLI 生命周期命令通过，续训到第三轮，见 [周期模型 CLI 记录](multiscale-cli-validation.json)。清单为 34/100 已迁移，66 条 pending。
 
 ## 持续完成的清单
 

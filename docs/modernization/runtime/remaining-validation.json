@@ -1,5 +1,5 @@
 {
-  "scope": "Remaining-work commits 1-8; whole-library migration remains in progress",
+  "scope": "Remaining-work commits 1-9; whole-library migration remains in progress",
   "environment": {
     "python": "3.12.13",
     "torch": "2.15.0+cpu",
@@ -7,7 +7,7 @@
     "platform": "Windows-11-10.0.26200-SP0"
   },
   "full_tests": {
-    "tests": 235,
+    "tests": 243,
     "failures": 0,
     "errors": 0,
     "skipped": 0
@@ -188,6 +188,14 @@
     "test_stid_independent_calendar_switches_and_unequal_embeddings[True-False]",
     "test_stid_independent_calendar_switches_and_unequal_embeddings[False-False]",
     "test_stnorm_single_node_statistics_are_finite_and_checkpointed",
+    "test_reference_forward_gradients_and_explicit_cpt_branch_order[ASTGCN]",
+    "test_reference_forward_gradients_and_explicit_cpt_branch_order[MSTGCN]",
+    "test_all_cpt_branches_train_evaluate_and_resume_exactly[ASTGCN]",
+    "test_all_cpt_branches_train_evaluate_and_resume_exactly[MSTGCN]",
+    "test_unequal_filters_multiple_targets_batch_one_float64_and_no_labels[ASTGCN]",
+    "test_unequal_filters_multiple_targets_batch_one_float64_and_no_labels[MSTGCN]",
+    "test_cpu_amp_and_single_node_zero_laplacian[ASTGCN]",
+    "test_cpu_amp_and_single_node_zero_laplacian[MSTGCN]",
     "test_retired_modules_and_executor_classes_are_absent",
     "test_tensor_collation_owns_values_and_padding_keeps_explicit_lengths",
     "test_tensor_loader_spawn_and_heterogeneous_tail_padding",
@@ -252,8 +260,8 @@
   ],
   "inventory": {
     "total": 100,
-    "migrated": 32,
-    "pending": 68
+    "migrated": 34,
+    "pending": 66
   },
   "history": [
     {
@@ -297,6 +305,20 @@
         "migrated": 30,
         "pending": 70
       }
+    },
+    {
+      "scope": "commits 1-8, through b60ca0e",
+      "full_tests": {
+        "tests": 235,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "inventory": {
+        "total": 100,
+        "migrated": 32,
+        "pending": 68
+      }
     }
   ],
   "current_cli": {
@@ -309,6 +331,11 @@
   },
   "road_reconstruction_cli": {
     "report": "road-reconstruction-cli-validation.json",
+    "commands": 6,
+    "fixture_commands": 2
+  },
+  "multiscale_cli": {
+    "report": "multiscale-cli-validation.json",
     "commands": 6,
     "fixture_commands": 2
   }

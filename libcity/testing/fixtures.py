@@ -25,6 +25,10 @@ def atomic_fixture(root, name='Tiny', steps=48, nodes=3,interval_minutes=5):
     return folder
 
 
+def multiscale_fixture(root, name='Tiny'):
+    return atomic_fixture(root,name=name,steps=400,interval_minutes=60)
+
+
 def road_feature_fixture(root, name='RoadFeatures', nodes=12):
     folder = Path(root)/name
     folder.mkdir(parents=True,exist_ok=True)

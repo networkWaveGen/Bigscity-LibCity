@@ -9,6 +9,8 @@ from libcity.model.runtime_registry import MODELS
 
 
 VALIDATION={
+    'ASTGCN':'reference_forward_and_gradients;all_CPT_branches;graph_buffers;unequal_filters;multiple_targets;batch_one_float64;short_train;independent_evaluate;exact_resume;CPU_AMP;singleton_graph',
+    'MSTGCN':'reference_forward_and_gradients;all_CPT_branches;graph_buffers;unequal_filters;multiple_targets;batch_one_float64;short_train;independent_evaluate;exact_resume;CPU_AMP;singleton_graph',
     'ChebConv':'reference_forward_and_gradients;independent_dual_chebyshev;zero_order;train_node_scaling;missing_attributes;full_graph_short_train;independent_evaluate;exact_resume;embedding_export;float64;CPU_AMP',
     'GAT':'reference_forward_and_gradients;edge_softmax;train_node_scaling;missing_attributes;empty_graph;full_graph_short_train;independent_evaluate;exact_resume;embedding_export;float64;CPU_AMP',
     'FPMC':'factorization_scores_and_cross_entropy_gradients;personalized_user_vocabulary;variable_padding;batch_one_float64;short_train;independent_evaluate;exact_resume;full_vocabulary_ranking',

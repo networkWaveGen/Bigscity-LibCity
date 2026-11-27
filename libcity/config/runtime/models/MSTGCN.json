@@ -1,0 +1,6 @@
+{
+  "model": {"params": {"nb_block": 2, "K": 3, "nb_chev_filter": 64, "nb_time_filter": 64}},
+  "data": {"sampling": {"name": "cpt", "closeness": 3, "period": 1, "trend": 0},
+    "graph": {"symmetric": true}},
+  "training": {"loss": {"name": "masked_mse"}, "optimizer": {"lr": 0.0001}}
+}

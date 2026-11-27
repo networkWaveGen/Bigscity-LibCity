@@ -1,0 +1,119 @@
+{
+  "passed": true,
+  "commands": 6,
+  "fixture_commands": 2,
+  "models": {
+    "ASTGCN": {
+      "commands": [
+        {
+          "arguments": [
+            "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+            "train",
+            "--config",
+            "D:\\LibCity 2.0\\.runtime-tests\\remaining-cpt-cli-ycv0v8h3\\ASTGCN\\astgcn.json",
+            "--set",
+            "runtime.exp_id=train"
+          ],
+          "returncode": 0
+        },
+        {
+          "arguments": [
+            "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+            "evaluate",
+            "--config",
+            "D:\\LibCity 2.0\\.runtime-tests\\remaining-cpt-cli-ycv0v8h3\\ASTGCN\\astgcn.json",
+            "--set",
+            "runtime.exp_id=evaluate",
+            "--checkpoint",
+            "D:\\LibCity 2.0\\.runtime-tests\\remaining-cpt-cli-ycv0v8h3\\ASTGCN\\runs\\train\\checkpoints\\best.pt"
+          ],
+          "returncode": 0
+        },
+        {
+          "arguments": [
+            "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+            "train",
+            "--config",
+            "D:\\LibCity 2.0\\.runtime-tests\\remaining-cpt-cli-ycv0v8h3\\ASTGCN\\astgcn.json",
+            "--set",
+            "runtime.exp_id=resumed",
+            "--resume",
+            "D:\\LibCity 2.0\\.runtime-tests\\remaining-cpt-cli-ycv0v8h3\\ASTGCN\\runs\\train\\checkpoints\\last.pt",
+            "--set",
+            "training.epochs=3"
+          ],
+          "returncode": 0
+        }
+      ],
+      "metrics": {
+        "MAE@1": 1.3241957585016886,
+        "RMSE@1": 1.5271422219108877,
+        "loss": 2.3321635246276857
+      },
+      "resume_epoch": 3,
+      "history_span_points": 168,
+      "sampling": {
+        "name": "cpt",
+        "closeness": 2,
+        "period": 1,
+        "trend": 1
+      }
+    },
+    "MSTGCN": {
+      "commands": [
+        {
+          "arguments": [
+            "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+            "train",
+            "--config",
+            "D:\\LibCity 2.0\\.runtime-tests\\remaining-cpt-cli-ycv0v8h3\\MSTGCN\\mstgcn.json",
+            "--set",
+            "runtime.exp_id=train"
+          ],
+          "returncode": 0
+        },
+        {
+          "arguments": [
+            "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+            "evaluate",
+            "--config",
+            "D:\\LibCity 2.0\\.runtime-tests\\remaining-cpt-cli-ycv0v8h3\\MSTGCN\\mstgcn.json",
+            "--set",
+            "runtime.exp_id=evaluate",
+            "--checkpoint",
+            "D:\\LibCity 2.0\\.runtime-tests\\remaining-cpt-cli-ycv0v8h3\\MSTGCN\\runs\\train\\checkpoints\\best.pt"
+          ],
+          "returncode": 0
+        },
+        {
+          "arguments": [
+            "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+            "train",
+            "--config",
+            "D:\\LibCity 2.0\\.runtime-tests\\remaining-cpt-cli-ycv0v8h3\\MSTGCN\\mstgcn.json",
+            "--set",
+            "runtime.exp_id=resumed",
+            "--resume",
+            "D:\\LibCity 2.0\\.runtime-tests\\remaining-cpt-cli-ycv0v8h3\\MSTGCN\\runs\\train\\checkpoints\\last.pt",
+            "--set",
+            "training.epochs=3"
+          ],
+          "returncode": 0
+        }
+      ],
+      "metrics": {
+        "MAE@1": 1.5066950996716817,
+        "RMSE@1": 1.8151935762859426,
+        "loss": 3.2949279308319093
+      },
+      "resume_epoch": 3,
+      "history_span_points": 168,
+      "sampling": {
+        "name": "cpt",
+        "closeness": 2,
+        "period": 1,
+        "trend": 1
+      }
+    }
+  }
+}

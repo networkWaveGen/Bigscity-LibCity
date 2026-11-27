@@ -45,6 +45,11 @@ the reconstruction targets. Scaling is fitted on training nodes. The run records
 metrics describe transductive reconstruction and do not measure downstream road
 classification. Graph training uses a single full-graph batch. Feature columns
 and categorical columns are configurable through the data block.
+
+For all three temporal branches of ASTGCN/MSTGCN, generate with `--model ASTGCN`
+or `--model MSTGCN`. The published hourly fixture covers weekly, daily and recent
+segments. Runs record the CPT sampling layout and `history_span_points`; the
+number of input samples differs from their span on the original timeline.
 The complete supported-model inventory and migration details are in the
 [runtime guide](../docs/modernization/runtime/README_zh.md). Small examples prove
 execution and reproducibility, not real-city benchmark accuracy.

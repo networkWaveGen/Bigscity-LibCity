@@ -67,7 +67,7 @@ def close_logger(logger):
 
 def protocol_changes(config):
     defaults = _resource('tasks', config['runtime']['task'])
-    fields = [('data', 'split'), ('data', 'input_window'), ('data', 'output_window'),
+    fields = [('data', 'split'), ('data', 'input_window'), ('data', 'output_window'), ('data','sampling'),
               ('evaluation', 'metrics'), ('evaluation', 'mask_value'), ('evaluation', 'mode')]
     changes = {f'{block}.{key}': config[block][key] for block, key in fields
             if key in defaults[block] and config[block][key] != defaults[block][key]}

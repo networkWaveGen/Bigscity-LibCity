@@ -29,6 +29,8 @@ class ModelSpec:
 
 
 MODELS = {
+    'ASTGCN': ModelSpec('libcity.model.traffic_flow_prediction.runtime_multiscale:ASTGCN'),
+    'MSTGCN': ModelSpec('libcity.model.traffic_flow_prediction.runtime_multiscale:MSTGCN'),
     'ChebConv': ModelSpec('libcity.model.road_representation.runtime_reconstruction:ChebConv',task='road_representation',
         protocol='road_reconstruction',prepare_data='libcity.data.road_reconstruction:prepare_reconstruction',
         loss='libcity.executor.road_reconstruction:ReconstructionLoss',

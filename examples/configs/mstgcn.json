@@ -1,0 +1,8 @@
+{
+  "data": {"dataset": "Tiny", "data_dir": "data", "cache_dir": "cache", "cache": true,
+    "input_window": 4, "output_window": 1, "pad_training": false,
+    "sampling": {"name": "cpt", "closeness": 2, "period": 1, "trend": 1}},
+  "model": {"name": "MSTGCN", "params": {"nb_block": 2, "K": 3, "nb_chev_filter": 4, "nb_time_filter": 4}},
+  "training": {"epochs": 2, "batch_size": 64},
+  "runtime": {"device": "cpu", "seed": 17, "output_dir": "runs"}
+}

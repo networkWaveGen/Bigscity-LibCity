@@ -164,7 +164,7 @@ def prepare_traffic(data, training, evaluation, seed, logger=None):
         requested_input_window=data['input_window'],adapter=layout['kind'], intervals=split_info,
         train_end=str(clock[cuts[0]]),val_end=str(clock[cuts[1]]),scaler_fit_end_exclusive=str(clock[cuts[0]]),
         discarded_boundary_windows=len(starts)-sum(map(len,selections)),
-        cache=cache_info)
+        history_span_points=int(-offsets.min()),cache=cache_info)
     if logger:
         logger.info('Target-time split: %s', summary)
     return DataBundle(*loaders,meta,scaler,generator,summary)
