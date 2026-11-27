@@ -9,6 +9,8 @@ from libcity.model.runtime_registry import MODELS
 
 
 VALIDATION={
+    'ToGCN':'original_autoregressive_and_teacher_forecast_gradients;explicit_teacher_inputs;no_global_anomaly_state;multi_target_batch_one_float64;short_train;independent_evaluate;Python_RNG_and_dropout_exact_resume;CPU_AMP',
+    'SimST':'original_forecast_and_gradients;independent_neighbor_and_calendar_reference;causal_mask_buffer;unequal_horizon;large_batch_node_semantics;multi_target_batch_one_float64;short_train;independent_evaluate;exact_resume;CPU_AMP',
     'TESTAM':'expert_reference_forecast_gate_auxiliary_objective_and_gradients;quantile_and_error_routing;original_LR_curve;multi_target_and_observation;raw_masks;label_free_batch_one_float64;short_train;independent_evaluate;dropout_exact_resume;CPU_AMP',
     'MegaCRN':'reference_prediction_memory_auxiliary_objective_and_gradients;explicit_future_covariates;label_free_training_mode_forward;curriculum_NP_exact_resume;short_train;independent_evaluate;no_covariate_batch_one_float64;CPU_AMP',
     'ASTGCN':'reference_forward_and_gradients;all_CPT_branches;graph_buffers;unequal_filters;multiple_targets;batch_one_float64;short_train;independent_evaluate;exact_resume;CPU_AMP;singleton_graph',

@@ -1,0 +1,172 @@
+{
+  "passed": true,
+  "fixture_commands": 2,
+  "commands": [
+    {
+      "arguments": [
+        "D:\\LibCity 2.0\\LibCity-modernization\\tools\\make_runtime_fixture.py",
+        "--directory",
+        "D:\\LibCity 2.0\\.runtime-tests\\graph-temporal-cli-s9o7tzsh\\ToGCN",
+        "--model",
+        "ToGCN"
+      ],
+      "exit_code": 0
+    },
+    {
+      "arguments": [
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "train",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\graph-temporal-cli-s9o7tzsh\\ToGCN\\togcn.json",
+        "--set",
+        "runtime.exp_id=train"
+      ],
+      "exit_code": 0
+    },
+    {
+      "arguments": [
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "evaluate",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\graph-temporal-cli-s9o7tzsh\\ToGCN\\togcn.json",
+        "--checkpoint",
+        "D:\\LibCity 2.0\\.runtime-tests\\graph-temporal-cli-s9o7tzsh\\ToGCN\\runs\\train\\checkpoints\\best.pt",
+        "--set",
+        "runtime.exp_id=evaluate"
+      ],
+      "exit_code": 0
+    },
+    {
+      "arguments": [
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "train",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\graph-temporal-cli-s9o7tzsh\\ToGCN\\togcn.json",
+        "--resume",
+        "D:\\LibCity 2.0\\.runtime-tests\\graph-temporal-cli-s9o7tzsh\\ToGCN\\runs\\train\\checkpoints\\last.pt",
+        "--set",
+        "runtime.exp_id=resumed",
+        "--set",
+        "training.epochs=3"
+      ],
+      "exit_code": 0
+    },
+    {
+      "arguments": [
+        "D:\\LibCity 2.0\\LibCity-modernization\\tools\\make_runtime_fixture.py",
+        "--directory",
+        "D:\\LibCity 2.0\\.runtime-tests\\graph-temporal-cli-s9o7tzsh\\SimST",
+        "--model",
+        "SimST"
+      ],
+      "exit_code": 0
+    },
+    {
+      "arguments": [
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "train",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\graph-temporal-cli-s9o7tzsh\\SimST\\simst.json",
+        "--set",
+        "runtime.exp_id=train"
+      ],
+      "exit_code": 0
+    },
+    {
+      "arguments": [
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "evaluate",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\graph-temporal-cli-s9o7tzsh\\SimST\\simst.json",
+        "--checkpoint",
+        "D:\\LibCity 2.0\\.runtime-tests\\graph-temporal-cli-s9o7tzsh\\SimST\\runs\\train\\checkpoints\\best.pt",
+        "--set",
+        "runtime.exp_id=evaluate"
+      ],
+      "exit_code": 0
+    },
+    {
+      "arguments": [
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "train",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\graph-temporal-cli-s9o7tzsh\\SimST\\simst.json",
+        "--resume",
+        "D:\\LibCity 2.0\\.runtime-tests\\graph-temporal-cli-s9o7tzsh\\SimST\\runs\\train\\checkpoints\\last.pt",
+        "--set",
+        "runtime.exp_id=resumed",
+        "--set",
+        "training.epochs=3"
+      ],
+      "exit_code": 0
+    }
+  ],
+  "models": {
+    "ToGCN": {
+      "train": {
+        "MAE@1": 0.8658862290558992,
+        "RMSE@1": 1.0523702310488519,
+        "MAE@2": 0.8867989999276621,
+        "RMSE@2": 1.0716732072234467,
+        "loss": 0.8763426542282104,
+        "best_validation": 0.9866848587989807
+      },
+      "evaluate": {
+        "MAE@1": 0.8658862290558992,
+        "RMSE@1": 1.0523702310488519,
+        "MAE@2": 0.8867989999276621,
+        "RMSE@2": 1.0716732072234467,
+        "loss": 0.8763426542282104
+      },
+      "resume": {
+        "MAE@1": 0.8658862290558992,
+        "RMSE@1": 1.0523702310488519,
+        "MAE@2": 0.8867989999276621,
+        "RMSE@2": 1.0716732072234467,
+        "loss": 0.8763426542282104,
+        "best_validation": 0.9866848587989807
+      },
+      "train_state": {
+        "stage": "train",
+        "epoch": 3,
+        "batches_seen": 9,
+        "optimizer_steps": 9,
+        "best_metric": 0.9866848587989807,
+        "task_state": {}
+      }
+    },
+    "SimST": {
+      "train": {
+        "MAE@1": 0.9846708156444408,
+        "RMSE@1": 1.2303097122144884,
+        "MAE@2": 1.0883689809728552,
+        "RMSE@2": 1.3188356632818972,
+        "loss": 1.0365198850631714,
+        "best_validation": 0.8691990971565247
+      },
+      "evaluate": {
+        "MAE@1": 0.9846708156444408,
+        "RMSE@1": 1.2303097122144884,
+        "MAE@2": 1.0883689809728552,
+        "RMSE@2": 1.3188356632818972,
+        "loss": 1.0365198850631714
+      },
+      "resume": {
+        "MAE@1": 0.984097198203758,
+        "RMSE@1": 1.2309661758118076,
+        "MAE@2": 1.057040532430013,
+        "RMSE@2": 1.2833053186039853,
+        "loss": 1.02056884765625,
+        "best_validation": 0.8632066249847412
+      },
+      "train_state": {
+        "stage": "train",
+        "epoch": 3,
+        "batches_seen": 9,
+        "optimizer_steps": 9,
+        "best_metric": 0.8632066249847412,
+        "task_state": {}
+      }
+    }
+  }
+}

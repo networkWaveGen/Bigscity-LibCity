@@ -29,6 +29,9 @@ class ModelSpec:
 
 
 MODELS = {
+    'ToGCN': ModelSpec('libcity.model.traffic_flow_prediction.runtime_togcn:ToGCN',
+        step='libcity.model.traffic_speed_prediction.runtime_seq2seq:teacher_step'),
+    'SimST': ModelSpec('libcity.model.traffic_flow_prediction.runtime_simst:SimST'),
     'TESTAM': ModelSpec('libcity.model.traffic_speed_prediction.runtime_testam:TESTAM',
         step='libcity.executor.testam_step:expert_step'),
     'MegaCRN': ModelSpec('libcity.model.traffic_speed_prediction.runtime_megacrn:MegaCRN',

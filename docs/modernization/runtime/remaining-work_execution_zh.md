@@ -18,6 +18,7 @@
 | commit10 | 8a1de42 | feat: migrate memory forecasts with explicit curriculum and auxiliary step |
 | commit11 | bf174ae | fix: cover matrix-only models in CPU AMP backward fallback |
 | commit12 | 04e2295 | feat: migrate TESTAM experts with explicit routing supervision |
+| commit13 | 26f4110 | fix: select native recurrent forward for unsupported CPU AMP backends |
 
 ## commit1：修复基础交通缓存（670b325）
 
@@ -132,6 +133,14 @@ Seq2Seq 旧实现推理仍读取 y 且随机生成解码起点，现使用固定
 修复：公共训练上下文在 CPU AMP 后端不支持且模型含 RNNBase 时，同时为训练前向选择原生循环内核；AMP 保留，后端设置在每个上下文结束后恢复。纯线性/卷积模型仍沿用此前回退策略，CUDA 不改变。
 
 验证：公共 CPU AMP、定制训练与 STSSL 共 **14 passed**；新增两层 dropout TrafficLSTM 的实际 AMP 连续训练/中断恢复，下一轮参数与计数逐项一致，后端设置恢复。另加新模型批次共 28 项通过，新模型在下一提交独立验收。
+
+## commit14：迁移 ToGCN 与 SimST 图时序预测
+
+ToGCN 保留图卷积、LSTM 编码/解码、历史预热和整批 teacher forcing。普通 forward 不读 y、不消耗 teacher RNG；训练目标由公共 teacher step 显式传入，未来额外输入只取已知协变量，其他观测沿用历史。静态邻接注册 buffer，输出恢复明确的节点/目标维，不再依赖 y.shape 确定预测窗，也不在构造时改变全局 anomaly 状态。
+
+SimST 保留因果时间注意力、节点嵌入、出/入方向指定邻居与邻域均值。邻域静态投影注册 buffer，向量化生成特征；按元信息将星期转换为原 weekday/7。修复位置编码/因果窗误用 output_window、邻域特征固定 12 步、batch>64 隐式改变节点维及回归头忽略多目标的问题。全节点批次不依赖 node_idx；按显式 data.graph 选择图，不再隐式使用旧 Dataset 的 ID 重排与距离变换。
+
+验证：新增 **14 项通过**，包括两种 ToGCN teacher/自回归前向与梯度对照、两种 SimST 邻域配置的独立输入参考和旧网络梯度、两模型训练/独立评估/精确续训（含 dropout 与 Python teacher RNG）、不同窗口、多目标/batch=1/float64/输入所有权/标签隔离、CPU AMP、65 样本批次一致性、无节点嵌入、因果 mask 和孤立节点方向性。完整回归 **271 passed，0 failed，0 errors，0 skipped**；仓库外两个发布夹具及 6 条生命周期命令成功，独立评估一致且续训到第三轮，见 [CLI 记录](graph-temporal-cli-validation.json)。迁移表为 **38/100**，62 条 pending；本期实际模型仍有 **53 个**待迁移，最终全量验收尚未完成。
 
 ## 持续完成的清单
 

@@ -1,0 +1,8 @@
+{
+  "data": {"dataset": "Tiny", "data_dir": "data", "cache_dir": "cache", "cache": true,
+    "input_window": 4, "output_window": 2, "pad_training": false},
+  "model": {"name": "SimST", "params": {"node_dim": 3, "init_dim": 4, "end_dim": 8,
+    "layer": 1, "in_neighbor_num": 1}},
+  "training": {"epochs": 2, "batch_size": 8},
+  "runtime": {"device": "cpu", "seed": 17, "output_dir": "runs"}
+}

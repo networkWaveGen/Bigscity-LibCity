@@ -1,0 +1,8 @@
+{
+  "model": {"params": {"node_dim": 20, "init_dim": 64, "end_dim": 512, "layer": 2,
+    "dropout": 0.1, "in_neighbor_num": 0}},
+  "data": {"features": {"time_in_day": true, "day_in_week": true}},
+  "training": {"optimizer": {"name": "adam", "lr": 0.001, "weight_decay": 0.0001},
+    "scheduler": {"name": "plateau", "interval": "metric", "factor": 0.31622776601683794,
+      "patience": 10, "monitor": "val_loss", "mode": "min"}, "clip_grad_norm": 5.0}
+}

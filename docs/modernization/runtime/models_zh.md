@@ -1,9 +1,10 @@
 # 新运行时模型迁移范围
 
-当前共 34 个运行时入口，对应原清单中的 36 个任务—模型条目（轨迹 RNN/LSTM/GRU 共用一个入口）。完整 [100 项 CSV](model-migration.csv) 逐项记录实际能力、依赖、验证与后续动作；其余 64 项仍为 pending，不会自动回退到旧运行时。37 个特殊交通数据集的深度整理仍延后。交通数据统一使用目标时间互斥切分，三个地图匹配算法均为独立直接执行入口。
+当前共 36 个运行时入口，对应原清单中的 38 个任务—模型条目（轨迹 RNN/LSTM/GRU 共用一个入口）。完整 [100 项 CSV](model-migration.csv) 逐项记录实际能力、依赖、验证与后续动作；其余 62 项仍为 pending，不会自动回退到旧运行时。37 个特殊交通数据集的深度整理仍延后。交通数据统一使用目标时间互斥切分，三个地图匹配算法均为独立直接执行入口。
 
 | 名称 | 任务/数据 | 训练接入 | 检查点/续训能力 | 实际验证级别 |
 | --- | --- | --- | --- | --- |
+| ToGCN / SimST | traffic_state_pred / 图时序编码解码、邻域时间注意力 | 默认 train_loop；ToGCN 使用显式 teacher step | 需要权重；完整续训 | 旧前向/梯度、显式 teacher 与 Python RNG/dropout 精确恢复、独立邻域/日历参考、因果 mask buffer、不同窗口、多目标/batch=1/float64、65 样本批次、CPU AMP、实际 CLI |
 | TESTAM | traffic_state_pred / 三专家与记忆路由 | 默认 train_loop + 专家/门控辅助 step | 需要权重；完整续训 | 旧专家计算、修正的预测切片/路由及辅助损失梯度对照、两种路由模式、原学习率曲线、原尺度掩码、多目标/多观测/batch=1/float64、完整训练/独立评估/dropout 精确续训、CPU AMP、实际 CLI |
 | MegaCRN | traffic_state_pred / 记忆银行+显式未来协变量 | 默认 train_loop + 记忆辅助/课程 step | 需要权重；完整续训 | 旧预测/记忆/辅助目标及梯度对照、训练态纯 forward 无标签且不消耗 RNG、课程 NumPy 随机状态与下一轮逐参数恢复、无协变量/batch=1/float64、CPU AMP、实际 CLI |
 | ASTGCN / MSTGCN | traffic_state_pred / 显式 CPT 三分支 | 默认 train_loop | 需要权重；完整续训 | 三分支旧前向/梯度、周期顺序、图 buffer、不同过滤器宽度及多目标、batch=1/float64、完整训练/独立评估/精确续训、CPU AMP 与单节点图、实际 CLI |
@@ -52,6 +53,10 @@ ASTGCN/MSTGCN 按元信息中的 trend/period/closeness 顺序切分输入，映
 MegaCRN 的普通 forward 在 train/eval 状态均只返回预测张量；记忆三元组/紧凑性损失与显式目标只在训练 step/forward_with_aux 使用，验证以原尺度预测指标选模。解码协变量只取 future_features 中声明为可提前获知的通道，支持没有协变量的情况；历史编码保留原实现仅使用目标通道的设计。临时状态随输入类型/设备创建，图卷积单位阵类型与支持矩阵一致，课程阈值在极大步数下安全归零。
 
 TESTAM 保留时间、动态图、注意力三个专家与记忆门控。旧 STModel 的隐藏残差通道不再作为预测参与路由；多目标按显式专家轴选择，时间通道来自元信息，未来时刻按实际预测窗和 future_features 构造。当前要求连续窗口且 output_window<=input_window，输出取对应未来区间的尾部槽位。普通 forward 始终只返回预测，辅助专家输出只在训练方法中使用；原始目标零值/NaN 不参与专家或门控监督。inverse_sqrt_cosine 调度器保留原预热/周期曲线，interval=step；修改 hidden_size 时应同步显式调整 scheduler.model_dim，避免把优化设置隐藏在模型内部。
+
+ToGCN 保留两层图卷积、逐时 LSTM 编码、历史解码预热与整批 teacher 选择。普通 forward 不读取目标或消耗 teacher RNG；训练通过显式方法传入目标，已知未来通道取 future_features，其他未来观测仅沿用最后已知历史，避免借用未来标签中的额外观测。邻接图注册 buffer，构造不改变全局 anomaly 设置；输出明确为 B×H×N×D，要求 0<=decoder_t<input_window。
+
+SimST 保留因果时间注意力、节点嵌入，以及出/入邻域的指定邻居与均值特征。邻域由配置选择的静态图生成；星期 one-hot 在模型输入适配中转换为原模型的 weekday/7。标准批次始终保持完整节点维，batch 大小不再决定节点采样语义；时间位置/因果 mask 使用实际输入窗，回归头同时支持任意预测窗及多目标。默认使用任务提供的图，不隐式套用旧 Dataset 的 ID 重排与距离预处理；需要距离图时应在 data.graph 明确配置。
 
 本轮有意修订的旧训练行为与原因见 [执行记录](execution_zh.md)。旧源文件中的神经网络层仍被复用；旧数学实现保留为迁移参考，旧 Executor、配置解析器与批对象已在阶段五删除。
 

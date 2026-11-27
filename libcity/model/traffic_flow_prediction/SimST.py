@@ -52,7 +52,7 @@ class TemporalAttention(nn.Module):
         self.proj = nn.Linear(dim, dim)
         self.proj_drop = nn.Dropout(dropout)
 
-        self.mask = torch.tril(torch.ones(window_size, window_size)).to(device)  # mask for causality
+        self.register_buffer('mask',torch.tril(torch.ones(window_size,window_size,dtype=torch.bool,device=device)))
 
     def forward(self, x):
         B_prev, T_prev, C_prev = x.shape

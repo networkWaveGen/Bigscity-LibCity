@@ -63,6 +63,12 @@ four historical steps. The original warmup/periodic learning-rate curve is
 configured explicitly with `inverse_sqrt_cosine`; keep `scheduler.model_dim`
 aligned with the intended optimizer scale when changing the model width.
 
+`--model ToGCN` and `--model SimST` generate graph/temporal examples with the same
+train/evaluate/resume commands. ToGCN trains with explicit teacher targets while
+inference reads only history. SimST creates incoming/outgoing neighborhood features
+from the configured graph and keeps the same full-node meaning for every batch
+size. Its input window and forecast window may differ.
+
 The complete supported-model inventory and migration details are in the
 [runtime guide](../docs/modernization/runtime/README_zh.md). Small examples prove
 execution and reproducibility, not real-city benchmark accuracy.

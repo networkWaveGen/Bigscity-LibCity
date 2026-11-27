@@ -1,5 +1,5 @@
 {
-  "scope": "Remaining-work commits 1-12; whole-library migration remains in progress",
+  "scope": "Remaining-work commits 1-14; whole-library migration remains in progress",
   "environment": {
     "python": "3.12.13",
     "torch": "2.15.0+cpu",
@@ -7,7 +7,7 @@
     "platform": "Windows-11-10.0.26200-SP0"
   },
   "full_tests": {
-    "tests": 256,
+    "tests": 271,
     "failures": 0,
     "errors": 0,
     "skipped": 0
@@ -113,6 +113,7 @@
     "test_cli_model_switch_uses_new_preset_without_old_architecture_fields",
     "test_cpu_convolution_amp_lifecycle_and_backend_restoration",
     "test_cpu_amp_fallback_does_not_require_a_convolution_module",
+    "test_cpu_lstm_amp_forward_workspace_and_exact_resume",
     "test_reference_forward_and_gradient_match_for_original_horizon",
     "test_crann_native_inputs_raw_mask_single_batch_and_target_time_split",
     "test_crann_short_training_independent_evaluation_and_exact_resume",
@@ -157,6 +158,20 @@
     "test_graph_models_use_shared_experiment_entry_and_inference_weights[STGCN]",
     "test_graph_models_use_shared_experiment_entry_and_inference_weights[DCRNN]",
     "test_graph_models_use_shared_experiment_entry_and_inference_weights[Trafformer]",
+    "test_togcn_original_forecast_teacher_objective_and_gradients[False]",
+    "test_togcn_original_forecast_teacher_objective_and_gradients[True]",
+    "test_simst_original_attention_forecast_and_gradients[0]",
+    "test_simst_original_attention_forecast_and_gradients[1]",
+    "test_full_training_independent_evaluation_and_exact_resume[ToGCN]",
+    "test_full_training_independent_evaluation_and_exact_resume[SimST]",
+    "test_multi_target_batch_one_float64_input_ownership_and_label_isolation[ToGCN]",
+    "test_multi_target_batch_one_float64_input_ownership_and_label_isolation[SimST]",
+    "test_actual_cpu_amp_training[ToGCN]",
+    "test_actual_cpu_amp_training[SimST]",
+    "test_simst_large_batch_has_same_node_semantics_and_causal_buffer[0]",
+    "test_simst_large_batch_has_same_node_semantics_and_causal_buffer[3]",
+    "test_neighbor_projection_is_directional_normalized_and_handles_isolated_nodes",
+    "test_togcn_teacher_is_explicit_and_constructor_has_no_global_side_effect",
     "test_migration_inventory_covers_every_original_task_model_and_truthful_capabilities",
     "test_map_bundle_and_direct_evaluation_without_training_objects[False]",
     "test_map_bundle_and_direct_evaluation_without_training_objects[True]",
@@ -273,8 +288,8 @@
   ],
   "inventory": {
     "total": 100,
-    "migrated": 36,
-    "pending": 64
+    "migrated": 38,
+    "pending": 62
   },
   "history": [
     {
@@ -360,6 +375,20 @@
         "migrated": 35,
         "pending": 65
       }
+    },
+    {
+      "scope": "commits 1-12, through 04e2295",
+      "full_tests": {
+        "tests": 256,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "inventory": {
+        "total": 100,
+        "migrated": 36,
+        "pending": 64
+      }
     }
   ],
   "current_cli": {
@@ -389,5 +418,10 @@
     "report": "testam-cli-validation.json",
     "commands": 3,
     "fixture_commands": 1
+  },
+  "graph_temporal_cli": {
+    "report": "graph-temporal-cli-validation.json",
+    "commands": 6,
+    "fixture_commands": 2
   }
 }
