@@ -8,8 +8,10 @@
 - [x] 基线完整测试通过 131 项；环境与结果见 `baseline/environment.json`。
 - [x] 提取可复用原子数据夹具，固定 GRU 权重、输入、目标和零值掩码；保存 `baseline/gru.json` 的前向与损失对照。
 - [x] 分层配置、路径解析、只读元数据与 DataBundle；配置/数据专项检查 38 项通过，GRU 标准模块复用基线权重进行无标签前向对照。
-- [ ] 默认训练、评估、产物、纯权重和完整续训检查点。
-- [ ] GRU CLI/Python 等价运行及阶段一验收。
+- [x] 默认训练、评估、产物、纯权重和完整续训检查点。
+- [x] GRU CLI/Python 等价运行及阶段一验收：156 项完整测试通过，记录见 `phase1-validation.json`。
+
+阶段一同时验证了 step/epoch/metric 三种调度时机、OneCycle 与 WarmupCosine 续训、按有效目标数加权的累积梯度和尾批更新、CPU bfloat16 AMP、可选 TensorBoard、min/max 最佳权重与最近续训状态分离。纯评估构造路径被检查为不调用训练上下文；独立进程导入不加载 Ray/Hyperopt/DGL/TorchText/TensorBoard。旧 CLI 的两项参数测试已随子命令接口更新，其余原有回归保留。
 
 ## 阶段二
 

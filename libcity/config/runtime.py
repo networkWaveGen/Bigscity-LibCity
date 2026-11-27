@@ -56,6 +56,11 @@ def _positive(value, path, zero=False):
         raise ValueError(f'{path} must be an integer >= {0 if zero else 1}')
 
 
+def _number(value, path, minimum=0., strict=False):
+    if type(value) not in (int, float) or not math.isfinite(value) or (value <= minimum if strict else value < minimum):
+        raise ValueError(f'{path} must be a finite number {">" if strict else ">="} {minimum}')
+
+
 def validate(config, preset):
     _known(config, ('data', 'model', 'training', 'evaluation', 'runtime'), 'config')
     for block in config:
@@ -71,6 +76,14 @@ def validate(config, preset):
     if runtime['task'] != spec.task:
         raise ValueError(f'{model["name"]} belongs to task {spec.task}, not {runtime["task"]}')
     _known(model['params'], preset.get('model', {}).get('params', {}), 'model.params')
+    for key, value in model['params'].items():
+        default = preset['model']['params'][key]
+        if isinstance(default, bool) and type(value) is not bool:
+            raise TypeError(f'model.params.{key} must be a boolean')
+        if type(default) is int and type(value) is not int:
+            raise TypeError(f'model.params.{key} must be an integer')
+        if type(default) is float and (type(value) not in (int, float) or not math.isfinite(value)):
+            raise TypeError(f'model.params.{key} must be a finite number')
     _known(data['split'], ('train', 'val'), 'data.split')
     rates = [data['split'].get(name) for name in ('train', 'val')]
     if any(type(rate) not in (int, float) or not math.isfinite(rate) or not 0 < rate < 1 for rate in rates) or sum(rates) >= 1:
@@ -116,12 +129,31 @@ def validate(config, preset):
         _known(training[key], names, f'training.{key}')
     if training['optimizer'].get('name') not in ('adam', 'adamw', 'sgd', 'rmsprop', 'adagrad'):
         raise ValueError('Unknown optimizer name')
+    optimizer = training['optimizer']
+    for key in ('lr', 'weight_decay', 'eps', 'momentum', 'alpha'):
+        if key in optimizer:
+            _number(optimizer[key], f'optimizer.{key}', strict=key in ('lr', 'eps'))
+    if not isinstance(optimizer.get('groups', []), list):
+        raise TypeError('optimizer.groups must be a list')
+    for group in optimizer.get('groups', []):
+        _known(group, ('modules', 'lr', 'weight_decay', 'freeze'), 'optimizer.groups')
+        modules = group.get('modules')
+        if not (isinstance(modules, str) and modules or isinstance(modules, list) and modules
+                and all(isinstance(name, str) and name for name in modules)):
+            raise ValueError('optimizer group requires nonempty modules')
+        if type(group.get('freeze', False)) is not bool:
+            raise TypeError('optimizer group freeze must be boolean')
+        for key in ('lr', 'weight_decay'):
+            if key in group:
+                _number(group[key], f'optimizer group {key}', strict=key == 'lr')
     scheduler = training['scheduler']
     if scheduler.get('name') not in ('none', 'step', 'multistep', 'cosine', 'exponential', 'plateau', 'onecycle', 'warmup_cosine'):
         raise ValueError('Unknown scheduler name')
     interval = scheduler.get('interval', 'epoch')
     if interval not in ('step', 'epoch', 'metric'):
         raise ValueError('scheduler.interval must be step, epoch or metric')
+    if scheduler['name'] != 'none' and 'interval' not in scheduler:
+        raise ValueError('scheduler.interval must be explicitly declared')
     if scheduler['name'] == 'plateau' and interval != 'metric':
         raise ValueError('plateau scheduler requires interval=metric')
     if scheduler['name'] in ('onecycle', 'warmup_cosine') and interval != 'step':
@@ -129,6 +161,16 @@ def validate(config, preset):
     if training['loss'].get('name') not in ('mae', 'mse', 'masked_mae', 'masked_mse'):
         raise ValueError('Unknown training.loss.name')
     _positive(training['early_stopping']['patience'], 'early_stopping.patience', zero=True)
+    _number(training['early_stopping']['min_delta'], 'early_stopping.min_delta')
+    if training['clip_grad_norm'] is not None:
+        _number(training['clip_grad_norm'], 'training.clip_grad_norm', strict=True)
+    if not isinstance(training['monitor'], str) or not training['monitor']:
+        raise ValueError('training.monitor must be a nonempty string')
+    for section in (training['loss'], evaluation):
+        value = section.get('mask_value')
+        if value is not None and (type(value) not in (int, float) or not math.isfinite(value)):
+            raise ValueError('mask_value must be a finite number or null')
+    _object(training['strategy'], 'training.strategy')
     if runtime['exp_id'] is not None and (not isinstance(runtime['exp_id'], str) or not runtime['exp_id']
             or runtime['exp_id'] in ('.', '..') or any(c in runtime['exp_id'] for c in '/\\')):
         raise ValueError('runtime.exp_id must be a single nonempty directory name')
@@ -155,6 +197,9 @@ def load_config(config_file=None, overrides=None, *, config=None):
         user = _object(deepcopy(config or {}), 'config')
     cli = _object(deepcopy(overrides or {}), 'overrides')
     selectors = merge_config(user, cli)
+    _known(selectors, ('data', 'model', 'training', 'evaluation', 'runtime'), 'config')
+    for block in selectors:
+        _object(selectors[block], block)
     name = selectors.get('model', {}).get('name')
     if not isinstance(name, str):
         raise ValueError('model.name is required')

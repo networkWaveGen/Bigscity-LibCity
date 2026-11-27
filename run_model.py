@@ -1,38 +1,39 @@
-"""
-训练并评估单一模型的脚本
-"""
-
+"""Source entrypoint; experiment behavior lives in libcity.pipeline.experiment."""
 import argparse
+import json
 
-from libcity.pipeline.pipeline import run_model
-from libcity.utils.argument_list import str2bool, add_general_args
+from libcity.pipeline.experiment import run_experiment
+
+
+def main(argv=None):
+    parser = argparse.ArgumentParser(description='Run a LibCity experiment')
+    parser.add_argument('mode', choices=('train', 'evaluate'))
+    parser.add_argument('--config', required=True)
+    parser.add_argument('--checkpoint')
+    parser.add_argument('--resume')
+    parser.add_argument('--set', action='append', default=[], metavar='BLOCK.KEY=JSON')
+    arguments = parser.parse_args(argv)
+    overrides = {}
+    for item in arguments.set:
+        if '=' not in item:
+            parser.error('--set requires BLOCK.KEY=JSON')
+        key, value = item.split('=', 1)
+        keys = key.split('.')
+        if len(keys) < 2 or any(not part for part in keys):
+            parser.error('--set requires a dotted configuration key')
+        try:
+            value = json.loads(value)
+        except json.JSONDecodeError:
+            pass
+        block = overrides
+        for part in keys[:-1]:
+            block = block.setdefault(part, {})
+        block[keys[-1]] = value
+    result = run_experiment(arguments.mode, arguments.config, overrides=overrides,
+                            checkpoint=arguments.checkpoint, resume=arguments.resume)
+    print(json.dumps(dict(metrics=result.metrics, artifacts={key: str(path) for key, path in result.artifacts.items()})))
+    return result
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    # 增加指定的参数
-    parser.add_argument('--task', type=str,
-                        default='traffic_state_pred', help='the name of task')
-    parser.add_argument('--model', type=str,
-                        default='GRU', help='the name of model')
-    parser.add_argument('--dataset', type=str,
-                        default='METR_LA', help='the name of dataset')
-    parser.add_argument('--config_file', type=str,
-                        default=None, help='the file name of config file')
-    parser.add_argument('--saved_model', type=str2bool,
-                        default=None, help='whether save the trained model (otherwise use config)')
-    parser.add_argument('--train', type=str2bool, default=None,
-                        help='whether re-train model if the model is trained before')
-    parser.add_argument('--exp_id', type=str, default=None, help='id of experiment')
-    parser.add_argument('--seed', type=int, default=0, help='random seed')
-    # 增加其他可选的参数
-    add_general_args(parser)
-    # 解析参数
-    args = parser.parse_args()
-    dict_args = vars(args)
-    other_args = {key: val for key, val in dict_args.items() if key not in [
-        'task', 'model', 'dataset', 'config_file', 'saved_model', 'train'] and
-        val is not None}
-    run_model(task=args.task, model_name=args.model, dataset_name=args.dataset,
-              config_file=args.config_file, saved_model=args.saved_model,
-              train=args.train, other_args=other_args)
+    main()

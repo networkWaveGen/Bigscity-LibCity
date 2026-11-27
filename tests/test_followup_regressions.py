@@ -109,22 +109,23 @@ def test_real_config_json_flags_and_explicit_overrides(tmp_path, json_flags, exp
     assert (config['train'], config['saved_model']) == expected
 
 
-@pytest.mark.parametrize('arguments', [[], ['--train', 'true', '--saved_model', 'true']])
-def test_real_cli_leaves_omitted_flags_to_json(tmp_path, monkeypatch, arguments):
+@pytest.mark.parametrize('arguments', [[], ['--set', 'training.epochs=2']])
+def test_real_cli_passes_layered_config_and_explicit_overrides(tmp_path, monkeypatch, arguments):
     path = tmp_path / 'experiment.json'
-    path.write_text('{"train": false, "saved_model": false}', encoding='utf-8')
-    pipeline = importlib.import_module('libcity.pipeline.pipeline')
+    path.write_text('{"data": {"dataset": "fixture"}, "model": {"name": "GRU"}, "training": {"epochs": 1}}', encoding='utf-8')
+    pipeline = importlib.import_module('libcity.pipeline.experiment')
     observed = []
 
-    def inspect_config(task, model_name, dataset_name, config_file, saved_model, train, other_args):
-        cfg = ConfigParser(task, model_name, dataset_name, config_file, saved_model, train, other_args)
-        observed.append((cfg['train'], cfg['saved_model']))
+    def inspect_config(mode, config_file, *, overrides, checkpoint, resume):
+        from libcity.config.runtime import load_config
+        cfg = load_config(config_file, overrides)
+        observed.append((mode, cfg['training']['epochs'], checkpoint, resume))
+        return SimpleNamespace(metrics={}, artifacts={})
 
-    monkeypatch.setattr(pipeline, 'run_model', inspect_config)
-    monkeypatch.setattr(sys, 'argv', ['run_model.py', '--dataset', 'fixture', '--config_file', str(path),
-                                    '--gpu', 'false', *arguments])
+    monkeypatch.setattr(pipeline, 'run_experiment', inspect_config)
+    monkeypatch.setattr(sys, 'argv', ['run_model.py', 'train', '--config', str(path), *arguments])
     runpy.run_path(str(ROOT / 'run_model.py'), run_name='__main__')
-    assert observed == [(bool(arguments), bool(arguments))]
+    assert observed == [('train', 2 if arguments else 1, None, None)]
 
 
 def test_json_evaluation_mode_does_not_start_data_preparation(tmp_path, monkeypatch):

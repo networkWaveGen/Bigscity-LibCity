@@ -7,6 +7,11 @@ Existing model names continue to work in experiment configuration. Python
 callers should import components from their implementation modules.
 AgentCity is outside this change.
 
+The source CLI now uses `run_model.py train/evaluate --config ...` and layered
+JSON configuration. See the [new runtime guide](runtime/README_zh.md) and
+[phase acceptance record](runtime/execution_zh.md). Historical executor audits
+below describe the retained migration baseline, not the new CLI contract.
+
 The follow-up [runtime fixes](runtime-fixes_zh.md) address evaluation sample
 accounting, checkpoint/mode controls and CPU placement. That work has its own
 70-case validation record; the earlier audit reports below remain archived.

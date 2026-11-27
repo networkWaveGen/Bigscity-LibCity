@@ -4,8 +4,8 @@ from libcity.data.dataset.traffic_state_datatset import TrafficStateDataset
 
 class TrafficStatePointDataset(TrafficStateDataset):
 
-    def __init__(self, config):
-        super().__init__(config)
+    def __init__(self, config, logger=None):
+        super().__init__(config, logger=logger)
         self.cache_file_name = self._get_cache_file_name('point_based')
 
     def _load_geo(self):

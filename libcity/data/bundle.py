@@ -62,7 +62,7 @@ METADATA_FIELDS = {'geo_file', 'rel_file', 'data_files', 'ext_file', 'data_col',
                    'output_dim', 'time_intervals'}
 
 
-def prepare_traffic(data_config, training_config, evaluation_config, seed):
+def prepare_traffic(data_config, training_config, evaluation_config, seed, logger=None):
     from libcity.data.dataset.traffic_state_point_dataset import TrafficStatePointDataset
     folder = Path(data_config['data_dir']) / data_config['dataset']
     raw = json.loads((folder / 'config.json').read_text(encoding='utf-8'))
@@ -75,7 +75,7 @@ def prepare_traffic(data_config, training_config, evaluation_config, seed):
         scaler=data_config['scaler']['name'], batch_size=training_config['batch_size'], num_workers=0,
         pad_with_last_sample=data_config['pad_training'], load_external=data_config['features']['load_external'],
         add_time_in_day=data_config['features']['time_in_day'], add_day_in_week=data_config['features']['day_in_week'])
-    dataset = TrafficStatePointDataset(legacy)
+    dataset = TrafficStatePointDataset(legacy, logger=logger)
     loaders = dataset.get_data()
     features = dataset.get_data_feature()
     meta = DatasetMetadata(data_config['dataset'], features['num_nodes'], features['feature_dim'],

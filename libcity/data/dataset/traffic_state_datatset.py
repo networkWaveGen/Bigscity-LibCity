@@ -28,7 +28,7 @@ class TrafficStateDataset(AbstractDataset):
     默认使用`train_rate`和`eval_rate`在样本数量(num_samples)维度上直接切分训练集、测试集、验证集。
     """
 
-    def __init__(self, config):
+    def __init__(self, config, logger=None):
         self.config = config
         self.dataset = self.config.get('dataset', '')
         self.batch_size = self.config.get('batch_size', 64)
@@ -89,7 +89,7 @@ class TrafficStateDataset(AbstractDataset):
         self.ext_dim = 0
         self.num_nodes = 0
         self.num_batches = 0
-        self._logger = getLogger()
+        self._logger = logger if logger is not None else getLogger()
         if os.path.exists(self.data_path + self.geo_file + '.geo'):
             self._load_geo()
         else:
