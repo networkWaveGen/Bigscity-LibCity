@@ -5,7 +5,7 @@
 | 模型/组件 | 当前源码依赖 | 具体处理步骤与验收门槛 |
 | --- | --- | --- |
 | GeoSAN | 原 TorchText Field 与 NLTK 已移除，geosan 可选组已删除 | 已用标准库词频表、固定 PAD=0/词频降序/词典序同频规则、字符串滑窗与 pad_sequence 替代。静态 POI 建词表，训练访问统计隔离；修复经纬度和 KNN 弧度、有限候选/访问耗尽回退，保留加权二元目标。已接入原生模型、采样 step 与公共训练，覆盖四种旧有效前向/梯度、采样分布、全词表排名、精确续训；显式阻止 TorchText/NLTK 导入后实际短训通过。具体协议差异见 models_zh.md。 |
-| Node2Vec、DeepWalk | embeddings 组的 gensim | 先隔离随机游走与词向量训练，明确不可用梯度优化器、是否支持验证/续训；通过直接训练回调输出统一向量与 node_ids，不调用旧全局缓存路径。对照固定游走、词表和相似度；若替换训练器，单列数值语义变更。 |
+| Node2Vec、DeepWalk | embeddings 组的 gensim>=4.4,<5（NumPy 2 兼容） | 已接入独立外部训练回调，保留 Gensim skip-gram 后端；稀疏游走/有界缓存/流式语料，安全 Tensor 向量权重与真实 node_ids。完成固定游走、Gensim 直接数值对照、跨进程确定性及实际 CLI；无需 PyTorch 优化器，独立评估不导入 Gensim。不声明验证/调参/完整续训能力，不保存或加载 Gensim pickle。 |
 | DMVSTNet、GMAN、STAGGCN、STMGAT、GeomGCN 等 | graph/DGL；具体组合见完整 CSV 的 dependency_extras | 仅在选中时加载。分离图预处理与前向，将静态图注册 buffer；优先对简单消息传递评估用 PyTorch sparse/index_add 重写的可行性，保留边方向、归一化和稀疏度对照。复杂层先记录可用环境后再决定替换。 |
 | STWave、PDFormer 等 | fastdtw、PyWavelets、tslearn 等独立组 | 将 DTW/小波/聚类放在明确的数据变换步骤，记录变换配置和产物；可离线准备时不阻塞基础安装。替代算法必须记录近似误差与图结构变化，不能只删除 import。 |
 | STGODE、STGNCDE | torchdiffeq 等 | 保持 ode 可选组，单独核对求解器设置、浮点类型、梯度和短训练；不将“不是核心依赖”解释为必须重写求解器。 |

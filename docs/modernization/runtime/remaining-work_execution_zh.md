@@ -35,7 +35,8 @@
 | commit27 | c9b77ca | feat: migrate CARA with author gates and causal pairwise ranking |
 | commit28 | 39ed76b | feat: migrate LSTPM with causal session attention and ranking |
 | commit29 | 4fc8211 | feat: migrate GeoSAN with native geography and bounded sampling |
-| commit30 | 随本节交付的提交 | feat: migrate TTPNet with departure-known traffic and cumulative ETA training |
+| commit30 | cf56fa4 | feat: migrate TTPNet with departure-known traffic and cumulative ETA training |
+| commit31 | 随本节交付的提交 | feat: migrate Node2Vec and DeepWalk with explicit external training |
 
 ## commit1：修复基础交通缓存（670b325）
 
@@ -304,6 +305,20 @@ cara_ranking 协议明确 training.loss.name=bpr。每样本独立计算原成�
 数值对照中的初次 FP32 原始坐标归一化误差约 0.006689，导致预测差约 2.58e-6；定位为旧实现先截断大经纬度再相减的精度损失。新数据层先在双精度中归一化，模型数学对照使用双精度原始坐标后，最大预测差约 3.37e-10；没有通过放宽原检查阈值掩盖差异。全部模型参数梯度对照通过。其余有意变化（真实长度、ID 对齐、时间单位和输入可用性）明确登记，不将完整旧错误路径当等价基准。
 
 验证：TTPNet 新增 **16 项通过**，覆盖旧有效非填充模型及全部梯度、按路线累计相对 RMSE/权重/梯度与精确拟合、训练/独立评估/秒级导出/dropout 参数与 RNG 精确续训、混批/变长/padding/batch=1/float64/所有权/标签隔离、完整行程共同基准/训练统计/预训练 ID 对齐/单位换算、实际未来耗时变化后输入与预测不变、非法/缺失/未来快照和速度 JSON、零速度/常量 CPU AMP、两点路线/非固定嵌入宽度、跨天总秒数和旧编码器修复。与共享任务/退役接口检查合计 **42 项通过**。当前源码完整回归 **463 passed，0 failed，0 errors，0 skipped**，见 [汇总](remaining-validation.json)；仓库外夹具、训练、独立评估、续训第三轮共 4 条实际命令成功，指标一致且预测按秒导出，见 [CLI](ttpnet-cli-validation.json)。迁移表 **53/100**，47 条 pending；两个 ETA 模型均已接入。本期仍有 **38 个**实际模型（35 交通、3 道路表征）及最终全量验收待完成。
+
+## commit31：迁移 Node2Vec/DeepWalk 与明确外部训练能力
+
+问题：旧模型只提供写全局缓存的 run，依赖 Gensim 顶层导入及旧 NetworkX/Python API；DeepWalk 的 start=0 会误选随机起点，默认 Random 对象在调用间共享状态。训练保存 Gensim pickle/.m，再从文本反读向量，缺少统一实验目录、真实节点 ID 校验和明确验证/续训能力。旧全图邻接矩阵、全量游走列表及全部二阶 alias 表也会造成较大内存开销。
+
+修改：保留 Gensim skip-gram 后端，[Gensim 4.4](https://github.com/piskvorky/gensim/releases/tag/4.4.0) 支持 NumPy 2，embeddings 最低版本更新为 4.4，实际安装在当前 CPU 环境并通过 editable 安装/pip check。新 road_walk 协议完整定义五个配置区块，训练参数属于 Word2Vec，不继承无作用的神经训练项。ModelSpec 声明 kind=external、CPU、需要安全推理权重，但不支持验证和续训；轻量 AlgorithmContext 交给独立训练回调，不创建 PyTorch 优化器、调度器、GradScaler 或 TensorBoard。统一入口继续负责配置、日志、运行摘要和输出；CheckpointManager 增加集中式纯权重写出。既有神经及直接算法路径保持原职责，普通导入不加载 Gensim。
+
+数据按真实 .geo ID 构建稀疏边表和行偏移；二值图默认按关系存在连边，Node2Vec 可显式读取正亲和权重。零边去掉、非法负/非有限权重拒绝，重复有向关系最后生效，无向化双向取最大，自环显式配置。全图无监督协议不创建伪 train/val/test loader。Node2Vec 的 p/q、加权 alias 采样和 DeepWalk 的均匀/重启随机游走保留；每个 corpus 使用局部 RNG，二阶缓存按 100,000 个邻居槽限制，概率归一化保持数值稳定。采样逐条写入实验 training/walks.txt，Gensim 按行重复读取，不把全部路径留在 Python 列表。旧参考代码同步修复 NetworkX 接口/无向标记、Iterable、起点 0 与共享默认 RNG，不恢复旧全局运行入口。
+
+向量按节点索引直接从 Word2Vec 获取；Node2Vec 默认负采样 5，DeepWalk 保留 LibCity 的 hs=1 且 negative=5 组合，可显式选择仅 HS。运行种子、固定 token 初始化映射和单 worker 支持当前环境跨进程复现；确定性模式拒绝多 worker。单词初始化映射不涉及源文件内容哈希。训练统计/来源文件版本写入 training/report.json 和 metrics.jsonl，安全权重为 checkpoints/embeddings.pt（纯 Tensor，含节点 ID、算法配置、稀疏图与向量），不存储/加载 Gensim pickle。独立评估无 Gensim 依赖，严格拒绝不匹配的 ID/图/配置，按真实 ID 导出 embeddings.npy/node_ids.json；关闭导出会移除旧结果。
+
+能力边界：没有验证划分或完整安全后端状态，因此无 best_validation、best.pt/last.pt 或完整续训；--resume 与调参在准备数据/训练前拒绝。结果只报告节点数/维度/覆盖率/均值范数/孤立及无出边节点等结构诊断，不能解释为模型精度；覆盖率 1 也不表示孤立节点有上下文训练信号。默认 epochs 沿用旧 1000，发布示例显式两轮，只证明生命周期和数值实现，不声称下游精度复现。
+
+验证：新增 **17 项通过**，包括加权有向/无向 Node2Vec 固定游走对照、修正起点 0 后 DeepWalk 三种重启概率与重复调用、p/q 概率/alias 分布/对称权重/只读稀疏元信息、两个模型真实 Gensim 构造器逐向量完全一致、外部训练不创建 PyTorch 优化器或记录器、跨进程逐元素确定性、阻止 Gensim 导入后实际独立评估、导出关闭与 ID 对齐、明确能力拒绝、缺少训练依赖报错、损坏/不匹配权重拒绝、全孤立图与 2,000 节点稀疏适配/有界缓存。完整回归 **480 passed，0 failed，0 errors，0 skipped**（环境实际安装 Gensim 4.4），见 [汇总](remaining-validation.json)。仓库外两个夹具、两次训练及两次独立评估共 **6 条成功命令**，另有 **4 条续训/调参请求按预期拒绝**，见 [CLI](walk-cli-validation.json)。迁移表 **55/100**，45 条 pending；本期实际剩余 **36 个模型**（35 交通、1 道路 GeomGCN），最终全量验收仍未完成。
 
 ## 持续完成的清单
 

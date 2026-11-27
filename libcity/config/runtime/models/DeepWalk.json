@@ -1,0 +1,5 @@
+{
+  "data": {"graph": {"directed": false}},
+  "model": {"params": {"output_dim": 128, "num_walks": 10, "walk_length": 80, "restart": 0.0}},
+  "training": {"loss": {"hierarchical_softmax": true}}
+}

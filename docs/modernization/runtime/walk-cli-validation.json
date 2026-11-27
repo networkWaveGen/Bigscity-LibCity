@@ -1,0 +1,275 @@
+{
+  "passed": true,
+  "source": "D:\\LibCity 2.0\\LibCity-modernization",
+  "directory": "D:\\LibCity 2.0\\.runtime-tests\\walk-cli-1p7xee50",
+  "commands": [
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\tools\\make_runtime_fixture.py",
+        "--directory",
+        "D:\\LibCity 2.0\\.runtime-tests\\walk-cli-1p7xee50\\Node2Vec",
+        "--model",
+        "Node2Vec"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\walk-cli-1p7xee50",
+      "exit_code": 0,
+      "expected_failure": false
+    },
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "train",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\walk-cli-1p7xee50\\Node2Vec\\node2vec.json",
+        "--set",
+        "runtime.exp_id=train"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\walk-cli-1p7xee50",
+      "exit_code": 0,
+      "expected_failure": false
+    },
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "evaluate",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\walk-cli-1p7xee50\\Node2Vec\\node2vec.json",
+        "--checkpoint",
+        "D:\\LibCity 2.0\\.runtime-tests\\walk-cli-1p7xee50\\Node2Vec\\runs\\train\\checkpoints\\embeddings.pt",
+        "--set",
+        "runtime.exp_id=evaluate"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\walk-cli-1p7xee50",
+      "exit_code": 0,
+      "expected_failure": false
+    },
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "train",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\walk-cli-1p7xee50\\Node2Vec\\node2vec.json",
+        "--resume",
+        "D:\\LibCity 2.0\\.runtime-tests\\walk-cli-1p7xee50\\Node2Vec\\runs\\train\\checkpoints\\embeddings.pt",
+        "--set",
+        "runtime.exp_id=rejected-resume"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\walk-cli-1p7xee50",
+      "exit_code": 1,
+      "expected_failure": true,
+      "expected_message": "does not support --resume"
+    },
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_hyper.py",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\walk-cli-1p7xee50\\Node2Vec\\node2vec.json",
+        "--space",
+        "D:\\LibCity 2.0\\.runtime-tests\\walk-cli-1p7xee50\\space.json",
+        "--max-trials",
+        "2"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\walk-cli-1p7xee50",
+      "exit_code": 1,
+      "expected_failure": true,
+      "expected_message": "Tuning requires validation scores"
+    },
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\tools\\make_runtime_fixture.py",
+        "--directory",
+        "D:\\LibCity 2.0\\.runtime-tests\\walk-cli-1p7xee50\\DeepWalk",
+        "--model",
+        "DeepWalk"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\walk-cli-1p7xee50",
+      "exit_code": 0,
+      "expected_failure": false
+    },
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "train",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\walk-cli-1p7xee50\\DeepWalk\\deepwalk.json",
+        "--set",
+        "runtime.exp_id=train"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\walk-cli-1p7xee50",
+      "exit_code": 0,
+      "expected_failure": false
+    },
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "evaluate",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\walk-cli-1p7xee50\\DeepWalk\\deepwalk.json",
+        "--checkpoint",
+        "D:\\LibCity 2.0\\.runtime-tests\\walk-cli-1p7xee50\\DeepWalk\\runs\\train\\checkpoints\\embeddings.pt",
+        "--set",
+        "runtime.exp_id=evaluate"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\walk-cli-1p7xee50",
+      "exit_code": 0,
+      "expected_failure": false
+    },
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "train",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\walk-cli-1p7xee50\\DeepWalk\\deepwalk.json",
+        "--resume",
+        "D:\\LibCity 2.0\\.runtime-tests\\walk-cli-1p7xee50\\DeepWalk\\runs\\train\\checkpoints\\embeddings.pt",
+        "--set",
+        "runtime.exp_id=rejected-resume"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\walk-cli-1p7xee50",
+      "exit_code": 1,
+      "expected_failure": true,
+      "expected_message": "does not support --resume"
+    },
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_hyper.py",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\walk-cli-1p7xee50\\DeepWalk\\deepwalk.json",
+        "--space",
+        "D:\\LibCity 2.0\\.runtime-tests\\walk-cli-1p7xee50\\space.json",
+        "--max-trials",
+        "2"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\walk-cli-1p7xee50",
+      "exit_code": 1,
+      "expected_failure": true,
+      "expected_message": "Tuning requires validation scores"
+    }
+  ],
+  "models": {
+    "Node2Vec": {
+      "training": {
+        "metrics": {
+          "nodes": 8.0,
+          "dimensions": 4.0,
+          "coverage": 1.0,
+          "mean_norm": 1.1145452888714513,
+          "isolated_nodes": 0.0,
+          "dead_end_nodes": 0.0
+        },
+        "artifacts": {
+          "metrics_json": "D:\\LibCity 2.0\\.runtime-tests\\walk-cli-1p7xee50\\Node2Vec\\runs\\train\\eval\\metrics.json",
+          "metrics_csv": "D:\\LibCity 2.0\\.runtime-tests\\walk-cli-1p7xee50\\Node2Vec\\runs\\train\\eval\\metrics.csv",
+          "embeddings": "D:\\LibCity 2.0\\.runtime-tests\\walk-cli-1p7xee50\\Node2Vec\\runs\\train\\eval\\embeddings.npy",
+          "node_ids": "D:\\LibCity 2.0\\.runtime-tests\\walk-cli-1p7xee50\\Node2Vec\\runs\\train\\eval\\node_ids.json",
+          "resolved_config": "D:\\LibCity 2.0\\.runtime-tests\\walk-cli-1p7xee50\\Node2Vec\\runs\\train\\resolved_config.json",
+          "runtime_info": "D:\\LibCity 2.0\\.runtime-tests\\walk-cli-1p7xee50\\Node2Vec\\runs\\train\\runtime_info.json",
+          "run_log": "D:\\LibCity 2.0\\.runtime-tests\\walk-cli-1p7xee50\\Node2Vec\\runs\\train\\run.log",
+          "weights": "D:\\LibCity 2.0\\.runtime-tests\\walk-cli-1p7xee50\\Node2Vec\\runs\\train\\checkpoints\\embeddings.pt",
+          "training_report": "D:\\LibCity 2.0\\.runtime-tests\\walk-cli-1p7xee50\\Node2Vec\\runs\\train\\training\\report.json",
+          "walks": "D:\\LibCity 2.0\\.runtime-tests\\walk-cli-1p7xee50\\Node2Vec\\runs\\train\\training\\walks.txt",
+          "training_metrics": "D:\\LibCity 2.0\\.runtime-tests\\walk-cli-1p7xee50\\Node2Vec\\runs\\train\\metrics.jsonl"
+        }
+      },
+      "evaluation": {
+        "metrics": {
+          "nodes": 8.0,
+          "dimensions": 4.0,
+          "coverage": 1.0,
+          "mean_norm": 1.1145452888714513,
+          "isolated_nodes": 0.0,
+          "dead_end_nodes": 0.0
+        },
+        "artifacts": {
+          "metrics_json": "D:\\LibCity 2.0\\.runtime-tests\\walk-cli-1p7xee50\\Node2Vec\\runs\\evaluate\\eval\\metrics.json",
+          "metrics_csv": "D:\\LibCity 2.0\\.runtime-tests\\walk-cli-1p7xee50\\Node2Vec\\runs\\evaluate\\eval\\metrics.csv",
+          "embeddings": "D:\\LibCity 2.0\\.runtime-tests\\walk-cli-1p7xee50\\Node2Vec\\runs\\evaluate\\eval\\embeddings.npy",
+          "node_ids": "D:\\LibCity 2.0\\.runtime-tests\\walk-cli-1p7xee50\\Node2Vec\\runs\\evaluate\\eval\\node_ids.json",
+          "resolved_config": "D:\\LibCity 2.0\\.runtime-tests\\walk-cli-1p7xee50\\Node2Vec\\runs\\evaluate\\resolved_config.json",
+          "runtime_info": "D:\\LibCity 2.0\\.runtime-tests\\walk-cli-1p7xee50\\Node2Vec\\runs\\evaluate\\runtime_info.json",
+          "run_log": "D:\\LibCity 2.0\\.runtime-tests\\walk-cli-1p7xee50\\Node2Vec\\runs\\evaluate\\run.log"
+        }
+      },
+      "capabilities": {
+        "requires_checkpoint": true,
+        "supports_resume": false,
+        "supports_validation": false
+      },
+      "execution_kind": "external"
+    },
+    "DeepWalk": {
+      "training": {
+        "metrics": {
+          "nodes": 8.0,
+          "dimensions": 4.0,
+          "coverage": 1.0,
+          "mean_norm": 1.1456524497671028,
+          "isolated_nodes": 0.0,
+          "dead_end_nodes": 0.0
+        },
+        "artifacts": {
+          "metrics_json": "D:\\LibCity 2.0\\.runtime-tests\\walk-cli-1p7xee50\\DeepWalk\\runs\\train\\eval\\metrics.json",
+          "metrics_csv": "D:\\LibCity 2.0\\.runtime-tests\\walk-cli-1p7xee50\\DeepWalk\\runs\\train\\eval\\metrics.csv",
+          "embeddings": "D:\\LibCity 2.0\\.runtime-tests\\walk-cli-1p7xee50\\DeepWalk\\runs\\train\\eval\\embeddings.npy",
+          "node_ids": "D:\\LibCity 2.0\\.runtime-tests\\walk-cli-1p7xee50\\DeepWalk\\runs\\train\\eval\\node_ids.json",
+          "resolved_config": "D:\\LibCity 2.0\\.runtime-tests\\walk-cli-1p7xee50\\DeepWalk\\runs\\train\\resolved_config.json",
+          "runtime_info": "D:\\LibCity 2.0\\.runtime-tests\\walk-cli-1p7xee50\\DeepWalk\\runs\\train\\runtime_info.json",
+          "run_log": "D:\\LibCity 2.0\\.runtime-tests\\walk-cli-1p7xee50\\DeepWalk\\runs\\train\\run.log",
+          "weights": "D:\\LibCity 2.0\\.runtime-tests\\walk-cli-1p7xee50\\DeepWalk\\runs\\train\\checkpoints\\embeddings.pt",
+          "training_report": "D:\\LibCity 2.0\\.runtime-tests\\walk-cli-1p7xee50\\DeepWalk\\runs\\train\\training\\report.json",
+          "walks": "D:\\LibCity 2.0\\.runtime-tests\\walk-cli-1p7xee50\\DeepWalk\\runs\\train\\training\\walks.txt",
+          "training_metrics": "D:\\LibCity 2.0\\.runtime-tests\\walk-cli-1p7xee50\\DeepWalk\\runs\\train\\metrics.jsonl"
+        }
+      },
+      "evaluation": {
+        "metrics": {
+          "nodes": 8.0,
+          "dimensions": 4.0,
+          "coverage": 1.0,
+          "mean_norm": 1.1456524497671028,
+          "isolated_nodes": 0.0,
+          "dead_end_nodes": 0.0
+        },
+        "artifacts": {
+          "metrics_json": "D:\\LibCity 2.0\\.runtime-tests\\walk-cli-1p7xee50\\DeepWalk\\runs\\evaluate\\eval\\metrics.json",
+          "metrics_csv": "D:\\LibCity 2.0\\.runtime-tests\\walk-cli-1p7xee50\\DeepWalk\\runs\\evaluate\\eval\\metrics.csv",
+          "embeddings": "D:\\LibCity 2.0\\.runtime-tests\\walk-cli-1p7xee50\\DeepWalk\\runs\\evaluate\\eval\\embeddings.npy",
+          "node_ids": "D:\\LibCity 2.0\\.runtime-tests\\walk-cli-1p7xee50\\DeepWalk\\runs\\evaluate\\eval\\node_ids.json",
+          "resolved_config": "D:\\LibCity 2.0\\.runtime-tests\\walk-cli-1p7xee50\\DeepWalk\\runs\\evaluate\\resolved_config.json",
+          "runtime_info": "D:\\LibCity 2.0\\.runtime-tests\\walk-cli-1p7xee50\\DeepWalk\\runs\\evaluate\\runtime_info.json",
+          "run_log": "D:\\LibCity 2.0\\.runtime-tests\\walk-cli-1p7xee50\\DeepWalk\\runs\\evaluate\\run.log"
+        }
+      },
+      "capabilities": {
+        "requires_checkpoint": true,
+        "supports_resume": false,
+        "supports_validation": false
+      },
+      "execution_kind": "external"
+    }
+  },
+  "gensim": "4.4.0",
+  "numpy": "2.5.5",
+  "successful_commands": 6,
+  "expected_rejections": 4
+}

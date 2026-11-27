@@ -1,9 +1,10 @@
 # 新运行时模型迁移范围
 
-当前共 51 个运行时入口，对应原清单中的 53 个任务—模型条目（轨迹 RNN/LSTM/GRU 共用一个入口）。完整 [100 项 CSV](model-migration.csv) 逐项记录实际能力、依赖、验证与后续动作；其余 47 项仍为 pending，不会自动回退到旧运行时。轨迹预测全部 13 个非模板条目、两个 ETA 模型及三个地图匹配算法均已接入。37 个特殊交通数据集的深度整理仍延后。交通数据统一使用目标时间互斥切分。
+当前共 53 个运行时入口，对应原清单中的 55 个任务—模型条目（轨迹 RNN/LSTM/GRU 共用一个入口）。完整 [100 项 CSV](model-migration.csv) 逐项记录实际能力、依赖、验证与后续动作；其余 45 项仍为 pending，不会自动回退到旧运行时。轨迹预测全部 13 个非模板条目、两个 ETA 模型及三个地图匹配算法均已接入；道路表征 6 项中已接入 5 项，GeomGCN 仍待迁移。37 个特殊交通数据集的深度整理仍延后。交通数据统一使用目标时间互斥切分。
 
 | 名称 | 任务/数据 | 训练接入 | 检查点/续训能力 | 实际验证级别 |
 | --- | --- | --- | --- | --- |
+| Node2Vec / DeepWalk | road_representation / 稀疏全图随机游走 | external 独立 Gensim 训练回调 | 独立评估需要安全向量权重；无验证/调参/完整续训 | 原加权有向/无向 Node2Vec 游走、修正起点 0 后的 DeepWalk 游走/重启、转移概率与 alias 分布、局部 RNG/有界缓存、真实 Gensim 向量数值与跨进程确定性、流式语料、ID/图/配置权重校验、无 Gensim 独立评估、无 PyTorch 优化器/记录器、孤立节点/共享 2,000 节点稀疏适配、实际 CLI 与能力拒绝 |
 | TTPNet | eta / 出发前交通快照与已知计划路线 | 默认 train_loop + 累计相对 RMSE step | 需要权重；dropout 完整续训 | 旧速度/道路/双向 LSTM/累计预测及全部梯度对照、真实变长打包/批次隔离、预训练道路 ID 对齐、出发前快照校验/标签隔离、训练统计与单位换算、逐路线相对 RMSE/精确拟合有限梯度、跨天秒数/周末、完整训练/独立评估/按秒导出/精确续训、两点路线/任意静态嵌入宽度、batch=1/float64/CPU AMP/零速度/常量、实际 CLI |
 | GeoSAN | traj_loc_pred / Quadkey 地理自注意力与候选解码 | 默认 train_loop + 加权二元采样 step | 需要权重；采样/dropout 完整续训 | 四种旧有效位置/解码分支分数与全部梯度、TorchText 词表规则冻结及替代、正确经纬度与弧度 KNN、采样分布/耗尽、静态词表/训练访问隔离、因果/padding/混批/候选分块与子集梯度、非默认融合/用户/时间/奇数宽度、完整训练/独立评估/精确续训、float64/CPU AMP/单位置、阻止旧依赖后实际训练、实际 CLI |
 | LSTPM | traj_loc_pred / 历史行程两级注意力与空间膨胀 LSTM | 默认 train_loop + 公共排名损失 | 需要权重；完整续训 | 原有效路径两级注意力/膨胀递推/全部梯度、显式历史行程边界与跨行程状态、训练原子观测时间相似度、因果空间父索引与近邻同距规则、历史质心距离、空历史保留样本、padding/混批/batch=1/float64、完整训练/独立评估/精确续训、CPU AMP、实际 CLI |
@@ -125,5 +126,11 @@ TTPNet 保留三支短期速度 CNN/RNN、长期速度 CNN/RNN、速度与道路
 TTPNet 使用具名 ttpnet_eta 协议：训练是每条路线有效累计点的相对 RMSE，再按路线平均；验证 loss 是整趟 MAPE，公共指标和导出按秒。输出仍以训练 time_gap 的均值/标准差作仿射尺度，保留旧预测含义，逆变换只在 loss/评估层。向量范数修复精确拟合时旧 sqrt 的 NaN 梯度，eps 默认 1 秒。实际途中累计耗时只作标签；输入为已知计划几何/长度和出发前交通快照，每个点必须有 traffic_snapshot_time（数据 config.json 可用 traffic_snapshot_time_column 指定列名），所有时间必须不晚于该趟出发。静态图嵌入和短/长速度向量由上游提供，本轮没有新增论文的离线张量分解或图嵌入训练器。默认最短路线 3 点，与 DeepTTE 的完整行程集合一致；data.min_route_length=2 显式启用两点路线，比较基准时须保持同一集合。
 
 TTPNet 短期三列 speeds/speeds_relevant1/speeds_relevant2 每点各 4 值，speeds_long 每点 7 值，均为 JSON；grid_len 非负，零速度沿用 0.2 km/h 约定。元信息 speed_unit 可为 km/h（默认）或 m/s，grid_len_unit 和 distance_unit 可为 km（默认）或 m，统一转换后再拟合统计。坐标在双精度中归一化，时间用 total_seconds，默认周末为星期六/日；存在 holiday 时使用明确 0/1 值。两种 ETA 适配共享完整行程读取与互斥时间切分；公共 ETA 逆变换仅提升低精度类型，保留 float64 调用者精度。新流程沿用公共早停配置，可用 patience=0 关闭；不宣称与旧错误填充、日期处理或完整原论文数据流程数值等价。
+
+Node2Vec/DeepWalk 使用完整的 road_walk 任务协议和 external 执行能力，不创建 PyTorch 优化器、GradScaler、早停或 TensorBoard。Gensim 仍负责原 skip-gram 优化；训练安装 embeddings 可选组（Gensim>=4.4,<5，支持 NumPy 2），独立向量评估不导入 Gensim。Node2Vec 默认有向、p=2/q=1、负采样 5；DeepWalk 默认无向、均匀邻居和重启 0，保留 LibCity 原 hs=1 且 negative=5 的组合，显式设负样本 0 可用仅 HS。CPU 单 worker、运行种子和固定 token 初始化映射支持当前环境跨进程重复；deterministic=true 时多 worker 被拒绝，不承诺跨库版本或平台数值相同。
+
+路网按 .geo 原 ID 顺序映射为稀疏边表/偏移，不建完整 N×N 矩阵。默认二值边；Node2Vec 可显式选 weighted，weight_column 或元信息 weight_col 指定正亲和权重。零边删除、负/非有限权重拒绝，重复有向关系最后一条生效，无向化取双向权重最大值，自环由配置明确选择。DeepWalk 只接受二值图。全图训练不虚构 train/val/test 切分，DataBundle 三个 loader 均为 None；孤立节点仍出现在词表，但向量缺少上下文训练信号。每条游走写入实验 training/walks.txt，Word2Vec 按行重放，二阶 alias 缓存限制为 100,000 个邻居槽；采样使用独立随机状态。旧 DeepWalk 的 start=0 错误、默认 RNG 跨调用共享与 Iterable 导入，以及旧 Node2Vec 的 NetworkX 接口/无向标记已修复，旧全局缓存入口不恢复。
+
+外部训练只保存 checkpoints/embeddings.pt（纯 Tensor 状态，不保存 Gensim pickle），含向量与节点 ID、算法配置和稀疏图身份；映射/图/配置不匹配时拒绝加载。导出 eval/embeddings.npy 与 node_ids.json，关闭预测导出会清理旧文件。metrics 只包含节点数、维度、覆盖率、均值范数、孤立点及无出边点等结构诊断，不是分类、链路预测或泛化精度；覆盖率 1 也不表示孤立节点学到了有用表示。训练损失与来源文件版本另记 training/report.json 和 metrics.jsonl。没有验证协议或完整安全续训状态，因此 supports_validation/supports_resume=false，调参和 --resume 在入口拒绝，无 best_validation/best.pt/last.pt；需要重新训练时新建实验。training 中只接受 Word2Vec 的 epochs/num_workers/window_size/batch_words/subsample/dynamic_window、gensim_sgd 和目标配置，不接受无作用的 AMP/梯度累积等参数。
 
 阶段三、四有意调整见 [新增记录](phases34_execution_zh.md)。旧依赖处理步骤及已完成结果见 [登记](optional_dependencies_zh.md)。

@@ -83,7 +83,7 @@ Install a feature from this checkout with `pip install -e '.[graph]'`, replacing
 | tune | Ray Tune, Hyperopt, Bayesian search | Legacy Ray APIs remain; compatibility pending |
 | graph | DGL models such as GeomGCN and STMGAT | Compatibility pending |
 | dtw | FastDTW dataset preprocessing | Compatibility pending |
-| embeddings | Gensim word and graph embeddings | Compatibility pending |
+| embeddings | Gensim word and graph embeddings | Node2Vec/DeepWalk use Gensim>=4.4 with NumPy 2; other pending consumers still need migration |
 | No extra for GeoSAN | Native quadkey vocabulary and geographic sampling | Uses the core installation; TorchText/NLTK and the obsolete geosan extra were removed |
 | ode | Neural differential equation models | Compatibility pending |
 | transformer | Models using einops | Compatibility pending |

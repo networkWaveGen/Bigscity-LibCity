@@ -194,6 +194,25 @@ explicit `data.min_route_length=2` also supports two-point routes. Padding never
 enters the bidirectional state or cumulative objective. Train/evaluate/resume use
 the common runtime, including dropout RNG restoration.
 
+`--model Node2Vec` and `--model DeepWalk` create CPU examples using the external
+Word2Vec backend. Install `pip install -e '.[embeddings]'` for fitting (Gensim>=4.4,
+NumPy 2 compatible). Use the normal `train` command, then `evaluate --checkpoint`
+with the returned `checkpoints/embeddings.pt`; evaluation needs no Gensim import.
+The `road_walk` protocol fits the whole graph without a validation/test split and
+rejects tuning or `--resume`. It has Word2Vec settings rather than PyTorch
+optimizer/AMP/accumulation options. Deterministic execution requires one worker;
+`training.num_workers` controls Word2Vec, not DataLoader. Node2Vec supports positive
+weighted edges and p/q transitions; DeepWalk uses binary edges and optional restart.
+DeepWalk preserves LibCity's combined hierarchical-softmax and negative-sampling
+default; set `training.loss.negative_samples=0` for hierarchical softmax alone.
+Walks stream to `training/walks.txt`, with JSONL progress and a training report.
+Tensor-only weights preserve node/graph/configuration identity; unsafe Gensim model
+pickles are not used. Exported vectors follow `node_ids.json`. Reported coverage,
+norms and isolated/dead-end node counts are structural diagnostics, not downstream
+prediction scores; isolated-node vectors have no context-learning signal. These
+small examples use two epochs, while the model protocol retains the legacy
+1000-epoch default; use an explicit epoch budget for actual experiments.
+
 The complete supported-model inventory and migration details are in the
 [runtime guide](../docs/modernization/runtime/README_zh.md). Small examples prove
 execution and reproducibility, not real-city benchmark accuracy.

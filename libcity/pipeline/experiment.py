@@ -11,8 +11,9 @@ import torch
 
 from libcity.config.runtime import load_config, _resource
 from libcity.data.bundle import prepare_traffic
-from libcity.executor.evaluate import ForecastLoss, evaluate_loop
+from libcity.executor.evaluate import ExperimentResult, ForecastLoss, evaluate_loop
 from libcity.executor.train import build_context, train_loop
+from libcity.executor.algorithm import AlgorithmContext
 from libcity.model.runtime_registry import model_spec, resolve
 from libcity.utils.runtime_checkpoint import CheckpointManager
 
@@ -70,7 +71,7 @@ def protocol_changes(config):
     fields = [('data', 'split'), ('data', 'input_window'), ('data', 'output_window'), ('data','sampling'),
               ('evaluation', 'metrics'), ('evaluation', 'mask_value'), ('evaluation', 'mode')]
     changes = {f'{block}.{key}': config[block][key] for block, key in fields
-            if key in defaults[block] and config[block][key] != defaults[block][key]}
+            if key in defaults[block] and key in config[block] and config[block][key] != defaults[block][key]}
     protocol = model_spec(config['model']['name']).protocol
     if protocol:
         changes['benchmark.protocol'] = protocol
@@ -91,7 +92,7 @@ def run_experiment(mode, config_file=None, *, config=None, overrides=None, check
     if mode == 'train' and checkpoint is not None:
         raise ValueError('Use --resume last.pt for training, or --checkpoint best.pt for evaluation')
     if mode == 'evaluate' and spec.requires_checkpoint and checkpoint is None:
-        raise ValueError('Evaluation requires --checkpoint best.pt')
+        raise ValueError('Evaluation requires --checkpoint (best.pt or fitted algorithm weights)')
     if checkpoint is not None and not spec.requires_checkpoint:
         raise ValueError('This algorithm does not use a checkpoint')
     for label, path in (('checkpoint', checkpoint), ('resume', resume)):
@@ -113,6 +114,7 @@ def run_experiment(mode, config_file=None, *, config=None, overrides=None, check
     directory.mkdir(parents=True, exist_ok=True)
     logger = run_logger(directory)
     context = None
+    fitted = None
     try:
         if spec.prepare_data:
             adapter=resolve(spec.prepare_data)
@@ -137,13 +139,17 @@ def run_experiment(mode, config_file=None, *, config=None, overrides=None, check
             logger.warning('Explicit benchmark protocol changes: %s', changes)
         (directory / 'resolved_config.json').write_text(json.dumps(cfg, indent=2)+'\n', encoding='utf-8')
         info = dict(python=platform.python_version(), pytorch=str(torch.__version__), numpy=np.__version__,
-            platform=platform.platform(), mode=mode, device=str(device), seed=cfg['runtime']['seed'],
+            platform=platform.platform(), mode=mode, execution_kind=spec.kind, device=str(device), seed=cfg['runtime']['seed'],
             benchmark_protocol=spec.protocol or 'task_default',
             split=bundle.split_summary, protocol_changes=changes,
             capabilities=dict(requires_checkpoint=spec.requires_checkpoint, supports_resume=spec.supports_resume,
                               supports_validation=spec.supports_validation))
         (directory / 'runtime_info.json').write_text(json.dumps(info, indent=2)+'\n', encoding='utf-8')
-        if mode == 'train':
+        if mode=='train' and spec.kind=='external':
+            fitted = resolve(spec.train)(AlgorithmContext(model,bundle,cfg,device,directory,logger))
+            if not isinstance(fitted,ExperimentResult):
+                raise ValueError('External training must return an ExperimentResult')
+        elif mode == 'train':
             updates = resolve(spec.updates_per_epoch)(cfg,bundle) if spec.updates_per_epoch else None
             loss_fn=resolve(spec.loss)(bundle,cfg['training']['loss']) if spec.loss else None
             evaluator=resolve(spec.evaluate_loader) if spec.evaluate_loader else None
@@ -162,7 +168,6 @@ def run_experiment(mode, config_file=None, *, config=None, overrides=None, check
         elif spec.requires_checkpoint:
             CheckpointManager.load_weights(checkpoint, model)
         if mode=='train' and not evaluate_test:
-            from libcity.executor.evaluate import ExperimentResult
             result=ExperimentResult({'validation_score':float(score)})
         elif spec.evaluate:
             result=resolve(spec.evaluate)(model,bundle,cfg['evaluation'],directory=directory/'eval',logger=logger)
@@ -177,6 +182,9 @@ def run_experiment(mode, config_file=None, *, config=None, overrides=None, check
         if context is not None:
             result.metrics['best_validation'] = float(score)
             result.artifacts.update(best=directory / 'checkpoints/best.pt', last=directory / 'checkpoints/last.pt')
+        if fitted is not None:
+            result.metrics.update(fitted.metrics)
+            result.artifacts.update(fitted.artifacts)
         logger.info('Result metrics: %s', result.metrics)
         return result
     finally:

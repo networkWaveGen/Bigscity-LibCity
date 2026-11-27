@@ -98,6 +98,9 @@ def validate(config, preset):
         if type(default) is float and (type(value) not in (int, float) or not math.isfinite(value)):
             raise TypeError(f'model.params.{key} must be a finite number')
     _validate_runtime(runtime)
+    if spec.kind=='external':
+        _validate_external(data,training,evaluation,runtime,model['name'])
+        return
     if spec.task=='map_matching':
         if type(data['cache']) is not bool:
             raise TypeError('data.cache must be boolean')
@@ -287,6 +290,40 @@ def validate(config, preset):
         raise ValueError('This task adapter currently requires data.cache=false')
 
 
+def _validate_external(data,training,evaluation,runtime,model):
+    if type(data['cache']) is not bool or data['cache']:
+        raise ValueError('Walk graph adapter requires data.cache=false')
+    _known(data['graph'],('name','directed','self_loops','weight_column'),'data.graph')
+    # A selector change replaces the old block; fill the selected graph's own defaults.
+    for name,value in dict(directed=True,self_loops=False,weight_column=None).items():
+        data['graph'].setdefault(name,value)
+    if data['graph']['name'] not in ('binary','weighted'):
+        raise ValueError('Walk graph.name must be binary or weighted')
+    if model=='DeepWalk' and data['graph']['name']!='binary':
+        raise ValueError('DeepWalk uses unweighted binary edges')
+    for name in ('directed','self_loops'):
+        if type(data['graph'][name]) is not bool: raise TypeError(f'Walk graph.{name} must be boolean')
+    column = data['graph']['weight_column']
+    if column is not None and (not isinstance(column,str) or not column): raise ValueError('Walk weight_column must be a column name or null')
+    for name in ('epochs','num_workers','window_size','batch_words'): _positive(training[name],f'training.{name}')
+    _number(training['subsample'],'training.subsample')
+    if type(training['dynamic_window']) is not bool: raise TypeError('Walk dynamic_window must be boolean')
+    _known(training['optimizer'],('name','lr','min_lr'),'training.optimizer')
+    if training['optimizer']['name']!='gensim_sgd': raise ValueError('Walk training uses gensim_sgd, not a PyTorch optimizer')
+    for name in ('lr','min_lr'): _number(training['optimizer'][name],f'optimizer.{name}',strict=True)
+    if training['optimizer']['min_lr']>training['optimizer']['lr']: raise ValueError('Walk min_lr must not exceed lr')
+    _known(training['loss'],('name','negative_samples','hierarchical_softmax'),'training.loss')
+    if training['loss']['name']!='word2vec': raise ValueError('Walk training requires word2vec loss')
+    _positive(training['loss']['negative_samples'],'loss.negative_samples',zero=True)
+    if type(training['loss']['hierarchical_softmax']) is not bool: raise TypeError('hierarchical_softmax must be boolean')
+    if not training['loss']['hierarchical_softmax'] and not training['loss']['negative_samples']: raise ValueError('Word2Vec needs hierarchical softmax or negative samples')
+    if runtime['deterministic'] and training['num_workers']!=1: raise ValueError('Deterministic Word2Vec requires training.num_workers=1')
+    if runtime['tensorboard']: raise ValueError('External Word2Vec records JSONL; runtime.tensorboard must be false')
+    if type(evaluation['save_predictions']) is not bool: raise TypeError('save_predictions must be boolean')
+    if not isinstance(evaluation['metrics'],list) or not evaluation['metrics'] or any(name not in ('nodes','dimensions','coverage','mean_norm','isolated_nodes','dead_end_nodes') for name in evaluation['metrics']):
+        raise ValueError('Walk metrics are structural diagnostics, not held-out quality scores')
+
+
 def _resource(group, name):
     path = files('libcity.config').joinpath('runtime', group, str(name) + '.json')
     if not path.is_file():
@@ -296,8 +333,11 @@ def _resource(group, name):
 
 def task_defaults(task, model):
     """Named task protocols keep distinct objectives out of model hyperparameters."""
+    spec = model_spec(model)
+    if spec.kind=='external':
+        return _resource('protocols',spec.protocol)
     defaults = _resource('tasks', task)
-    protocol = model_spec(model).protocol
+    protocol = spec.protocol
     return merge_config(defaults, _resource('protocols', protocol)) if protocol else defaults
 
 

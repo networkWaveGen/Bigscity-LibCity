@@ -1,13 +1,14 @@
 {
-  "scope": "Remaining-work commits 1-30; whole-library migration remains in progress",
+  "scope": "Remaining-work commits 1-31; whole-library migration remains in progress",
   "environment": {
     "python": "3.12.13",
     "torch": "2.15.0+cpu",
     "numpy": "2.5.5",
-    "platform": "Windows-11-10.0.26200-SP0"
+    "platform": "Windows-11-10.0.26200-SP0",
+    "gensim": "4.4.0"
   },
   "full_tests": {
-    "tests": 463,
+    "tests": 480,
     "failures": 0,
     "errors": 0,
     "skipped": 0
@@ -476,12 +477,29 @@
     "test_invalid_search_fails_before_creating_study[space2]",
     "test_invalid_search_fails_before_creating_study[space3]",
     "test_invalid_search_fails_before_creating_study[space4]",
-    "test_new_hyper_cli_runs_outside_repository"
+    "test_new_hyper_cli_runs_outside_repository",
+    "test_node2vec_walks_match_original_alias_sampling_without_global_rng_mutation[False]",
+    "test_node2vec_walks_match_original_alias_sampling_without_global_rng_mutation[True]",
+    "test_deepwalk_matches_corrected_zero_start_and_default_rng_is_not_shared[0.0]",
+    "test_deepwalk_matches_corrected_zero_start_and_default_rng_is_not_shared[0.4]",
+    "test_deepwalk_matches_corrected_zero_start_and_default_rng_is_not_shared[1.0]",
+    "test_transition_probabilities_alias_distribution_and_weighted_symmetry",
+    "test_real_word2vec_reference_weights_safe_export_and_no_torch_optimizer[Node2Vec]",
+    "test_real_word2vec_reference_weights_safe_export_and_no_torch_optimizer[DeepWalk]",
+    "test_cross_process_determinism_and_evaluation_without_gensim[Node2Vec]",
+    "test_cross_process_determinism_and_evaluation_without_gensim[DeepWalk]",
+    "test_capabilities_invalid_config_and_missing_training_dependency",
+    "test_safe_weights_reject_changed_node_mapping_algorithm_and_graph[node_ids]",
+    "test_safe_weights_reject_changed_node_mapping_algorithm_and_graph[algorithm]",
+    "test_safe_weights_reject_changed_node_mapping_algorithm_and_graph[graph]",
+    "test_safe_weights_reject_changed_node_mapping_algorithm_and_graph[vectors]",
+    "test_isolated_only_graph_is_explicit_and_sparse_without_full_matrix",
+    "test_large_sparse_graph_keeps_edge_storage_and_bounded_walk_cache"
   ],
   "inventory": {
     "total": 100,
-    "migrated": 53,
-    "pending": 47
+    "migrated": 55,
+    "pending": 45
   },
   "history": [
     {
@@ -791,6 +809,20 @@
         "migrated": 52,
         "pending": 48
       }
+    },
+    {
+      "scope": "Remaining-work commits 1-30; whole-library migration remains in progress",
+      "full_tests": {
+        "tests": 463,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "inventory": {
+        "total": 100,
+        "migrated": 53,
+        "pending": 47
+      }
     }
   ],
   "current_cli": {
@@ -921,5 +953,16 @@
     "format_version": 3,
     "duration_unit": "seconds",
     "traffic_inputs": "departure_known_snapshot"
+  },
+  "walk_cli": {
+    "report": "walk-cli-validation.json",
+    "successful_commands": 6,
+    "expected_rejections": 4,
+    "models": [
+      "Node2Vec",
+      "DeepWalk"
+    ],
+    "supports_validation": false,
+    "supports_resume": false
   }
 }

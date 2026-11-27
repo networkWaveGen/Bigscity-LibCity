@@ -2,7 +2,6 @@ import random
 import json
 import networkx as nx
 import numpy as np
-from gensim.models import Word2Vec
 
 from logging import getLogger
 from libcity.model.abstract_traffic_tradition_model import AbstractTraditionModel
@@ -159,6 +158,7 @@ def alias_draw(J, q):
 
 
 def learn_embeddings(walks, dimensions, window_size, workers, iters, min_count=0, sg=1, hs=0):
+    from gensim.models import Word2Vec
     walks = [list(map(str, walk)) for walk in walks]
     model = Word2Vec(
         walks, vector_size=dimensions, window=window_size, min_count=min_count, sg=sg, hs=hs,
@@ -197,7 +197,9 @@ class Node2Vec(AbstractTraditionModel):
             format(self.exp_id, self.model, self.dataset, self.output_dim)
 
     def run(self, data=None):
-        nx_g = nx.from_numpy_matrix(self.adj_mx, create_using=nx.DiGraph())
+        nx_g = nx.from_numpy_array(self.adj_mx, create_using=nx.DiGraph())
+        if not self.is_directed:
+            nx_g = nx_g.to_undirected()
         g = Graph(nx_g, self.is_directed, self.p, self.q)
         g.preprocess_transition_probs()
 

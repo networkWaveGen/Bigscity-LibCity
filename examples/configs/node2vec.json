@@ -1,0 +1,6 @@
+{
+  "data": {"dataset": "TaskTiny", "data_dir": "data", "cache": false},
+  "model": {"name": "Node2Vec", "params": {"output_dim": 4, "num_walks": 3, "walk_length": 8}},
+  "training": {"epochs": 2, "window_size": 3, "subsample": 0.0},
+  "runtime": {"device": "cpu", "seed": 17, "output_dir": "runs"}
+}

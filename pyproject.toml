@@ -20,7 +20,7 @@ dependencies = [
 tensorboard = ["tensorboard>=2.18,<3"]
 graph = ["dgl>=0.6.1"]
 dtw = ["fastdtw==0.3.4"]
-embeddings = ["gensim>=4.0.1,<5"]
+embeddings = ["gensim>=4.4,<5"]
 ode = ["torchdiffeq>=0.2.3"]
 statistics = ["statsmodels>=0.11"]
 transformer = ["einops>=0.6"]

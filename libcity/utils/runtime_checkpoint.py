@@ -89,6 +89,13 @@ class CheckpointManager:
         self.best_state = copy_state_to_cpu(model.state_dict())
         return self._save('best.pt', self.best_state)
 
+    def save_weights(self,model,name='weights.pt'):
+        name = str(name)
+        if Path(name).name!=name or '/' in name or '\\' in name:
+            raise ValueError('Weight filename must stay inside the checkpoint directory')
+        require_pt(name)
+        return self._save(name,copy_state_to_cpu(model.state_dict()))
+
     def save_last(self, context):
         payload = dict(format_version=3, model=copy_state_to_cpu(context.model.state_dict()),
             optimizer=copy_state_to_cpu(context.optimizer.state_dict()), scheduler=context.schedule.state_dict(),

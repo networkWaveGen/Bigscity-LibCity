@@ -198,7 +198,7 @@ def test_checkpoint_errors_and_optional_import_isolation(data):
     assert not (data/'runs').exists()
     command = subprocess.run([sys.executable,'-B','-c',
         "import sys; from libcity.pipeline.experiment import run_experiment; "
-        "assert not {'ray','hyperopt','dgl','torchtext','tensorboard','torch.utils.tensorboard'} & set(sys.modules)"],
+        "assert not {'ray','hyperopt','dgl','torchtext','gensim','tensorboard','torch.utils.tensorboard'} & set(sys.modules)"],
         cwd=ROOT, capture_output=True, text=True)
     assert command.returncode == 0, command.stderr
 

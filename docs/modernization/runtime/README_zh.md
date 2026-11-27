@@ -34,7 +34,7 @@ print(result.artifacts['best'])
 
 ## 训练与产物
 
-每次实验写入 `<output_dir>/<exp_id>/`，含 resolved_config.json、runtime_info.json、run.log、metrics.jsonl、checkpoints/best.pt、checkpoints/last.pt 和 eval/ 下的 JSON/CSV 指标及可选预测文件。`evaluation.save_predictions=false` 关闭预测导出。TensorBoard 仅在训练且 `runtime.tensorboard=true` 时创建；独立评估不创建优化器、训练记录器或 TensorBoard。
+神经网络训练实验写入 `<output_dir>/<exp_id>/`，含 resolved_config.json、runtime_info.json、run.log、metrics.jsonl、checkpoints/best.pt、checkpoints/last.pt 和 eval/ 下的 JSON/CSV 指标及可选预测文件。`evaluation.save_predictions=false` 关闭预测导出。TensorBoard 仅在支持它的训练且 `runtime.tensorboard=true` 时创建；独立评估不创建优化器、训练记录器或 TensorBoard。
 
 基础安装不要求 TensorBoard。启用该后端时安装 `pip install -e '.[tensorboard]'`；dev 组为可选记录器的验收保留该依赖。Trafformer 单独需要 `pip install -e '.[transformer]'`。
 
@@ -98,6 +98,8 @@ LSTPM 可用 --model LSTPM 生成历史行程示例，复用 train/evaluate/resu
 GeoSAN 可用 --model GeoSAN 生成地理自注意力示例，基础安装即可运行，无需 TorchText/NLTK。data.quadkey_level/quadkey_ngram 定义静态地理词，默认 17/6；geosan_ranking 协议在 training.loss 配置 weighted_binary、negative_samples、num_nearest、temperature 和 exclude_visited。KNN 按正确经纬度弧度计算，候选不足时截断近邻池，访问耗尽有明确回退。训练使用采样候选，验证/测试为完整词表排名及确定性加权二元损失；这与旧最后新位置留出和随机候选协议不同。变长批次、可选候选注意力、训练/独立评估/精确续训均复用公共运行时，详见 [迁移说明](models_zh.md)。
 
 TTPNet 可用 --model TTPNet 生成 ETA 示例，使用相同 train/evaluate/resume 命令。实际数据除计划路线外，还需 .geo 的 JSON embeddings 和 .dyna 的 grid_len、speeds/speeds_relevant1/speeds_relevant2（各 4 值）、speeds_long（7 值）。所有点的 traffic_snapshot_time 必须不晚于该趟出发；可在数据 config.json 用 traffic_snapshot_time_column 指定名称，不能用实际到达时采集的速度冒充出发前信息。元信息 speed_unit 支持 km/h 或 m/s，grid_len_unit/distance_unit 支持 km 或 m。ttpnet_eta 协议用逐路线累计相对 RMSE 训练、整趟 MAPE 验证，指标/JSON 导出按秒。默认 data.min_route_length=3 保持公共 ETA 样本集合，显式设 2 可用两点路线；嵌入行数/宽度由静态文件决定，不固定城市网格大小。详见 [模型说明](models_zh.md)。
+
+Node2Vec/DeepWalk 可用 --model Node2Vec 或 --model DeepWalk 生成示例。训练先安装 `pip install -e '.[embeddings]'`（Gensim>=4.4），使用相同 train 命令；独立 evaluate 指向训练返回的 checkpoints/embeddings.pt，无需 Gensim。road_walk 是全图外部训练协议，不提供验证/调参/完整续训；--resume 与 run_hyper 会在入口拒绝。这里的 training.num_workers 是 Word2Vec worker，确定性模式要求 1；optimizer 为 gensim_sgd，不接受 PyTorch AMP、梯度累积或 TensorBoard 配置。游走在 training/walks.txt 流式保存，优化信息在 training/report.json/metrics.jsonl；输出向量及真实 node_ids，与结构诊断一起保存在 eval。结构诊断不代表预测精度，孤立节点虽保留覆盖但缺少上下文训练信号。详细图权重、目标与能力约束见 [模型说明](models_zh.md)。
 
 ## 统一调参
 

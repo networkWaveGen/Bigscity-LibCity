@@ -29,6 +29,12 @@ class ModelSpec:
 
 
 MODELS = {
+    'Node2Vec': ModelSpec('libcity.model.road_representation.runtime_walk:create_node2vec',task='road_representation',
+        kind='external',protocol='road_walk',train='libcity.executor.walk_training:train',supports_resume=False,supports_validation=False,
+        prepare_data='libcity.data.walk_graph:prepare_walk_graph',evaluate='libcity.executor.walk_training:evaluate',device_types=('cpu',)),
+    'DeepWalk': ModelSpec('libcity.model.road_representation.runtime_walk:create_deepwalk',task='road_representation',
+        kind='external',protocol='road_walk',train='libcity.executor.walk_training:train',supports_resume=False,supports_validation=False,
+        prepare_data='libcity.data.walk_graph:prepare_walk_graph',evaluate='libcity.executor.walk_training:evaluate',device_types=('cpu',)),
     'TTPNet': ModelSpec('libcity.model.eta.runtime_ttpnet:TTPNet',task='eta',protocol='ttpnet_eta',
         prepare_data='libcity.data.ttpnet_eta:prepare_ttpnet',loss='libcity.executor.ttpnet_step:TTPNetLoss',
         step='libcity.executor.ttpnet_step:cumulative_step',evaluate_loader='libcity.executor.task_evaluation:evaluate_task'),

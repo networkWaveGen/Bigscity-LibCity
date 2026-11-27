@@ -1,0 +1,12 @@
+{
+  "data": {"dataset": null, "data_dir": "raw_data", "cache_dir": "cache", "cache": false,
+    "graph": {"name": "binary", "directed": true, "self_loops": false, "weight_column": null}},
+  "model": {"name": null, "params": {}},
+  "training": {"epochs": 1000, "num_workers": 1, "window_size": 10, "batch_words": 10000,
+    "subsample": 0.001, "dynamic_window": true,
+    "optimizer": {"name": "gensim_sgd", "lr": 0.025, "min_lr": 0.0001},
+    "loss": {"name": "word2vec", "negative_samples": 5, "hierarchical_softmax": false}},
+  "evaluation": {"save_predictions": true, "metrics": ["nodes", "dimensions", "coverage", "mean_norm", "isolated_nodes", "dead_end_nodes"]},
+  "runtime": {"task": "road_representation", "device": "cpu", "seed": 0, "exp_id": null,
+    "output_dir": "runs", "tensorboard": false, "deterministic": true, "num_threads": 1}
+}

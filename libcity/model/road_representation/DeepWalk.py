@@ -1,12 +1,12 @@
 import numpy as np
-from gensim.models import Word2Vec
 import json
 from logging import getLogger
 from libcity.model.abstract_traffic_tradition_model import AbstractTraditionModel
 
 from io import open
 from time import time
-from collections import defaultdict, Iterable
+from collections import defaultdict
+from collections.abc import Iterable
 import random
 
 
@@ -107,14 +107,15 @@ class Graph(defaultdict):
         "Returns the number of nodes in the graph"
         return self.order()
 
-    def random_walk(self, path_length, alpha=0, rand=random.Random(), start=None):
+    def random_walk(self, path_length, alpha=0, rand=None, start=None):
         """ Returns a truncated random walk.
             path_length: Length of the random walk.
             alpha: probability of restarts.
             start: the start node of the random walk.
         """
         G = self
-        if start:
+        rand = random.Random() if rand is None else rand
+        if start is not None:
             path = [start]
         else:
             # Sampling is uniform w.r.t V, and not w.r.t E
@@ -132,7 +133,8 @@ class Graph(defaultdict):
         return [str(node) for node in path]
 
 
-def build_deepwalk_corpus(G, num_paths, path_length, alpha=0, rand=random.Random(0)):
+def build_deepwalk_corpus(G, num_paths, path_length, alpha=0, rand=None):
+    rand = random.Random(0) if rand is None else rand
     walks = []
 
     nodes = list(G.nodes())
@@ -167,6 +169,7 @@ def from_numpy(x, directed=False):
 
 
 def learn_embeddings(walks, dimensions, window_size, workers, iters, min_count=0, sg=1, hs=0):
+    from gensim.models import Word2Vec
     walks = [list(map(str, walk)) for walk in walks]
     model = Word2Vec(
         walks, vector_size=dimensions, window=window_size, min_count=min_count, sg=sg, hs=hs,
