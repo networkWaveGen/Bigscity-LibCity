@@ -56,9 +56,9 @@ class TrafficStateDataset(AbstractDataset):
             + str(self.batch_size) + '_' + str(self.load_external) + '_' + str(self.add_time_in_day) + '_' \
             + str(self.add_day_in_week) + '_' + str(self.pad_with_last_sample)
         self.cache_file_name = self._get_cache_file_name('traffic_state')
-        self.cache_file_folder = './libcity/cache/dataset_cache/'
+        self.cache_file_folder = os.fspath(config.get('cache_dir', './libcity/cache/dataset_cache/'))
         ensure_dir(self.cache_file_folder)
-        self.data_path = './raw_data/' + self.dataset + '/'
+        self.data_path = os.path.join(os.fspath(config.get('data_dir', './raw_data/')), self.dataset, '')
         if not os.path.exists(self.data_path):
             raise ValueError("Dataset {} not exist! Please ensure the path "
                              "'./raw_data/{}/' exist!".format(self.dataset, self.dataset))
@@ -125,7 +125,8 @@ class TrafficStateDataset(AbstractDataset):
     def _get_cache_file_name(self, prefix):
         # Only the configuration string is hashed. No file contents are read.
         identity = hashlib.sha256(self._cache_config_json().encode('utf-8')).hexdigest()
-        return os.path.join('./libcity/cache/dataset_cache/', f'{prefix}_v3_{identity}.npz')
+        return os.path.join(os.fspath(self.config.get('cache_dir', './libcity/cache/dataset_cache/')),
+                            f'{prefix}_v3_{identity}.npz')
 
     def _load_geo(self):
         """

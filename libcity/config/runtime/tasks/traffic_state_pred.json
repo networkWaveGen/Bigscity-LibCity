@@ -1,0 +1,33 @@
+{
+  "data": {
+    "dataset": null,
+    "data_dir": "raw_data",
+    "cache_dir": "cache",
+    "cache": true,
+    "input_window": 12,
+    "output_window": 2,
+    "split": {"train": 0.6, "val": 0.2},
+    "scaler": {"name": "standard"},
+    "features": {"load_external": false, "time_in_day": false, "day_in_week": false},
+    "pad_training": true
+  },
+  "model": {"name": null, "params": {}},
+  "training": {
+    "epochs": 10, "batch_size": 64, "num_workers": 0, "shuffle": true,
+    "optimizer": {"name": "adam", "lr": 0.001, "weight_decay": 0.0},
+    "scheduler": {"name": "none", "interval": "epoch"},
+    "loss": {"name": "masked_mae", "mask_value": 0.0},
+    "accumulation_steps": 1, "clip_grad_norm": null,
+    "amp": false, "amp_dtype": "bfloat16", "monitor": "val_loss", "direction": "min",
+    "early_stopping": {"patience": 20, "min_delta": 0.0}, "strategy": {}
+  },
+  "evaluation": {
+    "batch_size": 64, "num_workers": 0, "metrics": ["MAE", "RMSE"],
+    "mask_value": 0.0, "mode": "single", "save_predictions": true
+  },
+  "runtime": {
+    "task": "traffic_state_pred", "device": "auto", "seed": 0,
+    "exp_id": null, "output_dir": "runs", "tensorboard": false,
+    "deterministic": true, "num_threads": 1
+  }
+}
