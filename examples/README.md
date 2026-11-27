@@ -121,6 +121,16 @@ Distances use the last known position and static POIs. Actual next-event locatio
 and time are excluded; a known query offset can be supplied explicitly in seconds.
 Validation loss is deterministic full-vocabulary normalized BPR, rather than NLL.
 
+`--model SERM` creates a semantic trajectory example with a small synthetic vector
+file. In the dataset's `config.json`, set `word_vector_file` to a headerless GloVe
+text file (absolute, or relative to the dataset directory). `semantic_column`
+defaults to `venue_category_name` in `.geo`. Pretrained vectors stay intact and
+trainable; only words used by static POI categories are retained. Duplicate words
+keep their multiplicity, and categories without known words become zero vectors.
+POIs use their real IDs rather than DataFrame row numbers. The same train,
+evaluate and resume commands apply, with full-vocabulary NLL/ranking. Resume
+rejects changes to the referenced vector file before updating parameters.
+
 The complete supported-model inventory and migration details are in the
 [runtime guide](../docs/modernization/runtime/README_zh.md). Small examples prove
 execution and reproducibility, not real-city benchmark accuracy.

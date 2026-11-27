@@ -1,0 +1,4 @@
+{
+  "model": {"params": {"loc_emb_size": 50, "tim_emb_size": 50, "hidden_size": 50}},
+  "training": {"epochs": 30, "optimizer": {"name": "rmsprop", "lr": 0.01}}
+}

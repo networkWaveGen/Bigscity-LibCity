@@ -87,6 +87,8 @@ LINE 支持 first/second order。训练使用独立正边集合及负采样，�
 
 三个监督任务均使用相同 train/evaluate/resume 命令。完整基础环境 CLI 验证（五类任务、续训与调参，共 19 条命令）见 [记录](phases34-cli-validation.json)。
 
+SERM 可用 --model SERM 生成小型示例，并复用 train/evaluate/resume 命令。实际数据集的 config.json 需声明 word_vector_file（无表头 GloVe 文本，路径相对数据集目录或使用绝对路径），semantic_column 默认指向 .geo 的 venue_category_name。模型保留并训练预训练向量，按真实 POI ID 提取类别；空/OOV 类别用零语义，前向不构造独热矩阵。该外部文件纳入续训来源版本检查。具体行为与验收见 [模型迁移说明](models_zh.md)。
+
 ## 统一调参
 
 搜索空间为 JSON，例如 `{"training.optimizer.lr":[0.001,0.002],"data.input_window":[4,6]}`。保存为 space.json 后：

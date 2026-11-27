@@ -29,6 +29,9 @@ class ModelSpec:
 
 
 MODELS = {
+    'SERM': ModelSpec('libcity.model.trajectory_loc_prediction.runtime_serm:SERM',task='traj_loc_pred',
+        prepare_data='libcity.data.semantic_trajectory:prepare_semantic',
+        loss='libcity.executor.task_evaluation:RankingLoss',evaluate_loader='libcity.executor.task_evaluation:evaluate_task'),
     'ATSTLSTM': ModelSpec('libcity.model.trajectory_loc_prediction.runtime_atstlstm:ATSTLSTM',task='traj_loc_pred',
         protocol='atst_ranking',prepare_data='libcity.data.atst_trajectory:prepare_atst',
         loss='libcity.executor.atst_step:ATSTRankingLoss',step='libcity.executor.atst_step:pairwise_step',

@@ -1,0 +1,131 @@
+{
+  "passed": true,
+  "model": "SERM",
+  "source": "D:\\LibCity 2.0\\LibCity-modernization",
+  "directory": "D:\\LibCity 2.0\\.runtime-tests\\serm-cli-jifxyrr9",
+  "commands": [
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\tools\\make_runtime_fixture.py",
+        "--directory",
+        "D:\\LibCity 2.0\\.runtime-tests\\serm-cli-jifxyrr9\\case",
+        "--model",
+        "SERM"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\serm-cli-jifxyrr9",
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "train",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\serm-cli-jifxyrr9\\case\\serm.json",
+        "--set",
+        "runtime.exp_id=train"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\serm-cli-jifxyrr9",
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "evaluate",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\serm-cli-jifxyrr9\\case\\serm.json",
+        "--checkpoint",
+        "D:\\LibCity 2.0\\.runtime-tests\\serm-cli-jifxyrr9\\case\\runs\\train\\checkpoints\\best.pt",
+        "--set",
+        "runtime.exp_id=evaluate"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\serm-cli-jifxyrr9",
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "train",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\serm-cli-jifxyrr9\\case\\serm.json",
+        "--resume",
+        "D:\\LibCity 2.0\\.runtime-tests\\serm-cli-jifxyrr9\\case\\runs\\train\\checkpoints\\last.pt",
+        "--set",
+        "runtime.exp_id=resumed",
+        "--set",
+        "training.epochs=3"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\serm-cli-jifxyrr9",
+      "exit_code": 0
+    }
+  ],
+  "training": {
+    "metrics": {
+      "Recall@1": 0.5,
+      "Recall@5": 1.0,
+      "Recall@10": 1.0,
+      "MRR@10": 0.6904761450631278,
+      "loss": 1.391966462135315,
+      "best_validation": 0.5714285714285714
+    },
+    "artifacts": {
+      "metrics_json": "D:\\LibCity 2.0\\.runtime-tests\\serm-cli-jifxyrr9\\case\\runs\\train\\eval\\metrics.json",
+      "metrics_csv": "D:\\LibCity 2.0\\.runtime-tests\\serm-cli-jifxyrr9\\case\\runs\\train\\eval\\metrics.csv",
+      "predictions": "D:\\LibCity 2.0\\.runtime-tests\\serm-cli-jifxyrr9\\case\\runs\\train\\eval\\predictions.json",
+      "resolved_config": "D:\\LibCity 2.0\\.runtime-tests\\serm-cli-jifxyrr9\\case\\runs\\train\\resolved_config.json",
+      "runtime_info": "D:\\LibCity 2.0\\.runtime-tests\\serm-cli-jifxyrr9\\case\\runs\\train\\runtime_info.json",
+      "run_log": "D:\\LibCity 2.0\\.runtime-tests\\serm-cli-jifxyrr9\\case\\runs\\train\\run.log",
+      "best": "D:\\LibCity 2.0\\.runtime-tests\\serm-cli-jifxyrr9\\case\\runs\\train\\checkpoints\\best.pt",
+      "last": "D:\\LibCity 2.0\\.runtime-tests\\serm-cli-jifxyrr9\\case\\runs\\train\\checkpoints\\last.pt"
+    }
+  },
+  "evaluation": {
+    "metrics": {
+      "Recall@1": 0.5,
+      "Recall@5": 1.0,
+      "Recall@10": 1.0,
+      "MRR@10": 0.6904761450631278,
+      "loss": 1.391966462135315
+    },
+    "artifacts": {
+      "metrics_json": "D:\\LibCity 2.0\\.runtime-tests\\serm-cli-jifxyrr9\\case\\runs\\evaluate\\eval\\metrics.json",
+      "metrics_csv": "D:\\LibCity 2.0\\.runtime-tests\\serm-cli-jifxyrr9\\case\\runs\\evaluate\\eval\\metrics.csv",
+      "predictions": "D:\\LibCity 2.0\\.runtime-tests\\serm-cli-jifxyrr9\\case\\runs\\evaluate\\eval\\predictions.json",
+      "resolved_config": "D:\\LibCity 2.0\\.runtime-tests\\serm-cli-jifxyrr9\\case\\runs\\evaluate\\resolved_config.json",
+      "runtime_info": "D:\\LibCity 2.0\\.runtime-tests\\serm-cli-jifxyrr9\\case\\runs\\evaluate\\runtime_info.json",
+      "run_log": "D:\\LibCity 2.0\\.runtime-tests\\serm-cli-jifxyrr9\\case\\runs\\evaluate\\run.log"
+    }
+  },
+  "resume": {
+    "metrics": {
+      "Recall@1": 0.7857142857142857,
+      "Recall@5": 1.0,
+      "Recall@10": 1.0,
+      "MRR@10": 0.875,
+      "loss": 1.149381399154663,
+      "best_validation": 0.7142857142857143
+    },
+    "artifacts": {
+      "metrics_json": "D:\\LibCity 2.0\\.runtime-tests\\serm-cli-jifxyrr9\\case\\runs\\resumed\\eval\\metrics.json",
+      "metrics_csv": "D:\\LibCity 2.0\\.runtime-tests\\serm-cli-jifxyrr9\\case\\runs\\resumed\\eval\\metrics.csv",
+      "predictions": "D:\\LibCity 2.0\\.runtime-tests\\serm-cli-jifxyrr9\\case\\runs\\resumed\\eval\\predictions.json",
+      "resolved_config": "D:\\LibCity 2.0\\.runtime-tests\\serm-cli-jifxyrr9\\case\\runs\\resumed\\resolved_config.json",
+      "runtime_info": "D:\\LibCity 2.0\\.runtime-tests\\serm-cli-jifxyrr9\\case\\runs\\resumed\\runtime_info.json",
+      "run_log": "D:\\LibCity 2.0\\.runtime-tests\\serm-cli-jifxyrr9\\case\\runs\\resumed\\run.log",
+      "best": "D:\\LibCity 2.0\\.runtime-tests\\serm-cli-jifxyrr9\\case\\runs\\resumed\\checkpoints\\best.pt",
+      "last": "D:\\LibCity 2.0\\.runtime-tests\\serm-cli-jifxyrr9\\case\\runs\\resumed\\checkpoints\\last.pt"
+    }
+  },
+  "resumed_epoch": 3,
+  "format_version": 3,
+  "semantic_known_words": 4,
+  "semantic_word_dim": 3,
+  "word_vector_source_tracked": true
+}

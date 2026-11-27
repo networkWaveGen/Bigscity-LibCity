@@ -114,3 +114,19 @@ def strnn_fixture(root,name='TaskTiny'):
     geo['coordinates'] = [json.dumps([116+index*.001,39+(index%3)*.0005]) for index in range(len(geo))]
     geo.to_csv(folder/f'{name}.geo',index=False)
     return folder
+
+
+def serm_fixture(root,name='TaskTiny'):
+    folder = task_fixture(root,name)
+    geo = pd.read_csv(folder/f'{name}.geo')
+    geo['venue_category_name'] = ['Coffee Shop','Park','Coffee coffee unknown','',
+        'unknown unseen','Shop','park food','food']
+    geo.to_csv(folder/f'{name}.geo',index=False)
+    vectors = Path(root)/'word_vec'
+    vectors.mkdir(parents=True,exist_ok=True)
+    (vectors/'glove.fixture.txt').write_text('unused 0 0 0\ncoffee 1 2 3\nshop -1 0 2\npark .5 .25 .75\nfood 0 1 -1\n',encoding='utf-8')
+    path = folder/'config.json'
+    metadata = json.loads(path.read_text(encoding='utf-8'))
+    metadata.update(word_vector_file='../word_vec/glove.fixture.txt',semantic_column='venue_category_name')
+    path.write_text(json.dumps(metadata),encoding='utf-8')
+    return folder

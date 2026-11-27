@@ -28,6 +28,7 @@
 | commit20 | 20c3437 | feat: migrate DeepMove with causal history and masked attention |
 | commit21 | a1734bd | feat: migrate STRNN with explicit candidate geometry |
 | commit22 | e3f8655 | feat: migrate HSTLSTM with causal intervals and corrected memory |
+| commit23 | c71f33c | feat: migrate ATSTLSTM with causal candidate ranking |
 
 ## commit1：修复基础交通缓存（670b325）
 
@@ -224,6 +225,14 @@ TGCLSTM 保留逐步图过滤、门控细胞与滑动窗口重编码，所有静
 数据层复用 HSTLSTM 的已观察前缀计算，模型保持独立的首点约定。候选投影做代数分解，不构造 B×V×H；训练仅计算所选候选分数。每个组批器最多缓存 16 个起点距离行，避免 V×V 表，输出拷贝防止缓存污染。静态 WGS84 距离采用向量化 Vincenty，极点/未收敛点对通过已有 geopy/Karney 回退；全球随机及对跖等边界与 Karney 核对，不引入新依赖。
 
 验证：新增 **11 项通过**，包括旧有效非填充分支的候选分数、原归一化 BPR 和全部梯度；候选子集训练与全量分数的损失/梯度一致且禁止调用全量 forward；修改真实下一位置/时刻后输入与预测不变、原子训练热度核对、正类排除/无放回、确定性评估、注意力 padding/混批/batch=1/float64、有限缓存命中与所有权、协议非法配置、CPU AMP、spawn worker，以及三轮完整训练/独立评估/排名导出/含随机负采样的精确续训。HSTLSTM 复用前缀后的 10 项验收保持通过。完整回归 **374 passed，0 failed，0 errors，0 skipped**；仓库外发布夹具及 3 条生命周期命令均成功，评估一致并续训第三轮，见 [CLI 记录](atstlstm-cli-validation.json)。迁移清单为 **47/100**，53 条 pending，本期仍有 **44 个**实际模型待迁移。
+
+## commit24：迁移 SERM 并保留预训练语义权重
+
+旧 SERM 在载入词向量后调用全模型初始化，导致预训练 Linear 权重被覆盖；前向构造 text_size 平方的单位矩阵、嵌套 NumPy 独热、CPU Tensor 和逐样本隐藏状态拼接。新标准 nn.Module 保留位置/时间/语义 LSTM 与用户偏好融合，初始化不再触碰语义权重，词向量仍可训练。静态 POI 词 ID 注册 buffer，用 EmbeddingBag 均值直接实现原有词频平均，重复词、空/OOV 类别均正确处理；直接读取最后有效 LSTM 隐状态，前向只有 Tensor 输入和预测输出，公共循环负责 NLL、全词表排名及完整续训。
+
+旧编码器把真实 location 当作 DataFrame 行号，且数据集名称判断不一致、词向量路径硬编码并整文件入内存。新轻量适配与公共轨迹词表共用 geo_id 顺序，允许任何显式声明类别列的数据集；config.json 必须给出 word_vector_file，semantic_column 默认 venue_category_name，相对资源路径从数据集目录解析。按静态类别的小写空白词流式保留所需 GloVe 向量，不加载无关词入字典，全部找到后可提前结束；维度由文件读取，已用向量的维度/非有限数值、缺失资源有明确错误。摘要记录实际命中词、维度与空语义 POI 数。文件作为显式辅助来源进入现有格式 3 检查点，修改外部词向量后在更新前拒绝续训，不新增哈希校验。
+
+验证：新增 **16 项通过**。预训练原值保留及可训练梯度、语义重复词/空类别的独立均值、同权重下旧独热均值/分类/全部梯度对照、重排 .geo 后的非连续真实 ID 对齐和仓库外路径、流式选择/提前结束、缺失或非法资源、全 OOV 类别、padding/混批/batch=1/float64/无标签与输入所有权、完整训练/独立排名评估/导出及 RMSprop/调度器/逐参数精确续训、外部向量只增加未用词也会在下一次更新前拒绝续训、CPU AMP。完整回归 **390 passed，0 failed，0 errors，0 skipped**。仓库外发布夹具和 3 条生命周期命令成功，独立评估一致并续训第三轮，见 [CLI 记录](serm-cli-validation.json)。预训练覆盖修复属于有意变化，不声称与旧错误初始化的训练结果相同；发布夹具是合成三维词向量，不是 GloVe 精度基准。迁移表为 **48/100**，52 条 pending，本期仍有 **43 个**实际模型待迁移。
 
 ## 持续完成的清单
 
