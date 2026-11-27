@@ -16,8 +16,8 @@ ASTGCNDataset既可以继承TrafficStatePointDataset，也可以继承TrafficSta
 
 class ASTGCNDataset(TrafficStatePointDataset):
 
-    def __init__(self, config):
-        super().__init__(config)
+    def __init__(self, config, logger=None):
+        super().__init__(config, logger=logger)
         self.points_per_hour = 3600 // self.time_intervals  # 每小时的时间片数
         self.len_closeness = self.config.get('len_closeness', 3)
         self.len_period = self.config.get('len_period', 4)

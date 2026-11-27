@@ -100,6 +100,8 @@ def run_experiment(mode, config_file=None, *, config=None, overrides=None, check
         model = resolve(spec.factory)(metadata=bundle.metadata, input_window=cfg['data']['input_window'],
             output_window=cfg['data']['output_window'], **cfg['model']['params']).to(device)
         changes = protocol_changes(cfg)
+        if bundle.split_summary['input_window']!=cfg['data']['input_window']:
+            changes['data.effective_input_window'] = bundle.split_summary['input_window']
         if changes:
             logger.warning('Explicit benchmark protocol changes: %s', changes)
         (directory / 'resolved_config.json').write_text(json.dumps(cfg, indent=2)+'\n', encoding='utf-8')
@@ -109,9 +111,11 @@ def run_experiment(mode, config_file=None, *, config=None, overrides=None, check
             capabilities=dict(requires_checkpoint=spec.requires_checkpoint, supports_resume=spec.supports_resume))
         (directory / 'runtime_info.json').write_text(json.dumps(info, indent=2)+'\n', encoding='utf-8')
         if mode == 'train':
-            context = build_context(model, bundle, cfg, device, directory, logger)
+            updates = resolve(spec.updates_per_epoch)(cfg,bundle) if spec.updates_per_epoch else None
+            context = build_context(model, bundle, cfg, device, directory, logger,steps_per_epoch=updates)
             if resume is not None:
-                context.checkpoints.load_last(resume, context)
+                prepare = resolve(spec.prepare_resume) if spec.prepare_resume else None
+                context.checkpoints.load_last(resume, context,prepare=prepare)
             if spec.train is not None:
                 score = resolve(spec.train)(context)
             else:

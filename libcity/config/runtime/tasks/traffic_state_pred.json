@@ -9,6 +9,7 @@
     "split": {"train": 0.6, "val": 0.2},
     "scaler": {"name": "standard"},
     "graph": {"name": "binary", "symmetric": false, "self_loops": false},
+    "sampling": {"name": "window"},
     "features": {"load_external": false, "time_in_day": false, "day_in_week": false},
     "pad_training": true
   },

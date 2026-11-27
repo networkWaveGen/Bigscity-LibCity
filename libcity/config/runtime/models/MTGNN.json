@@ -1,0 +1,4 @@
+{
+  "model": {"params": {"gcn_true": true, "buildA_true": true, "gcn_depth": 2, "dropout": 0.3, "subgraph_size": 20, "node_dim": 40, "dilation_exponential": 1, "conv_channels": 32, "residual_channels": 32, "skip_channels": 64, "end_channels": 128, "layers": 3, "propalpha": 0.05, "tanhalpha": 3.0, "layer_norm_affline": true}},
+  "training": {"strategy": {"num_split": 1, "permutation_interval": 100, "curriculum_step": 2500, "use_curriculum_learning": false}}
+}

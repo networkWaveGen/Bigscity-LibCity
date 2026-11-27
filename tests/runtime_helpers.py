@@ -27,4 +27,5 @@ def make_context(config):
     from pathlib import Path
     directory = Path(directory) / config['runtime']['exp_id']
     directory.mkdir(parents=True, exist_ok=True)
-    return build_context(model, bundle, config, device, directory, logging.getLogger('runtime-test'))
+    updates = resolve(spec.updates_per_epoch)(config,bundle) if spec.updates_per_epoch else None
+    return build_context(model, bundle, config, device, directory, logging.getLogger('runtime-test'),steps_per_epoch=updates)

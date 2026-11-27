@@ -37,10 +37,10 @@ class TrainingContext:
     loss_fn: object
 
 
-def build_context(model, bundle, config, device, directory, logger):
+def build_context(model, bundle, config, device, directory, logger, *, steps_per_epoch=None):
     training = config['training']
     optimizer = build_optimizer(model, training['optimizer'])
-    updates = math.ceil(len(bundle.train) / training['accumulation_steps'])
+    updates = steps_per_epoch or math.ceil(len(bundle.train) / training['accumulation_steps'])
     schedule = build_scheduler(optimizer, training['scheduler'], epochs=training['epochs'], steps_per_epoch=updates)
     if training['amp'] and device.type == 'cpu' and training['amp_dtype'] != 'bfloat16':
         raise ValueError('CPU AMP requires bfloat16')
@@ -99,13 +99,16 @@ def complete_epoch(context, metrics, training_loss):
     return context.stopper.stopped
 
 
-def train_loop(context, step_fn=None, *, until_epoch=None):
+def train_loop(context, step_fn=None, *, until_epoch=None, epochs=None):
     training = context.config['training']
     if context.bundle.train is None or context.bundle.val is None:
         raise ValueError('Training requires both train and validation loaders')
     step_fn = step_fn or supervised_step(context.loss_fn)
     accumulation = training['accumulation_steps']
-    end = training['epochs'] if until_epoch is None else min(training['epochs'], until_epoch)
+    target = training['epochs'] if epochs is None else epochs
+    end = target if until_epoch is None else min(target, until_epoch)
+    if context.stopper.stopped:
+        end = context.state.epoch
     for epoch in range(context.state.epoch, end):
         context.model.train()
         context.optimizer.zero_grad(set_to_none=True)

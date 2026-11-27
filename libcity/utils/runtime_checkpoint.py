@@ -13,7 +13,8 @@ from libcity.utils.checkpoint import copy_state_to_cpu
 def resume_settings(config):
     data = {key: value for key, value in config['data'].items() if key not in ('data_dir', 'cache_dir', 'cache')}
     training = {key: value for key, value in config['training'].items() if key != 'epochs'}
-    if config['training']['scheduler']['name'] in ('onecycle', 'warmup_cosine'):
+    if (config['training']['scheduler']['name'] in ('onecycle', 'warmup_cosine')
+            or 'fine_tune_epochs' in config['training']['strategy']):
         training['epochs'] = config['training']['epochs']
     return dict(data=data, model=config['model'], training=training)
 
@@ -71,7 +72,7 @@ class CheckpointManager:
             resume_settings=resume_settings(context.config))
         return self._save('last.pt', payload)
 
-    def load_last(self, path, context):
+    def load_last(self, path, context, prepare=None):
         payload = torch.load(path, map_location='cpu', weights_only=True)
         required = {'model', 'optimizer', 'scheduler', 'train_state', 'rng', 'early_stopper', 'best_model', 'amp_scaler'}
         if not isinstance(payload, dict) or not required <= payload.keys():
@@ -80,6 +81,8 @@ class CheckpointManager:
             raise ValueError('Resume model configuration does not match checkpoint')
         if payload['resume_settings'] != resume_settings(context.config):
             raise ValueError('Resume data/training configuration does not match checkpoint')
+        if prepare is not None:
+            prepare(context,payload['train_state'])
         context.model.load_state_dict(payload['model'])
         context.optimizer.load_state_dict(payload['optimizer'])
         context.schedule.load_state_dict(payload['scheduler'])

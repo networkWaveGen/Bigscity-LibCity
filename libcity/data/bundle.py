@@ -29,10 +29,12 @@ class DatasetMetadata:
     output_dim: int = 0
     adjacency: np.ndarray | None = field(default=None, repr=False, compare=False)
     info: object = field(default_factory=dict)
+    input_layout: object = field(default_factory=dict)
 
     def __post_init__(self):
         object.__setattr__(self, 'adjacency', readonly(self.adjacency))
         object.__setattr__(self, 'info', readonly(dict(self.info)))
+        object.__setattr__(self, 'input_layout', readonly(dict(self.input_layout)))
 
 
 @dataclass
@@ -81,7 +83,28 @@ def prepare_traffic(data_config, training_config, evaluation_config, seed, logge
         init_weight_inf_or_zero='inf' if graph_config['name']=='distance' else 'zero',
         set_weight_link_or_dist='link' if graph_config['name']=='binary' else 'dist',
         calculate_weight_adj=graph_config['name']=='distance',weight_adj_epsilon=graph_config.get('epsilon',.1))
-    dataset = TrafficStatePointDataset(legacy, logger=logger)
+    sampling = data_config['sampling']
+    layout = dict(kind='window',length=data_config['input_window'])
+    dataset_class = TrafficStatePointDataset
+    if sampling['name']=='cpt':
+        from libcity.data.dataset.dataset_subclass.astgcn_dataset import ASTGCNDataset
+        dataset_class = ASTGCNDataset
+        for key in ('closeness','period','trend'):
+            legacy['len_'+key] = sampling.get(key,0)
+        for key in ('interval_period','interval_trend'):
+            legacy[key] = sampling.get(key,1)
+        points = 3600//metadata.get('time_intervals',300)
+        horizon = data_config['output_window']
+        if points<1 or horizon>points:
+            raise ValueError('CPT adapter requires output_window <= points per hour to keep history before targets')
+        segments = [(sampling.get('trend',0),7*24*sampling.get('interval_trend',1)),
+                    (sampling.get('period',0),24*sampling.get('interval_period',1)),
+                    (sampling.get('closeness',0),1)]
+        maximum = max(count*points*units for count,units in segments)
+        indices = [maximum-depend*points*units+index for count,units in segments
+                   for depend in range(1,count+1) for index in range(horizon)]
+        layout = dict(kind='cpt',length=len(indices),max_position=maximum,temporal_indices=indices,sampling=dict(sampling))
+    dataset = dataset_class(legacy, logger=logger)
     loaders = dataset.get_data()
     features = dataset.get_data_feature()
     graph = features['adj_mx'].copy()
@@ -92,7 +115,7 @@ def prepare_traffic(data_config, training_config, evaluation_config, seed, logge
     if not np.isfinite(graph).all():
         raise ValueError('Graph preprocessing produced non-finite adjacency weights')
     meta = DatasetMetadata(data_config['dataset'], features['num_nodes'], features['feature_dim'],
-                           features['output_dim'], graph, metadata)
+                           features['output_dim'], graph, metadata, layout)
     generator = torch.Generator().manual_seed(seed)
     converted = []
     for index, old in enumerate(loaders):
@@ -102,5 +125,6 @@ def prepare_traffic(data_config, training_config, evaluation_config, seed, logge
             shuffle=training_config['shuffle'] if index == 0 else False,
             generator=generator if index == 0 else None))
     summary = dict(train=len(converted[0].dataset), val=len(converted[1].dataset), test=len(converted[2].dataset),
-                   train_padded=data_config['pad_training'], semantics='legacy_window_count')
+                   train_padded=data_config['pad_training'], semantics='legacy_window_count',
+                   input_window=layout['length'],requested_input_window=data_config['input_window'],adapter=layout['kind'])
     return DataBundle(*converted, meta, dataset.scaler, generator, summary)

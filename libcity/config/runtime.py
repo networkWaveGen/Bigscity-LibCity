@@ -9,7 +9,7 @@ import warnings
 from libcity.model.runtime_registry import model_spec
 
 
-SELECTORS = {'optimizer', 'scheduler', 'scaler', 'loss', 'graph'}
+SELECTORS = {'optimizer', 'scheduler', 'scaler', 'loss', 'graph', 'sampling'}
 PATHS = (('data', 'data_dir'), ('data', 'cache_dir'), ('runtime', 'output_dir'))
 
 
@@ -91,6 +91,16 @@ def validate(config, preset):
     _known(data['features'], ('load_external', 'time_in_day', 'day_in_week'), 'data.features')
     _known(data['scaler'], ('name',), 'data.scaler')
     _known(data['graph'], ('name', 'symmetric', 'self_loops', 'epsilon'), 'data.graph')
+    _known(data['sampling'], ('name','closeness','period','trend','interval_period','interval_trend'), 'data.sampling')
+    if data['sampling'].get('name') not in ('window','cpt'):
+        raise ValueError('Unknown data.sampling.name')
+    if data['sampling']['name']=='cpt':
+        for key in ('closeness','period','trend'):
+            _positive(data['sampling'].get(key,0),f'data.sampling.{key}',zero=True)
+        if not sum(data['sampling'].get(key,0) for key in ('closeness','period','trend')):
+            raise ValueError('CPT sampling requires at least one history segment')
+        for key in ('interval_period','interval_trend'):
+            _positive(data['sampling'].get(key,1),f'data.sampling.{key}')
     if data['graph'].get('name') not in ('binary', 'weighted', 'distance'):
         raise ValueError('Unknown data.graph.name')
     for key in ('symmetric', 'self_loops'):
