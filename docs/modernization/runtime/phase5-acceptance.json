@@ -1,0 +1,81 @@
+{
+  "baseline": "3dcae47",
+  "implementation_parent": "b4bcaac",
+  "scope": "Plan phase 5; final documentation and summary committed together",
+  "passed": true,
+  "complete_requirements": [
+    "published_scripts_examples_and_test_migration",
+    "deleted_replaced_legacy_execution_and_loaders",
+    "clean_cpu_full_regression",
+    "outside_checkout_absolute_cli",
+    "os_enforced_readonly_source_and_data",
+    "cuda_representative_lifecycles",
+    "runnable_train_evaluate_resume_examples",
+    "full_model_inventory",
+    "current_real_data_short_run",
+    "test_reports"
+  ],
+  "clean_cpu": {
+    "isolated_venv": true,
+    "system_site_packages": false,
+    "installation": "python -m pip install -e '.[dev,transformer]'",
+    "pip_check": "No broken requirements found.",
+    "tests": 148,
+    "failures": 0,
+    "skipped": 0,
+    "seconds": 27.056,
+    "readonly_report": "phase5-readonly-validation.json"
+  },
+  "current_dependency_extras": [
+    "tensorboard",
+    "graph",
+    "dtw",
+    "embeddings",
+    "geosan",
+    "ode",
+    "statistics",
+    "transformer",
+    "multispans",
+    "wavelet",
+    "pdformer",
+    "dev"
+  ],
+  "cli": {
+    "commands": 19,
+    "report": "phase5-cli-validation.json",
+    "all_exit_zero": true
+  },
+  "cuda": {
+    "device": "NVIDIA GeForce RTX 5060 Laptop GPU",
+    "torch": "2.10.0+cu128",
+    "models": [
+      "GRU",
+      "STGCN",
+      "DCRNN"
+    ],
+    "report": "phase5-cuda-validation.json"
+  },
+  "real_data": {
+    "dataset": "METR_LA",
+    "used_steps": 2016,
+    "nodes": 207,
+    "report": "phase5-metr-la-validation.json"
+  },
+  "published_search": {
+    "trials": 4,
+    "final_test_evaluations": 1,
+    "report": "phase5-published-search.json"
+  },
+  "model_inventory": {
+    "total": 100,
+    "migrated": 15,
+    "pending": 85,
+    "runtime_entries": 13
+  },
+  "limits": [
+    "Only listed representative model/device configurations verified",
+    "METR-LA first week, not full accuracy benchmark",
+    "Pending models remain unsupported by current runtime",
+    "Plan section 8 deferred"
+  ]
+}

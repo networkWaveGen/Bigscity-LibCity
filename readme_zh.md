@@ -104,6 +104,8 @@ LibCity 中所复现的全部模型列表见[文档](https://bigscity-libcity-do
 
 ## Tutorial
 
+下列上游资料作为参考索引，当前分支的接口以本地使用指南和 examples 为准。
+
 为了方便用户使用 LibCity，我们为用户提供了一些入门教程：
 
 - 我们在 ACM SIGSPATIAL 2021 Main Track 以及 Local Track 上都进行了演讲，相关的演讲视频和Slide见我们的[主页](https://libcity.ai/#/tutorial)（中英文）。

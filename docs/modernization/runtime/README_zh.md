@@ -1,6 +1,6 @@
-# 新运行时：阶段一到四
+# 当前源码运行时
 
-实施依据和逐项状态分别见 [方案](plan_zh.md) 与 [验收记录](execution_zh.md)。本轮入口采用五区块 JSON；原来的扁平 CLI 参数已被子命令替换。旧模型和 Executor 文件保留到后续迁移清理阶段，未迁移模型不会静默回退到旧运行时。
+实施依据和逐项状态分别见 [方案](plan_zh.md) 与 [验收记录](execution_zh.md)。本轮入口采用五区块 JSON；原来的扁平 CLI 参数已被子命令替换。旧 Executor、ConfigParser、自定义 Batch 和历史加载路径已在阶段五删除；待迁移模型源码仍保留，但不会回退到另一套运行时。
 
 阶段一、二的 184 项记录保留为历史基线。阶段三修复预测输入和目标时间轴，阶段四接入五类任务代表组合及统一调参。当前范围、依赖与验证级别见 [模型迁移表](models_zh.md)，新增实施记录见 [阶段三、四记录](phases34_execution_zh.md) 和 [验收报告](phases34_acceptance_zh.md)。
 
@@ -32,7 +32,7 @@ print(result.artifacts['best'])
 
 每次实验写入 `<output_dir>/<exp_id>/`，含 resolved_config.json、runtime_info.json、run.log、metrics.jsonl、checkpoints/best.pt、checkpoints/last.pt 和 eval/ 下的 JSON/CSV 指标及可选预测文件。`evaluation.save_predictions=false` 关闭预测导出。TensorBoard 仅在训练且 `runtime.tensorboard=true` 时创建；独立评估不创建优化器、训练记录器或 TensorBoard。
 
-基础安装不要求 TensorBoard。启用该后端时安装 `pip install -e '.[tensorboard]'`；dev 组为旧执行器回归测试保留该依赖。Trafformer 单独需要 `pip install -e '.[transformer]'`。
+基础安装不要求 TensorBoard。启用该后端时安装 `pip install -e '.[tensorboard]'`；dev 组为可选记录器的验收保留该依赖。Trafformer 单独需要 `pip install -e '.[transformer]'`。
 
 `best.pt` 是纯模型 state_dict。`last.pt` 保存最近完整轮次的模型、优化器、调度器、AMP、TrainState、早停、最佳权重、Python/NumPy/Torch 随机状态和训练 DataLoader 随机状态，全部使用 weights_only 安全加载。续训可以延长普通调度器的 epochs；按总更新数定义的 OneCycle/WarmupCosine 必须保持原定 horizon。数据选择、损失、优化器和累积设置不能在续训时悄悄改变。
 
@@ -90,3 +90,11 @@ python run_hyper.py --config ../runtime-demo/gru.json --space space.json --algor
 ```
 
 也可调用 `from libcity.pipeline.runtime_tuning import run_search`，传入 config/space 字典。grid 与带固定种子的 random 都是标准库有限搜索，不需要调参可选包。每个 trial 的配置、数据预处理、权重、训练指标和目录相互独立；trial 只用训练与验证，选定验证最佳权重后测试集只评估一次。search.json 记录所有分数、参数、最佳 trial 和最终测试指标。不支持验证的 HMMM 会在启动前被拒绝；Optuna/Ray 的后端选型仍延后。
+
+## 阶段五交付
+
+完整结果见 [阶段五验收](phase5_acceptance_zh.md) 与 [执行/Commit 映射](phase5_execution_zh.md)。旧扁平配置保存在 reference/config 作为未安装的历史参考，不能传给新入口；旧 registry/Executor/Batch 和检查点迁移命令已删除。当前只接受 best.pt / last.pt，完整状态只能用于续训，纯权重用于独立评估。
+
+独立 CPU 环境在实际只读源码/数据副本上通过全部 148 项测试及仓库外训练/评估/续训。另在 RTX 5060 上验证 GRU、STGCN、DCRNN 的 CUDA 生命周期，含 GRU AMP 续训对照；不据此认证所有模型组合或 MPS。
+
+需要复验时，源码安装 dev/transformer 后运行 `python tools/validate_readonly_runtime.py --directory <新的仓库外临时目录> --report <报告路径>`。它只对生成的副本临时设置权限，实际写入探针必须被拒绝；在会屏蔽 ACL 的沙箱中应使用允许设置临时副本权限的执行环境。它不改动原仓库、原始数据的权限。GPU 验证使用 `tools/validate_cuda_runtime.py`，需要实际可用的 CUDA PyTorch，不会回退 CPU。

@@ -1,3 +1,16 @@
+# LibCity 当前现代化运行时
+
+- [源码用法与五类示例](runtime/README_zh.md)
+- [阶段五验收](runtime/phase5_acceptance_zh.md) 与 [执行/Commit 映射](runtime/phase5_execution_zh.md)
+- [100 条模型迁移清单](runtime/model-migration.csv)：13 个入口对应 15 条已迁移记录，85 条 pending
+- [旧测试迁移映射](runtime/phase5-test-migration.json) 与 [移除/参考配置清单](runtime/phase5-retirement.json)
+
+仅新入口提供实验执行。旧 ConfigParser、Batch、Executor、registry 工厂和检查点迁移工具已删除。reference 目录中的旧配置、经典基线数学代码以及保留的待迁移模型源码不是第二套受支持入口。
+
+以下内容为早期现代化基线的历史记录，描述当时保留的组件与检查，不适用于阶段五已经退役的接口。当前安装与运行以以上链接及根目录 README 为准。
+
+---
+
 # LibCity modernization
 
 Development branch: `refactor/libcity-modernization`.

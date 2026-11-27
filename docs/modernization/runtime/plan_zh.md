@@ -8,11 +8,11 @@
 
 | 现状 | 要解决的问题 |
 | --- | --- |
-| 扁平全局配置把命令行参数、模型结构、数据预处理、训练参数与数据集元信息混在同一个字典中；相对路径 `./raw_data/`、`./libcity/cache/`、`./libcity/log/` 硬编码在各处。 | 建立分层配置体系，分离数据集元信息、任务基准协议与模型特征适配；数据目录、缓存目录和运行输出目录可独立配置。 [配置解析](../../../libcity/config/config_parser.py) |
-| 注册了 23 个 `Executor`，其中 `TrafficStateExecutor` 有 16 个直接子类，大量复制外层 `train()` 与 `evaluate()` 循环；各任务优化器与调度器配置命名及步进时机不统一。 | 提供可组合的底层训练工具与一个简明通用的 `train_loop`，特殊训练流程直接注册独立 `train` 函数；统一优化器参数组与学习率调度步进规则。 [注册表](../../../libcity/registry.py) · [交通执行器](../../../libcity/executor/traffic_state_executor.py) · [轨迹执行器](../../../libcity/executor/traj_loc_pred_executor.py) |
-| 模型内部持有 `self._scaler`、`self.device` 并依赖自定义 `Batch` 对象；部分模型在推理阶段也读取 `batch['y']`；评估与纯推理路径仍会初始化优化器和 TensorBoard writer。 | 模型回归标准 `nn.Module`，推理输入不依赖目标标签；训练、评估和直接运行算法各自只初始化所需组件。 [RNN 模型](../../../libcity/model/traffic_speed_prediction/RNN.py) · [地图匹配执行器](../../../libcity/executor/map_matching_executor.py) |
+| 扁平全局配置把命令行参数、模型结构、数据预处理、训练参数与数据集元信息混在同一个字典中；相对路径 `./raw_data/`、`./libcity/cache/`、`./libcity/log/` 硬编码在各处。 | 建立分层配置体系，分离数据集元信息、任务基准协议与模型特征适配；数据目录、缓存目录和运行输出目录可独立配置。 [配置解析](https://github.com/networkWaveGen/Bigscity-LibCity/blob/3dcae47/libcity/config/config_parser.py) |
+| 注册了 23 个 `Executor`，其中 `TrafficStateExecutor` 有 16 个直接子类，大量复制外层 `train()` 与 `evaluate()` 循环；各任务优化器与调度器配置命名及步进时机不统一。 | 提供可组合的底层训练工具与一个简明通用的 `train_loop`，特殊训练流程直接注册独立 `train` 函数；统一优化器参数组与学习率调度步进规则。 [注册表](https://github.com/networkWaveGen/Bigscity-LibCity/blob/3dcae47/libcity/registry.py) · [交通执行器](https://github.com/networkWaveGen/Bigscity-LibCity/blob/3dcae47/libcity/executor/traffic_state_executor.py) · [轨迹执行器](https://github.com/networkWaveGen/Bigscity-LibCity/blob/3dcae47/libcity/executor/traj_loc_pred_executor.py) |
+| 模型内部持有 `self._scaler`、`self.device` 并依赖自定义 `Batch` 对象；部分模型在推理阶段也读取 `batch['y']`；评估与纯推理路径仍会初始化优化器和 TensorBoard writer。 | 模型回归标准 `nn.Module`，推理输入不依赖目标标签；训练、评估和直接运行算法各自只初始化所需组件。 [RNN 模型](../../../libcity/model/traffic_speed_prediction/RNN.py) · [地图匹配执行器](https://github.com/networkWaveGen/Bigscity-LibCity/blob/3dcae47/libcity/executor/map_matching_executor.py) |
 | 交通数据先滑窗展开再按样本数量切分，存在训练/验证/测试目标窗口重叠；滑窗缓存体积庞大且配置变更易失效。 | 先通过轻量适配层完成运行时切换，随后单独提交时间轴切分修复（目标窗口互斥、归一化仅用训练集）并分离已知未来特征与目标标签。 [交通数据集](../../../libcity/data/dataset/traffic_state_datatset.py) · [CRANN 数据集](../../../libcity/data/dataset/dataset_subclass/crann_dataset.py) |
-| 普通运行、Hyperopt 与 Ray Tune 各自装配流程，且 Hyperopt 每个试验都运行测试集。 | 所有模式统一经由包内实验入口运行；调参阶段只使用训练集和验证集，选定配置后再单独评估测试集（调参后端改造安排在架构稳定后进行）。 [普通运行与 Hyperopt](../../../libcity/pipeline/pipeline.py) · [Ray Tune](../../../libcity/pipeline/tuning.py) |
+| 普通运行、Hyperopt 与 Ray Tune 各自装配流程，且 Hyperopt 每个试验都运行测试集。 | 所有模式统一经由包内实验入口运行；调参阶段只使用训练集和验证集，选定配置后再单独评估测试集（调参后端改造安排在架构稳定后进行）。 [普通运行与 Hyperopt](https://github.com/networkWaveGen/Bigscity-LibCity/blob/3dcae47/libcity/pipeline/pipeline.py) · [Ray Tune](https://github.com/networkWaveGen/Bigscity-LibCity/blob/3dcae47/libcity/pipeline/tuning.py) |
 
 ## 2. 模块目录结构
 
@@ -135,7 +135,7 @@
 ### 阶段 1：建立基线并跑通 GRU 全闭环
 
 - [x] 从 `6ddc6ee` 建立实施分支，在独立环境中运行 `python -m pip install -e '.[dev]'` 与 `python -m pytest -q`，记录平台、依赖版本与基线测试结果（参考基线：macOS CPU、Python 3.13、PyTorch 2.10 通过 131 项测试）。
-- [x] 从现有测试提取可复用的小型原子数据夹具，固定随机种子、输入、目标、掩码和预测步，保存基线前向输出与指标作为对照。 [现有交通流水线测试](../../../tests/test_modern_core.py)
+- [x] 从现有测试提取可复用的小型原子数据夹具，固定随机种子、输入、目标、掩码和预测步，保存基线前向输出与指标作为对照。 [现有交通流水线测试](https://github.com/networkWaveGen/Bigscity-LibCity/blob/3dcae47/tests/test_modern_core.py)
 - [x] 实现分层配置解析与轻量校验、实验入口 `libcity/pipeline/`、基础工具组件、`train_loop`、通用评估与实验目录/检查点输出，并完成 `TrafficStatePointDataset` 的轻量适配。
 - [x] 通过 `python run_model.py train/evaluate` 跑通 GRU 在 CPU 上的训练、保存 `best.pt` 与 `last.pt`、独立评估以及 `--resume` 续训；通过 Python 接口执行等价配置并核对结果一致。
 - [x] 验证纯权重文件 `best.pt` 可完成独立评估且不初始化优化器和训练记录器；验证配置缺项、组件切换合并规则与检查点缺失报错清晰；验证未安装调参等可选依赖时可正常运行。
@@ -144,7 +144,7 @@
 
 - [x] 接入 STGCN，验证静态图矩阵通过元数据显式传入并经 `register_buffer` 管理，普通图模型零训练样板代码直接复用 `train_loop`。
 - [x] 接入 DCRNN（自定义 `step_fn` 读取 `state.batches_seen`，验证续训后课程学习进度一致）与 Trafformer（验证内置梯度累积及尾批更新规则）。
-- [x] 接入 ASTGNN（验证标签提取、反归一化及多阶段顺序调用）与 MTGNN（验证独立 `train` 函数组合底层工具实现单 batch 多次更新）。从同一初始状态和固定数据出发，核对更新次数、学习率与短训后参数，记录有意调整的训练语义。 [DCRNN](../../../libcity/executor/dcrnn_executor.py) · [ASTGNN](../../../libcity/executor/astgnn_executor.py) · [Trafformer](../../../libcity/executor/trafformer_executor.py) · [MTGNN](../../../libcity/executor/mtgnn_executor.py)
+- [x] 接入 ASTGNN（验证标签提取、反归一化及多阶段顺序调用）与 MTGNN（验证独立 `train` 函数组合底层工具实现单 batch 多次更新）。从同一初始状态和固定数据出发，核对更新次数、学习率与短训后参数，记录有意调整的训练语义。 [DCRNN](https://github.com/networkWaveGen/Bigscity-LibCity/blob/3dcae47/libcity/executor/dcrnn_executor.py) · [ASTGNN](https://github.com/networkWaveGen/Bigscity-LibCity/blob/3dcae47/libcity/executor/astgnn_executor.py) · [Trafformer](https://github.com/networkWaveGen/Bigscity-LibCity/blob/3dcae47/libcity/executor/trafformer_executor.py) · [MTGNN](https://github.com/networkWaveGen/Bigscity-LibCity/blob/3dcae47/libcity/executor/mtgnn_executor.py)
 - [x] 验证 `train_loop` 支持 `step`/`epoch`/`metric` 三类学习率调度器步进与续训恢复；用尾批、缺失值掩码与不同预测步验证指标聚合正确性，并统一预测导出开关行为。
 - [x] 在扩大迁移前，挑选 1 个非交通任务（如 `traj_loc_pred` 验证变长序列与按 `Recall@K` 最大化选最佳模型，或 `map_matching` 验证无训练权重的直接评估），检验 `DataBundle`、评估返回结构与入口设计未过度偏向交通预测。
 
@@ -162,9 +162,9 @@
 
 ### 阶段 5：切换默认入口并清理旧实现
 
-- [ ] 迁移随仓库发布的脚本、示例配置与测试，删除已被替换的旧入口、旧 `ConfigParser`、旧 `Batch/BatchPAD`、旧 `Executor` 子类与旧 `.m`/`.tar` 加载路径。同步更新使用文档，说明入口、配置、目录与切分变化。
-- [ ] 在干净 CPU 环境中从源码执行全部回归测试与端到端实验；切换到仓库外目录通过绝对路径运行 `run_model.py`，验证只读源码/数据目录配合独立可写缓存/运行目录可正常完成训练与评估。有 CUDA 或 MPS 环境时补充代表性运行记录。 [现有验证记录](../validation.md)
-- [ ] 交付可直接运行的训练、续训、独立评估示例，以及完整的模型迁移表、真实数据短跑记录和测试报告。
+- [x] 迁移随仓库发布的脚本、示例配置与测试，删除已被替换的旧入口、旧 `ConfigParser`、旧 `Batch/BatchPAD`、旧 `Executor` 子类与旧 `.m`/`.tar` 加载路径。同步更新使用文档，说明入口、配置、目录与切分变化。
+- [x] 在干净 CPU 环境中从源码执行全部回归测试与端到端实验；切换到仓库外目录通过绝对路径运行 `run_model.py`，验证只读源码/数据目录配合独立可写缓存/运行目录可正常完成训练与评估。有 CUDA 或 MPS 环境时补充代表性运行记录。 [现有验证记录](../validation.md)
+- [x] 交付可直接运行的训练、续训、独立评估示例，以及完整的模型迁移表、真实数据短跑记录和测试报告。
 
 > 阶段 1 和阶段 2 通过验收后再全面扩大模型迁移，届时应能通过代码与测试验证：新增常规模型只需编写模型本身与预设配置，即可获得完整训练、验证、续训、检查点与评估导出能力。
 

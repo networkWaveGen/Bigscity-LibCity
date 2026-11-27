@@ -9,9 +9,9 @@ from libcity.model.runtime_registry import MODELS
 
 
 VALIDATION={
-    'GRU':'fixed_reference;forward;short_train;CLI_API_equality;exact_resume;real_METR_LA_prefix',
-    'STGCN':'reference_forward_and_updates;buffer_dtype;short_train;independent_evaluate;shared_resume',
-    'DCRNN':'reference_forward_and_updates;curriculum_exact_resume;short_train;independent_evaluate',
+    'GRU':'fixed_reference;forward;short_train;CLI_API_equality;exact_resume;real_METR_LA_prefix;CUDA_AMP_resume',
+    'STGCN':'reference_forward_and_updates;buffer_dtype;short_train;independent_evaluate;shared_resume;CUDA_lifecycle',
+    'DCRNN':'reference_forward_and_updates;curriculum_exact_resume;short_train;independent_evaluate;CUDA_lifecycle',
     'Trafformer':'reference_forward_and_updates;unequal_horizon;accumulation_tail;short_train;shared_resume',
     'ASTGNN':'reference_forward_and_updates;teacher_finetune_exact_resume;short_train;independent_evaluate',
     'MTGNN':'reference_updates;subgraph_exact_resume;short_train;independent_evaluate',
@@ -53,7 +53,7 @@ def inventory():
                 action='next migration batch: extract pure module and task data; use shared loop or explicit auxiliary/custom train; verify forward/short train/resume'
             rows.append(dict(task=task,model=name,runtime_name=native if migrated else '',
                 runtime_params=json.dumps(parameters),migration_status='migrated' if migrated else 'pending',
-                training_entry=('direct_evaluate' if spec.kind=='direct' else spec.train or ('step_fn' if spec.step else 'train_loop')) if migrated else values.get(name,{}).get('executor','legacy'),
+                training_entry=('direct_evaluate' if spec.kind=='direct' else spec.train or ('step_fn' if spec.step else 'train_loop')) if migrated else 'not_migrated; former='+values.get(name,{}).get('executor','legacy'),
                 requires_checkpoint=spec.requires_checkpoint if migrated else 'unverified',
                 supports_validation=spec.supports_validation if migrated else 'unverified',
                 supports_resume=spec.supports_resume if migrated else 'unverified',dependency_extras=extras,

@@ -18,7 +18,6 @@ dependencies = [
 
 [project.optional-dependencies]
 tensorboard = ["tensorboard>=2.18,<3"]
-tune = ["ray[tune]>=1.2", "hyperopt>=0.2.5", "bayesian-optimization"]
 graph = ["dgl>=0.6.1"]
 dtw = ["fastdtw==0.3.4"]
 embeddings = ["gensim>=4.0.1,<5"]

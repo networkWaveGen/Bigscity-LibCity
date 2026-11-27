@@ -80,7 +80,7 @@
 
 - [x] 保存改造前的依赖、模型和组件注册清单。
 
-  执行记录：**已补齐。** [commit11] 从固定上游提交直接导出 19 个包、220 个公开组件，并归档原始任务配置；[commit13] 补充 `baseline_models.csv` 的 100 项旧模型及组件映射、`task_registration_changes.json` 的前后对照。当前审计从固定上游提交读取旧依赖，基线清单可通过 [`baseline_audit.py`](audit/baseline_audit.py) 重新生成。
+  执行记录：**已补齐。** [commit11] 从固定上游提交直接导出 19 个包、220 个公开组件，并归档原始任务配置；[commit13] 补充 `baseline_models.csv` 的 100 项旧模型及组件映射、`task_registration_changes.json` 的前后对照。当前审计从固定上游提交读取旧依赖，基线清单可通过 [`baseline_audit.py`](https://github.com/networkWaveGen/Bigscity-LibCity/blob/3dcae47/docs/modernization/audit/baseline_audit.py) 重新生成。
 
 - [x] 记录本机 Python、操作系统、CPU 或 GPU 环境，并保存已有可用的历史实验记录。
 

@@ -119,6 +119,8 @@ For a list of all models reproduced in LibCity, see [Docs](https://bigscity-libc
 
 ## Tutorial
 
+The upstream material below is a reference index; use this branch’s local guide and examples for current APIs.
+
 In order to facilitate users to use LibCity, we provide users with some tutorials:
 
 - We gave lectures on both ACM SIGSPATIAL 2021 Main Track and Local Track. For related lecture videos and Slides, please see our [HomePage](https://libcity.ai/#/tutorial) (in Chinese and English).
