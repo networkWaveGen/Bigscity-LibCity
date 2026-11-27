@@ -41,14 +41,16 @@ class TrainingContext:
 
 
 @lru_cache(maxsize=1)
-def cpu_amp_convolution_backward_supported():
+def cpu_amp_backward_supported():
     """Probe the actual backend without advancing the experiment's random state."""
     with torch.random.fork_rng(devices=[]):
-        layer = torch.nn.Conv2d(1, 1, 1)
+        convolution = torch.nn.Conv2d(1, 1, 1)
+        projection = torch.nn.Linear(4, 8)
         with torch.autocast('cpu', dtype=torch.bfloat16):
-            prediction = layer(torch.ones(2, 1, 2, 2))
+            prediction = convolution(torch.ones(2, 1, 2, 2))
+            projected = projection(torch.ones(2, 3, 4))
         try:
-            prediction.float().square().mean().backward()
+            (prediction.float().square().mean()+projected.float().square().mean()).backward()
         except RuntimeError as error:
             if 'does not support bf16/f16 backward' in str(error):
                 return False
@@ -67,13 +69,10 @@ def build_context(model, bundle, config, device, directory, logger, *, steps_per
     stopper = EarlyStopper(training['direction'], **training['early_stopping'])
     loss = loss_fn if loss_fn is not None else ForecastLoss(training['loss'], bundle.scaler, bundle.metadata.output_dim)
     tracker = MetricTracker(directory, logger, tensorboard=config['runtime']['tensorboard'])
-    convolutions = (torch.nn.Conv1d, torch.nn.Conv2d, torch.nn.Conv3d,
-                    torch.nn.ConvTranspose1d, torch.nn.ConvTranspose2d, torch.nn.ConvTranspose3d)
     native_cpu_backward = (training['amp'] and device.type=='cpu' and torch.backends.mkldnn.enabled
-        and any(isinstance(module, convolutions) for module in model.modules())
-        and not cpu_amp_convolution_backward_supported())
+        and not cpu_amp_backward_supported())
     if native_cpu_backward:
-        logger.info('CPU AMP: oneDNN bfloat16 convolution backward is unavailable; using native backward kernels')
+        logger.info('CPU AMP: oneDNN bfloat16 backward is unavailable; using native backward kernels')
     return TrainingContext(model, bundle, config, device, directory, tracker,
         CheckpointManager(directory / 'checkpoints'), TrainState(), optimizer, schedule, scaler, stopper, loss,
         evaluate_fn, native_cpu_backward)
@@ -87,7 +86,7 @@ def autocast_context(context):
 
 
 def backward(context, weighted_loss):
-    """Keep AMP enabled while using native CPU convolution backward if required."""
+    """Keep AMP enabled while using native CPU backward kernels if required."""
     backend = torch.backends.mkldnn.flags(enabled=False) if context.native_cpu_amp_backward else nullcontext()
     with backend:
         context.amp_scaler.scale(weighted_loss).backward()

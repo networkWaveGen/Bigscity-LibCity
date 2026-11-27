@@ -15,6 +15,7 @@
 | commit7 | c626860 | feat: migrate FPMC with personalized inputs and valid ranking loss |
 | commit8 | b60ca0e | feat: migrate sparse road autoencoders with explicit reconstruction protocol |
 | commit9 | abdd51b | feat: migrate multiscale graph forecasts with explicit CPT branches |
+| commit10 | 8a1de42 | feat: migrate memory forecasts with explicit curriculum and auxiliary step |
 
 ## commit1：修复基础交通缓存（670b325）
 
@@ -105,6 +106,14 @@ Seq2Seq 旧实现推理仍读取 y 且随机生成解码起点，现使用固定
 修复：旧调用在无标签或缺 batches_seen 时仍尝试课程学习；旧图卷积单位阵固定 FP32 导致 float64/混合精度类型不一致；长训练的 exp 课程阈值可能溢出。现在无标签 forward 不消耗课程 RNG，显式训练辅助路径执行采样，阈值在极大步数安全归零。验证使用纯预测指标，辅助记忆正则只参与训练。
 
 验证：新增 **4 项通过**，覆盖旧预测、记忆输出、训练目标和逐参数梯度对照，纯 forward 的标签/RNG 隔离，三轮课程训练/独立评估/中断恢复且 NumPy 状态、计数、调度器及每个参数一致，无协变量/batch=1/float64，以及 CPU AMP。完整回归 **247 passed，0 failed，0 errors，0 skipped**。发布夹具和仓库外 3 条 CLI 训练/评估/续训命令通过，续训第三轮，见 [MegaCRN CLI 记录](megacrn-cli-validation.json)。清单为 35/100，65 条 pending。
+
+## commit11：补齐无卷积模型的 CPU AMP 反向回退
+
+新问题：TESTAM 实际 CPU BF16 训练在矩阵反向中触发同样的 oneDNN 不支持错误。此前只为含 Conv 模块的网络启用回退，遗漏了仅含线性层、注意力和矩阵运算的模型。
+
+修复：隔离 RNG 的一次性后端探测同时执行卷积与线性投影前向/反向；所有 CPU AMP 训练按实际探测结果选择反向内核，不再按模型中是否存在 Conv 决定。仍只在反向上下文切换后端，结束时恢复设置，保留混合精度前向，CUDA 路径不受影响。
+
+验证：CPU AMP、定制训练与 STSSL 共 **13 passed**。新增无卷积 STAEformer 实际训练与回退选择验证；原卷积模型的连续/中断恢复和后端设置恢复保持通过。TESTAM 迁移与完整回归在独立提交中验收。
 
 ## 持续完成的清单
 
