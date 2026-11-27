@@ -1,5 +1,5 @@
 {
-  "scope": "Remaining-work commits 1-5; whole-library migration remains in progress",
+  "scope": "Remaining-work commits 1-7; whole-library migration remains in progress",
   "environment": {
     "python": "3.12.13",
     "torch": "2.15.0+cpu",
@@ -7,7 +7,7 @@
     "platform": "Windows-11-10.0.26200-SP0"
   },
   "full_tests": {
-    "tests": 207,
+    "tests": 223,
     "failures": 0,
     "errors": 0,
     "skipped": 0
@@ -66,6 +66,18 @@
     "test_cstn_actual_batch_size_and_gradient[3]",
     "test_real_dataset_get_data_twice_preserves_loaders_values_and_scaler[False]",
     "test_real_dataset_get_data_twice_preserves_loaders_values_and_scaler[True]",
+    "test_multiple_trajectories_and_reference_algorithm[False-STMatching]",
+    "test_multiple_trajectories_and_reference_algorithm[False-IVMM]",
+    "test_multiple_trajectories_and_reference_algorithm[True-STMatching]",
+    "test_multiple_trajectories_and_reference_algorithm[True-IVMM]",
+    "test_unmatched_and_single_point_trajectories[unmatched_tail-STMatching]",
+    "test_unmatched_and_single_point_trajectories[unmatched_tail-IVMM]",
+    "test_unmatched_and_single_point_trajectories[all_unmatched-STMatching]",
+    "test_unmatched_and_single_point_trajectories[all_unmatched-IVMM]",
+    "test_unmatched_and_single_point_trajectories[single_point-STMatching]",
+    "test_unmatched_and_single_point_trajectories[single_point-IVMM]",
+    "test_matching_cli_and_capability_guards[STMatching]",
+    "test_matching_cli_and_capability_guards[IVMM]",
     "test_reference_predictions_and_gradients[AutoEncoder]",
     "test_reference_predictions_and_gradients[AGCRN]",
     "test_reference_predictions_and_gradients[TGCN]",
@@ -132,6 +144,10 @@
     "test_dropout_and_shuffled_loader_rng_resume_exactly",
     "test_clip_is_applied_after_objective_normalization",
     "test_resume_rejects_changed_readonly_source_metadata",
+    "test_scores_valid_nll_and_gradients_match_markov_factorization",
+    "test_training_independent_ranking_and_exact_resume",
+    "test_batch_one_padding_label_isolation_and_float64",
+    "test_personalized_user_vocabulary_is_validated",
     "test_forward_loss_and_short_updates_match_legacy_computation[STGCN]",
     "test_forward_loss_and_short_updates_match_legacy_computation[DCRNN]",
     "test_forward_loss_and_short_updates_match_legacy_computation[Trafformer]",
@@ -222,112 +238,10 @@
     "test_invalid_search_fails_before_creating_study[space4]",
     "test_new_hyper_cli_runs_outside_repository"
   ],
-  "crann_actual_cli": {
-    "train": {
-      "metrics": {
-        "MAE@1": 13.793091263687401,
-        "RMSE@1": 14.20447746950411,
-        "MAE@2": 10.175983993107813,
-        "RMSE@2": 10.491876234962994,
-        "loss": 11.984538078308105
-      },
-      "cache": "miss",
-      "split": {
-        "train": {
-          "samples": 53,
-          "target_start": "2024-01-01T00:30:00.000000000",
-          "target_end": "2024-01-01T04:55:00.000000000",
-          "target_index_start": 6,
-          "target_index_end": 59
-        },
-        "val": {
-          "samples": 19,
-          "target_start": "2024-01-01T05:00:00.000000000",
-          "target_end": "2024-01-01T06:35:00.000000000",
-          "target_index_start": 60,
-          "target_index_end": 79
-        },
-        "test": {
-          "samples": 19,
-          "target_start": "2024-01-01T06:40:00.000000000",
-          "target_end": "2024-01-01T08:15:00.000000000",
-          "target_index_start": 80,
-          "target_index_end": 99
-        }
-      }
-    },
-    "evaluate": {
-      "metrics": {
-        "MAE@1": 13.793091263687401,
-        "RMSE@1": 14.20447746950411,
-        "MAE@2": 10.175983993107813,
-        "RMSE@2": 10.491876234962994,
-        "loss": 11.984538078308105
-      },
-      "cache": "hit",
-      "split": {
-        "train": {
-          "samples": 53,
-          "target_start": "2024-01-01T00:30:00.000000000",
-          "target_end": "2024-01-01T04:55:00.000000000",
-          "target_index_start": 6,
-          "target_index_end": 59
-        },
-        "val": {
-          "samples": 19,
-          "target_start": "2024-01-01T05:00:00.000000000",
-          "target_end": "2024-01-01T06:35:00.000000000",
-          "target_index_start": 60,
-          "target_index_end": 79
-        },
-        "test": {
-          "samples": 19,
-          "target_start": "2024-01-01T06:40:00.000000000",
-          "target_end": "2024-01-01T08:15:00.000000000",
-          "target_index_start": 80,
-          "target_index_end": 99
-        }
-      }
-    },
-    "resumed": {
-      "metrics": {
-        "MAE@1": 12.511607424470416,
-        "RMSE@1": 12.930814507047439,
-        "MAE@2": 9.05566050216817,
-        "RMSE@2": 9.340333855228883,
-        "loss": 10.7836332321167
-      },
-      "cache": "hit",
-      "split": {
-        "train": {
-          "samples": 53,
-          "target_start": "2024-01-01T00:30:00.000000000",
-          "target_end": "2024-01-01T04:55:00.000000000",
-          "target_index_start": 6,
-          "target_index_end": 59
-        },
-        "val": {
-          "samples": 19,
-          "target_start": "2024-01-01T05:00:00.000000000",
-          "target_end": "2024-01-01T06:35:00.000000000",
-          "target_index_start": 60,
-          "target_index_end": 79
-        },
-        "test": {
-          "samples": 19,
-          "target_start": "2024-01-01T06:40:00.000000000",
-          "target_end": "2024-01-01T08:15:00.000000000",
-          "target_index_start": 80,
-          "target_index_end": 99
-        }
-      },
-      "epoch": 3
-    }
-  },
   "inventory": {
     "total": 100,
-    "migrated": 27,
-    "pending": 73
+    "migrated": 30,
+    "pending": 70
   },
   "history": [
     {
@@ -343,7 +257,28 @@
         "migrated": 22,
         "pending": 78
       }
+    },
+    {
+      "scope": "commits 1-5, through 0c0a20d",
+      "full_tests": {
+        "tests": 207,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "inventory": {
+        "total": 100,
+        "migrated": 27,
+        "pending": 73
+      }
     }
   ],
-  "crann_actual_cli_code": "956c1d5; later batches add explicit calendar metadata, current lifecycle also covered by full_tests"
+  "current_cli": {
+    "report": "remaining-cli-validation.json",
+    "commands": 6,
+    "models": [
+      "CRANN",
+      "FPMC"
+    ]
+  }
 }

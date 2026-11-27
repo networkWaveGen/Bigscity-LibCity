@@ -11,6 +11,7 @@
 | commit3 | 23bf934 | feat: migrate six standard forecasts with native training contracts |
 | commit4 | 1a8eb2e | fix: support CPU AMP when oneDNN convolution backward is unavailable |
 | commit5 | 0c0a20d | feat: migrate calendar spectral and normalization forecasts |
+| commit6 | 2a085e1 | feat: migrate direct map matchers with isolated trajectory state |
 
 ## commit1：修复基础交通缓存（670b325）
 
@@ -65,6 +66,16 @@ Seq2Seq 旧实现推理仍读取 y 且随机生成解码起点，现使用固定
 验证：新增 **12 项通过**，包括两种算法有/无时间戳的多轨迹评估，逐轨迹对照原算法，重复运行的状态隔离，尾部无候选、全部无候选和单点轨迹，以及实际 CLI 和拒绝训练/续训/检查点请求。代表路网上 RMF=0、AN=1、AL=1。未初始化优化器、TensorBoard 或检查点。迁移表为 29/100，71 条 pending。
 
 限制明确保留：原算法 temporal_analysis 是空实现，本轮沿用其空间/投票数学逻辑，时间戳保留用于输出，不声称已实现论文中的额外时间速度评分。
+
+## commit7：迁移 FPMC 个性化轨迹模型
+
+新增标准 nn.Module，保留 UI/IU/LI/IL 四个嵌入矩阵的偏好和一阶转移分解；显式 lengths 选择最后有效位置，移除旧 Batch.get_origin_len 与模型内部 device。个性化轨迹适配按 .usr 建立用户映射并验证未知用户，无 .usr 时从轨迹构造稳定词表；基础 RNN 路径不强制增加用户字段。
+
+修复旧 calculate_loss 已注释承认的 NLL 错误：未归一化分数不能直接送入 NLLLoss。现在去除 padding 类后返回 log_softmax，目标/导出与公共零基位置词表一致，数学上等价于对原分解分数做全词表交叉熵。
+
+验证：新增 4 项，覆盖旧四矩阵分数和正确交叉熵梯度、概率归一化、用户词表校验、batch=1/float64/填充隔离/无标签前向，以及完整训练、独立全词表排名导出和精确续训；与既有跨任务测试合计 **17 passed**。迁移表更新为 30/100，70 条 pending。
+
+前七批完成后的完整回归为 **223 passed，0 failed，0 errors，0 skipped**，见 [完整机器记录](remaining-validation.json)。在仓库外新建独立数据/运行目录实际执行 CRANN 和 FPMC 各自训练、独立评估和续训共 **6 条 CLI 命令**，均成功，续训达到第三轮，独立评估与训练后评估一致；CRANN 训练缓存 miss，评估/续训均 hit，见 [当前 CLI 记录](remaining-cli-validation.json)。
 
 ## 持续完成的清单
 

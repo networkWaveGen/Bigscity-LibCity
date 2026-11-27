@@ -28,6 +28,9 @@ class ModelSpec:
 
 
 MODELS = {
+    'FPMC': ModelSpec('libcity.model.trajectory_loc_prediction.runtime_fpmc:FPMC', task='traj_loc_pred',
+        prepare_data='libcity.data.task_bundles:prepare_personalized_trajectory',
+        loss='libcity.executor.task_evaluation:RankingLoss', evaluate_loader='libcity.executor.task_evaluation:evaluate_task'),
     'STMatching': ModelSpec('libcity.model.map_matching.runtime_matching:create_stmatching', task='map_matching',
         requires_checkpoint=False, supports_resume=False, supports_validation=False,
         evaluate='libcity.model.map_matching.runtime_hmmm:evaluate', kind='direct', device_types=('cpu',)),

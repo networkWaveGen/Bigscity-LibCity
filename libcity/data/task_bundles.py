@@ -75,12 +75,20 @@ def split_index(start,end,cuts):
     return None
 
 
-def prepare_trajectory(data,training,evaluation,seed,logger=None):
+def prepare_trajectory(data,training,evaluation,seed,logger=None,*,include_users=False):
     folder,raw=atomic(data)
     geo=pd.read_csv(folder/(raw.get('geo_file',data['dataset'])+'.geo'))
     ids=geo['geo_id'].tolist()
     locations={value:index+1 for index,value in enumerate(ids)}
     groups,cuts=sessions(folder,raw,data)
+    users = None
+    if include_users:
+        path = folder/(raw.get('usr_file',data['dataset'])+'.usr')
+        identities = pd.read_csv(path)['usr_id'].tolist() if path.is_file() else list(dict.fromkeys(
+            group['entity_id'].iloc[0] for group in groups))
+        if not identities or len(set(identities)) != len(identities):
+            raise ValueError('Trajectory user vocabulary must be nonempty and unique')
+        users = {identity:index for index,identity in enumerate(identities)}
     rows=[[],[],[]]
     for group in groups:
         if len(group)<data['min_session_length']:
@@ -94,14 +102,27 @@ def prepare_trajectory(data,training,evaluation,seed,logger=None):
         encoded=(time.dt.hour+24*(time.dt.day_of_week>=5)).tolist()
         for position in range(1,len(group)):
             part=split_index(time.iloc[position],time.iloc[position],cuts)
-            rows[part].append(dict(current_loc=torch.tensor(loc[:position]),current_tim=torch.tensor(encoded[:position]),
+            row = dict(current_loc=torch.tensor(loc[:position]),current_tim=torch.tensor(encoded[:position]),
                 lengths=torch.tensor(position),y=torch.tensor(loc[position]-1),
-                sample_id=torch.tensor(int(group['dyna_id'].iloc[position]))))
+                sample_id=torch.tensor(int(group['dyna_id'].iloc[position])))
+            if users is not None:
+                user = group['entity_id'].iloc[0]
+                if user not in users:
+                    raise ValueError('Trajectory user is absent from .usr vocabulary')
+                row['uid'] = torch.tensor(users[user])
+            rows[part].append(row)
+    info = dict(location_ids=ids,loc_size=len(ids)+1,tim_size=49,loc_pad=0,tim_pad=48)
+    if users is not None:
+        info.update(uid_size=len(users),user_ids=identities)
     metadata=DatasetMetadata(data['dataset'],num_nodes=len(ids),output_dim=len(ids),
-        info=dict(location_ids=ids,loc_size=len(ids)+1,tim_size=49,loc_pad=0,tim_pad=48),
+        info=info,
         input_layout=dict(kind='padded_trajectory',target_semantics='next_location',time_encoding='weekday_weekend_hour'))
     return bundle(rows,metadata,NoneScaler(),training,evaluation,seed,
         dict(semantics='target_timestamp',train_end=str(cuts[0]),val_end=str(cuts[1])))
+
+
+def prepare_personalized_trajectory(data,training,evaluation,seed,logger=None):
+    return prepare_trajectory(data,training,evaluation,seed,logger,include_users=True)
 
 
 def safe_statistics(values):

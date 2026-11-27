@@ -1,0 +1,129 @@
+{
+  "passed": true,
+  "commands": 6,
+  "models": {
+    "CRANN": {
+      "commands": [
+        {
+          "arguments": [
+            "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+            "train",
+            "--config",
+            "D:\\LibCity 2.0\\.runtime-tests\\remaining-cli-pcyfeozv\\CRANN\\config.json",
+            "--set",
+            "runtime.exp_id=train"
+          ],
+          "returncode": 0
+        },
+        {
+          "arguments": [
+            "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+            "evaluate",
+            "--config",
+            "D:\\LibCity 2.0\\.runtime-tests\\remaining-cli-pcyfeozv\\CRANN\\config.json",
+            "--set",
+            "runtime.exp_id=evaluate",
+            "--checkpoint",
+            "D:\\LibCity 2.0\\.runtime-tests\\remaining-cli-pcyfeozv\\CRANN\\runs\\train\\checkpoints\\best.pt"
+          ],
+          "returncode": 0
+        },
+        {
+          "arguments": [
+            "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+            "train",
+            "--config",
+            "D:\\LibCity 2.0\\.runtime-tests\\remaining-cli-pcyfeozv\\CRANN\\config.json",
+            "--set",
+            "runtime.exp_id=resumed",
+            "--resume",
+            "D:\\LibCity 2.0\\.runtime-tests\\remaining-cli-pcyfeozv\\CRANN\\runs\\train\\checkpoints\\last.pt",
+            "--set",
+            "training.epochs=3"
+          ],
+          "returncode": 0
+        }
+      ],
+      "train_metrics": {
+        "MAE@1": 13.793091263687401,
+        "RMSE@1": 14.20447746950411,
+        "MAE@2": 10.175983993107813,
+        "RMSE@2": 10.491876234962994,
+        "loss": 11.984538078308105,
+        "best_validation": 11.745325088500977
+      },
+      "evaluation_metrics": {
+        "MAE@1": 13.793091263687401,
+        "RMSE@1": 14.20447746950411,
+        "MAE@2": 10.175983993107813,
+        "RMSE@2": 10.491876234962994,
+        "loss": 11.984538078308105
+      },
+      "resume_epoch": 3,
+      "cache": {
+        "train": "miss",
+        "evaluate": "hit",
+        "resumed": "hit"
+      }
+    },
+    "FPMC": {
+      "commands": [
+        {
+          "arguments": [
+            "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+            "train",
+            "--config",
+            "D:\\LibCity 2.0\\.runtime-tests\\remaining-cli-pcyfeozv\\FPMC\\config.json",
+            "--set",
+            "runtime.exp_id=train"
+          ],
+          "returncode": 0
+        },
+        {
+          "arguments": [
+            "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+            "evaluate",
+            "--config",
+            "D:\\LibCity 2.0\\.runtime-tests\\remaining-cli-pcyfeozv\\FPMC\\config.json",
+            "--set",
+            "runtime.exp_id=evaluate",
+            "--checkpoint",
+            "D:\\LibCity 2.0\\.runtime-tests\\remaining-cli-pcyfeozv\\FPMC\\runs\\train\\checkpoints\\best.pt"
+          ],
+          "returncode": 0
+        },
+        {
+          "arguments": [
+            "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+            "train",
+            "--config",
+            "D:\\LibCity 2.0\\.runtime-tests\\remaining-cli-pcyfeozv\\FPMC\\config.json",
+            "--set",
+            "runtime.exp_id=resumed",
+            "--resume",
+            "D:\\LibCity 2.0\\.runtime-tests\\remaining-cli-pcyfeozv\\FPMC\\runs\\train\\checkpoints\\last.pt",
+            "--set",
+            "training.epochs=3"
+          ],
+          "returncode": 0
+        }
+      ],
+      "train_metrics": {
+        "Recall@1": 0.35714285714285715,
+        "Recall@5": 0.7857142857142857,
+        "Recall@10": 1.0,
+        "MRR@10": 0.5406462465013776,
+        "loss": 1.9452570676803589,
+        "best_validation": 0.35714285714285715
+      },
+      "evaluation_metrics": {
+        "Recall@1": 0.35714285714285715,
+        "Recall@5": 0.7857142857142857,
+        "Recall@10": 1.0,
+        "MRR@10": 0.5406462465013776,
+        "loss": 1.9452570676803589
+      },
+      "resume_epoch": 3
+    }
+  }
+}

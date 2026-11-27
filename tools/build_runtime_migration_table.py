@@ -9,6 +9,7 @@ from libcity.model.runtime_registry import MODELS
 
 
 VALIDATION={
+    'FPMC':'factorization_scores_and_cross_entropy_gradients;personalized_user_vocabulary;variable_padding;batch_one_float64;short_train;independent_evaluate;exact_resume;full_vocabulary_ranking',
     'STMatching':'direct_algorithm;single_trajectory_reference;trajectory_state_isolation;timestamps;unmatched_tail;all_unmatched;single_point;actual_CLI;capability_guards',
     'IVMM':'direct_algorithm;single_trajectory_reference;trajectory_state_isolation;timestamps;unmatched_tail;all_unmatched;single_point;actual_CLI;capability_guards',
     'STID':'reference_forward_and_gradients;explicit_calendar;multivariate_batch_one_float64;short_train;independent_evaluate;exact_resume;CPU_AMP',
