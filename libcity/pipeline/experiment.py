@@ -69,11 +69,13 @@ def protocol_changes(config):
             if key in defaults[block] and config[block][key] != defaults[block][key]}
 
 
-def run_experiment(mode, config_file=None, *, config=None, overrides=None, checkpoint=None, resume=None):
+def run_experiment(mode, config_file=None, *, config=None, overrides=None, checkpoint=None, resume=None, evaluate_test=True):
     if mode not in ('train', 'evaluate'):
         raise ValueError('Experiment mode must be train or evaluate')
     cfg = load_config(config_file, overrides, config=config)
     spec = model_spec(cfg['model']['name'])
+    if type(evaluate_test) is not bool or (not evaluate_test and (mode!='train' or not spec.supports_validation)):
+        raise ValueError('Validation-only fitting requires a trainable validation-capable model')
     if mode == 'train' and not spec.requires_checkpoint and spec.train is None:
         raise ValueError('This algorithm provides direct evaluation only')
     if resume is not None and (mode != 'train' or not spec.supports_resume):
@@ -126,7 +128,8 @@ def run_experiment(mode, config_file=None, *, config=None, overrides=None, check
         info = dict(python=platform.python_version(), pytorch=str(torch.__version__), numpy=np.__version__,
             platform=platform.platform(), mode=mode, device=str(device), seed=cfg['runtime']['seed'],
             split=bundle.split_summary, protocol_changes=changes,
-            capabilities=dict(requires_checkpoint=spec.requires_checkpoint, supports_resume=spec.supports_resume))
+            capabilities=dict(requires_checkpoint=spec.requires_checkpoint, supports_resume=spec.supports_resume,
+                              supports_validation=spec.supports_validation))
         (directory / 'runtime_info.json').write_text(json.dumps(info, indent=2)+'\n', encoding='utf-8')
         if mode == 'train':
             updates = resolve(spec.updates_per_epoch)(cfg,bundle) if spec.updates_per_epoch else None
@@ -146,7 +149,10 @@ def run_experiment(mode, config_file=None, *, config=None, overrides=None, check
                 raise ValueError('Training entry must return a finite scalar validation score')
         elif spec.requires_checkpoint:
             CheckpointManager.load_weights(checkpoint, model)
-        if spec.evaluate:
+        if mode=='train' and not evaluate_test:
+            from libcity.executor.evaluate import ExperimentResult
+            result=ExperimentResult({'validation_score':float(score)})
+        elif spec.evaluate:
             result=resolve(spec.evaluate)(model,bundle,cfg['evaluation'],directory=directory/'eval',logger=logger)
         else:
             evaluator=resolve(spec.evaluate_loader) if spec.evaluate_loader else evaluate_loop

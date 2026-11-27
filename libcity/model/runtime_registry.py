@@ -16,6 +16,7 @@ class ModelSpec:
     train: str | None = None
     requires_checkpoint: bool = True
     supports_resume: bool = True
+    supports_validation: bool = True
     prepare_resume: str | None = None
     updates_per_epoch: str | None = None
     evaluate: str | None = None
@@ -50,7 +51,7 @@ MODELS = {
     'MTGNN': ModelSpec('libcity.model.traffic_speed_prediction.runtime_mtgnn:MTGNN',
         train='libcity.executor.mtgnn_train:train',updates_per_epoch='libcity.executor.mtgnn_train:updates_per_epoch'),
     'HMMM': ModelSpec('libcity.model.map_matching.runtime_hmmm:create_model',task='map_matching',
-        requires_checkpoint=False,supports_resume=False,evaluate='libcity.model.map_matching.runtime_hmmm:evaluate',
+        requires_checkpoint=False,supports_resume=False,supports_validation=False,evaluate='libcity.model.map_matching.runtime_hmmm:evaluate',
         kind='direct',device_types=('cpu',)),
 }
 
