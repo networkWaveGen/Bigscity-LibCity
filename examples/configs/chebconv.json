@@ -1,0 +1,6 @@
+{
+  "data": {"dataset": "RoadFeatures", "data_dir": "data", "cache_dir": "cache", "cache": false},
+  "model": {"name": "ChebConv", "params": {"embedding_dim": 4, "max_diffusion_step": 2}},
+  "training": {"epochs": 2},
+  "runtime": {"device": "cpu", "seed": 17, "output_dir": "runs"}
+}

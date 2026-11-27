@@ -1,5 +1,5 @@
 {
-  "scope": "Remaining-work commits 1-7; whole-library migration remains in progress",
+  "scope": "Remaining-work commits 1-8; whole-library migration remains in progress",
   "environment": {
     "python": "3.12.13",
     "torch": "2.15.0+cpu",
@@ -7,7 +7,7 @@
     "platform": "Windows-11-10.0.26200-SP0"
   },
   "full_tests": {
-    "tests": 223,
+    "tests": 235,
     "failures": 0,
     "errors": 0,
     "skipped": 0
@@ -201,6 +201,18 @@
     "test_flat_configs_and_training_mode_aliases_are_not_silently_accepted",
     "test_native_eta_export_keeps_repeated_users_and_all_tail_trajectories",
     "test_visualization_cli_uses_explicit_paths_from_outside_source",
+    "test_reference_forward_and_gradients_with_no_forward_filesystem[ChebConv]",
+    "test_reference_forward_and_gradients_with_no_forward_filesystem[GAT]",
+    "test_chebyshev_zero_order_and_independent_dual_support_polynomials",
+    "test_full_lifecycle_exact_resume_protocol_and_embeddings[ChebConv]",
+    "test_full_lifecycle_exact_resume_protocol_and_embeddings[GAT]",
+    "test_node_splits_scaling_missing_values_and_data_ownership",
+    "test_float64_subset_prediction_and_cpu_amp[ChebConv]",
+    "test_float64_subset_prediction_and_cpu_amp[GAT]",
+    "test_gat_empty_graph_and_protocol_metric_validation",
+    "test_sparse_road_metadata_and_model_do_not_expand_dense_adjacency[ChebConv]",
+    "test_sparse_road_metadata_and_model_do_not_expand_dense_adjacency[GAT]",
+    "test_automatic_device_selection_respects_model_capabilities",
     "test_stssl_dynamic_task_state_next_updates_and_rng_resume",
     "test_stssl_prediction_has_no_augmentation_or_labels_and_pipeline_exports",
     "test_atomic_task_train_independent_evaluate_and_label_free_forward[RNN]",
@@ -240,8 +252,8 @@
   ],
   "inventory": {
     "total": 100,
-    "migrated": 30,
-    "pending": 70
+    "migrated": 32,
+    "pending": 68
   },
   "history": [
     {
@@ -271,6 +283,20 @@
         "migrated": 27,
         "pending": 73
       }
+    },
+    {
+      "scope": "commits 1-7, through c626860",
+      "full_tests": {
+        "tests": 223,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "inventory": {
+        "total": 100,
+        "migrated": 30,
+        "pending": 70
+      }
     }
   ],
   "current_cli": {
@@ -280,5 +306,10 @@
       "CRANN",
       "FPMC"
     ]
+  },
+  "road_reconstruction_cli": {
+    "report": "road-reconstruction-cli-validation.json",
+    "commands": 6,
+    "fixture_commands": 2
   }
 }

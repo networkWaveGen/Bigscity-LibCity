@@ -78,7 +78,7 @@ def validate(config, preset):
     _known(config, ('data', 'model', 'training', 'evaluation', 'runtime'), 'config')
     for block in config:
         _object(config[block], block)
-    defaults = _resource('tasks', config['runtime']['task'])
+    defaults = task_defaults(config['runtime']['task'], config['model']['name'])
     for block in config:
         _known(config[block], defaults[block], block)
     data, model, training, evaluation, runtime = (config[name] for name in
@@ -176,7 +176,7 @@ def validate(config, preset):
             raise ValueError('evaluation.topk requires positive integers')
         allowed_metrics = {f'{name}@{k}' for name in ('Recall','MRR','NDCG') for k in evaluation['topk']}
     elif spec.task=='road_representation':
-        allowed_metrics={'loss','accuracy'}
+        allowed_metrics={'loss','MAE','MSE','RMSE'} if spec.protocol=='road_reconstruction' else {'loss','accuracy'}
     elif spec.task=='eta':
         allowed_metrics={'MAE','MSE','RMSE','MAPE'}
     if any(not isinstance(name, str) or name.removeprefix('masked_') not in allowed_metrics for name in evaluation['metrics']):
@@ -218,7 +218,8 @@ def validate(config, preset):
         raise ValueError('plateau scheduler requires interval=metric')
     if scheduler['name'] in ('onecycle', 'warmup_cosine') and interval != 'step':
         raise ValueError('onecycle/warmup_cosine scheduler requires interval=step')
-    losses={'traj_loc_pred':('nll',),'road_representation':('negative_sampling',),'eta':('mae','mse')}.get(
+    road_losses = ('mae','mse') if spec.protocol=='road_reconstruction' else ('negative_sampling',)
+    losses={'traj_loc_pred':('nll',),'road_representation':road_losses,'eta':('mae','mse')}.get(
         spec.task,('mae','mse','masked_mae','masked_mse'))
     if training['loss'].get('name') not in losses:
         raise ValueError('Unknown training.loss.name')
@@ -240,7 +241,15 @@ def validate(config, preset):
             raise ValueError('Trajectory training requires loss.name=nll')
     if spec.task=='road_representation':
         _positive(data['negative_samples'],'negative_samples',zero=True)
-        if training['loss']['name']!='negative_sampling':
+        if spec.protocol=='road_reconstruction':
+            for key in ('feature_columns','categorical_columns'):
+                if (not isinstance(data[key],list) or any(not isinstance(value,str) or not value for value in data[key])
+                        or len(set(data[key]))!=len(data[key])):
+                    raise ValueError(f'data.{key} must contain unique nonempty column names')
+            _known(data['scaler'], ('name',), 'data.scaler')
+            if data['scaler'].get('name') not in ('none','standard'):
+                raise ValueError('Road reconstruction supports none/standard scaling')
+        elif training['loss']['name']!='negative_sampling':
             raise ValueError('LINE training requires loss.name=negative_sampling')
     if spec.task=='eta':
         if training['loss']['name'] not in ('mae','mse'):
@@ -256,6 +265,13 @@ def _resource(group, name):
     if not path.is_file():
         raise ValueError(f'No runtime {group} preset for {name!r}')
     return json.loads(path.read_text(encoding='utf-8'))
+
+
+def task_defaults(task, model):
+    """Named task protocols keep distinct objectives out of model hyperparameters."""
+    defaults = _resource('tasks', task)
+    protocol = model_spec(model).protocol
+    return merge_config(defaults, _resource('protocols', protocol)) if protocol else defaults
 
 
 def load_config(config_file=None, overrides=None, *, config=None):
@@ -278,7 +294,7 @@ def load_config(config_file=None, overrides=None, *, config=None):
         raise ValueError('model.name is required')
     model_spec(name)
     task = selectors.get('runtime', {}).get('task', model_spec(name).task)
-    defaults = _paths(_resource('tasks', task), Path.cwd())
+    defaults = _paths(task_defaults(task, name), Path.cwd())
     defaults['model']['name']=name
     user_model=user.get('model',{})
     if isinstance(user_model,dict) and user_model.get('name',name)!=name:

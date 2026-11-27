@@ -17,9 +17,13 @@ from libcity.model.runtime_registry import model_spec, resolve
 from libcity.utils.runtime_checkpoint import CheckpointManager
 
 
-def select_device(value):
+def select_device(value, *, allowed=('cpu','cuda','mps')):
     if value == 'auto':
-        value = 'cuda:0' if torch.cuda.is_available() else 'mps' if torch.backends.mps.is_available() else 'cpu'
+        value = ('cuda:0' if 'cuda' in allowed and torch.cuda.is_available() else
+                 'mps' if 'mps' in allowed and torch.backends.mps.is_available() else
+                 'cpu' if 'cpu' in allowed else None)
+        if value is None:
+            raise ValueError(f'No available device supported by this model: {allowed}')
     device = torch.device(value)
     if device.type == 'cuda' and (not torch.cuda.is_available() or (device.index or 0) >= torch.cuda.device_count()):
         raise ValueError(f'Requested CUDA device is unavailable: {value}')
@@ -65,8 +69,12 @@ def protocol_changes(config):
     defaults = _resource('tasks', config['runtime']['task'])
     fields = [('data', 'split'), ('data', 'input_window'), ('data', 'output_window'),
               ('evaluation', 'metrics'), ('evaluation', 'mask_value'), ('evaluation', 'mode')]
-    return {f'{block}.{key}': config[block][key] for block, key in fields
+    changes = {f'{block}.{key}': config[block][key] for block, key in fields
             if key in defaults[block] and config[block][key] != defaults[block][key]}
+    protocol = model_spec(config['model']['name']).protocol
+    if protocol:
+        changes['benchmark.protocol'] = protocol
+    return changes
 
 
 def run_experiment(mode, config_file=None, *, config=None, overrides=None, checkpoint=None, resume=None, evaluate_test=True):
@@ -92,8 +100,8 @@ def run_experiment(mode, config_file=None, *, config=None, overrides=None, check
             require_pt(path)
         if path is not None and not Path(path).is_file():
             raise FileNotFoundError(f'{label} file does not exist: {path}')
-    if cfg['runtime']['device']=='auto' and spec.device_types==('cpu',):
-        cfg['runtime']['device']='cpu'
+    if cfg['runtime']['device']=='auto':
+        cfg['runtime']['device']=str(select_device('auto',allowed=spec.device_types))
     device = initialize_runtime(cfg['runtime'])
     if device.type not in spec.device_types:
         raise ValueError(f'{cfg["model"]["name"]} supports devices {spec.device_types}')
@@ -130,6 +138,7 @@ def run_experiment(mode, config_file=None, *, config=None, overrides=None, check
         (directory / 'resolved_config.json').write_text(json.dumps(cfg, indent=2)+'\n', encoding='utf-8')
         info = dict(python=platform.python_version(), pytorch=str(torch.__version__), numpy=np.__version__,
             platform=platform.platform(), mode=mode, device=str(device), seed=cfg['runtime']['seed'],
+            benchmark_protocol=spec.protocol or 'task_default',
             split=bundle.split_summary, protocol_changes=changes,
             capabilities=dict(requires_checkpoint=spec.requires_checkpoint, supports_resume=spec.supports_resume,
                               supports_validation=spec.supports_validation))

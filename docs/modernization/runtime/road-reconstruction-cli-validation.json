@@ -1,0 +1,119 @@
+{
+  "passed": true,
+  "commands": 6,
+  "fixture_commands": 2,
+  "models": {
+    "ChebConv": {
+      "commands": [
+        {
+          "arguments": [
+            "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+            "train",
+            "--config",
+            "D:\\LibCity 2.0\\.runtime-tests\\remaining-sparse-road-cli-o6rspchk\\ChebConv\\chebconv.json",
+            "--set",
+            "runtime.exp_id=train"
+          ],
+          "returncode": 0
+        },
+        {
+          "arguments": [
+            "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+            "evaluate",
+            "--config",
+            "D:\\LibCity 2.0\\.runtime-tests\\remaining-sparse-road-cli-o6rspchk\\ChebConv\\chebconv.json",
+            "--set",
+            "runtime.exp_id=evaluate",
+            "--checkpoint",
+            "D:\\LibCity 2.0\\.runtime-tests\\remaining-sparse-road-cli-o6rspchk\\ChebConv\\runs\\train\\checkpoints\\best.pt"
+          ],
+          "returncode": 0
+        },
+        {
+          "arguments": [
+            "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+            "train",
+            "--config",
+            "D:\\LibCity 2.0\\.runtime-tests\\remaining-sparse-road-cli-o6rspchk\\ChebConv\\chebconv.json",
+            "--set",
+            "runtime.exp_id=resumed",
+            "--resume",
+            "D:\\LibCity 2.0\\.runtime-tests\\remaining-sparse-road-cli-o6rspchk\\ChebConv\\runs\\train\\checkpoints\\last.pt",
+            "--set",
+            "training.epochs=3"
+          ],
+          "returncode": 0
+        }
+      ],
+      "metrics": {
+        "MAE": 1.7221394699244272,
+        "RMSE": 3.629915140392363,
+        "loss": 13.176283836364746
+      },
+      "resume_epoch": 3,
+      "protocol": "road_reconstruction",
+      "sparse_graph": true,
+      "support_nonzeros": {
+        "encoder.support_0": 24,
+        "encoder.support_1": 24,
+        "decoder.support_0": 24,
+        "decoder.support_1": 24
+      }
+    },
+    "GAT": {
+      "commands": [
+        {
+          "arguments": [
+            "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+            "train",
+            "--config",
+            "D:\\LibCity 2.0\\.runtime-tests\\remaining-sparse-road-cli-o6rspchk\\GAT\\gat.json",
+            "--set",
+            "runtime.exp_id=train"
+          ],
+          "returncode": 0
+        },
+        {
+          "arguments": [
+            "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+            "evaluate",
+            "--config",
+            "D:\\LibCity 2.0\\.runtime-tests\\remaining-sparse-road-cli-o6rspchk\\GAT\\gat.json",
+            "--set",
+            "runtime.exp_id=evaluate",
+            "--checkpoint",
+            "D:\\LibCity 2.0\\.runtime-tests\\remaining-sparse-road-cli-o6rspchk\\GAT\\runs\\train\\checkpoints\\best.pt"
+          ],
+          "returncode": 0
+        },
+        {
+          "arguments": [
+            "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+            "train",
+            "--config",
+            "D:\\LibCity 2.0\\.runtime-tests\\remaining-sparse-road-cli-o6rspchk\\GAT\\gat.json",
+            "--set",
+            "runtime.exp_id=resumed",
+            "--resume",
+            "D:\\LibCity 2.0\\.runtime-tests\\remaining-sparse-road-cli-o6rspchk\\GAT\\runs\\train\\checkpoints\\last.pt",
+            "--set",
+            "training.epochs=3"
+          ],
+          "returncode": 0
+        }
+      ],
+      "metrics": {
+        "MAE": 2.553761910824549,
+        "RMSE": 6.015311609656587,
+        "loss": 36.1839714050293
+      },
+      "resume_epoch": 3,
+      "protocol": "road_reconstruction",
+      "sparse_graph": true,
+      "edge_index_shape": [
+        2,
+        24
+      ]
+    }
+  }
+}

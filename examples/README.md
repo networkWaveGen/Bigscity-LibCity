@@ -35,6 +35,16 @@ then use `../crann-demo/crann.json` with the same train/evaluate/resume commands
 CRANN explicitly declares long temporal history and spatial grid dimensions;
 only `known_future_columns` become future covariates. Other external observations
 are restricted to historical inputs.
+
+Road attribute autoencoders have their own named reconstruction protocol. Generate
+`python tools/make_runtime_fixture.py --directory ../road-reconstruction --model ChebConv`
+or use `--model GAT`, then train/evaluate/resume with the generated JSON. Inputs
+contain the full observed graph and node attributes; disjoint node masks select
+the reconstruction targets. Scaling is fitted on training nodes. The run records
+`road_reconstruction`, raw attribute MAE/RMSE, and full-node embeddings; these
+metrics describe transductive reconstruction and do not measure downstream road
+classification. Graph training uses a single full-graph batch. Feature columns
+and categorical columns are configurable through the data block.
 The complete supported-model inventory and migration details are in the
 [runtime guide](../docs/modernization/runtime/README_zh.md). Small examples prove
 execution and reproducibility, not real-city benchmark accuracy.

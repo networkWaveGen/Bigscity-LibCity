@@ -5,7 +5,7 @@ from pathlib import Path
 import sys
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT))
-from libcity.testing.fixtures import atomic_fixture,crann_fixture,map_fixture,task_fixture
+from libcity.testing.fixtures import atomic_fixture,crann_fixture,map_fixture,task_fixture,road_feature_fixture
 
 
 EXAMPLES={'traffic_state_pred':'gru','traj_loc_pred':'rnn','eta':'deeptte',
@@ -15,16 +15,20 @@ EXAMPLES={'traffic_state_pred':'gru','traj_loc_pred':'rnn','eta':'deeptte',
 def main(argv=None):
     parser=argparse.ArgumentParser()
     parser.add_argument('--directory',required=True,type=Path)
-    parser.add_argument('--task',choices=EXAMPLES,default='traffic_state_pred')
-    parser.add_argument('--model',choices=('GRU','CRANN'),help='Optional traffic model example')
+    parser.add_argument('--task',choices=EXAMPLES)
+    parser.add_argument('--model',choices=('GRU','CRANN','ChebConv','GAT'),help='Optional named model example')
     args=parser.parse_args(argv)
-    if args.model and args.task!='traffic_state_pred':
-        parser.error('--model currently selects traffic examples; choose --task traffic_state_pred')
+    selected_task = 'road_representation' if args.model in ('ChebConv','GAT') else 'traffic_state_pred'
+    if args.model and args.task and args.task!=selected_task:
+        parser.error('--model and --task select different tasks')
+    args.task = args.task or selected_task
     directory=args.directory.expanduser().resolve()
     directory.mkdir(parents=True,exist_ok=True)
-    fixture=(crann_fixture if args.model=='CRANN' else atomic_fixture) if args.task=='traffic_state_pred' else map_fixture if args.task=='map_matching' else task_fixture
+    fixture=(road_feature_fixture if args.model in ('ChebConv','GAT') else
+        (crann_fixture if args.model=='CRANN' else atomic_fixture) if args.task=='traffic_state_pred' else
+        map_fixture if args.task=='map_matching' else task_fixture)
     fixture(directory/'data')
-    name='crann' if args.model=='CRANN' else EXAMPLES[args.task]
+    name=args.model.lower() if args.model else EXAMPLES[args.task]
     config=json.loads((ROOT/'examples/configs'/f'{name}.json').read_text(encoding='utf-8'))
     path=directory/f'{name}.json'
     path.write_text(json.dumps(config,indent=2)+'\n',encoding='utf-8')

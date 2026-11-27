@@ -25,6 +25,21 @@ def atomic_fixture(root, name='Tiny', steps=48, nodes=3,interval_minutes=5):
     return folder
 
 
+def road_feature_fixture(root, name='RoadFeatures', nodes=12):
+    folder = Path(root)/name
+    folder.mkdir(parents=True,exist_ok=True)
+    (folder/'config.json').write_text(json.dumps(dict(geo_file=name,rel_file=name)),encoding='utf-8')
+    ids = np.arange(100,100+nodes)
+    pd.DataFrame(dict(geo_id=ids,type='LineString',coordinates='[[116,39],[116.001,39]]',
+        length=np.arange(nodes)*5.+20,maxspeed=np.full(nodes,40.),width=np.arange(nodes)%3+3.,
+        lanes=np.arange(nodes)%2+1,highway=['primary' if index%2 else 'secondary' for index in range(nodes)]
+    )).to_csv(folder/f'{name}.geo',index=False)
+    pairs = [(int(ids[index]),int(ids[(index+step)%nodes])) for index in range(nodes) for step in (1,2)]
+    pd.DataFrame(dict(rel_id=range(len(pairs)),type='geo',origin_id=[a for a,b in pairs],
+        destination_id=[b for a,b in pairs])).to_csv(folder/f'{name}.rel',index=False)
+    return folder
+
+
 def crann_fixture(root, name='Tiny', steps=100):
     folder = atomic_fixture(root, name=name, steps=steps)
     times = pd.read_csv(folder/f'{name}.dyna')['time'].drop_duplicates().to_numpy()

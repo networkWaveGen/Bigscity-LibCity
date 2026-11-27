@@ -25,9 +25,18 @@ class ModelSpec:
     evaluate_loader: str | None = None
     kind: str = 'neural'
     device_types: tuple = ('cpu','cuda','mps')
+    protocol: str | None = None
 
 
 MODELS = {
+    'ChebConv': ModelSpec('libcity.model.road_representation.runtime_reconstruction:ChebConv',task='road_representation',
+        protocol='road_reconstruction',prepare_data='libcity.data.road_reconstruction:prepare_reconstruction',
+        loss='libcity.executor.road_reconstruction:ReconstructionLoss',
+        evaluate_loader='libcity.executor.road_reconstruction:evaluate_reconstruction',device_types=('cpu','cuda')),
+    'GAT': ModelSpec('libcity.model.road_representation.runtime_reconstruction:GAT',task='road_representation',
+        protocol='road_reconstruction',prepare_data='libcity.data.road_reconstruction:prepare_reconstruction',
+        loss='libcity.executor.road_reconstruction:ReconstructionLoss',
+        evaluate_loader='libcity.executor.road_reconstruction:evaluate_reconstruction'),
     'FPMC': ModelSpec('libcity.model.trajectory_loc_prediction.runtime_fpmc:FPMC', task='traj_loc_pred',
         prepare_data='libcity.data.task_bundles:prepare_personalized_trajectory',
         loss='libcity.executor.task_evaluation:RankingLoss', evaluate_loader='libcity.executor.task_evaluation:evaluate_task'),

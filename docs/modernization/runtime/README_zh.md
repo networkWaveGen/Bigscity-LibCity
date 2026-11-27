@@ -6,6 +6,8 @@
 
 当前正在继续完成剩余模型迁移与主线缺口，最新提交、修复说明和验收范围见 [主线剩余问题执行记录](remaining-work_execution_zh.md)。历史阶段验收通过不等同于全模型迁移完成；当前支持范围以迁移 CSV 为准。
 
+道路表征的 ChebConv/GAT 使用具名 `road_reconstruction` 协议，任务默认配置与模型预设分开加载；预设仍不能静默改写协议字段。协议名称及相对于默认边采样协议的差异会写入日志和 runtime_info.json。生成示例可用 `tools/make_runtime_fixture.py --directory <目录> --model ChebConv` 或 `--model GAT`；它们重建静态节点属性并导出全节点嵌入，使用全图批次与互斥监督节点集合，不将此指标解释为下游分类精度。
+
 ## GRU 完整例子
 
 从源码根目录运行，数据、缓存和输出都可放在仓库外：

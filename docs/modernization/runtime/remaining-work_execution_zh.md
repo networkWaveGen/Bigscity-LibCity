@@ -12,6 +12,7 @@
 | commit4 | 1a8eb2e | fix: support CPU AMP when oneDNN convolution backward is unavailable |
 | commit5 | 0c0a20d | feat: migrate calendar spectral and normalization forecasts |
 | commit6 | 2a085e1 | feat: migrate direct map matchers with isolated trajectory state |
+| commit7 | c626860 | feat: migrate FPMC with personalized inputs and valid ranking loss |
 
 ## commit1：修复基础交通缓存（670b325）
 
@@ -76,6 +77,16 @@ Seq2Seq 旧实现推理仍读取 y 且随机生成解码起点，现使用固定
 验证：新增 4 项，覆盖旧四矩阵分数和正确交叉熵梯度、概率归一化、用户词表校验、batch=1/float64/填充隔离/无标签前向，以及完整训练、独立全词表排名导出和精确续训；与既有跨任务测试合计 **17 passed**。迁移表更新为 30/100，70 条 pending。
 
 前七批完成后的完整回归为 **223 passed，0 failed，0 errors，0 skipped**，见 [完整机器记录](remaining-validation.json)。在仓库外新建独立数据/运行目录实际执行 CRANN 和 FPMC 各自训练、独立评估和续训共 **6 条 CLI 命令**，均成功，续训达到第三轮，独立评估与训练后评估一致；CRANN 训练缓存 miss，评估/续训均 hit，见 [当前 CLI 记录](remaining-cli-validation.json)。
+
+## commit8：迁移 ChebConv/GAT 节点属性重建
+
+保留两模型的属性自编码目标，新增具名 road_reconstruction 协议、轻量原子属性适配和公共训练组件下的损失/评估。模型预设不能改写受保护的协议字段；协议及相对默认任务的差异显式记录，避免将 LINE 的边采样目标冒充节点重建。模型为标准 nn.Module，无 scaler/logger/device，无前向文件写入；静态图注册 buffer，统一在评估阶段导出嵌入及节点 ID。
+
+数据以完整已知图/属性为输入，训练、验证、测试监督节点互斥；仅训练节点拟合逐特征统计量。常量列尺度回退为 1，缺失数值输入用训练均值填补，原始 NaN 目标不计入损失。图使用只读 2×E 边表与稀疏算子，避免构造 N×N 稠密邻接矩阵。保持传导式属性重建语义，不宣称下游分类或归纳泛化认证。
+
+修复：ChebConv 的双图高阶递推错误地沿用上一图的状态，以及 0 阶分支；稀疏乘法在 AMP 中保持匹配的 FP32/FP64 运算，稠密投影仍使用 autocast。GAT 按目标邻域与头分别做稳定 softmax，支持空边集并修复混合精度聚合类型。自动设备选择尊重模型能力，ChebConv 在仅有 MPS 的机器可回退 CPU，显式不支持的设备仍报错。
+
+验证：新增 **12 项通过**，包含旧前向/梯度、双图独立多项式与 0 阶、完整训练/独立评估/精确续训及嵌入导出、归一化统计与缺失值/所有权、float64/CPU AMP、空图、协议指标校验、2,000 节点/4,000 边稀疏前向和设备选择。完整回归 **235 passed，0 failed，0 errors，0 skipped**。从仓库外执行两个发布夹具生成命令及 6 条训练/评估/续训 CLI，独立评估一致且续训到第三轮，见 [道路重建 CLI 记录](road-reconstruction-cli-validation.json)。迁移表为 32/100，68 条 pending。
 
 ## 持续完成的清单
 

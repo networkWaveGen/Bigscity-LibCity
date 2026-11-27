@@ -1,0 +1,6 @@
+{
+  "data": {"feature_columns": [], "categorical_columns": ["lanes", "highway"],
+    "scaler": {"name": "standard"}},
+  "training": {"loss": {"name": "mse"}},
+  "evaluation": {"metrics": ["MAE", "RMSE"], "mask_value": null}
+}
