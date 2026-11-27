@@ -33,7 +33,8 @@
 | commit25 | 4bf8c9c | feat: migrate STAN with causal attention and bounded sampling |
 | commit26 | 33f5f5f | fix: keep epoch schedules unchanged without optimizer updates |
 | commit27 | c9b77ca | feat: migrate CARA with author gates and causal pairwise ranking |
-| commit28 | 随本节交付的提交 | feat: migrate LSTPM with causal session attention and ranking |
+| commit28 | 39ed76b | feat: migrate LSTPM with causal session attention and ranking |
+| commit29 | 随本节交付的提交 | feat: migrate GeoSAN with native geography and bounded sampling |
 
 ## commit1：修复基础交通缓存（670b325）
 
@@ -276,6 +277,18 @@ cara_ranking 协议明确 training.loss.name=bpr。每样本独立计算原成�
 原有效路径前向和全部梯度对齐；有意变化为去掉 padding 类后使用公共平均 NLL（原为包含 padding 的 summed NLL）、训练统计去泄漏、首行程保留，以及移除从未被调用的 dropout 配置。时间相似度注册 buffer，临时状态随输入设备与类型，模型不持有 device/scaler/logger。发布 lstpm.json 和 --model LSTPM 夹具。补齐前表 commit27 与 c9b77ca 的映射。
 
 验证：新增 **14 项通过**，覆盖原两级注意力/跨行程状态/膨胀递推/全部参数梯度，显式行程边界与质心距离、训练原子时间相似度/空槽、每个前缀空间父索引/同距规则、重叠行程排除/首行程保留、真实下一事件变更后输入与预测不变、完整训练/独立全词表排名/导出/精确续训、padding/混批/全空历史/batch=1/float64/输入与 buffer 所有权、错误输入、CPU AMP。完整回归 **432 passed，0 failed，0 errors，0 skipped**，见 [汇总](remaining-validation.json)；仓库外实际夹具、训练、独立评估、续训第三轮共 4 条命令成功，见 [CLI 记录](lstpm-cli-validation.json)。迁移表为 **51/100**，49 条 pending；排除 7 个延期 Common 和 2 个模板后，本期仍有 **40 个**实际模型待迁移，最终全量验收尚未完成。
+
+## commit29：迁移 GeoSAN 并替换停止维护的 Field 接口
+
+问题：数据适配依赖 TorchText 0.6 Field/NLTK，词频与访问集合读取全量未来数据；.geo 的经纬度顺序错置、BallTree 用角度而非弧度、近邻数超过实际位置数时报错，排除访问位置可能无限重试。旧模型使用九元组与 device、混合训练/推理候选布局；默认零宽度用户层、无用线性层和 Transformer 层原型造成未使用参数，非默认乘法/用户融合及位置单分支的维度不一致。
+
+修改：新增标准库 QuadkeyVocabulary/字符串 n-gram，按 [TorchText 0.6 Vocab](https://github.com/pytorch/text/blob/0.6.0/torchtext/vocab.py) 与 [Field](https://github.com/pytorch/text/blob/0.6.0/torchtext/data/field.py) 冻结 PAD=0、无 UNK、频次降序及同频词典序规则，支持最小词频和张量 padding。旧数据参考源码同样移除 Field/NLTK，并将坐标 eval 改为 JSON；pyproject 删除 geosan 可选组，当前 editable 安装已实际重建。安装初次受沙箱带花括号的系统临时路径影响失败，指定工作区临时目录后成功，不把此环境路径问题改成项目代码。
+
+新数据适配复用公共目标时间切分，保留所有基准前缀，不采用旧全量频次过滤及最后新位置留出。正确读取经纬度，静态 POI 建地理词表（默认 17 级/6-gram），仅训练原子观测建立已访问集合；位置表、词表、地理布局和用户/星期小时信息均显式记录。新模型为标准 nn.Module，静态地理词注册 buffer，保留原区域 Transformer/因果编码、两种位置编码与可选候选注意力的有效计算，普通 forward 只返回全词表原始分数。移除未用参数、模型设备与恒等注意力矩阵，区域位置相加不改写输入；显式源投影修正非默认用户/时间/乘法融合维度，位置单分支的候选也只用位置，正弦编码支持奇数宽度。
+
+训练使用 geosan_ranking 具名协议和简短 sampled_step，复用公共外层训练，无需保留原独立 Executor。KNN 在正确纬度/经度弧度上查询，近邻数截断至词表大小，显式排除正类，均匀有放回采样并记录真实概率；过滤已访问耗尽时回退到非正类近邻，无无限循环。纯静态近邻缓存上限 128，不建立全 POI 两两距离；采样器按需初始化，独立评估不创建训练索引。加权二元目标保留 softmax 权重的梯度；训练仅打分所需候选，源编码在候选块间复用。验证/测试使用完整词表和确定性加权二元损失/排名；单位置无负类时保留正类训练项。与旧过滤/随机候选实验协议的差异明确登记，不将新全词表结果声称为旧实验精度复现。
+
+验证：新增 GeoSAN **15 项**，含四种旧有效位置/解码组合的分数与全部参数梯度、冻结词表规则/Mercator 地理编码、加权二元损失和权重梯度、KNN 球面近邻/采样分布/缓存边界/访问耗尽、公共基准样本保留/训练统计隔离、真实下一事件变化后的输入隔离、因果/padding/混批/分块/float64 与候选子集梯度、非默认融合/用户/时间/奇数宽度、完整训练/独立评估/采样及 dropout RNG 精确续训、CPU AMP/单位置，以及阻止旧依赖导入后的实际训练。最后源码完整回归 **447 passed，0 failed，0 errors，0 skipped**，见 [汇总](remaining-validation.json)。未安装 TorchText/NLTK 的环境中，仓库外发布夹具、训练、独立评估和续训第三轮共 4 条实际命令成功，指标一致，见 [CLI](geosan-cli-validation.json)；editable 安装和 pip check 通过。迁移表为 **52/100**，48 条 pending；轨迹预测全部 **13 个非模板条目**均已接入，本期仍有 **39 个**其他任务的实际模型待迁移，最终全量验收保持未完成。
 
 ## 持续完成的清单
 

@@ -162,6 +162,20 @@ first-trip samples remain in the benchmark. Full-vocabulary mean NLL replaces th
 old summed NLL including the padding class. Train/evaluate/resume use the shared
 runtime; the unused legacy dropout option is removed.
 
+`--model GeoSAN` creates a geographic self-attention example using the core
+installation. Quadkey level/ngram (default 17/6) are data settings. A plain
+vocabulary replaces TorchText/NLTK, preserving PAD=0 and frequency/lexical ordering;
+it is built from static POIs rather than future check-in frequencies. The
+`geosan_ranking` protocol configures `training.loss.name=weighted_binary`,
+`negative_samples`, `num_nearest`, `temperature` and `exclude_visited`. Geographic
+negatives use haversine radians, cap the neighbour pool, remove the positive and
+sample uniformly with replacement. Visited filtering uses training observations;
+exhaustion falls back to geographic nonpositives. Single-POI data use only the
+positive binary term. Evaluation ranks all POIs and reports deterministic weighted
+binary loss, not NLL or the old sampled novelty benchmark. Source encoding is
+reused across candidate chunks; optional decoder attention and corrected user/time
+fusion are explicit model settings. Common train/evaluate/resume commands apply.
+
 The complete supported-model inventory and migration details are in the
 [runtime guide](../docs/modernization/runtime/README_zh.md). Small examples prove
 execution and reproducibility, not real-city benchmark accuracy.

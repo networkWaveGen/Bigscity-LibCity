@@ -29,6 +29,10 @@ class ModelSpec:
 
 
 MODELS = {
+    'GeoSAN': ModelSpec('libcity.model.trajectory_loc_prediction.runtime_geosan:GeoSAN',task='traj_loc_pred',
+        protocol='geosan_ranking',prepare_data='libcity.data.geosan_trajectory:prepare_geosan',
+        loss='libcity.executor.geosan_step:GeoSANLoss',step='libcity.executor.geosan_step:sampled_step',
+        evaluate_loader='libcity.executor.task_evaluation:evaluate_task'),
     'LSTPM': ModelSpec('libcity.model.trajectory_loc_prediction.runtime_lstpm:LSTPM',task='traj_loc_pred',
         prepare_data='libcity.data.lstpm_trajectory:prepare_lstpm',
         loss='libcity.executor.task_evaluation:RankingLoss',evaluate_loader='libcity.executor.task_evaluation:evaluate_task'),

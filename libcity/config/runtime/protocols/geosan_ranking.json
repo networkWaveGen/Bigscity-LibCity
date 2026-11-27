@@ -1,0 +1,5 @@
+{
+  "data": {"quadkey_level": 17, "quadkey_ngram": 6},
+  "training": {"loss": {"name": "weighted_binary", "negative_samples": 5,
+    "temperature": 1.0, "num_nearest": 2000, "exclude_visited": false}}
+}

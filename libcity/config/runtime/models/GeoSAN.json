@@ -1,0 +1,7 @@
+{
+  "model": {"params": {"location_dim": 50, "region_dim": 50, "user_dim": 0, "time_dim": 0,
+    "num_heads": 1, "num_layers": 2, "dropout": 0.5, "max_len": 5000, "candidate_chunk_size": 256,
+    "position_encoding": "transformer", "embedding_fusion": "concat", "use_location_only": false,
+    "size_sqrt_regularize": true, "use_attention_as_decoder": false}},
+  "training": {"epochs": 50}
+}

@@ -95,6 +95,8 @@ CARA 可用 --model CARA 生成上下文门控示例。cara_ranking 协议使用
 
 LSTPM 可用 --model LSTPM 生成历史行程示例，复用 train/evaluate/resume。时间相似度仅用原子训练观测拟合，历史必须在当前行程开始前完成；显式行程边界保留连续历史 LSTM 与两级注意力。空间父索引只选较早观察、同距取最近时间索引，历史质心距离至少 1 km。空历史使用零上下文，首行程样本保留；训练改用排除 padding 类的公共平均 NLL。对旧计算的保留和有意变化见 [模型迁移说明](models_zh.md)。
 
+GeoSAN 可用 --model GeoSAN 生成地理自注意力示例，基础安装即可运行，无需 TorchText/NLTK。data.quadkey_level/quadkey_ngram 定义静态地理词，默认 17/6；geosan_ranking 协议在 training.loss 配置 weighted_binary、negative_samples、num_nearest、temperature 和 exclude_visited。KNN 按正确经纬度弧度计算，候选不足时截断近邻池，访问耗尽有明确回退。训练使用采样候选，验证/测试为完整词表排名及确定性加权二元损失；这与旧最后新位置留出和随机候选协议不同。变长批次、可选候选注意力、训练/独立评估/精确续训均复用公共运行时，详见 [迁移说明](models_zh.md)。
+
 ## 统一调参
 
 搜索空间为 JSON，例如 `{"training.optimizer.lr":[0.001,0.002],"data.input_window":[4,6]}`。保存为 space.json 后：

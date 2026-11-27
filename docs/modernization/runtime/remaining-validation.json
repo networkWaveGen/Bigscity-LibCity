@@ -1,5 +1,5 @@
 {
-  "scope": "Remaining-work commits 1-28; whole-library migration remains in progress",
+  "scope": "Remaining-work commits 1-29; whole-library migration remains in progress",
   "environment": {
     "python": "3.12.13",
     "torch": "2.15.0+cpu",
@@ -7,7 +7,7 @@
     "platform": "Windows-11-10.0.26200-SP0"
   },
   "full_tests": {
-    "tests": 432,
+    "tests": 447,
     "failures": 0,
     "errors": 0,
     "skipped": 0
@@ -188,6 +188,21 @@
     "test_training_independent_ranking_and_exact_resume",
     "test_batch_one_padding_label_isolation_and_float64",
     "test_personalized_user_vocabulary_is_validated",
+    "test_quadkeys_match_legacy_geometry_and_frozen_field_vocabulary_rules",
+    "test_original_geographic_encoder_decoder_scores_and_all_gradients[False-transformer]",
+    "test_original_geographic_encoder_decoder_scores_and_all_gradients[True-transformer]",
+    "test_original_geographic_encoder_decoder_scores_and_all_gradients[False-embedding]",
+    "test_original_geographic_encoder_decoder_scores_and_all_gradients[True-embedding]",
+    "test_weighted_binary_loss_importance_weights_and_score_gradients",
+    "test_geographic_sampler_uses_radians_excludes_positive_and_is_bounded",
+    "test_canonical_samples_static_vocabulary_and_training_only_user_statistics",
+    "test_causal_padding_batch_chunks_float64_and_candidate_gradient_equivalence",
+    "test_corrected_fusion_user_time_odd_width_and_trainable_parameters[concat-False]",
+    "test_corrected_fusion_user_time_odd_width_and_trainable_parameters[multiply-False]",
+    "test_corrected_fusion_user_time_odd_width_and_trainable_parameters[concat-True]",
+    "test_full_sampled_training_ranking_export_and_exact_dropout_rng_resume",
+    "test_actual_cpu_amp_and_single_location_positive_only_training",
+    "test_torchtext_and_nltk_are_unneeded_and_invalid_config_fails",
     "test_forward_loss_and_short_updates_match_legacy_computation[STGCN]",
     "test_forward_loss_and_short_updates_match_legacy_computation[DCRNN]",
     "test_forward_loss_and_short_updates_match_legacy_computation[Trafformer]",
@@ -449,8 +464,8 @@
   ],
   "inventory": {
     "total": 100,
-    "migrated": 51,
-    "pending": 49
+    "migrated": 52,
+    "pending": 48
   },
   "history": [
     {
@@ -732,6 +747,20 @@
         "migrated": 50,
         "pending": 50
       }
+    },
+    {
+      "scope": "Remaining-work commits 1-28; whole-library migration remains in progress",
+      "full_tests": {
+        "tests": 432,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "inventory": {
+        "total": 100,
+        "migrated": 51,
+        "pending": 49
+      }
     }
   ],
   "current_cli": {
@@ -842,5 +871,17 @@
     "commands": 3,
     "fixture_commands": 1,
     "format_version": 3
+  },
+  "geosan_cli": {
+    "report": "geosan-cli-validation.json",
+    "commands": 3,
+    "fixture_commands": 1,
+    "format_version": 3,
+    "legacy_dependencies": {
+      "torchtext": false,
+      "nltk": false
+    },
+    "editable_install": true,
+    "pip_check": true
   }
 }

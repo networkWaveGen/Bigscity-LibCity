@@ -84,7 +84,7 @@ Install a feature from this checkout with `pip install -e '.[graph]'`, replacing
 | graph | DGL models such as GeomGCN and STMGAT | Compatibility pending |
 | dtw | FastDTW dataset preprocessing | Compatibility pending |
 | embeddings | Gensim word and graph embeddings | Compatibility pending |
-| geosan | GeoSAN's historical TorchText Field and NLTK | Legacy dependency; a compatible separate environment may be needed |
+| No extra for GeoSAN | Native quadkey vocabulary and geographic sampling | Uses the core installation; TorchText/NLTK and the obsolete geosan extra were removed |
 | ode | Neural differential equation models | Compatibility pending |
 | transformer | Models using einops | Compatibility pending |
 | multispans | MultiSPANS graph and community detection dependencies | Compatibility pending |

@@ -1,0 +1,7 @@
+{
+  "data": {"dataset": "TaskTiny", "data_dir": "data", "cache": false},
+  "model": {"name": "GeoSAN", "params": {"location_dim": 4, "region_dim": 4,
+    "num_heads": 2, "num_layers": 1, "dropout": 0.1, "max_len": 32, "candidate_chunk_size": 4}},
+  "training": {"epochs": 2, "batch_size": 8},
+  "runtime": {"device": "cpu", "seed": 17, "output_dir": "runs"}
+}

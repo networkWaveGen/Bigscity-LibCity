@@ -9,6 +9,7 @@ from libcity.model.runtime_registry import MODELS
 
 
 VALIDATION={
+    'GeoSAN':'frozen_TorchText_PAD_frequency_lexical_vocabulary_contract_without_legacy_dependencies;correct_lon_lat_Mercator_quadkeys;four_original_position_decoder_score_and_all_gradient_references;weighted_binary_importance_loss_and_gradient_reference;bounded_haversine_radian_KNN_uniform_sampling_and_exhaustion;canonical_target_time_samples;static_POI_vocabulary_and_training_only_visited_statistics;causal_padding_batch_chunk_independence;selected_candidate_full_gradient_reference;corrected_fusion_user_time_and_odd_width;short_train;independent_evaluate;sampled_dropout_RNG_exact_resume;batch_one_float64;single_location_positive_only;CPU_AMP;blocked_legacy_import_actual_train',
     'LSTPM':'original_two_level_session_attention_dilated_recurrence_and_all_gradients;carried_history_state_with_explicit_boundaries;training_only_atomic_time_similarity;causal_nearest_earlier_spatial_parents_with_latest_ties;completed_session_centroid_distances;cold_start_preserves_benchmark_samples;short_train;independent_evaluate;exact_resume;batch_padding_independence;batch_one_float64;CPU_AMP',
     'CARA':'author_Keras_gate_activation_corrected_recurrence_candidate_score_and_all_gradients;per_sample_BPR;causal_query_clock_and_real_time_gaps;correct_spherical_fractional_distances;bounded_negative_sampling_with_exhaustion;prefix_reuse_selected_full_gradient_reference;128_step_stability;short_train;independent_evaluate;sampled_RNG_exact_resume;batch_padding_chunk_independence;batch_one_float64;single_location_zero_updates;CPU_AMP',
     'STAN':'original_two_level_interpolation_attention_scores_and_all_gradients_with_explicit_key_mask_fix;static_spherical_diameter_reference_without_dense_POI_matrix;causal_query_time_and_train_bounds;unique_shared_positive_sampled_softmax;all_class_and_duplicate_batches;selected_vs_full_gradient_reference;short_train;independent_evaluate;sampled_RNG_exact_resume;batch_padding_chunk_independence;batch_one_float64;single_location_zero_bounds;CPU_AMP',
@@ -79,6 +80,8 @@ def inventory():
             spec=MODELS.get(native)
             migrated=spec is not None and spec.task==task
             extras=old['optional_extras']
+            if migrated and name=='GeoSAN':
+                extras=''  # Native quadkey vocabulary no longer needs TorchText/NLTK.
             if name=='TemplateTLP' or name=='TemplateTSP':
                 action='developer_template; not a trainable model'
             elif migrated:

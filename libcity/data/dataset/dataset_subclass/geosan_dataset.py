@@ -1,12 +1,12 @@
 import os
+import json
 import pandas as pd
 import math
 import copy
 from datetime import datetime
 import numpy as np
 from collections import defaultdict
-from torchtext.data import Field
-from nltk import ngrams
+from libcity.data.quadkeys import QuadkeyVocabulary,quadkey_ngrams
 from tqdm import tqdm
 from libcity.data.dataset.abstract_dataset import AbstractDataset
 from torch.utils.data import DataLoader
@@ -284,8 +284,7 @@ class GeoSANDataset(AbstractDataset):
             for i in range(len(seq)):
                 check_in = seq[i]
                 region_quadkey = check_in[3]
-                region_quadkey_bigram = ' '.join([''.join(x) for x in ngrams(region_quadkey, 6)])
-                region_quadkey_bigram = region_quadkey_bigram.split()
+                region_quadkey_bigram = quadkey_ngrams(region_quadkey,6)
                 all_quadkeys.append(region_quadkey_bigram)
                 user_seq_array[u][i] = (check_in[0], check_in[1], check_in[2], region_quadkey_bigram, check_in[4])
 
@@ -294,25 +293,18 @@ class GeoSANDataset(AbstractDataset):
         for loc_idx in range(1, self.n_loc):
             lat, lon = self.idx2gps[loc_idx]
             quadkey = latlon2quadkey(float(lat), float(lon), self.LOD)
-            quadkey_bigram = ' '.join([''.join(x) for x in ngrams(quadkey, 6)])
-            quadkey_bigram = quadkey_bigram.split()
+            quadkey_bigram = quadkey_ngrams(quadkey,6)
             self.loc2quadkey.append(quadkey_bigram)
             all_quadkeys.append(quadkey_bigram)
 
-        self.QUADKEY = Field(
-            sequential=True,
-            use_vocab=True,
-            batch_first=True,
-            unk_token=None,
-            preprocessing=str.split
-        )
+        self.QUADKEY = QuadkeyVocabulary()
         self.QUADKEY.build_vocab(all_quadkeys)
 
         return user_seq_array, user2idx, region2idx, n_users, n_region, regidx2loc, 169
 
     def __get_lat_lon__(self, loc):
-        coor = eval(self.geo.loc[loc]['coordinates'])
-        return coor[0], coor[1]
+        coor = json.loads(self.geo.loc[loc]['coordinates'])
+        return coor[1], coor[0]
 
     def add_location(self, loc, coordinate):
         if loc not in self.loc2idx:
