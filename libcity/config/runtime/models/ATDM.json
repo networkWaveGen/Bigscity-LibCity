@@ -1,0 +1,4 @@
+{
+  "model": {"params": {"hidden_size": 64, "past_t": 3, "dropout": 0.2}},
+  "training": {"loss": {"name": "masked_mse"}}
+}

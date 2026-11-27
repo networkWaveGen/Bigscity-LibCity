@@ -28,6 +28,11 @@ class ModelSpec:
 
 
 MODELS = {
+    'STID': ModelSpec('libcity.model.traffic_speed_prediction.runtime_identity:STID'),
+    'STAEformer': ModelSpec('libcity.model.traffic_speed_prediction.runtime_identity:STAEformer'),
+    'FreTS': ModelSpec('libcity.model.traffic_flow_prediction.runtime_frets:FreTS'),
+    'STNorm': ModelSpec('libcity.model.traffic_flow_prediction.runtime_stnorm:STNorm'),
+    'ATDM': ModelSpec('libcity.model.traffic_speed_prediction.runtime_baselines:ATDM'),
     'AutoEncoder': ModelSpec('libcity.model.traffic_speed_prediction.runtime_baselines:AutoEncoder'),
     'AGCRN': ModelSpec('libcity.model.traffic_speed_prediction.runtime_baselines:AGCRN'),
     'TGCN': ModelSpec('libcity.model.traffic_speed_prediction.runtime_baselines:TGCN',

@@ -131,6 +131,9 @@ def prepare_traffic(data, training, evaluation, seed, logger=None):
         layout = dict(kind='cpt', length=len(offsets), max_position=maximum,
                       temporal_indices=(offsets+maximum).tolist(), sampling=dict(sampling))
     layout.update(future_feature_indices=known_indices,
+                  calendar=dict(time_in_day=known_indices[0] if data['features']['time_in_day'] else None,
+                    day_of_week=known_indices[int(data['features']['time_in_day']):int(data['features']['time_in_day'])+7]
+                    if data['features']['day_in_week'] else []),
                   observed_feature_indices=[i for i in range(history.shape[-1]) if i not in known_indices],
                   target_semantics='raw_and_scaled', split_semantics='target_time_v1')
     starts = np.concatenate([np.arange(left-offsets.min(), right-horizon+1) for left,right in intervals])

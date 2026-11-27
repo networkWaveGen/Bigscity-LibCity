@@ -1,9 +1,14 @@
 # 新运行时模型迁移范围
 
-当前共 20 个运行时入口，对应原清单中的 22 个任务—模型条目（轨迹 RNN/LSTM/GRU 共用一个入口）。完整 [100 项 CSV](model-migration.csv) 逐项记录实际能力、依赖、验证与后续动作；其余 78 项仍为 pending，不会自动回退到旧运行时。37 个特殊交通数据集的深度整理仍延后。交通数据统一使用目标时间互斥切分，HMMM 为独立直接执行算法。
+当前共 25 个运行时入口，对应原清单中的 27 个任务—模型条目（轨迹 RNN/LSTM/GRU 共用一个入口）。完整 [100 项 CSV](model-migration.csv) 逐项记录实际能力、依赖、验证与后续动作；其余 73 项仍为 pending，不会自动回退到旧运行时。37 个特殊交通数据集的深度整理仍延后。交通数据统一使用目标时间互斥切分，HMMM 为独立直接执行算法。
 
 | 名称 | 任务/数据 | 训练接入 | 检查点/续训能力 | 实际验证级别 |
 | --- | --- | --- | --- | --- |
+| STID | traffic_state_pred / 元数据明确的日历通道 | 默认 train_loop | 需要权重；完整续训 | 旧前向/梯度、两个日历开关与不同维度、多变量 batch=1/float64、完整训练/独立评估/精确续训、CPU AMP |
+| STAEformer | traffic_state_pred / 数值+时刻+星期整数输入 | 默认 train_loop | 需要权重；完整续训 | 正确星期整数布局的旧前向/梯度、两种预测投影、多变量 batch=1/float64、完整训练/独立评估/精确续训、CPU AMP |
+| FreTS | traffic_state_pred / frequency MLP | 默认 train_loop | 需要权重；完整续训 | 单变量旧前向/梯度、多变量嵌入与输出布局、batch=1/float64、完整训练/独立评估/精确续训、CPU AMP |
+| STNorm | traffic_state_pred / 空间与时间归一化 | 默认 train_loop | 需要权重；统计量完整续训 | 旧前向/梯度、单节点统计量有限、长输入取最后预测、多变量 batch=1/float64、完整训练/独立评估/精确续训、CPU AMP |
+| ATDM | traffic_state_pred / spatial agnostic CNN | 默认 train_loop | 需要权重；完整续训 | 旧前向/梯度、多目标回归头、batch=1/float64、完整训练/独立评估/精确续训、CPU AMP |
 | AutoEncoder | traffic_state_pred / point window | 默认 train_loop | 需要权重；完整续训 | 旧前向/梯度对照，完整训练/独立评估/精确续训，batch=1 与 float64 |
 | AGCRN | traffic_state_pred / adaptive graph | 默认 train_loop | 需要权重；完整续训 | 旧前向/梯度对照，完整训练/独立评估/精确续训，batch=1 与 float64；cheb_order>=2 |
 | TGCN | traffic_state_pred / static graph GRU | step_fn，保留原始正则训练目标 | 需要权重；完整续训 | 旧前向与原尺度目标/梯度对照，稀疏图 buffer，完整训练/独立评估/精确续训，batch=1 与 float64 |
@@ -27,6 +32,8 @@
 CPU 覆盖在 Windows 验证；阶段五另在 RTX 5060/CUDA 验证 GRU、STGCN、DCRNN 的训练、独立评估与续训（GRU 含 AMP）。其他模型及 MPS 未完成真实硬件验收；未对所有架构参数组合和真实城市数据集做精度认证。STGCN/Trafformer 的公共续训依据通用循环与检查点验收，不额外声称已重复每一种模型配置的完整恢复测试。
 
 交通旧 RNN/LSTM 的新名称为 `TrafficRNN`/`TrafficLSTM`，避免与轨迹任务的 `RNN` 入口重名。Seq2Seq 解码起点由随机噪声改为固定零向量，保证独立评估确定性；训练标签只能通过 forward_with_teacher 显式传入。TGCN 保留半均方误差与按有效目标数归一化的 L2 正则训练目标，验证/评估报告公共原尺度 MSE 及所选指标。
+
+日历通道现在通过 DatasetMetadata.input_layout.calendar 显式说明位置，额外观测不会挤占日历索引。STAEformer 将星期 one-hot 转为星期整数后再嵌入，steps_per_day 默认由数据采样间隔推导；STID 修复单独启用日历分支时的嵌入维度计算。FreTS 保留原始频域对角权重收缩，按特征求和嵌入修复多变量广播，回归按明确的 horizon/node/feature 布局输出。STNorm 使用公共原尺度损失及 y_raw 掩码，取最后有效时间位置输出完整预测窗，单节点方差不再产生 NaN。ATDM 回归头同时覆盖预测窗与全部目标维度。
 
 本轮有意修订的旧训练行为与原因见 [执行记录](execution_zh.md)。旧源文件中的神经网络层仍被复用；旧数学实现保留为迁移参考，旧 Executor、配置解析器与批对象已在阶段五删除。
 

@@ -1,0 +1,5 @@
+{
+  "model": {"params": {"num_block": 3, "time_series_emb_dim": 32, "spatial_emb_dim": 32,
+    "temp_dim_tid": 32, "temp_dim_diw": 32, "if_spatial": true, "if_TiD": true, "if_DiW": true}},
+  "data": {"features": {"time_in_day": true, "day_in_week": true}}
+}

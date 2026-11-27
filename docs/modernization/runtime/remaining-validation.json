@@ -1,5 +1,5 @@
 {
-  "scope": "Remaining-work commits 1-3; whole-library migration remains in progress",
+  "scope": "Remaining-work commits 1-5; whole-library migration remains in progress",
   "environment": {
     "python": "3.12.13",
     "torch": "2.15.0+cpu",
@@ -7,7 +7,7 @@
     "platform": "Windows-11-10.0.26200-SP0"
   },
   "full_tests": {
-    "tests": 180,
+    "tests": 207,
     "failures": 0,
     "errors": 0,
     "skipped": 0
@@ -99,6 +99,7 @@
     "test_adapter_matches_atomic_baseline_and_metadata_is_readonly",
     "test_calendar_feature_does_not_implicitly_enable_external_file",
     "test_cli_model_switch_uses_new_preset_without_old_architecture_fields",
+    "test_cpu_convolution_amp_lifecycle_and_backend_restoration",
     "test_reference_forward_and_gradient_match_for_original_horizon",
     "test_crann_native_inputs_raw_mask_single_batch_and_target_time_split",
     "test_crann_short_training_independent_evaluation_and_exact_resume",
@@ -145,6 +146,32 @@
     "test_map_single_metric_and_prediction_switch_remove_stale_export",
     "test_map_capabilities_fail_before_data_or_training_initialization",
     "test_map_cli_matches_python_with_no_checkpoint",
+    "test_reference_forward_and_gradients[STID]",
+    "test_reference_forward_and_gradients[STAEformer]",
+    "test_reference_forward_and_gradients[FreTS]",
+    "test_reference_forward_and_gradients[STNorm]",
+    "test_reference_forward_and_gradients[ATDM]",
+    "test_complete_training_evaluation_and_exact_resume[STID]",
+    "test_complete_training_evaluation_and_exact_resume[STAEformer]",
+    "test_complete_training_evaluation_and_exact_resume[FreTS]",
+    "test_complete_training_evaluation_and_exact_resume[STNorm]",
+    "test_complete_training_evaluation_and_exact_resume[ATDM]",
+    "test_batch_one_multivariate_output_and_dtype[STID]",
+    "test_batch_one_multivariate_output_and_dtype[STAEformer]",
+    "test_batch_one_multivariate_output_and_dtype[FreTS]",
+    "test_batch_one_multivariate_output_and_dtype[STNorm]",
+    "test_batch_one_multivariate_output_and_dtype[ATDM]",
+    "test_cpu_amp_training[STID]",
+    "test_cpu_amp_training[STAEformer]",
+    "test_cpu_amp_training[FreTS]",
+    "test_cpu_amp_training[STNorm]",
+    "test_cpu_amp_training[ATDM]",
+    "test_staeformer_projection_modes_use_metadata_calendar[False]",
+    "test_staeformer_projection_modes_use_metadata_calendar[True]",
+    "test_stid_independent_calendar_switches_and_unequal_embeddings[False-True]",
+    "test_stid_independent_calendar_switches_and_unequal_embeddings[True-False]",
+    "test_stid_independent_calendar_switches_and_unequal_embeddings[False-False]",
+    "test_stnorm_single_node_statistics_are_finite_and_checkpointed",
     "test_retired_modules_and_executor_classes_are_absent",
     "test_tensor_collation_owns_values_and_padding_keeps_explicit_lengths",
     "test_tensor_loader_spawn_and_heterogeneous_tail_padding",
@@ -299,7 +326,24 @@
   },
   "inventory": {
     "total": 100,
-    "migrated": 22,
-    "pending": 78
-  }
+    "migrated": 27,
+    "pending": 73
+  },
+  "history": [
+    {
+      "scope": "commits 1-3, through 23bf934",
+      "full_tests": {
+        "tests": 180,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "inventory": {
+        "total": 100,
+        "migrated": 22,
+        "pending": 78
+      }
+    }
+  ],
+  "crann_actual_cli_code": "956c1d5; later batches add explicit calendar metadata, current lifecycle also covered by full_tests"
 }

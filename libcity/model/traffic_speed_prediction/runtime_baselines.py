@@ -5,6 +5,7 @@ from torch import nn
 
 from libcity.model.traffic_flow_prediction.AGCRN import AVWDCRNN
 from libcity.model.traffic_speed_prediction.TGCN import calculate_normalized_laplacian
+from libcity.model.traffic_speed_prediction.ATDM import AgnosticConvBlock, ConvRegBlock
 
 
 class AutoEncoder(nn.Module):
@@ -99,3 +100,30 @@ def tgcn_step(loss_fn):
         objective = .5*result.loss + .5*model.regularization*regularizer/max(result.weight, 1)
         return StepResult(objective, result.weight)
     return step
+
+
+class SpatialAgnosticNetwork(nn.Module):
+    def __init__(self, metadata, history, horizon, past_t, hidden, dropout):
+        super().__init__()
+        self.past_t, self.horizon, self.outputs = past_t, horizon, metadata.output_dim
+        self.conv_block = AgnosticConvBlock(metadata.feature_dim, metadata.num_nodes, past_t, hidden, 1)
+        self.convT = nn.ConvTranspose2d(hidden, hidden, (1, metadata.num_nodes))
+        self.drop = nn.Dropout2d(dropout)
+        self.regressor = ConvRegBlock(history, horizon*metadata.output_dim, metadata.num_nodes, hidden)
+
+    def forward(self, source):
+        padded = torch.nn.functional.pad(source, (0, 0, self.past_t-1, 0))
+        hidden = self.drop(self.convT(self.conv_block(padded)))
+        prediction = self.regressor(hidden.flatten(1, 2))
+        return prediction.reshape(source.shape[0], self.outputs, self.horizon, source.shape[-1])
+
+
+class ATDM(nn.Module):
+    def __init__(self, *, metadata, input_window, output_window, hidden_size=64, past_t=3, dropout=.2):
+        super().__init__()
+        if min(hidden_size, past_t) < 1:
+            raise ValueError('ATDM hidden_size and past_t must be positive')
+        self.sann = SpatialAgnosticNetwork(metadata, input_window, output_window, past_t, hidden_size, dropout)
+
+    def forward(self, batch):
+        return self.sann(batch['X'].permute(0, 3, 1, 2)).permute(0, 2, 3, 1)

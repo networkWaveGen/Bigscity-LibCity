@@ -9,6 +9,7 @@
 | commit1 | 670b325 | fix: persist and reuse split-independent atomic traffic caches |
 | commit2 | 956c1d5 | feat: migrate CRANN with explicit inputs and resumable shared training |
 | commit3 | 23bf934 | feat: migrate six standard forecasts with native training contracts |
+| commit4 | 1a8eb2e | fix: support CPU AMP when oneDNN convolution backward is unavailable |
 
 ## commit1：修复基础交通缓存（670b325）
 
@@ -43,6 +44,18 @@ Seq2Seq 旧实现推理仍读取 y 且随机生成解码起点，现使用固定
 修复：对 CPU AMP 卷积反向做一次实际小探测，隔离并恢复随机状态；仅后端不支持时，在反向阶段使用 PyTorch 原生卷积内核，保留 BF16 前向与 AMP。公共 backward 组件同时供默认循环、MTGNN、STSSL 使用；上下文退出恢复后端设置，不永久关闭 oneDNN，不修改 CUDA 路径。
 
 验证：STGCN 实际 CPU BF16 训练、两轮连续/中断恢复逐参数相同及后端设置恢复；与既有定制训练、STSSL 测试共 12 项通过。下一批五模型的 AMP 测试也全部通过，随模型迁移独立记录。
+
+## commit5：迁移日历、频域与归一化交通模型
+
+新增 STID、STAEformer、FreTS、STNorm、ATDM，全部使用标准 nn.Module 与公共训练闭环，推理不读取标签。新增只读 calendar 通道元信息，按位置读取时刻与星期，避免新增观测列后索引错位。
+
+明确修正的旧实现问题：STID 单独启用时刻/星期分支时嵌入维度交换；STAEformer 把星期 one-hot 的第一列当作星期整数，以及默认日采样数脱离元信息；FreTS 多变量 token 嵌入广播错误与多目标回归的维度重排；STNorm 单节点无偏方差导致 NaN、长输入残留多个时间位置及 n_pred 与预测窗/目标维度脱节；ATDM 回归头未包含全部目标维度。STNorm 的损失统一使用原尺度目标与公共掩码；FreTS 保留原始频域对角收缩，不更换数学算法。
+
+验证：新增 **26 项通过**，包含五模型前向与梯度参考对照（STAEformer 使用正确的星期整数布局）、各自训练/独立评估/精确续训、多变量 batch=1/float64、CPU AMP；另外覆盖 STAEformer 两种投影、STID 独立日历开关和不同嵌入宽度、STNorm 单节点统计量。迁移表为 27/100 已迁移，73 条 pending，仍未完成全库迁移。
+
+日历布局元信息扩充后，续训仍严格校验输入布局；旧布局不一致的 last.pt 会明确拒绝，纯 best.pt 权重评估仍须匹配模型结构。
+
+前五批之后完整回归 **207 passed，0 failed，0 errors，0 skipped**，机器记录 [remaining-validation.json](remaining-validation.json) 保留此前 180 项结果的范围，并明确区分早前 CRANN CLI 记录和当前完整测试。
 
 ## 持续完成的清单
 

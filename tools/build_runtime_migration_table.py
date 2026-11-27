@@ -9,6 +9,11 @@ from libcity.model.runtime_registry import MODELS
 
 
 VALIDATION={
+    'STID':'reference_forward_and_gradients;explicit_calendar;multivariate_batch_one_float64;short_train;independent_evaluate;exact_resume;CPU_AMP',
+    'STAEformer':'canonical_calendar_reference_forward_and_gradients;both_projection_modes;multivariate_batch_one_float64;short_train;independent_evaluate;exact_resume;CPU_AMP',
+    'FreTS':'reference_forward_and_gradients;multivariate_batch_one_float64;short_train;independent_evaluate;exact_resume;CPU_AMP',
+    'STNorm':'reference_forward_and_gradients;multivariate_batch_one_float64;short_train;independent_evaluate;exact_resume;singleton_norm;CPU_AMP',
+    'ATDM':'reference_forward_and_gradients;multivariate_batch_one_float64;short_train;independent_evaluate;exact_resume;CPU_AMP',
     'AutoEncoder':'reference_forward_and_gradients;short_train;independent_evaluate;exact_resume',
     'AGCRN':'reference_forward_and_gradients;short_train;independent_evaluate;exact_resume',
     'TGCN':'reference_forward_and_objective_gradients;graph_buffer_dtype;short_train;independent_evaluate;exact_resume',
