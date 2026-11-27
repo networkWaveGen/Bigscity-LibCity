@@ -1,5 +1,5 @@
 {
-  "scope": "Remaining-work commits 1-25; whole-library migration remains in progress",
+  "scope": "Remaining-work commits 1-27; whole-library migration remains in progress",
   "environment": {
     "python": "3.12.13",
     "torch": "2.15.0+cpu",
@@ -7,7 +7,7 @@
     "platform": "Windows-11-10.0.26200-SP0"
   },
   "full_tests": {
-    "tests": 405,
+    "tests": 418,
     "failures": 0,
     "errors": 0,
     "skipped": 0
@@ -110,6 +110,18 @@
     "test_teacher_forcing_is_explicit_and_changes_only_training_path[TrafficRNN]",
     "test_teacher_forcing_is_explicit_and_changes_only_training_path[TrafficLSTM]",
     "test_teacher_forcing_is_explicit_and_changes_only_training_path[Seq2Seq]",
+    "test_author_gate_activation_and_full_candidate_reference_scores_and_gradients",
+    "test_full_bpr_training_full_ranking_and_exact_rng_resume",
+    "test_padding_batch_chunk_float64_and_input_label_isolation",
+    "test_real_timestamp_gaps_across_weekend_midnight_and_known_query_clock",
+    "test_changed_real_next_time_and_location_leave_inputs_and_prediction_unchanged",
+    "test_bpr_is_per_sample_and_negatives_exclude_history_positive_with_finite_fallback",
+    "test_selected_training_matches_full_scores_gradients_and_encodes_prefix_once",
+    "test_long_prefix_finite_and_explicit_recent_window_matches_cropped_context",
+    "test_single_location_without_any_negative_skips_updates_and_evaluates",
+    "test_geometry_uses_longitude_latitude_radians_fractional_kilometres",
+    "test_protocol_rejects_cross_entropy_in_place_of_bpr",
+    "test_actual_cpu_amp_training",
     "test_config_layers_paths_and_component_replacement",
     "test_invalid_config_fails_at_entry[changes0-model.name]",
     "test_invalid_config_fails_at_entry[changes1-not migrated]",
@@ -152,6 +164,7 @@
     "test_actual_cpu_amp_training[RNN]",
     "test_actual_cpu_amp_training[GRU]",
     "test_actual_cpu_amp_training[LSTM]",
+    "test_epoch_schedule_waits_for_real_updates_and_resumes_after_empty_epochs",
     "test_gru_cli_python_train_evaluate_and_resume",
     "test_complete_resume_matches_next_updates_lr_counters_and_best[scheduler0]",
     "test_complete_resume_matches_next_updates_lr_counters_and_best[scheduler1]",
@@ -422,8 +435,8 @@
   ],
   "inventory": {
     "total": 100,
-    "migrated": 49,
-    "pending": 51
+    "migrated": 50,
+    "pending": 50
   },
   "history": [
     {
@@ -677,6 +690,20 @@
         "migrated": 48,
         "pending": 52
       }
+    },
+    {
+      "scope": "commits 1-25, through 4bf8c9c",
+      "full_tests": {
+        "tests": 405,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "inventory": {
+        "total": 100,
+        "migrated": 49,
+        "pending": 51
+      }
     }
   ],
   "current_cli": {
@@ -772,6 +799,12 @@
   },
   "stan_cli": {
     "report": "stan-cli-validation.json",
+    "commands": 3,
+    "fixture_commands": 1,
+    "format_version": 3
+  },
+  "cara_cli": {
+    "report": "cara-cli-validation.json",
     "commands": 3,
     "fixture_commands": 1,
     "format_version": 3

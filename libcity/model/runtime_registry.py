@@ -29,6 +29,10 @@ class ModelSpec:
 
 
 MODELS = {
+    'CARA': ModelSpec('libcity.model.trajectory_loc_prediction.runtime_cara:CARA',task='traj_loc_pred',
+        protocol='cara_ranking',prepare_data='libcity.data.cara_trajectory:prepare_cara',
+        loss='libcity.executor.cara_step:CARALoss',step='libcity.executor.cara_step:pairwise_step',
+        evaluate_loader='libcity.executor.task_evaluation:evaluate_task'),
     'STAN': ModelSpec('libcity.model.trajectory_loc_prediction.runtime_stan:STAN',task='traj_loc_pred',
         protocol='stan_ranking',prepare_data='libcity.data.stan_trajectory:prepare_stan',
         loss='libcity.executor.stan_step:STANLoss',step='libcity.executor.stan_step:sampled_step',

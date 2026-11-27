@@ -1,13 +1,12 @@
 """Hour-of-week prefixes and static spherical geometry, without dense POI pairs."""
 from dataclasses import replace
-import json
 
 import numpy as np
-import pandas as pd
 from scipy.spatial import cKDTree
 import torch
 
 from libcity.data.task_bundles import atomic,prepare_personalized_trajectory,sessions
+from libcity.data.trajectory_points import read_points
 
 
 def spherical_distance(left,right):
@@ -41,14 +40,7 @@ def spherical_diameter(coordinates):
 def prepare_stan(data,training,evaluation,seed,logger=None):
     result = prepare_personalized_trajectory(data,training,evaluation,seed,logger)
     folder,raw = atomic(data)
-    geo = pd.read_csv(folder/(raw.get('geo_file',data['dataset'])+'.geo'))
-    try:
-        coordinates = np.asarray([json.loads(value) for value in geo['coordinates']],dtype=np.float64)
-    except (ValueError,TypeError,KeyError) as error:
-        raise ValueError('STAN requires JSON point coordinates in .geo') from error
-    if (coordinates.shape!=(result.metadata.num_nodes,2) or not np.isfinite(coordinates).all()
-            or (np.abs(coordinates[:,0])>180).any() or (np.abs(coordinates[:,1])>90).any()):
-        raise ValueError('STAN requires finite longitude/latitude point coordinates')
+    _,coordinates = read_points(folder,raw,data['dataset'],result.metadata.num_nodes,'STAN')
     groups,_ = sessions(folder,raw,data)
     prefixes = {}
     for group in groups:

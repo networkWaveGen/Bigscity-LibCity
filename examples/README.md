@@ -141,6 +141,16 @@ candidates with unique positive labels. Requests for too many negatives are capp
 full-vocabulary validation/test use deterministic NLL and ranking. Inference does
 not require labels, next-event times or a dense POI distance table.
 
+`--model CARA` creates a contextual recurrent ranking example. It restores the
+author implementation's gate activations and small normal embedding initialization.
+`history_window=0` uses the complete observed prefix; a positive value selects the
+most recent observations. Gaps use actual timestamps in hours, including midnight
+transitions. The optional `query_offset_hours` is explicitly known input; actual
+next-event times and locations are never inference features. The `cara_ranking`
+protocol uses per-sample BPR (`training.loss.name=bpr`) and bounded negative sampling.
+Validation/test rank the full vocabulary with deterministic mean BPR. Prefix states
+are reused across candidate chunks rather than replaying the sequence per candidate.
+
 The complete supported-model inventory and migration details are in the
 [runtime guide](../docs/modernization/runtime/README_zh.md). Small examples prove
 execution and reproducibility, not real-city benchmark accuracy.

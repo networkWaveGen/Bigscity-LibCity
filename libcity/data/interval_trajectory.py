@@ -1,26 +1,17 @@
 """Observed check-in intervals; slot bounds are fitted on training prefixes only."""
 from dataclasses import replace
-import json
 import math
 
 from geopy.distance import geodesic
-import numpy as np
-import pandas as pd
 import torch
 
 from libcity.data.task_bundles import atomic,prepare_trajectory,sessions
+from libcity.data.trajectory_points import read_points
 
 
 def observed_prefixes(data,num_nodes,*,first_time,first_distance,model_name):
     folder,raw = atomic(data)
-    geo = pd.read_csv(folder/(raw.get('geo_file',data['dataset'])+'.geo'))
-    try:
-        coordinates = np.asarray([json.loads(value) for value in geo['coordinates']],dtype=np.float64)
-    except (ValueError,TypeError,KeyError) as error:
-        raise ValueError(f'{model_name} requires JSON point coordinates in .geo') from error
-    if (coordinates.shape!=(num_nodes,2) or not np.isfinite(coordinates).all()
-            or (np.abs(coordinates[:,0])>180).any() or (np.abs(coordinates[:,1])>90).any()):
-        raise ValueError(f'{model_name} requires finite longitude/latitude point coordinates')
+    geo,coordinates = read_points(folder,raw,data['dataset'],num_nodes,model_name)
     positions = {identity:point for identity,point in zip(geo['geo_id'],coordinates)}
     groups,_ = sessions(folder,raw,data)
     prefixes = {}

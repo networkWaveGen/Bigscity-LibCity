@@ -30,6 +30,8 @@
 | commit22 | e3f8655 | feat: migrate HSTLSTM with causal intervals and corrected memory |
 | commit23 | c71f33c | feat: migrate ATSTLSTM with causal candidate ranking |
 | commit24 | 1307e31 | feat: migrate SERM with intact pretrained semantic embeddings |
+| commit25 | 4bf8c9c | feat: migrate STAN with causal attention and bounded sampling |
+| commit26 | 33f5f5f | fix: keep epoch schedules unchanged without optimizer updates |
 
 ## commit1：修复基础交通缓存（670b325）
 
@@ -244,6 +246,22 @@ TGCLSTM 保留逐步图过滤、门控细胞与滑动窗口重编码，所有静
 具名 stan_ranking 协议保留采样分类目标，training.loss.name=sampled_softmax；训练步去重批内正类并映射标签，从其余完整词表无放回抽取共享负类，数量按可用词表截断。修复旧循环在负类不足时反复重试、遗漏第 0 类负样本、同一正类在候选表多次出现的问题；批次覆盖全部类别时直接做全类 CE。训练只计算候选子集，标准 forward 输出全词表 log_softmax，公共验证/测试用确定性 NLL 与排名。移除模型自增 seed 和 Python 重播种，随机状态由公共检查点保存。
 
 验证：新增 **15 项通过**，包括显式修复掩码并使用正确上界后的旧两级分数/全部梯度、静态直径对照及极点/对跖/毫米级范围、小时/用户编码与训练时间边界、修改真实下一位置/时刻后输入/预测不变、重复正类/全类别批次/第 0 类负样本、候选子集与全量梯度一致且训练禁止调用全量 forward、padding/混批/分块/batch=1/float64/无标签、单位置/重合坐标/零时间范围、非法坐标和位置容量启动前检查、CPU AMP，以及三轮训练/独立评估/排名导出/采样 RNG 与逐参数精确续训。完整回归 **405 passed，0 failed，0 errors，0 skipped**；仓库外发布夹具与 3 条生命周期命令成功，独立评估一致并续训第三轮，见 [CLI 记录](stan-cli-validation.json)。迁移表为 **49/100**，51 条 pending，本期仍有 **42 个**实际模型待迁移。
+
+## commit26：无参数更新的轮次不提前衰减学习率（33f5f5f）
+
+新问题：整轮无有效监督、无可构造负样本或 AMP 跳过全部更新时，epoch 调度器仍推进，导致首次更新前就衰减学习率并发出顺序警告。默认循环、MTGNN 和 STSSL 现都记录该轮开始的 optimizer_steps；只有该轮实际更新才推进 epoch 调度。验证、早停、日志、检查点及 metric 调度仍正常执行，不改变检查点格式。
+
+公共引擎/定制训练/STSSL **31 项通过**。新增测试连续跳过两轮，确认学习率不变；从第二轮恢复后首次有效训练，与连续训练的参数/状态/调度器精确相同，且只衰减一次、没有顺序警告。详见 [问题与修复](empty-epoch-scheduler_zh.md)。后续 CARA 提交的完整回归同时覆盖此修复。
+
+## commit27：迁移 CARA 并修复激活、候选与独立排序
+
+旧包装器取最前 5 点，预测读取真实目标位置/时刻并随机生成 101 候选；训练先跨 batch 汇总分数，使样本耦合，负采样可能包含正类或在词表耗尽时无限重试。时间间隔按日历编码相减，距离还混用了经纬度与角度、负距离从错误的正类位置出发并截断为整数。新输入只包含已知前缀，按真实时间戳计算小时差；查询默认最后观察时刻，显式已知偏移可通过 query_offset_hours 提供，跨午夜/周末正确计算日历嵌入。坐标按 JSON/真实词表解析，用原半径 6373 千米的大圆小数距离，候选距离均从最后已知位置计算。
+
+长序列探针进一步暴露旧门控不稳定；对照[作者官方实现](https://github.com/feay1234/CARA/blob/master/CARA.ipynb)及 [Keras 1.2 激活定义](https://github.com/keras-team/keras/blob/1.2.2/keras/backend/tensorflow_backend.py)，修复 LibCity 将门控与候选激活颠倒的问题，使用斜率 0.2 的 hard sigmoid 门控和 tanh 候选，并恢复作者的小正态嵌入与 Glorot uniform 矩阵初始化。其余官方连接保留。默认使用完整已知前缀；history_window 正值选择最近窗口，首步间隔/距离归零。先编码前缀一次，再逐候选执行一个单元，按块打分，移除 NumPy/CPU 往返和模型内部临时张量属性；共享坐标校验/球面距离函数供现有模型复用。
+
+cara_ranking 协议明确 training.loss.name=bpr。每样本独立计算原成对目标及常数 1，再在批次取均值；负采样优先排除已访问/正类，无未访问位置时退回非正类，单位置无负对时跳过更新。验证/测试固定使用完整词表，报告所有非正类平均 BPR 和公共排名，不将 BPR 当 NLL 或把此协议声称为作者随机候选精度复现。采样 RNG、调度器和参数通过公共格式 3 检查点恢复；门控、输入与损失修复均为有意变化，不宣称与旧错误完整路径等价。
+
+验证：CARA 新增 **12 项通过**，覆盖显式纠正激活后的作者兼容递推/候选分数/全部梯度、逐样本 BPR 与样本独立性、跨周末午夜的真实间隔/查询、修改真实下一事件后输入/预测不变、均匀负采样/词表耗尽/单位置零更新、候选子集与全量梯度且只编码一次、128 步有限前向/梯度与最近窗口对照、球面小数距离、padding/混批/分块/batch=1/float64/输入所有权、三轮训练/独立全词表排名/导出及采样 RNG/逐参数精确续训、CPU AMP。共享函数的 STAN/HSTLSTM/ATSTLSTM 验收保持通过。完整回归 **418 passed，0 failed，0 errors，0 skipped**；仓库外发布夹具及 3 条生命周期命令成功，独立评估一致并续训第三轮，见 [CLI 记录](cara-cli-validation.json)。迁移表为 **50/100**，50 条 pending，本期仍有 **41 个**实际模型待迁移。
 
 ## 持续完成的清单
 

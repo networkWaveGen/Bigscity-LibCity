@@ -229,7 +229,8 @@ def validate(config, preset):
         _positive(scheduler.get('warmup_steps'),'scheduler.warmup_steps')
         _number(scheduler.get('lr_multiplier',1.),'scheduler.lr_multiplier',strict=True)
     road_losses = ('mae','mse') if spec.protocol=='road_reconstruction' else ('negative_sampling',)
-    trajectory_losses = {'atst_ranking':('normalized_bpr',),'stan_ranking':('sampled_softmax',)}.get(spec.protocol,('nll',))
+    trajectory_losses = {'atst_ranking':('normalized_bpr',),'stan_ranking':('sampled_softmax',),
+        'cara_ranking':('bpr',)}.get(spec.protocol,('nll',))
     losses={'traj_loc_pred':trajectory_losses,'road_representation':road_losses,'eta':('mae','mse')}.get(
         spec.task,('mae','mse','masked_mae','masked_mse'))
     if training['loss'].get('name') not in losses:

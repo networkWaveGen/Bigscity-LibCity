@@ -3,6 +3,7 @@ import math
 
 import torch
 from torch import nn
+from libcity.model.trajectory_loc_prediction.runtime_geography import spherical_distance
 
 
 class STAN(nn.Module):
@@ -32,13 +33,7 @@ class STAN(nn.Module):
 
     def distances(self,left,right):
         # Centered coordinates keep small POI separations when the module is FP32.
-        with torch.autocast(self.coordinates.device.type,enabled=False):
-            difference = torch.deg2rad(left-right)
-            lat1 = torch.deg2rad(left[...,1]+self.coordinate_origin[1])
-            lat2 = torch.deg2rad(right[...,1]+self.coordinate_origin[1])
-            a = (difference[...,1]/2).sin().square()+lat1.cos()*lat2.cos()*(difference[...,0]/2).sin().square()
-            a = a.clamp(0,1)
-            return 2*6371*torch.atan2(a.sqrt(),(1-a).sqrt())
+        return spherical_distance(left,right,self.coordinate_origin,radius=6371)
 
     def interval(self,spatial,temporal):
         # The original code sums the embedding axis immediately. Collapse that
