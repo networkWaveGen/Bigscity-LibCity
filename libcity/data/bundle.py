@@ -68,18 +68,31 @@ def prepare_traffic(data_config, training_config, evaluation_config, seed, logge
     raw = json.loads((folder / 'config.json').read_text(encoding='utf-8'))
     raw = {**raw, **raw.get('info', {})}
     metadata = {key: value for key, value in raw.items() if key in METADATA_FIELDS}
+    features_config, graph_config = data_config['features'], data_config['graph']
     legacy = dict(metadata, dataset=data_config['dataset'], data_dir=data_config['data_dir'],
         cache_dir=data_config['cache_dir'], cache_dataset=data_config['cache'],
         input_window=data_config['input_window'], output_window=data_config['output_window'],
         train_rate=data_config['split']['train'], eval_rate=data_config['split']['val'],
         scaler=data_config['scaler']['name'], batch_size=training_config['batch_size'], num_workers=0,
-        pad_with_last_sample=data_config['pad_training'], load_external=data_config['features']['load_external'],
-        add_time_in_day=data_config['features']['time_in_day'], add_day_in_week=data_config['features']['day_in_week'])
+        pad_with_last_sample=data_config['pad_training'],
+        load_external=any(features_config.values()),
+        include_external=features_config['load_external'],
+        add_time_in_day=features_config['time_in_day'], add_day_in_week=features_config['day_in_week'],
+        init_weight_inf_or_zero='inf' if graph_config['name']=='distance' else 'zero',
+        set_weight_link_or_dist='link' if graph_config['name']=='binary' else 'dist',
+        calculate_weight_adj=graph_config['name']=='distance',weight_adj_epsilon=graph_config.get('epsilon',.1))
     dataset = TrafficStatePointDataset(legacy, logger=logger)
     loaders = dataset.get_data()
     features = dataset.get_data_feature()
+    graph = features['adj_mx'].copy()
+    if graph_config.get('symmetric',False):
+        graph = np.maximum(graph,graph.T)
+    if graph_config.get('self_loops',False):
+        np.fill_diagonal(graph,1.)
+    if not np.isfinite(graph).all():
+        raise ValueError('Graph preprocessing produced non-finite adjacency weights')
     meta = DatasetMetadata(data_config['dataset'], features['num_nodes'], features['feature_dim'],
-                           features['output_dim'], features['adj_mx'], metadata)
+                           features['output_dim'], graph, metadata)
     generator = torch.Generator().manual_seed(seed)
     converted = []
     for index, old in enumerate(loaders):

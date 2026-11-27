@@ -9,7 +9,7 @@ import warnings
 from libcity.model.runtime_registry import model_spec
 
 
-SELECTORS = {'optimizer', 'scheduler', 'scaler', 'loss'}
+SELECTORS = {'optimizer', 'scheduler', 'scaler', 'loss', 'graph'}
 PATHS = (('data', 'data_dir'), ('data', 'cache_dir'), ('runtime', 'output_dir'))
 
 
@@ -90,6 +90,12 @@ def validate(config, preset):
         raise ValueError('data.split requires positive train and val rates whose sum is below 1')
     _known(data['features'], ('load_external', 'time_in_day', 'day_in_week'), 'data.features')
     _known(data['scaler'], ('name',), 'data.scaler')
+    _known(data['graph'], ('name', 'symmetric', 'self_loops', 'epsilon'), 'data.graph')
+    if data['graph'].get('name') not in ('binary', 'weighted', 'distance'):
+        raise ValueError('Unknown data.graph.name')
+    for key in ('symmetric', 'self_loops'):
+        if type(data['graph'].get(key, False)) is not bool:
+            raise TypeError(f'data.graph.{key} must be boolean')
     if data['scaler'].get('name') not in ('none', 'normal', 'standard', 'minmax01', 'minmax11', 'log'):
         raise ValueError('Unknown data.scaler.name')
     for key in ('input_window', 'output_window'):

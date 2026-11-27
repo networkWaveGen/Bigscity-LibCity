@@ -20,6 +20,10 @@ class ModelSpec:
 
 MODELS = {
     'GRU': ModelSpec('libcity.model.traffic_speed_prediction.runtime_rnn:GRU'),
+    'STGCN': ModelSpec('libcity.model.traffic_speed_prediction.runtime_stgcn:STGCN'),
+    'DCRNN': ModelSpec('libcity.model.traffic_speed_prediction.runtime_dcrnn:DCRNN',
+                       step='libcity.model.traffic_speed_prediction.runtime_dcrnn:curriculum_step'),
+    'Trafformer': ModelSpec('libcity.model.traffic_speed_prediction.runtime_trafformer:Trafformer'),
 }
 
 

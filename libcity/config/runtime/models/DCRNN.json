@@ -1,0 +1,3 @@
+{
+  "model": {"params": {"rnn_units": 64, "num_rnn_layers": 2, "max_diffusion_step": 2, "filter_type": "dual_random_walk", "use_curriculum_learning": true, "cl_decay_steps": 1000}}
+}

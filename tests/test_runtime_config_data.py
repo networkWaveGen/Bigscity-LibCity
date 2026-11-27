@@ -84,3 +84,13 @@ def test_adapter_matches_atomic_baseline_and_metadata_is_readonly(tmp_path, monk
     value.backward()
     assert model.fc.weight.grad is not None
     assert not any(hasattr(model, key) for key in ('_scaler', 'device', '_logger'))
+
+
+def test_calendar_feature_does_not_implicitly_enable_external_file(tmp_path):
+    folder = atomic_fixture(tmp_path/'raw')
+    (folder/'Tiny.ext').write_text('invalid external file must not be read', encoding='utf-8')
+    cfg = minimal(tmp_path)
+    cfg['data']['features'] = {'time_in_day':True,'load_external':False}
+    cfg = load_config(config=cfg)
+    bundle = prepare_traffic(cfg['data'],cfg['training'],cfg['evaluation'],17)
+    assert bundle.metadata.feature_dim==2

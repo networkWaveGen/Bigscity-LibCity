@@ -105,7 +105,7 @@ class TrafficStateDataset(AbstractDataset):
         defaults = dict(
             dataset='', data_col='', ext_col='', weight_col='', output_dim=1,
             input_window=12, output_window=12, train_rate=0.7, eval_rate=0.1,
-            scaler='none', ext_scaler='none', load_external=False, normal_external=False,
+            scaler='none', ext_scaler='none', load_external=False, include_external=True, normal_external=False,
             add_time_in_day=False, add_day_in_week=False, time_intervals=300,
             init_weight_inf_or_zero='inf', set_weight_link_or_dist='dist',
             bidir_adj_mx=False, calculate_weight_adj=False,
@@ -820,7 +820,8 @@ class TrafficStateDataset(AbstractDataset):
         else:  # str
             data_files = [self.data_files].copy()
         # 加载外部数据
-        if self.load_external and os.path.exists(self.data_path + self.ext_file + '.ext'):  # 外部数据集
+        if (self.load_external and self.config.get('include_external', True)
+                and os.path.exists(self.data_path + self.ext_file + '.ext')):
             ext_data = self._load_ext()
         else:
             ext_data = None
