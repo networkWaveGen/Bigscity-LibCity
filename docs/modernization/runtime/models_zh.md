@@ -1,9 +1,10 @@
 # 新运行时模型迁移范围
 
-当前共 53 个运行时入口，对应原清单中的 55 个任务—模型条目（轨迹 RNN/LSTM/GRU 共用一个入口）。完整 [100 项 CSV](model-migration.csv) 逐项记录实际能力、依赖、验证与后续动作；其余 45 项仍为 pending，不会自动回退到旧运行时。轨迹预测全部 13 个非模板条目、两个 ETA 模型及三个地图匹配算法均已接入；道路表征 6 项中已接入 5 项，GeomGCN 仍待迁移。37 个特殊交通数据集的深度整理仍延后。交通数据统一使用目标时间互斥切分。
+当前共 54 个运行时入口，对应原清单中的 56 个任务—模型条目（轨迹 RNN/LSTM/GRU 共用一个入口）。完整 [100 项 CSV](model-migration.csv) 逐项记录实际能力、依赖、验证与后续动作；其余 44 项仍为 pending，不会自动回退到旧运行时。轨迹预测全部 13 个非模板条目、两个 ETA 模型、三个地图匹配算法和六个道路表征模型均已接入。排除七个延期 Common 变体和两个模板后，本期仍有 35 个交通预测模型待迁移。37 个特殊交通数据集的深度整理仍延后。交通数据统一使用目标时间互斥切分。
 
 | 名称 | 任务/数据 | 训练接入 | 检查点/续训能力 | 实际验证级别 |
 | --- | --- | --- | --- | --- |
+| GeomGCN | road_representation / 道路边与自环两分区属性重建 | 默认 train_loop + 公共重建损失/评估 | 需要权重；完整续训 | 修正边分区后的独立稠密公式/嵌入/全部梯度、16 种合并设置、全图入度、无 DGL 训练/独立评估/嵌入导出、dropout/优化器/调度器/RNG 精确续训、无标签/batch=1/float64、空图/单节点/自环去重、2,000 节点稀疏图、CPU AMP 与实际 CLI |
 | Node2Vec / DeepWalk | road_representation / 稀疏全图随机游走 | external 独立 Gensim 训练回调 | 独立评估需要安全向量权重；无验证/调参/完整续训 | 原加权有向/无向 Node2Vec 游走、修正起点 0 后的 DeepWalk 游走/重启、转移概率与 alias 分布、局部 RNG/有界缓存、真实 Gensim 向量数值与跨进程确定性、流式语料、ID/图/配置权重校验、无 Gensim 独立评估、无 PyTorch 优化器/记录器、孤立节点/共享 2,000 节点稀疏适配、实际 CLI 与能力拒绝 |
 | TTPNet | eta / 出发前交通快照与已知计划路线 | 默认 train_loop + 累计相对 RMSE step | 需要权重；dropout 完整续训 | 旧速度/道路/双向 LSTM/累计预测及全部梯度对照、真实变长打包/批次隔离、预训练道路 ID 对齐、出发前快照校验/标签隔离、训练统计与单位换算、逐路线相对 RMSE/精确拟合有限梯度、跨天秒数/周末、完整训练/独立评估/按秒导出/精确续训、两点路线/任意静态嵌入宽度、batch=1/float64/CPU AMP/零速度/常量、实际 CLI |
 | GeoSAN | traj_loc_pred / Quadkey 地理自注意力与候选解码 | 默认 train_loop + 加权二元采样 step | 需要权重；采样/dropout 完整续训 | 四种旧有效位置/解码分支分数与全部梯度、TorchText 词表规则冻结及替代、正确经纬度与弧度 KNN、采样分布/耗尽、静态词表/训练访问隔离、因果/padding/混批/候选分块与子集梯度、非默认融合/用户/时间/奇数宽度、完整训练/独立评估/精确续训、float64/CPU AMP/单位置、阻止旧依赖后实际训练、实际 CLI |
@@ -132,5 +133,9 @@ Node2Vec/DeepWalk 使用完整的 road_walk 任务协议和 external 执行能�
 路网按 .geo 原 ID 顺序映射为稀疏边表/偏移，不建完整 N×N 矩阵。默认二值边；Node2Vec 可显式选 weighted，weight_column 或元信息 weight_col 指定正亲和权重。零边删除、负/非有限权重拒绝，重复有向关系最后一条生效，无向化取双向权重最大值，自环由配置明确选择。DeepWalk 只接受二值图。全图训练不虚构 train/val/test 切分，DataBundle 三个 loader 均为 None；孤立节点仍出现在词表，但向量缺少上下文训练信号。每条游走写入实验 training/walks.txt，Word2Vec 按行重放，二阶 alias 缓存限制为 100,000 个邻居槽；采样使用独立随机状态。旧 DeepWalk 的 start=0 错误、默认 RNG 跨调用共享与 Iterable 导入，以及旧 Node2Vec 的 NetworkX 接口/无向标记已修复，旧全局缓存入口不恢复。
 
 外部训练只保存 checkpoints/embeddings.pt（纯 Tensor 状态，不保存 Gensim pickle），含向量与节点 ID、算法配置和稀疏图身份；映射/图/配置不匹配时拒绝加载。导出 eval/embeddings.npy 与 node_ids.json，关闭预测导出会清理旧文件。metrics 只包含节点数、维度、覆盖率、均值范数、孤立点及无出边点等结构诊断，不是分类、链路预测或泛化精度；覆盖率 1 也不表示孤立节点学到了有用表示。训练损失与来源文件版本另记 training/report.json 和 metrics.jsonl。没有验证协议或完整安全续训状态，因此 supports_validation/supports_resume=false，调参和 --resume 在入口拒绝，无 best_validation/best.pt/last.pt；需要重新训练时新建实验。training 中只接受 Word2Vec 的 epochs/num_workers/window_size/batch_words/subsample/dynamic_window、gensim_sgd 和目标配置，不接受无作用的 AMP/梯度累积等参数。
+
+GeomGCN 保留 LibCity 的四层属性自编码器：两个编码层产生节点嵌入，两个解码层重建属性；不声称实现原论文的几何嵌入空间邻域构建。沿用道路非自环边/每节点一个自环的两个分区，分别投影、按完整有向图的入度作源/目标归一化，再合并分区与多头。原实现把边分区错误地替换成节点诱导子图，并遗漏结果写回，不能把其零结果作为等价目标；本轮按[作者分区聚合实现](https://github.com/bingzhewei/geom-gcn/blob/master/utils_layers.py)的边语义独立重写为 PyTorch index_add，不依赖 DGL。
+
+默认 hidden_dim=144、embedding_dim=32、dropout=0.5 对应原类实际读取值（原 JSON 的 dropout 字段没有被该类读取）；默认不归一化，保留非负重建输出。可以显式选择训练节点拟合的 standard，但最终 ReLU 仍保留。四个合并设置支持 cat/mean；embedding_dim 是每头每分区宽度，实际嵌入宽度乘以第二层选择拼接的分区数/头数。旧第二层拼接会导致后续维度不匹配，新层按实际输出宽度构造；最终重建层固定按分区和头取均值以保持原属性宽度，默认及原有有效 mean 路径不变。完整节点图、范数与边作为 buffer，前向不改图、不写文件；嵌入按公共评估层与真实 node_ids 导出。公共重建损失仅提升半精度类型，float64 输入不再被无条件降为 float32。
 
 阶段三、四有意调整见 [新增记录](phases34_execution_zh.md)。旧依赖处理步骤及已完成结果见 [登记](optional_dependencies_zh.md)。

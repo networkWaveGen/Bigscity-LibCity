@@ -1,0 +1,9 @@
+{
+  "data": {"scaler": {"name": "none"}},
+  "model": {"params": {
+    "hidden_dim": 144, "embedding_dim": 32, "dropout": 0.5,
+    "num_heads_layer_one": 1, "num_heads_layer_two": 1,
+    "layer_one_ggcn_merge": "cat", "layer_one_channel_merge": "cat",
+    "layer_two_ggcn_merge": "mean", "layer_two_channel_merge": "mean"
+  }}
+}

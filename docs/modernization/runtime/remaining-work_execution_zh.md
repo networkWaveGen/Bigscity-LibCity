@@ -36,7 +36,8 @@
 | commit28 | 39ed76b | feat: migrate LSTPM with causal session attention and ranking |
 | commit29 | 4fc8211 | feat: migrate GeoSAN with native geography and bounded sampling |
 | commit30 | cf56fa4 | feat: migrate TTPNet with departure-known traffic and cumulative ETA training |
-| commit31 | 随本节交付的提交 | feat: migrate Node2Vec and DeepWalk with explicit external training |
+| commit31 | a87159c | feat: migrate Node2Vec and DeepWalk with explicit external training |
+| commit32 | 随本节交付的提交 | feat: migrate GeomGCN with native partitioned reconstruction |
 
 ## commit1：修复基础交通缓存（670b325）
 
@@ -319,6 +320,20 @@ cara_ranking 协议明确 training.loss.name=bpr。每样本独立计算原成�
 能力边界：没有验证划分或完整安全后端状态，因此无 best_validation、best.pt/last.pt 或完整续训；--resume 与调参在准备数据/训练前拒绝。结果只报告节点数/维度/覆盖率/均值范数/孤立及无出边节点等结构诊断，不能解释为模型精度；覆盖率 1 也不表示孤立节点有上下文训练信号。默认 epochs 沿用旧 1000，发布示例显式两轮，只证明生命周期和数值实现，不声称下游精度复现。
 
 验证：新增 **17 项通过**，包括加权有向/无向 Node2Vec 固定游走对照、修正起点 0 后 DeepWalk 三种重启概率与重复调用、p/q 概率/alias 分布/对称权重/只读稀疏元信息、两个模型真实 Gensim 构造器逐向量完全一致、外部训练不创建 PyTorch 优化器或记录器、跨进程逐元素确定性、阻止 Gensim 导入后实际独立评估、导出关闭与 ID 对齐、明确能力拒绝、缺少训练依赖报错、损坏/不匹配权重拒绝、全孤立图与 2,000 节点稀疏适配/有界缓存。完整回归 **480 passed，0 failed，0 errors，0 skipped**（环境实际安装 Gensim 4.4），见 [汇总](remaining-validation.json)。仓库外两个夹具、两次训练及两次独立评估共 **6 条成功命令**，另有 **4 条续训/调参请求按预期拒绝**，见 [CLI](walk-cli-validation.json)。迁移表 **55/100**，45 条 pending；本期实际剩余 **36 个模型**（35 交通、1 道路 GeomGCN），最终全量验收仍未完成。
+
+## commit32：迁移 GeomGCN 并完成道路表征覆盖
+
+问题：旧 GeomGCN 顶层依赖旧 DGLGraph/子图 API，训练前向把中间向量写到全局缓存。其分区边集合已计算却未使用，后续构造节点诱导子图会混入别的分区边；子图结果未写回父图，读取父图时可能只得到零结果。第二层选择拼接时，嵌入/解码层仍按未拼接宽度构造，不能运行。旧 JSON 的 dropout 字段也未被实际读取（类读取 dropout_rate，缺省 0.5）。
+
+修改：保留 LibCity 四层属性自编码器及实际使用的两分区（非自环道路边、每节点一个自环），没有把原论文的几何邻域构建作为新增范围。对照[作者的边分区聚合实现](https://github.com/bingzhewei/geom-gcn/blob/master/utils_layers.py)，用原生 PyTorch 投影/index_add 直接计算分区消息、完整有向入度的源/目标归一化、分区合并和多头合并。边和范数是 buffer，不持有 DGL 图、scaler、logger 或设备；前向不写文件、不改图，不读取目标。重复关系/输入自环不产生重复消息，每个节点显式恰好一个自环，孤立节点可以使用自身属性。
+
+四个合并设置均支持 cat/mean，按实际宽度构建后续层；最终读出固定对分区/头取均值，保证属性重建宽度不变。这保留原默认及原可运行 mean 路径，同时为原本维度错误的拼接分支定义可用行为。embedding_dim 是每头每分区宽度，第二层拼接会增加实际导出维度。默认 hidden_dim=144、embedding_dim=32、dropout=0.5、无归一化及最终 ReLU 按旧有效配置保留；可显式使用仅训练节点拟合的 standard。公共重建损失修复无条件 float32 转换，只提升半精度，保留 float64 精度。
+
+GeomGCN 复用 road_reconstruction 具名协议、公共数据适配/损失/评估和默认 train_loop，支持验证选模、独立评估与完整续训；向量和真实 node_ids 在评估层统一导出。迁移表不再给该模型要求 graph/DGL 可选组，旧源码仅作历史数学参考。发布 geomgcn.json 及 --model GeomGCN 夹具生成方式，同步更新运行指南、可选依赖登记和当前迁移数量。
+
+验证：新增 **28 项通过**，包括全部 16 种分区/通道合并设置下修正后原公式的独立稠密前向、嵌入及全部参数梯度对照；诱导子图混边的专门反例、完整图入度、各层真实参数更新、阻止 DGL 导入后的训练/独立评估/嵌入与 ID 导出、dropout/优化器/调度器/早停/RNG/下一轮状态精确续训、无标签/全图与单节点子集/float64/输入和图状态不变、空图/单节点/自环去重、2,000 节点稀疏图、CPU AMP、缺失目标及双精度损失梯度。与既有道路重建/清单检查合计 **41 项通过**；之后当前源码完整回归 **508 passed，0 failed，0 errors，0 skipped**，见 [汇总](remaining-validation.json)。仓库外实际夹具、训练、独立评估及续训第三轮共 **4 条成功命令**，独立指标/向量完全一致，见 [CLI](geomgcn-cli-validation.json)。
+
+迁移表更新为 **56/100**，44 条 pending。道路表征全部 **6 个模型**已接入；排除 7 个延期 Common 和 2 个模板后，本期仍有 **35 个交通预测模型**及最终全量验收待完成，不能据此宣布全部主线完成。
 
 ## 持续完成的清单
 

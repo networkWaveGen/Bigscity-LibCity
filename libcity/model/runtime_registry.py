@@ -29,6 +29,10 @@ class ModelSpec:
 
 
 MODELS = {
+    'GeomGCN': ModelSpec('libcity.model.road_representation.runtime_geomgcn:GeomGCN',task='road_representation',
+        protocol='road_reconstruction',prepare_data='libcity.data.road_reconstruction:prepare_reconstruction',
+        loss='libcity.executor.road_reconstruction:ReconstructionLoss',
+        evaluate_loader='libcity.executor.road_reconstruction:evaluate_reconstruction'),
     'Node2Vec': ModelSpec('libcity.model.road_representation.runtime_walk:create_node2vec',task='road_representation',
         kind='external',protocol='road_walk',train='libcity.executor.walk_training:train',supports_resume=False,supports_validation=False,
         prepare_data='libcity.data.walk_graph:prepare_walk_graph',evaluate='libcity.executor.walk_training:evaluate',device_types=('cpu',)),

@@ -6,7 +6,7 @@
 
 当前正在继续完成剩余模型迁移与主线缺口，最新提交、修复说明和验收范围见 [主线剩余问题执行记录](remaining-work_execution_zh.md)。历史阶段验收通过不等同于全模型迁移完成；当前支持范围以迁移 CSV 为准。
 
-道路表征的 ChebConv/GAT 使用具名 `road_reconstruction` 协议，任务默认配置与模型预设分开加载；预设仍不能静默改写协议字段。协议名称及相对于默认边采样协议的差异会写入日志和 runtime_info.json。生成示例可用 `tools/make_runtime_fixture.py --directory <目录> --model ChebConv` 或 `--model GAT`；它们重建静态节点属性并导出全节点嵌入，使用全图批次与互斥监督节点集合，不将此指标解释为下游分类精度。
+道路表征的 ChebConv/GAT/GeomGCN 使用具名 `road_reconstruction` 协议，任务默认配置与模型预设分开加载；预设仍不能静默改写协议字段。协议名称及相对于默认边采样协议的差异会写入日志和 runtime_info.json。生成示例可用 `tools/make_runtime_fixture.py --directory <目录> --model ChebConv`、`--model GAT` 或 `--model GeomGCN`；它们重建静态节点属性并导出全节点嵌入，使用全图批次与互斥监督节点集合，不将此指标解释为下游分类精度。GeomGCN 的道路边/自环分区以 PyTorch 聚合实现，不需要 DGL；训练、独立评估与完整续训均使用公共入口。它保留 LibCity 的两分区重建变体，不包含原论文的几何邻域构建；合并维度与有意修复见模型说明。
 
 ## GRU 完整例子
 

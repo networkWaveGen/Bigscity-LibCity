@@ -1,0 +1,94 @@
+{
+  "passed": true,
+  "source": "D:\\LibCity 2.0\\LibCity-modernization",
+  "directory": "D:\\LibCity 2.0\\.runtime-tests\\geomgcn-cli-7_qz1s8y",
+  "commands": [
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\tools\\make_runtime_fixture.py",
+        "--directory",
+        "D:\\LibCity 2.0\\.runtime-tests\\geomgcn-cli-7_qz1s8y\\example",
+        "--model",
+        "GeomGCN"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\geomgcn-cli-7_qz1s8y",
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "train",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\geomgcn-cli-7_qz1s8y\\example\\geomgcn.json",
+        "--set",
+        "runtime.exp_id=train"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\geomgcn-cli-7_qz1s8y",
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "evaluate",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\geomgcn-cli-7_qz1s8y\\example\\geomgcn.json",
+        "--checkpoint",
+        "D:\\LibCity 2.0\\.runtime-tests\\geomgcn-cli-7_qz1s8y\\example\\runs\\train\\checkpoints\\best.pt",
+        "--set",
+        "runtime.exp_id=evaluate"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\geomgcn-cli-7_qz1s8y",
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "train",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\geomgcn-cli-7_qz1s8y\\example\\geomgcn.json",
+        "--resume",
+        "D:\\LibCity 2.0\\.runtime-tests\\geomgcn-cli-7_qz1s8y\\example\\runs\\train\\checkpoints\\last.pt",
+        "--set",
+        "training.epochs=3",
+        "--set",
+        "runtime.exp_id=resumed"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\geomgcn-cli-7_qz1s8y",
+      "exit_code": 0
+    }
+  ],
+  "model": "GeomGCN",
+  "protocol": "road_reconstruction",
+  "metrics": {
+    "MAE": 11.84478061575265,
+    "RMSE": 20.707487820250712,
+    "loss": 428.800048828125,
+    "best_validation": 748.4462890625
+  },
+  "embedding_shape": [
+    12,
+    4
+  ],
+  "embedding_vectors_identical": true,
+  "independent_metrics_identical": true,
+  "resume_format": 3,
+  "resumed_epoch": 3,
+  "optimizer_steps": 3,
+  "DGL_required": false,
+  "graph_partitions": [
+    "observed_nonself_edges",
+    "one_self_edge_per_node"
+  ],
+  "limitations": [
+    "LibCity two-partition reconstruction variant, not paper embedding-space neighborhood construction",
+    "synthetic lifecycle validation, not real-city accuracy certification"
+  ]
+}

@@ -1,5 +1,5 @@
 {
-  "scope": "Remaining-work commits 1-31; whole-library migration remains in progress",
+  "scope": "Remaining-work commits 1-32; whole-library migration remains in progress",
   "environment": {
     "python": "3.12.13",
     "torch": "2.15.0+cpu",
@@ -8,7 +8,7 @@
     "gensim": "4.4.0"
   },
   "full_tests": {
-    "tests": 480,
+    "tests": 508,
     "failures": 0,
     "errors": 0,
     "skipped": 0
@@ -189,6 +189,34 @@
     "test_training_independent_ranking_and_exact_resume",
     "test_batch_one_padding_label_isolation_and_float64",
     "test_personalized_user_vocabulary_is_validated",
+    "test_corrected_original_dense_forecast_embedding_and_all_gradients[merges0]",
+    "test_corrected_original_dense_forecast_embedding_and_all_gradients[merges1]",
+    "test_corrected_original_dense_forecast_embedding_and_all_gradients[merges2]",
+    "test_corrected_original_dense_forecast_embedding_and_all_gradients[merges3]",
+    "test_corrected_original_dense_forecast_embedding_and_all_gradients[merges4]",
+    "test_corrected_original_dense_forecast_embedding_and_all_gradients[merges5]",
+    "test_corrected_original_dense_forecast_embedding_and_all_gradients[merges6]",
+    "test_corrected_original_dense_forecast_embedding_and_all_gradients[merges7]",
+    "test_corrected_original_dense_forecast_embedding_and_all_gradients[merges8]",
+    "test_corrected_original_dense_forecast_embedding_and_all_gradients[merges9]",
+    "test_corrected_original_dense_forecast_embedding_and_all_gradients[merges10]",
+    "test_corrected_original_dense_forecast_embedding_and_all_gradients[merges11]",
+    "test_corrected_original_dense_forecast_embedding_and_all_gradients[merges12]",
+    "test_corrected_original_dense_forecast_embedding_and_all_gradients[merges13]",
+    "test_corrected_original_dense_forecast_embedding_and_all_gradients[merges14]",
+    "test_corrected_original_dense_forecast_embedding_and_all_gradients[merges15]",
+    "test_edge_partitions_do_not_include_induced_edges_and_use_full_in_degree",
+    "test_train_evaluate_export_and_exact_dropout_optimizer_rng_resume",
+    "test_label_free_dtype_stateless_buffers_and_full_vs_subset",
+    "test_empty_graph_is_self_only_and_repeated_loops_do_not_change_degree[1]",
+    "test_empty_graph_is_self_only_and_repeated_loops_do_not_change_degree[4]",
+    "test_sparse_two_thousand_node_metadata_and_actual_cpu_amp_training",
+    "test_reconstruction_loss_preserves_double_precision_and_missing_target_gradients",
+    "test_invalid_dimensions_and_merges_are_rejected[params0]",
+    "test_invalid_dimensions_and_merges_are_rejected[params1]",
+    "test_invalid_dimensions_and_merges_are_rejected[params2]",
+    "test_invalid_dimensions_and_merges_are_rejected[params3]",
+    "test_invalid_dimensions_and_merges_are_rejected[params4]",
     "test_quadkeys_match_legacy_geometry_and_frozen_field_vocabulary_rules",
     "test_original_geographic_encoder_decoder_scores_and_all_gradients[False-transformer]",
     "test_original_geographic_encoder_decoder_scores_and_all_gradients[True-transformer]",
@@ -498,8 +526,8 @@
   ],
   "inventory": {
     "total": 100,
-    "migrated": 55,
-    "pending": 45
+    "migrated": 56,
+    "pending": 44
   },
   "history": [
     {
@@ -823,6 +851,20 @@
         "migrated": 53,
         "pending": 47
       }
+    },
+    {
+      "scope": "commits 1-31, through a87159c",
+      "full_tests": {
+        "tests": 480,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "inventory": {
+        "total": 100,
+        "migrated": 55,
+        "pending": 45
+      }
     }
   ],
   "current_cli": {
@@ -964,5 +1006,13 @@
     ],
     "supports_validation": false,
     "supports_resume": false
+  },
+  "geomgcn_cli": {
+    "report": "geomgcn-cli-validation.json",
+    "commands": 3,
+    "fixture_commands": 1,
+    "format_version": 3,
+    "legacy_DGL_required": false,
+    "graph_partitions": 2
   }
 }

@@ -9,6 +9,7 @@ from libcity.model.runtime_registry import MODELS
 
 
 VALIDATION={
+    'GeomGCN':'corrected_original_edge_partition_dense_forecast_embedding_and_all_gradient_reference;all_sixteen_partition_head_merge_settings;full_in_degree_normalization;no_mutable_DGL_graph_or_forward_filesystem;full_graph_short_train;independent_evaluate;dropout_optimizer_scheduler_RNG_exact_resume;real_ID_embedding_export;label_free_batch_one_float64;empty_singleton_graph_and_deduplicated_self_loops;two_thousand_node_sparse_graph;CPU_AMP;double_precision_masked_reconstruction_loss',
     'Node2Vec':'original_weighted_directed_and_undirected_alias_walk_reference;isolated_node_coverage;bounded_second_order_transition_cache;pure_local_RNG;actual_Gensim_Word2Vec_weight_reference;streamed_corpus;real_ID_safe_tensor_weights;train_and_independent_evaluate;cross_process_determinism;evaluation_without_Gensim;no_Torch_optimizer_or_writer;honest_no_validation_resume_tuning;graph_ID_configuration_checkpoint_guard;two_thousand_node_sparse_graph',
     'DeepWalk':'corrected_zero_start_original_walk_reference;restart_and_isolated_nodes;unshared_default_RNG;actual_Gensim_Word2Vec_HS_and_negative_sampling_weight_reference;streamed_corpus;real_ID_safe_tensor_weights;train_and_independent_evaluate;cross_process_determinism;evaluation_without_Gensim;no_Torch_optimizer_or_writer;honest_no_validation_resume_tuning;graph_ID_configuration_checkpoint_guard;two_thousand_node_sparse_graph',
     'TTPNet':'original_short_long_speed_road_biLSTM_cumulative_forecast_and_all_gradients_with_double_raw_normalization;explicit_departure_known_snapshot_guard;train_only_normalization;real_road_ID_pretrained_embedding_alignment;canonical_complete_trip_splits;kmh_mps_and_km_m_equivalence;vectorized_branch_and_cumulative_pooling;masked_route_relative_RMSE_objective_and_gradients;exact_fit_finite_gradient;short_train;independent_evaluate_seconds_export;dropout_exact_resume;batch_padding_label_isolation;batch_one_float64;two_point_routes_variable_embedding_width;multiday_seconds_correct_weekend;CPU_AMP_zero_speeds_constant_features',
@@ -83,8 +84,8 @@ def inventory():
             spec=MODELS.get(native)
             migrated=spec is not None and spec.task==task
             extras=old['optional_extras']
-            if migrated and name=='GeoSAN':
-                extras=''  # Native quadkey vocabulary no longer needs TorchText/NLTK.
+            if migrated and name in ('GeoSAN','GeomGCN'):
+                extras=''  # Native vocabulary/message passing no longer need legacy backends.
             if name=='TemplateTLP' or name=='TemplateTSP':
                 action='developer_template; not a trainable model'
             elif migrated:

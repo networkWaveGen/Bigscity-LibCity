@@ -38,13 +38,23 @@ are restricted to historical inputs.
 
 Road attribute autoencoders have their own named reconstruction protocol. Generate
 `python tools/make_runtime_fixture.py --directory ../road-reconstruction --model ChebConv`
-or use `--model GAT`, then train/evaluate/resume with the generated JSON. Inputs
+or use `--model GAT` / `--model GeomGCN`, then train/evaluate/resume with the generated JSON. Inputs
 contain the full observed graph and node attributes; disjoint node masks select
 the reconstruction targets. Scaling is fitted on training nodes. The run records
 `road_reconstruction`, raw attribute MAE/RMSE, and full-node embeddings; these
 metrics describe transductive reconstruction and do not measure downstream road
 classification. Graph training uses a single full-graph batch. Feature columns
 and categorical columns are configurable through the data block.
+
+GeomGCN uses the core installation and native PyTorch partition aggregation,
+without DGL. It preserves LibCity's four-layer autoencoder with separate road and
+self edges; it does not construct the original paper's embedding-space
+neighborhoods. Source and destination normalization use the full incoming degree,
+including exactly one self edge per node. Merge settings accept `cat`/`mean`;
+`embedding_dim` is a per-head, per-partition width, so concatenation in layer two
+increases the exported embedding width. The decoder follows actual widths and
+always averages the final partitions/heads to reconstruct the input attributes.
+Defaults retain unscaled inputs, dropout 0.5 and the original final ReLU.
 
 For all three temporal branches of ASTGCN/MSTGCN, generate with `--model ASTGCN`
 or `--model MSTGCN`. The published hourly fixture covers weekly, daily and recent
