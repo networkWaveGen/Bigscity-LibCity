@@ -4,6 +4,11 @@
 
 已发布提交不改写；补充工作按可独立审查的功能提交。提交不添加 co-author，不做源文件内容哈希校验。
 
+| 编号 | Commit | 提交标题 |
+| --- | --- | --- |
+| commit1 | 670b325 | fix: persist and reuse split-independent atomic traffic caches |
+| commit2 | 956c1d5 | feat: migrate CRANN with explicit inputs and resumable shared training |
+
 ## commit1：修复基础交通缓存（670b325）
 
 问题：`data.cache=true` 原先仅创建目录，每次重复读取原子 CSV；基础预处理缓存未生效。
@@ -19,6 +24,16 @@
 修改：新增标准 nn.Module，仅从 X 与显式 future_features 预测，外部未来协变量需通过 known_future_columns 声明；不读取 y，不持有 scaler/logger/device。data.sampling.name=crann 明确指定 temporal_history，空间历史仍由 input_window 决定；共享目标时间切分、训练区间归一化、y_raw 与原始缓存。temporal_channel 显式选择历史通道，dim_x*dim_y 必须覆盖节点且目标为单通道。注意力按实际 output_window 创建，保留 batch 维，隐状态随输入设备与类型初始化；n_layers_tem 实际控制编码与解码层数。旧参考数据路径同时保留 y_raw 并修复整网格归一化。
 
 验证：CRANN 的 4 项测试及迁移表测试 **5 passed**；原版 24 步前向/梯度对照、无标签/batch=1、精确原尺度零掩码、目标时间互斥、真实原子文件短训练、独立评估和两轮连续/中断恢复参数逐项相等。提供 crann.json 与 --model CRANN 夹具生成命令。迁移范围更新为 16/100 条记录，84 条仍 pending，未声明全库完成。
+
+## commit3：迁移六个标准交通模型
+
+新增 AutoEncoder、AGCRN、TGCN、TrafficRNN、TrafficLSTM、Seq2Seq，均为标准 nn.Module，推理只接收输入字典，公共训练/评估/检查点组件承接训练职责。TGCN 稀疏邻接矩阵注册为 buffer，移除硬编码 device/float32；独立 step 保留原始训练正则目标。AGCRN 初始隐状态由输入创建。交通 RNN/LSTM 显式命名以避开轨迹 RNN 入口。
+
+Seq2Seq 旧实现推理仍读取 y 且随机生成解码起点，现使用固定零起点，纯 forward 不读取标签、不消耗推理随机数；teacher forcing 由训练 step 显式传递归一化目标，交通 RNN/LSTM 同样通过显式训练方法实现。
+
+验证：新增 21 项，逐模型对照旧前向及梯度（Seq2Seq 明确使用相同零起点）；TGCN 同时核对原正则目标；六个模型分别完整训练、独立评估及中断续训参数逐项一致；RNN/LSTM/Seq2Seq 覆盖两层 dropout 与随机 teacher forcing 的恢复；所有模型覆盖 batch=1、无标签确定性及 float64。与既有训练引擎合计 **40 passed**。清单更新为 22/100 已迁移，78 条仍 pending。
+
+前三批完成后的完整回归为 **180 passed，0 failed，0 errors，0 skipped**。CRANN 发布示例实际 CLI 训练两轮、独立评估及续训至第三轮均成功；独立评估指标与训练后评估一致，评估/续训命中原始缓存。机器记录见 [remaining-validation.json](remaining-validation.json)。测试临时目录显式设置在工作区；系统沙箱临时路径下旧相对缓存测试曾遇到路径访问失败，同样测试在工作区独立临时目录 26/26 通过后，完整 180 项通过。
 
 ## 持续完成的清单
 

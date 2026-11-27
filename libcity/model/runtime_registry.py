@@ -28,6 +28,16 @@ class ModelSpec:
 
 
 MODELS = {
+    'AutoEncoder': ModelSpec('libcity.model.traffic_speed_prediction.runtime_baselines:AutoEncoder'),
+    'AGCRN': ModelSpec('libcity.model.traffic_speed_prediction.runtime_baselines:AGCRN'),
+    'TGCN': ModelSpec('libcity.model.traffic_speed_prediction.runtime_baselines:TGCN',
+        step='libcity.model.traffic_speed_prediction.runtime_baselines:tgcn_step'),
+    'TrafficRNN': ModelSpec('libcity.model.traffic_speed_prediction.runtime_rnn:AutoregressiveRNN',
+        step='libcity.model.traffic_speed_prediction.runtime_seq2seq:teacher_step'),
+    'TrafficLSTM': ModelSpec('libcity.model.traffic_speed_prediction.runtime_rnn:AutoregressiveRNN',
+        step='libcity.model.traffic_speed_prediction.runtime_seq2seq:teacher_step'),
+    'Seq2Seq': ModelSpec('libcity.model.traffic_speed_prediction.runtime_seq2seq:Seq2Seq',
+        step='libcity.model.traffic_speed_prediction.runtime_seq2seq:teacher_step'),
     'CRANN': ModelSpec('libcity.model.traffic_flow_prediction.runtime_crann:CRANN'),
     'FNN': ModelSpec('libcity.model.traffic_speed_prediction.runtime_standard:FNN'),
     'GWNET': ModelSpec('libcity.model.traffic_speed_prediction.runtime_standard:GWNET'),

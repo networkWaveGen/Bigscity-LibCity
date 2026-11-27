@@ -9,6 +9,12 @@ from libcity.model.runtime_registry import MODELS
 
 
 VALIDATION={
+    'AutoEncoder':'reference_forward_and_gradients;short_train;independent_evaluate;exact_resume',
+    'AGCRN':'reference_forward_and_gradients;short_train;independent_evaluate;exact_resume',
+    'TGCN':'reference_forward_and_objective_gradients;graph_buffer_dtype;short_train;independent_evaluate;exact_resume',
+    'TrafficRNN':'reference_forward_and_gradients;label_free_inference;teacher_step;short_train;independent_evaluate;exact_resume',
+    'TrafficLSTM':'reference_forward_and_gradients;label_free_inference;teacher_step;short_train;independent_evaluate;exact_resume',
+    'Seq2Seq':'zero_start_reference_forward_and_gradients;label_free_inference;teacher_step;short_train;independent_evaluate;exact_resume',
     'CRANN':'reference_forward_and_gradients;target_time_split;raw_target_mask;batch_one;short_train;independent_evaluate;exact_resume',
     'GRU':'fixed_reference;forward;short_train;CLI_API_equality;exact_resume;real_METR_LA_prefix;CUDA_AMP_resume',
     'STGCN':'reference_forward_and_updates;buffer_dtype;short_train;independent_evaluate;shared_resume;CUDA_lifecycle',
@@ -39,6 +45,8 @@ def inventory():
             if task=='traj_loc_pred' and name in ('GRU','LSTM','RNN'):
                 native='RNN'
                 parameters={'rnn_type':name}
+            elif task=='traffic_state_pred' and name in ('RNN','LSTM'):
+                native='Traffic'+name
             spec=MODELS.get(native)
             migrated=spec is not None and spec.task==task
             extras=old['optional_extras']

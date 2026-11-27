@@ -1,0 +1,4 @@
+{
+  "model": {"params": {"rnn_units": 64, "regularization": 0.0015}},
+  "training": {"loss": {"name": "mse"}}
+}
