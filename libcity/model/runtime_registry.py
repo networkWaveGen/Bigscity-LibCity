@@ -29,6 +29,9 @@ class ModelSpec:
 
 
 MODELS = {
+    'STRNN': ModelSpec('libcity.model.trajectory_loc_prediction.runtime_strnn:STRNN',task='traj_loc_pred',
+        prepare_data='libcity.data.spatiotemporal_trajectory:prepare_spatiotemporal',
+        loss='libcity.executor.task_evaluation:RankingLoss',evaluate_loader='libcity.executor.task_evaluation:evaluate_task'),
     'DeepMove': ModelSpec('libcity.model.trajectory_loc_prediction.runtime_deepmove:DeepMove',task='traj_loc_pred',
         prepare_data='libcity.data.task_bundles:prepare_history_trajectory',
         loss='libcity.executor.task_evaluation:RankingLoss',evaluate_loader='libcity.executor.task_evaluation:evaluate_task'),

@@ -101,6 +101,12 @@ History contains only the same user's sessions completed before the current trip
 started. Empty history becomes zero context without dropping benchmark samples.
 RNN/GRU/LSTM and dot/general/concat attention use the standard ranking lifecycle.
 
+`--model STRNN` creates an example with distinct POI geometry. Every candidate has
+its own distance-dependent state. The default query is the last observed time;
+actual next-event timestamps and target coordinates are excluded. Automatic time
+bounds use training prefixes, while spatial bounds use the declared static POIs.
+The model returns full-vocabulary log probabilities for common NLL/ranking.
+
 The complete supported-model inventory and migration details are in the
 [runtime guide](../docs/modernization/runtime/README_zh.md). Small examples prove
 execution and reproducibility, not real-city benchmark accuracy.

@@ -1,0 +1,6 @@
+{
+  "model": {"params": {"hidden_size": 500, "time_upper": 0.0, "distance_upper": 0.0,
+    "candidate_chunk_size": 512}},
+  "training": {"batch_size": 16},
+  "evaluation": {"batch_size": 32}
+}

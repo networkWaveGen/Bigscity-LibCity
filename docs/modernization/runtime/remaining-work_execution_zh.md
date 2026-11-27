@@ -25,6 +25,7 @@
 | commit17 | e2c728e | feat: migrate TimeMixer with explicit scales and temporal decomposition |
 | commit18 | 5244e90 | feat: migrate STG2Seq with explicit graph and attention axes |
 | commit19 | 81d5572 | fix: reject resume when atomic source versions change |
+| commit20 | 20c3437 | feat: migrate DeepMove with causal history and masked attention |
 
 ## commit1：修复基础交通缓存（670b325）
 
@@ -195,6 +196,14 @@ TGCLSTM 保留逐步图过滤、门控细胞与滑动窗口重编码，所有静
 修复旧历史 padding 参与 softmax、预测受同批其他行程长度影响的问题；支持显式长度、全空历史和无效填充值隔离。RNN 分支使用正确 RNN 解码器，补齐旧未完成的 concat 注意力并初始化其参数，移除未使用的 fc_attn。仅对最后当前状态做注意力，去除重复计算；默认隐状态随输入设备/类型创建，forward 不读标签，输出去除 padding 类后的全词表 log_softmax。
 
 验证：新增 **14 项通过**，包括 GRU/LSTM×dot/general 四种旧可用非填充分支的条件词表分数、NLL 与梯度对照；RNN/GRU/LSTM 三种训练/独立评估/导出/dropout 精确续训；历史/当前 padding、混批与独立推理等价、全空历史、batch=1/float64/无标签、concat 独立分数、基准样本 ID 保留、历史严格时间与重叠行程、collate 所有权、三种循环单元 CPU AMP。完整回归 **345 passed，0 failed，0 errors，0 skipped**。仓库外发布夹具与 3 条生命周期命令成功，独立评估一致并续训第三轮，见 [CLI 记录](deepmove-cli-validation.json)。示例生成器按注册信息选择任务，不再把新命名模型默认为交通预测。迁移清单为 **44/100**，56 条 pending，本期仍有 **47 个**实际模型待迁移。
+
+## commit21：迁移 STRNN 并消除真实目标时空输入
+
+原 predict 读取真实 target_tim 和按真实目的地计算的 current_dis，用这一目标条件向量给所有候选打分；源码已注释承认应逐候选建向量。现在保留原上下界时间/空间矩阵、全局项及用户/位置嵌入，每个候选分别计算几何状态。默认查询时刻为最后一次已知观测，模型可显式接受预先已知的 query_offset_hours，不从真实下一事件时间生成输入。elapsed_hours 仅含当前前缀，保留亚小时精度，自动时间边界只拟合训练前缀；距离使用静态 POI 的欧氏坐标度，中心化后注册 buffer，边界从包围盒推导并允许显式覆盖。零跨度有有限回退，超界比例夹紧，避免旧 LongTensor 上界截断/除零；坐标用 JSON 解析，不再依赖旧 eval。
+
+相同历史位置先聚合，再按候选块计算，避免 B×V×L×H 中间量；padding、查询偏移与位置词表有显式校验。forward 始终返回去除 padding 类的全词表 log_softmax，公共 NLL 替代旧对整个 batch 的正样本总分做 logistic 的损失，消除样本耦合并加入分类负类监督。上述为有意修复，不与旧错误 predict/loss 声称等价；原转移矩阵本身按每个候选对照。
+
+验证：新增 **8 项通过**，包括原转移矩阵逐候选分数、NLL 与全部梯度；训练/独立排名评估/导出/精确续训；分块、单独/混批、padding、batch=1/float64/目标字段隔离、几何状态的独立解析公式、训练边界与前缀时间核对、修改下一事件时间后输入/预测不变、重合坐标/零时间跨度、坐标错误与 CPU AMP。完整回归 **353 passed，0 failed，0 errors，0 skipped**。仓库外发布夹具及 3 条生命周期命令成功，评估一致并续训第三轮，见 [CLI 记录](strnn-cli-validation.json)。迁移表为 **45/100**，55 条 pending，本期仍有 **46 个**实际模型待迁移。
 
 ## 持续完成的清单
 

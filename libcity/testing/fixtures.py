@@ -106,3 +106,11 @@ def task_fixture(root,name='TaskTiny'):
                 current_dis=point*.1,current_state=point%2))
     pd.DataFrame(rows).to_csv(folder/f'{name}.dyna',index=False)
     return folder
+
+
+def strnn_fixture(root,name='TaskTiny'):
+    folder = task_fixture(root,name)
+    geo = pd.read_csv(folder/f'{name}.geo')
+    geo['coordinates'] = [json.dumps([116+index*.001,39+(index%3)*.0005]) for index in range(len(geo))]
+    geo.to_csv(folder/f'{name}.geo',index=False)
+    return folder
