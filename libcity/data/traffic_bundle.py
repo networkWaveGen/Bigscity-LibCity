@@ -46,12 +46,9 @@ class TrafficWindows(Dataset):
         return result
 
 
-def prepare_traffic(data, training, evaluation, seed, logger=None):
+def _read_atomic(data, metadata, logger=None):
     from libcity.data.dataset.traffic_state_point_dataset import TrafficStatePointDataset
     folder = Path(data['data_dir']) / data['dataset']
-    raw = json.loads((folder/'config.json').read_text(encoding='utf-8'))
-    raw = {**raw, **raw.get('info', {})}
-    metadata = {key: value for key, value in raw.items() if key in METADATA_FIELDS}
     graph_config, options = data['graph'], data['features']
     legacy = dict(metadata, dataset=data['dataset'], data_dir=data['data_dir'], cache_dir=data['cache_dir'],
         cache_dataset=False, init_weight_inf_or_zero='inf' if graph_config['name']=='distance' else 'zero',
@@ -59,9 +56,6 @@ def prepare_traffic(data, training, evaluation, seed, logger=None):
         calculate_weight_adj=graph_config['name']=='distance', weight_adj_epsilon=graph_config.get('epsilon', .1),
         add_time_in_day=options['time_in_day'], add_day_in_week=options['day_in_week'])
     reader = TrafficStatePointDataset(legacy, logger=logger)
-    if data['cache']:
-        # Keep raw-source reading in this transition; no expanded window cache.
-        Path(data['cache_dir']).mkdir(parents=True, exist_ok=True)
     filenames = metadata.get('data_files', data['dataset'])
     filenames = [filenames] if isinstance(filenames, str) else filenames
     histories, targets, knowns, clocks, intervals = [], [], [], [], []
@@ -94,6 +88,28 @@ def prepare_traffic(data, training, evaluation, seed, logger=None):
     if np.any(np.diff(clock) <= np.timedelta64(0, 's')):
         raise ValueError('data_files must be in chronological order without overlapping timestamps')
     history, target, known = map(np.concatenate, (histories, targets, knowns))
+    graph = reader.adj_mx.copy()
+    if graph_config.get('symmetric',False):
+        graph = np.maximum(graph, graph.T)
+    if graph_config.get('self_loops',False):
+        np.fill_diagonal(graph, 1.)
+    if not np.isfinite(graph).all():
+        raise ValueError('Graph preprocessing produced non-finite adjacency weights')
+    return dict(history=history, target=target, known=known, clock=clock,
+                intervals=np.asarray(intervals), graph=graph, known_indices=np.asarray(known_indices, dtype=np.int64))
+
+
+def prepare_traffic(data, training, evaluation, seed, logger=None):
+    from libcity.data.traffic_cache import prepare_arrays
+    folder = Path(data['data_dir']) / data['dataset']
+    raw = json.loads((folder/'config.json').read_text(encoding='utf-8'))
+    raw = {**raw, **raw.get('info', {})}
+    metadata = {key: value for key, value in raw.items() if key in METADATA_FIELDS}
+    arrays, cache_info = prepare_arrays(data, metadata, lambda: _read_atomic(data, metadata, logger), logger)
+    history, target, known, clock, intervals, graph, known_indices = (arrays[name] for name in
+        ('history', 'target', 'known', 'clock', 'intervals', 'graph', 'known_indices'))
+    known_indices = known_indices.tolist()
+    output_dim = target.shape[-1]
     cuts = boundaries(len(clock), data['split'], clock)
     scaler = fit_scaler(data['scaler']['name'], target[:cuts[0]])
     horizon, sampling = data['output_window'], data['sampling']
@@ -118,14 +134,7 @@ def prepare_traffic(data, training, evaluation, seed, logger=None):
     interval = np.timedelta64(metadata.get('time_intervals',300), 's')
     starts = np.array([start for start in starts if np.all(np.diff(clock[start+offsets.min():start+horizon])==interval)], dtype=np.int64)
     selections = partition_windows(starts, horizon, cuts, len(clock))
-    graph = reader.adj_mx.copy()
-    if graph_config.get('symmetric',False):
-        graph = np.maximum(graph, graph.T)
-    if graph_config.get('self_loops',False):
-        np.fill_diagonal(graph, 1.)
-    if not np.isfinite(graph).all():
-        raise ValueError('Graph preprocessing produced non-finite adjacency weights')
-    meta = DatasetMetadata(data['dataset'], reader.num_nodes, history.shape[-1], reader.output_dim,
+    meta = DatasetMetadata(data['dataset'], history.shape[1], history.shape[-1], output_dim,
                            graph, metadata, layout)
     generator = torch.Generator().manual_seed(seed)
     loaders, split_info = [], {}
@@ -139,7 +148,7 @@ def prepare_traffic(data, training, evaluation, seed, logger=None):
         if index==0 and data['pad_training']:
             padding = (-len(chosen)) % training['batch_size']
             chosen = np.pad(chosen, (0,padding), mode='edge')
-        dataset = TrafficWindows(history,target,known,chosen,offsets,horizon,reader.output_dim,scaler)
+        dataset = TrafficWindows(history,target,known,chosen,offsets,horizon,output_dim,scaler)
         cfg = training if index==0 else evaluation
         loaders.append(DataLoader(dataset,batch_size=cfg['batch_size'],num_workers=cfg['num_workers'],
             shuffle=training['shuffle'] if index==0 else False, generator=generator if index==0 else None))
@@ -148,7 +157,7 @@ def prepare_traffic(data, training, evaluation, seed, logger=None):
         requested_input_window=data['input_window'],adapter=layout['kind'], intervals=split_info,
         train_end=str(clock[cuts[0]]),val_end=str(clock[cuts[1]]),scaler_fit_end_exclusive=str(clock[cuts[0]]),
         discarded_boundary_windows=len(starts)-sum(map(len,selections)),
-        cache='raw_reader_no_expanded_windows')
+        cache=cache_info)
     if logger:
         logger.info('Target-time split: %s', summary)
     return DataBundle(*loaders,meta,scaler,generator,summary)
