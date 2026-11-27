@@ -29,6 +29,8 @@ class ModelSpec:
 MODELS = {
     'FNN': ModelSpec('libcity.model.traffic_speed_prediction.runtime_standard:FNN'),
     'GWNET': ModelSpec('libcity.model.traffic_speed_prediction.runtime_standard:GWNET'),
+    'STSSL': ModelSpec('libcity.model.traffic_flow_prediction.runtime_stssl:STSSL',
+        train='libcity.executor.stssl_train:train'),
     'RNN': ModelSpec('libcity.model.trajectory_loc_prediction.runtime_rnn:RNN',task='traj_loc_pred',
         prepare_data='libcity.data.task_bundles:prepare_trajectory',loss='libcity.executor.task_evaluation:RankingLoss',
         evaluate_loader='libcity.executor.task_evaluation:evaluate_task'),

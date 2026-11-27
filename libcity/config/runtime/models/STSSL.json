@@ -1,0 +1,5 @@
+{
+  "model": {"params": {"d_model": 64, "dropout": 0.2, "nmb_prototype": 6, "shm_temp": 0.5, "percent": 0.1}},
+  "data": {"graph": {"symmetric": true}},
+  "training": {"strategy": {"temperature": 2.0}}
+}
