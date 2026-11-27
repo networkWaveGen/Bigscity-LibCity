@@ -1,5 +1,5 @@
 """The default loop owns updates; custom steps own only their scalar objective."""
-from contextlib import nullcontext
+from contextlib import nullcontext,contextmanager
 from dataclasses import dataclass, field
 from functools import lru_cache
 import math
@@ -38,6 +38,7 @@ class TrainingContext:
     loss_fn: object
     evaluate_fn: object = None
     native_cpu_amp_backward: bool = False
+    native_cpu_amp_forward: bool = False
 
 
 @lru_cache(maxsize=1)
@@ -73,16 +74,23 @@ def build_context(model, bundle, config, device, directory, logger, *, steps_per
         and not cpu_amp_backward_supported())
     if native_cpu_backward:
         logger.info('CPU AMP: oneDNN bfloat16 backward is unavailable; using native backward kernels')
+    native_cpu_forward = native_cpu_backward and any(isinstance(module,torch.nn.RNNBase) for module in model.modules())
+    if native_cpu_forward:
+        logger.info('CPU AMP: recurrent forward must also use native kernels to avoid a oneDNN backward workspace')
     return TrainingContext(model, bundle, config, device, directory, tracker,
         CheckpointManager(directory / 'checkpoints'), TrainState(), optimizer, schedule, scaler, stopper, loss,
-        evaluate_fn, native_cpu_backward)
+        evaluate_fn, native_cpu_backward, native_cpu_forward)
 
 
+@contextmanager
 def autocast_context(context):
     training = context.config['training']
     if not training['amp']:
-        return nullcontext()
-    return torch.autocast(context.device.type, dtype=getattr(torch, training['amp_dtype']))
+        yield
+        return
+    backend = torch.backends.mkldnn.flags(enabled=False) if context.native_cpu_amp_forward else nullcontext()
+    with backend,torch.autocast(context.device.type, dtype=getattr(torch, training['amp_dtype'])):
+        yield
 
 
 def backward(context, weighted_loss):

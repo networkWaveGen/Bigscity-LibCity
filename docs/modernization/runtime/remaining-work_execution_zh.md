@@ -17,6 +17,7 @@
 | commit9 | abdd51b | feat: migrate multiscale graph forecasts with explicit CPT branches |
 | commit10 | 8a1de42 | feat: migrate memory forecasts with explicit curriculum and auxiliary step |
 | commit11 | bf174ae | fix: cover matrix-only models in CPU AMP backward fallback |
+| commit12 | 04e2295 | feat: migrate TESTAM experts with explicit routing supervision |
 
 ## commit1：修复基础交通缓存（670b325）
 
@@ -123,6 +124,14 @@ Seq2Seq 旧实现推理仍读取 y 且随机生成解码起点，现使用固定
 修复：旧自适应专家把隐藏残差通道作为预测；旧路由按 input_dim 展平，破坏多观测/多目标；未来时刻固定加 12，且假定时刻总在最后一列；非分位数监督沿错误轴索引；未来时间专家的默认零输入在观测通道多于隐藏宽度时维度错误。现在按专家轴选择预测通道，时刻/观测索引来自元信息，预测时刻按实际窗口及已知 future_features 计算，目标零值和 NaN 同时从专家与路由监督中排除。当前明确要求连续输入且 output_window<=input_window，取尾部对应未来的预测槽位，不静默改变评测窗口。
 
 验证：新增 TESTAM **8 项通过**，覆盖原专家计算、修正后的路由与辅助目标及梯度、prob_mul 两种分支、两种路由训练模式、原学习率曲线、观测通道数大于隐藏宽度、多目标/batch=1/float64/无标签、原尺度缺失值掩码、CPU AMP，以及三轮 dropout 连续训练与中断恢复逐参数、步数和调度器一致。完整回归 **256 passed，0 failed，0 errors，0 skipped**。发布夹具和仓库外训练/评估/续训共 4 条命令成功，独立评估与训练后评估一致，续训至第三轮，见 [TESTAM CLI 记录](testam-cli-validation.json)。迁移表为 **36/100**，64 条 pending；按本期排除 7 个延期 Common 和 2 个模板的口径，仍有 **55 个**实际模型待迁移。
+
+## commit13：修复 CPU AMP 循环网络的前向工作区
+
+新问题：ToGCN 的真实 AMP 训练中，LSTM 即使在 backward 时关闭 oneDNN，仍试图使用前向已创建的 BF16 oneDNN 工作区，报不支持反向。仅对反向切换内核不适用于这种循环网络。
+
+修复：公共训练上下文在 CPU AMP 后端不支持且模型含 RNNBase 时，同时为训练前向选择原生循环内核；AMP 保留，后端设置在每个上下文结束后恢复。纯线性/卷积模型仍沿用此前回退策略，CUDA 不改变。
+
+验证：公共 CPU AMP、定制训练与 STSSL 共 **14 passed**；新增两层 dropout TrafficLSTM 的实际 AMP 连续训练/中断恢复，下一轮参数与计数逐项一致，后端设置恢复。另加新模型批次共 28 项通过，新模型在下一提交独立验收。
 
 ## 持续完成的清单
 

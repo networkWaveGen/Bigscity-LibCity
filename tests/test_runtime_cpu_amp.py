@@ -3,6 +3,7 @@ import torch
 
 from libcity.executor.train import train_loop,cpu_amp_backward_supported
 from libcity.pipeline.experiment import run_experiment
+from libcity.model.traffic_speed_prediction.runtime_seq2seq import teacher_step
 from libcity.testing.fixtures import atomic_fixture
 from runtime_helpers import make_context, tiny_config
 
@@ -45,3 +46,26 @@ def test_cpu_amp_fallback_does_not_require_a_convolution_module(tmp_path):
         assert torch.backends.mkldnn.enabled==backend
     finally:
         context.tracker.close()
+
+
+def test_cpu_lstm_amp_forward_workspace_and_exact_resume(tmp_path):
+    atomic_fixture(tmp_path/'raw',steps=60)
+    def config(name):
+        value = tiny_config(tmp_path,name,epochs=2,amp=True,batch_size=8,shuffle=True)
+        value['model'] = dict(name='TrafficLSTM',params=dict(hidden_size=4,num_layers=2,dropout=.1))
+        return value
+    backend = torch.backends.mkldnn.enabled
+    full = run_experiment('train',config=config('full-lstm'))
+    expected = torch.load(full.artifacts['last'],weights_only=True)
+    partial = make_context(config('partial-lstm'))
+    try:
+        assert partial.native_cpu_amp_forward==partial.native_cpu_amp_backward
+        train_loop(partial,teacher_step(partial.loss_fn),until_epoch=1)
+    finally:
+        partial.tracker.close()
+    resumed = run_experiment('train',config=config('resume-lstm'),resume=partial.directory/'checkpoints/last.pt')
+    actual = torch.load(resumed.artifacts['last'],weights_only=True)
+    assert expected['train_state']==actual['train_state']
+    for name,value in expected['model'].items():
+        torch.testing.assert_close(value,actual['model'][name],rtol=0,atol=0)
+    assert torch.backends.mkldnn.enabled==backend
