@@ -1,0 +1,4 @@
+{
+  "model": {"params": {"hidden_size": 200}},
+  "training": {"batch_size": 10, "epochs": 20, "optimizer": {"name": "adam", "lr": 0.01}}
+}

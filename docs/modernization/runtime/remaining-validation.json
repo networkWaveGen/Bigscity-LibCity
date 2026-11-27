@@ -1,5 +1,5 @@
 {
-  "scope": "Remaining-work commits 1-22; whole-library migration remains in progress",
+  "scope": "Remaining-work commits 1-23; whole-library migration remains in progress",
   "environment": {
     "python": "3.12.13",
     "torch": "2.15.0+cpu",
@@ -7,7 +7,7 @@
     "platform": "Windows-11-10.0.26200-SP0"
   },
   "full_tests": {
-    "tests": 363,
+    "tests": 374,
     "failures": 0,
     "errors": 0,
     "skipped": 0
@@ -78,6 +78,17 @@
     "test_unmatched_and_single_point_trajectories[single_point-IVMM]",
     "test_matching_cli_and_capability_guards[STMatching]",
     "test_matching_cli_and_capability_guards[IVMM]",
+    "test_wgs84_vectorized_distances_match_karney_including_antipodes_and_poles",
+    "test_original_valid_candidate_scores_pairwise_loss_and_all_gradients",
+    "test_sampled_training_full_ranking_and_exact_rng_resume",
+    "test_masked_attention_batch_independence_float64_and_label_isolation",
+    "test_observed_prefix_geometry_and_popularity_do_not_use_next_target",
+    "test_popularity_negatives_exclude_positive_and_loss_is_deterministic",
+    "test_candidate_geometry_cache_is_bounded_owned_and_reused",
+    "test_training_selected_candidates_match_full_scores_and_gradients_without_full_forward",
+    "test_named_protocol_rejects_wrong_loss_and_invalid_sample_counts",
+    "test_actual_cpu_amp_training",
+    "test_spawn_worker_can_collate_candidate_geometry",
     "test_reference_predictions_and_gradients[AutoEncoder]",
     "test_reference_predictions_and_gradients[AGCRN]",
     "test_reference_predictions_and_gradients[TGCN]",
@@ -380,8 +391,8 @@
   ],
   "inventory": {
     "total": 100,
-    "migrated": 46,
-    "pending": 54
+    "migrated": 47,
+    "pending": 53
   },
   "history": [
     {
@@ -593,6 +604,20 @@
         "migrated": 45,
         "pending": 55
       }
+    },
+    {
+      "scope": "commits 1-22, through e3f8655",
+      "full_tests": {
+        "tests": 363,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "inventory": {
+        "total": 100,
+        "migrated": 46,
+        "pending": 54
+      }
     }
   ],
   "current_cli": {
@@ -670,6 +695,12 @@
   },
   "hstlstm_cli": {
     "report": "hstlstm-cli-validation.json",
+    "commands": 3,
+    "fixture_commands": 1,
+    "format_version": 3
+  },
+  "atstlstm_cli": {
+    "report": "atstlstm-cli-validation.json",
     "commands": 3,
     "fixture_commands": 1,
     "format_version": 3

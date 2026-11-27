@@ -27,6 +27,7 @@
 | commit19 | 81d5572 | fix: reject resume when atomic source versions change |
 | commit20 | 20c3437 | feat: migrate DeepMove with causal history and masked attention |
 | commit21 | a1734bd | feat: migrate STRNN with explicit candidate geometry |
+| commit22 | e3f8655 | feat: migrate HSTLSTM with causal intervals and corrected memory |
 
 ## commit1：修复基础交通缓存（670b325）
 
@@ -213,6 +214,16 @@ TGCLSTM 保留逐步图过滤、门控细胞与滑动窗口重编码，所有静
 新轻量数据适配只取当前已观察前缀，时间间隔为秒、距离保留 WGS84 测地线千米，首点仍为 0 秒/0.5 千米。原编码器在全量数据上计算分桶上界，现仅在训练前缀拟合，保留旧最小边界与向上取整；验证/测试超界夹紧，不重新拟合。桶作为 buffer 随模型迁移，保留浮点边界，用向量化 searchsorted/插值替代逐元素 Python 查桶、tolist 和固定 FP32/device 转换。仍对应仓库单层分类实现，不声称另行完成论文的额外层级结构；记忆公式修复和浮点分桶为有意变化，不宣称与旧错误计算逐值等价。
 
 验证：新增 **10 项通过**。覆盖独立门控/记忆计算和全部梯度、显式修正旧记忆公式后的原分类前向/梯度、浮点槽边界/插值/夹紧、WGS84 原子前缀核对、修改真实下一事件时间后输入/预测不变、测试前缀超远距离不扩大训练桶、collate 所有权、padding/混批/batch=1/float64/无标签、零间隔/重合坐标、完整训练/独立排名评估/导出/逐参数精确续训、CPU AMP。完整回归 **363 passed，0 failed，0 errors，0 skipped**；仓库外发布夹具和 3 条生命周期命令成功，独立评估一致并续训第三轮，见 [CLI 记录](hstlstm-cli-validation.json)。迁移清单为 **46/100**，54 条 pending；排除延期 Common 和模板后，本期仍有 **45 个**实际模型待迁移。
+
+## commit23：迁移 ATSTLSTM 并分离目标、负采样与候选几何
+
+原 forward 将真实 target_loc/target_dis/target_tim 与负样本拼入预测路径，负样本时间也取真实下一事件；注意力没有屏蔽 padding，导致相同前缀受同批长度影响。现标准 nn.Module 只读取已知位置、相邻间隔、用户及候选几何，forward 返回不含 padding 的全词表原始分数。候选距离从最后已观察位置分别计算，查询间隔默认 0，只允许调用者显式提供预先已知的 query_offset_seconds。首点保留 100 秒/1 千米，其他输入使用秒及 WGS84 测地线千米；填充在嵌入前隔离，并在注意力 softmax 前掩码。
+
+保留归一化成对排序目标，不替换成 NLL。具名 atst_ranking 协议声明 normalized_bpr 与 negative_samples；热度只统计训练时间区间原子点，按热度每批无放回重采样并排除正类，请求数按可用训练位置数减一截断。训练步显式选择正/负候选，按样本平均负对损失以适配公共梯度累积，使用稳定 softplus 计算原 logistic 目标；评估不随机采样，对全词表计算确定性 BPR 和公共排名。上述与旧固定且可能包含正类的采样、样本候选评估及 batch 总和标度存在有意差异，协议写入运行摘要，不能把 BPR loss 当 NLL 对比。
+
+数据层复用 HSTLSTM 的已观察前缀计算，模型保持独立的首点约定。候选投影做代数分解，不构造 B×V×H；训练仅计算所选候选分数。每个组批器最多缓存 16 个起点距离行，避免 V×V 表，输出拷贝防止缓存污染。静态 WGS84 距离采用向量化 Vincenty，极点/未收敛点对通过已有 geopy/Karney 回退；全球随机及对跖等边界与 Karney 核对，不引入新依赖。
+
+验证：新增 **11 项通过**，包括旧有效非填充分支的候选分数、原归一化 BPR 和全部梯度；候选子集训练与全量分数的损失/梯度一致且禁止调用全量 forward；修改真实下一位置/时刻后输入与预测不变、原子训练热度核对、正类排除/无放回、确定性评估、注意力 padding/混批/batch=1/float64、有限缓存命中与所有权、协议非法配置、CPU AMP、spawn worker，以及三轮完整训练/独立评估/排名导出/含随机负采样的精确续训。HSTLSTM 复用前缀后的 10 项验收保持通过。完整回归 **374 passed，0 failed，0 errors，0 skipped**；仓库外发布夹具及 3 条生命周期命令均成功，评估一致并续训第三轮，见 [CLI 记录](atstlstm-cli-validation.json)。迁移清单为 **47/100**，53 条 pending，本期仍有 **44 个**实际模型待迁移。
 
 ## 持续完成的清单
 

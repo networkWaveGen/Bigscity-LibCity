@@ -29,6 +29,10 @@ class ModelSpec:
 
 
 MODELS = {
+    'ATSTLSTM': ModelSpec('libcity.model.trajectory_loc_prediction.runtime_atstlstm:ATSTLSTM',task='traj_loc_pred',
+        protocol='atst_ranking',prepare_data='libcity.data.atst_trajectory:prepare_atst',
+        loss='libcity.executor.atst_step:ATSTRankingLoss',step='libcity.executor.atst_step:pairwise_step',
+        evaluate_loader='libcity.executor.task_evaluation:evaluate_task'),
     'HSTLSTM': ModelSpec('libcity.model.trajectory_loc_prediction.runtime_hstlstm:HSTLSTM',task='traj_loc_pred',
         prepare_data='libcity.data.interval_trajectory:prepare_intervals',
         loss='libcity.executor.task_evaluation:RankingLoss',evaluate_loader='libcity.executor.task_evaluation:evaluate_task'),

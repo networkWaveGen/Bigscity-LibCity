@@ -11,17 +11,16 @@ import torch
 from libcity.data.task_bundles import atomic,prepare_trajectory,sessions
 
 
-def prepare_intervals(data,training,evaluation,seed,logger=None):
-    result = prepare_trajectory(data,training,evaluation,seed,logger)
+def observed_prefixes(data,num_nodes,*,first_time,first_distance,model_name):
     folder,raw = atomic(data)
     geo = pd.read_csv(folder/(raw.get('geo_file',data['dataset'])+'.geo'))
     try:
         coordinates = np.asarray([json.loads(value) for value in geo['coordinates']],dtype=np.float64)
     except (ValueError,TypeError,KeyError) as error:
-        raise ValueError('HSTLSTM requires JSON point coordinates in .geo') from error
-    if (coordinates.shape!=(result.metadata.num_nodes,2) or not np.isfinite(coordinates).all()
+        raise ValueError(f'{model_name} requires JSON point coordinates in .geo') from error
+    if (coordinates.shape!=(num_nodes,2) or not np.isfinite(coordinates).all()
             or (np.abs(coordinates[:,0])>180).any() or (np.abs(coordinates[:,1])>90).any()):
-        raise ValueError('HSTLSTM requires finite longitude/latitude point coordinates')
+        raise ValueError(f'{model_name} requires finite longitude/latitude point coordinates')
     positions = {identity:point for identity,point in zip(geo['geo_id'],coordinates)}
     groups,_ = sessions(folder,raw,data)
     prefixes = {}
@@ -31,11 +30,18 @@ def prepare_intervals(data,training,evaluation,seed,logger=None):
         column = 'location' if 'location' in group else 'location_id'
         points = [positions[identity] for identity in group[column]]
         # Preserve the original first-check-in constants and WGS84 kilometre unit.
-        distances = torch.tensor([.5]+[geodesic(a[::-1],b[::-1]).km
+        distances = torch.tensor([first_distance]+[geodesic(a[::-1],b[::-1]).km
             for a,b in zip(points[:-1],points[1:])],dtype=torch.float32)
         intervals = torch.tensor(group['time'].diff().dt.total_seconds().fillna(0).to_numpy(),dtype=torch.float32)
+        intervals[0] = first_time
         for position in range(1,len(group)):
             prefixes[int(group['dyna_id'].iloc[position])] = (intervals[:position],distances[:position])
+    return prefixes,coordinates,groups
+
+
+def prepare_intervals(data,training,evaluation,seed,logger=None):
+    result = prepare_trajectory(data,training,evaluation,seed,logger)
+    prefixes,_,_ = observed_prefixes(data,result.metadata.num_nodes,first_time=0.,first_distance=.5,model_name='HSTLSTM')
     for loader in (result.train,result.val,result.test):
         for row in loader.dataset.rows:
             row.pop('current_tim')

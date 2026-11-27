@@ -112,6 +112,15 @@ seconds and distances are WGS84 geodesic kilometres. Slot bounds use training
 prefixes only; validation/test values are clamped without refitting. The corrected
 ST-LSTM output uses its updated memory cell. Padded steps leave the state intact.
 
+`--model ATSTLSTM` creates a personalized attentive trajectory example. It uses
+training-only popularity for negative sampling, excludes the positive location,
+and preserves the normalized pairwise ranking objective. `negative_samples` is
+under `training.loss`, with `name=normalized_bpr` selected by the named protocol.
+Training scores only selected candidates; evaluation ranks the full vocabulary.
+Distances use the last known position and static POIs. Actual next-event location
+and time are excluded; a known query offset can be supplied explicitly in seconds.
+Validation loss is deterministic full-vocabulary normalized BPR, rather than NLL.
+
 The complete supported-model inventory and migration details are in the
 [runtime guide](../docs/modernization/runtime/README_zh.md). Small examples prove
 execution and reproducibility, not real-city benchmark accuracy.

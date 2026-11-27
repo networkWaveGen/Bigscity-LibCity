@@ -1,0 +1,3 @@
+{
+  "training": {"loss": {"name": "normalized_bpr", "negative_samples": 10}}
+}

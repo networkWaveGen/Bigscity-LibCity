@@ -81,6 +81,8 @@ RNN 是轨迹模型族，model.params.rnn_type 可选 RNN/LSTM/GRU；交通 GRU 
 
 DeepTTE 的输入是已知计划路线几何、距离、用户与出发日历，逐点实际耗时只用于训练目标；不能把实际耗时作为预测输入。数据按完整行程时间区间切分，主损失 MAE/MSE，局部辅助 MAPE 在独立 step 中计算。评估导出 predictions.json，明确 prediction_seconds/truth_seconds。每条路线长度必须达到 kernel_size，当前适配需 .usr 和含 traj_id/coordinates 的 .dyna。
 
+ATSTLSTM 使用具名 atst_ranking 协议：training.loss.name=normalized_bpr，negative_samples 控制训练负样本请求数。训练区间热度驱动无放回采样并排除正类，训练步只计算候选子集；验证/测试对全词表计算确定性 BPR 与排名指标。预测不读取真实下一位置/时刻，默认使用最后已观察位置和查询时刻，模型输入可显式提供已知 query_offset_seconds。BPR loss 与其他轨迹模型的 NLL 不同，比较排名时应使用相同切分与候选集合；细节见 [迁移范围](models_zh.md)。发布示例由 --model ATSTLSTM 生成。
+
 LINE 支持 first/second order。训练使用独立正边集合及负采样，独立评估导出 embeddings.npy 与 node_ids.json；验证指标是持出边损失/准确率，尚不提供下游道路分类基准。STSSL 需要显式设置 output_window=1、input_window>=9，完整续训保留动态损失权重。
 
 三个监督任务均使用相同 train/evaluate/resume 命令。完整基础环境 CLI 验证（五类任务、续训与调参，共 19 条命令）见 [记录](phases34-cli-validation.json)。
