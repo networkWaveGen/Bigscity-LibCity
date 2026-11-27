@@ -13,6 +13,7 @@ from libcity.executor.components import build_optimizer
 from libcity.executor.evaluate import model_inputs
 from libcity.executor.train import train_loop
 from libcity.executor.evaluate import ExperimentResult
+from libcity.executor.evaluate import StepResult,supervised_step
 from libcity.pipeline.experiment import run_experiment
 from libcity.testing.fixtures import atomic_fixture
 from runtime_helpers import make_context, tiny_config
@@ -30,6 +31,41 @@ def data(tmp_path):
 def close(*contexts):
     for context in contexts:
         context.tracker.close()
+
+
+def test_epoch_schedule_waits_for_real_updates_and_resumes_after_empty_epochs(data,recwarn):
+    scheduler=dict(name='step',interval='epoch',step_size=1,gamma=.5)
+    def run(context,until_epoch=None):
+        standard=supervised_step(context.loss_fn)
+        def step(model,batch,state):
+            if state.epoch<2:
+                return StepResult(model(context.loss_fn.inputs(batch)).sum()*0.,0)
+            return standard(model,batch,state)
+        return train_loop(context,step,until_epoch=until_epoch)
+    full=make_context(tiny_config(data,'empty-full',epochs=3,batch_size=8,scheduler=scheduler))
+    partial=make_context(tiny_config(data,'empty-partial',epochs=3,batch_size=8,scheduler=scheduler))
+    try:
+        run(full)
+        run(partial,until_epoch=2)
+        assert partial.state.optimizer_steps==0 and partial.schedule.scheduler.last_epoch==0
+        assert partial.optimizer.param_groups[0]['lr']==.001
+        saved=partial.directory/'checkpoints/last.pt'
+        resumed=make_context(tiny_config(data,'empty-resumed',epochs=3,batch_size=8,scheduler=scheduler))
+        try:
+            resumed.checkpoints.load_last(saved,resumed)
+            run(resumed)
+            assert resumed.schedule.scheduler.last_epoch==full.schedule.scheduler.last_epoch==1
+            assert resumed.optimizer.param_groups[0]['lr']==full.optimizer.param_groups[0]['lr']==.0005
+            expected=torch.load(full.directory/'checkpoints/last.pt',weights_only=True)
+            actual=torch.load(resumed.directory/'checkpoints/last.pt',weights_only=True)
+            assert expected['train_state']==actual['train_state'] and expected['scheduler']==actual['scheduler']
+            for name,value in expected['model'].items():
+                torch.testing.assert_close(value,actual['model'][name],rtol=0,atol=0)
+        finally:
+            close(resumed)
+        assert not any('lr_scheduler.step()' in str(item.message) for item in recwarn)
+    finally:
+        close(full,partial)
 
 
 def test_gru_cli_python_train_evaluate_and_resume(data, monkeypatch):

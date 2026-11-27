@@ -20,6 +20,7 @@ def train(context,*,until_epoch=None):
     older=state.get('older_losses',[1.,1.,1.])
     previous=state.get('previous_losses',[1.,1.,1.])
     for epoch in range(context.state.epoch,end):
+        optimizer_steps_before = context.state.optimizer_steps
         weights=dynamic_weights(previous,older,cfg['strategy'].get('temperature',2.)) if epoch>1 else [1.,1.,1.]
         context.model.train()
         context.optimizer.zero_grad(set_to_none=True)
@@ -52,7 +53,7 @@ def train(context,*,until_epoch=None):
         metrics=evaluate_loop(context.model,context.bundle.val,device=context.device,loss_fn=context.loss_fn,
             evaluation=context.config['evaluation'],prefix='val_').metrics
         context.state.epoch=epoch+1
-        if complete_epoch(context,metrics,weighted_loss/sample_count):
+        if complete_epoch(context,metrics,weighted_loss/sample_count,optimizer_steps_before=optimizer_steps_before):
             break
     if context.checkpoints.best_state is None:
         raise ValueError('No finite STSSL validation result is available')

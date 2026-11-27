@@ -39,6 +39,7 @@ def train(context, *,until_epoch=None):
     if context.stopper.stopped:
         end = context.state.epoch
     for epoch in range(context.state.epoch,end):
+        optimizer_steps_before = context.state.optimizer_steps
         context.model.train()
         total,weight = 0.,0
         for index,batch in enumerate(context.bundle.train):
@@ -71,7 +72,7 @@ def train(context, *,until_epoch=None):
         metrics = evaluate_loop(context.model,context.bundle.val,device=context.device,loss_fn=context.loss_fn,
                                 evaluation=context.config['evaluation'],prefix='val_').metrics
         context.state.epoch = epoch+1
-        if complete_epoch(context,metrics,total/weight if weight else 0.):
+        if complete_epoch(context,metrics,total/weight if weight else 0.,optimizer_steps_before=optimizer_steps_before):
             break
     if context.checkpoints.best_state is None:
         raise ValueError('No completed MTGNN validation state available')

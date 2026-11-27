@@ -126,12 +126,13 @@ def optimizer_update(context, divisor):
     return updated
 
 
-def complete_epoch(context, metrics, training_loss):
+def complete_epoch(context, metrics, training_loss, *, optimizer_steps_before=None):
     training = context.config['training']
     monitor = training['monitor']
     if monitor not in metrics:
         raise ValueError(f'Training monitor {monitor!r} not reported')
-    context.schedule.step('epoch')
+    if optimizer_steps_before is None or context.state.optimizer_steps>optimizer_steps_before:
+        context.schedule.step('epoch')
     context.schedule.step('metric', metrics)
     improved = context.stopper.update(metrics[monitor])
     context.state.best_metric = context.stopper.best
@@ -154,6 +155,7 @@ def train_loop(context, step_fn=None, *, until_epoch=None, epochs=None):
     if context.stopper.stopped:
         end = context.state.epoch
     for epoch in range(context.state.epoch, end):
+        optimizer_steps_before = context.state.optimizer_steps
         context.model.train()
         context.optimizer.zero_grad(set_to_none=True)
         group_weight = 0
@@ -178,7 +180,7 @@ def train_loop(context, step_fn=None, *, until_epoch=None, epochs=None):
         metrics = evaluator(context.model, context.bundle.val, device=context.device,
             loss_fn=context.loss_fn, evaluation=context.config['evaluation'], prefix='val_').metrics
         context.state.epoch = epoch + 1
-        if complete_epoch(context, metrics, total / count if count else 0.):
+        if complete_epoch(context, metrics, total / count if count else 0.,optimizer_steps_before=optimizer_steps_before):
             break
     if context.checkpoints.best_state is None:
         raise ValueError('No completed epoch with a finite validation metric is available')
