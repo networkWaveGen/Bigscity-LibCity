@@ -4,7 +4,7 @@
 
 ------
 
-[![ACM SIGSpatial](https://img.shields.io/badge/ACM%20SIGSPATIAL'21-LibCity-orange)](https://dl.acm.org/doi/10.1145/3474717.3483923) [![Python](https://img.shields.io/badge/Python-3.7%2B-blue)](https://www.python.org/) [![Pytorch](https://img.shields.io/badge/Pytorch-1.7.1%2B-blue)](https://pytorch.org/) [![License](https://img.shields.io/badge/License-Apache%202.0-blue)](./LICENSE.txt) [![star](https://img.shields.io/github/stars/LibCity/Bigscity-LibCity?style=social)](https://github.com/LibCity/Bigscity-LibCity/stargazers) [![fork](https://img.shields.io/github/forks/LibCity/Bigscity-LibCity?style=social)](https://github.com/LibCity/Bigscity-LibCity/network/members) 
+[![ACM SIGSpatial](https://img.shields.io/badge/ACM%20SIGSPATIAL'21-LibCity-orange)](https://dl.acm.org/doi/10.1145/3474717.3483923) [![Python](https://img.shields.io/badge/Python-3.11%2B-blue)](https://www.python.org/) [![Pytorch](https://img.shields.io/badge/Pytorch-2.6%2B-blue)](https://pytorch.org/) [![License](https://img.shields.io/badge/License-Apache%202.0-blue)](./LICENSE.txt) [![star](https://img.shields.io/github/stars/LibCity/Bigscity-LibCity?style=social)](https://github.com/LibCity/Bigscity-LibCity/stargazers) [![fork](https://img.shields.io/github/forks/LibCity/Bigscity-LibCity?style=social)](https://github.com/LibCity/Bigscity-LibCity/network/members) 
 
 # LibCity（阡陌）
 
@@ -29,7 +29,7 @@ LibCity currently supports the following tasks:
 
 * **Unified**: LibCity builds a systematic pipeline to implement, use and evaluate traffic prediction models in a unified platform. We design basic spatial-temporal data storage, unified model instantiation interfaces, and standardized evaluation procedure.
 
-* **Comprehensive**: 74 models covering 9 traffic prediction tasks have been reproduced to form a comprehensive model warehouse. Meanwhile, LibCity collects 52 commonly used datasets of different sources and implements a series of commonly used evaluation metrics and strategies for performance evaluation. 
+* **Comprehensive**: The original library provides a broad reference model warehouse; the current runtime supports the explicitly listed migrated models. Meanwhile, LibCity collects 52 commonly used datasets of different sources and implements a series of commonly used evaluation metrics and strategies for performance evaluation. 
 
 * **Extensible**: LibCity enables a modular design of different components, allowing users to flexibly insert customized components into the library. Therefore, new researchers can easily develop new models with the support of LibCity.
 
@@ -73,50 +73,45 @@ LibCity currently supports the following tasks:
 
 ## Installation
 
-LibCity can only be installed from source code.
-
-Please execute the following command to get the source code.
-
-```shell
-git clone https://github.com/LibCity/Bigscity-LibCity
-cd Bigscity-LibCity
-```
-
-More details about environment configuration is represented in [Docs](https://bigscity-libcity-docs.readthedocs.io/en/latest/get_started/install.html).
+This branch runs from source with Python 3.11+, PyTorch 2.6+ and NumPy 2.
+See [pyproject.toml](pyproject.toml) for version ranges. Check out this repository's
+refactor/libcity-modernization branch. The following example creates atomic data
+and writes runs outside the checkout; no downloaded dataset is needed.
 
 ## Quick-Start
 
-Before run models in LibCity, please make sure you download at least one dataset and put it in directory `./raw_data/`. The dataset link is [BaiduDisk with code 1231](https://pan.baidu.com/s/1qEfcXBO-QwZfiT0G3IYMpQ) or [Google Drive](https://drive.google.com/drive/folders/1g5v2Gq1tkOq8XO0HDCZ9nOTtRpB6-gPe?usp=sharing). All dataset used in LibCity needs to be processed into the [atomic files](https://bigscity-libcity-docs.readthedocs.io/en/latest/user_guide/data/atomic_files.html) format.
-
-The script `run_model.py` is used for training and evaluating a single model in LibCity. When run the `run_model.py`, you must specify the following three parameters, namely **task**, **dataset** and **model**.  
-
-For example:
-
-```sh
-python run_model.py --task traffic_state_pred --model GRU --dataset METR_LA
+```powershell
+python -m pip install -e .
+python tools/make_runtime_fixture.py --directory ../libcity-demo
+python run_model.py train --config ../libcity-demo/gru.json --set runtime.exp_id=train
+python run_model.py evaluate --config ../libcity-demo/gru.json --checkpoint ../libcity-demo/runs/train/checkpoints/best.pt --set runtime.exp_id=evaluate
+python run_model.py train --config ../libcity-demo/gru.json --resume ../libcity-demo/runs/train/checkpoints/last.pt --set training.epochs=3 --set runtime.exp_id=resumed
+python run_hyper.py --config ../libcity-demo/gru.json --space hyper_example.json --max-trials 4
 ```
 
-This script will run the GRU model on the METR_LA dataset for traffic state prediction task under the default configuration.  **We have released the correspondence between datasets, models, and tasks at [here](https://bigscity-libcity-docs.readthedocs.io/en/latest/user_guide/data/dataset_for_task.html).** More details is represented in [Docs](https://bigscity-libcity-docs.readthedocs.io/en/latest/get_started/quick_start.html).
+The CLI uses train/evaluate subcommands and layered JSON. Paths in JSON are relative
+to that file. Python callers use `libcity.pipeline.experiment.run_experiment`.
+Search trials use validation data; only the selected weights receive a test evaluation.
+
+There are 13 supported runtime entries across five tasks, covering 15 of the original
+100 task/model records. The other 85 records remain pending. Retained model source is
+reference material, not an additional supported execution API. See the
+[migration inventory](docs/modernization/runtime/model-migration.csv),
+[five runnable examples](examples/README.md) and [current guide](docs/modernization/runtime/README_zh.md).
+
+Atomic files remain the input format. Target windows are disjoint between splits;
+normalization fits the training interval only. Each run owns its config, logs,
+metrics, best.pt inference weights, last.pt complete training state and predictions.
+Historical checkpoint formats are not automatically loaded.
 
 ## TensorBoard Visualization
 
-During the model training process, LibCity will record the loss of each epoch, and support tensorboard visualization.
-
-After running the model once, you can use the following command to visualize:
-
-```shell
-tensorboard --logdir 'libcity/cache'
-```
-
-```
-TensorFlow installation not found - running with reduced feature set.
-Serving TensorBoard on localhost; to expose to the network, use a proxy or pass --bind_all
-TensorBoard 2.4.1 at http://localhost:6006/ (Press CTRL+C to quit)
-```
-
-Visit this address([http://localhost:6006/](http://localhost:6006/)) in the browser to see the visualized result.
-
-![](https://bigscity-libcity-docs.readthedocs.io/en/latest/_images/tensorboard.png)
+TensorBoard is optional: install `python -m pip install -e '.[tensorboard]'` and add
+`--set runtime.tensorboard=true` to training. Then run
+`tensorboard --logdir ../libcity-demo/runs/train/tensorboard`. Evaluation creates no
+training writer. For development install `python -m pip install -e '.[dev,transformer]'`
+and run `python -m pytest -q`. See the [validation records](docs/modernization/README.md)
+for actual CPU and available accelerator coverage.
 
 ## Reproduced Model List
 

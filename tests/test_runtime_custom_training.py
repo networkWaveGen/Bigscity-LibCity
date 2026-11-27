@@ -9,7 +9,7 @@ import torch
 from libcity.executor.astgnn_train import train as train_astgnn,prepare_resume
 from libcity.executor.mtgnn_train import train as train_mtgnn,subgraphs
 from libcity.pipeline.experiment import run_experiment
-from runtime_fixtures import atomic_fixture
+from libcity.testing.fixtures import atomic_fixture
 from runtime_helpers import make_context,tiny_config
 
 pytestmark = pytest.mark.filterwarnings('ignore:Explicit benchmark protocol changes')

@@ -7,7 +7,7 @@ from libcity.config.runtime import load_config
 from libcity.executor.train import train_loop
 from libcity.model.runtime_registry import model_spec,resolve
 from libcity.pipeline.experiment import run_experiment
-from runtime_fixtures import task_fixture,atomic_fixture
+from libcity.testing.fixtures import task_fixture,atomic_fixture
 from runtime_helpers import make_context,tiny_config
 
 

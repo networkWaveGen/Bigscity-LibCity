@@ -10,7 +10,7 @@ from libcity.data.bundle import prepare_traffic
 from libcity.executor.evaluate import ForecastLoss, model_inputs
 from libcity.model.traffic_speed_prediction.runtime_rnn import GRU
 from libcity.data.dataset.dataset_subclass.crann_dataset import CRANNDataset
-from runtime_fixtures import atomic_fixture
+from libcity.testing.fixtures import atomic_fixture
 
 
 def setup(tmp_path, **changes):

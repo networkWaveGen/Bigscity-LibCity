@@ -2,7 +2,7 @@ import numpy as np
 import torch
 from libcity.executor.stssl_train import train,dynamic_weights
 from libcity.pipeline.experiment import run_experiment
-from runtime_fixtures import atomic_fixture
+from libcity.testing.fixtures import atomic_fixture
 from runtime_helpers import make_context,tiny_config
 
 

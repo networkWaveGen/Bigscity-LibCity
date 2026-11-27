@@ -9,7 +9,7 @@ from libcity.executor.evaluate import model_inputs
 from libcity.executor.train import TrainState, train_loop
 from libcity.model.runtime_registry import model_spec, resolve
 from libcity.utils.normalization import NoneScaler
-from runtime_fixtures import atomic_fixture
+from libcity.testing.fixtures import atomic_fixture
 from runtime_helpers import make_context, tiny_config
 
 pytestmark = pytest.mark.filterwarnings('ignore:Explicit benchmark protocol changes')

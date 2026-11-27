@@ -1,6 +1,10 @@
 {
-    "learning_rate": {
-        "type": "choice",
-        "list": [0.01, 0.005, 0.001]
-    }
+  "training.optimizer.lr": [
+    0.001,
+    0.002
+  ],
+  "model.params.hidden_size": [
+    8,
+    16
+  ]
 }

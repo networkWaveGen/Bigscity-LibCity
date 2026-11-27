@@ -1,42 +1,33 @@
-"""Create a reproducible small source-runtime example outside the source tree."""
+"""Copy a published config and create its atomic sample data outside the source tree."""
 import argparse
 import json
 from pathlib import Path
 import sys
+ROOT=Path(__file__).resolve().parents[1]
+sys.path.insert(0,str(ROOT))
+from libcity.testing.fixtures import atomic_fixture,map_fixture,task_fixture
 
-ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / 'tests'))
-from runtime_fixtures import atomic_fixture,map_fixture,task_fixture
+
+EXAMPLES={'traffic_state_pred':'gru','traj_loc_pred':'rnn','eta':'deeptte',
+          'road_representation':'line','map_matching':'hmmm'}
 
 
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--directory', required=True, type=Path)
-    parser.add_argument('--task',choices=('traffic_state_pred','map_matching','traj_loc_pred','eta','road_representation'),default='traffic_state_pred')
-    options = parser.parse_args()
-    directory = options.directory.expanduser().resolve()
-    directory.mkdir(parents=True, exist_ok=True)
-    if options.task=='map_matching':
-        map_fixture(directory/'data')
-        config=dict(data=dict(dataset='RoadTiny',data_dir='data',cache_dir='cache'),model={'name':'HMMM'},
-                    runtime=dict(device='cpu',seed=17,output_dir='runs'))
-        filename='hmmm.json'
-    elif options.task in ('traj_loc_pred','eta','road_representation'):
-        task_fixture(directory/'data')
-        model={'traj_loc_pred':'RNN','eta':'DeepTTE','road_representation':'LINE'}[options.task]
-        config=dict(data=dict(dataset='TaskTiny',data_dir='data',cache_dir='cache'),model={'name':model},
-                    training=dict(epochs=2,batch_size=3),runtime=dict(device='cpu',seed=17,output_dir='runs'))
-        filename=model.lower()+'.json'
-    else:
-        atomic_fixture(directory / 'data')
-        config = dict(data=dict(dataset='Tiny', data_dir='data', cache_dir='cache', input_window=4, output_window=2),
-            model=dict(name='GRU', params={'hidden_size':4}), training=dict(epochs=2, batch_size=8),
-            runtime=dict(device='cpu', seed=17, output_dir='runs'))
-        filename='gru.json'
-    path = directory / filename
-    path.write_text(json.dumps(config, indent=2)+'\n', encoding='utf-8')
+def main(argv=None):
+    parser=argparse.ArgumentParser()
+    parser.add_argument('--directory',required=True,type=Path)
+    parser.add_argument('--task',choices=EXAMPLES,default='traffic_state_pred')
+    args=parser.parse_args(argv)
+    directory=args.directory.expanduser().resolve()
+    directory.mkdir(parents=True,exist_ok=True)
+    fixture=atomic_fixture if args.task=='traffic_state_pred' else map_fixture if args.task=='map_matching' else task_fixture
+    fixture(directory/'data')
+    name=EXAMPLES[args.task]
+    config=json.loads((ROOT/'examples/configs'/f'{name}.json').read_text(encoding='utf-8'))
+    path=directory/f'{name}.json'
+    path.write_text(json.dumps(config,indent=2)+'\n',encoding='utf-8')
     print(path)
+    return path
 
 
-if __name__ == '__main__':
+if __name__=='__main__':
     main()

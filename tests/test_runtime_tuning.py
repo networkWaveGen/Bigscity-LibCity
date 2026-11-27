@@ -5,7 +5,7 @@ import sys
 import pytest
 
 from libcity.pipeline.runtime_tuning import run_search,candidates
-from runtime_fixtures import atomic_fixture,task_fixture
+from libcity.testing.fixtures import atomic_fixture,task_fixture
 from runtime_helpers import tiny_config
 from test_runtime_tasks import configuration
 

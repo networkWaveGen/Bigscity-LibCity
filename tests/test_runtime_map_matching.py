@@ -8,7 +8,7 @@ import pytest
 from libcity.config.runtime import load_config
 from libcity.data.map_matching_bundle import prepare_map_matching
 from libcity.pipeline.experiment import run_experiment
-from runtime_fixtures import map_fixture
+from libcity.testing.fixtures import map_fixture
 
 ROOT=Path(__file__).resolve().parents[1]
 

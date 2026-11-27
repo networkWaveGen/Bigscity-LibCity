@@ -8,7 +8,7 @@ import torch
 from libcity.config.runtime import load_config, merge_config
 from libcity.data.bundle import prepare_traffic
 from libcity.model.traffic_speed_prediction.runtime_rnn import GRU
-from runtime_fixtures import atomic_fixture
+from libcity.testing.fixtures import atomic_fixture
 
 
 def minimal(root):

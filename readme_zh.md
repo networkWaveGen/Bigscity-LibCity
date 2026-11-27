@@ -4,7 +4,7 @@
 
 ------
 
-[![ACM SIGSpatial](https://img.shields.io/badge/ACM%20SIGSPATIAL'21-LibCity-orange)](https://dl.acm.org/doi/10.1145/3474717.3483923) [![Python](https://img.shields.io/badge/Python-3.7%2B-blue)](https://www.python.org/) [![Pytorch](https://img.shields.io/badge/Pytorch-1.7.1%2B-blue)](https://pytorch.org/) [![License](https://img.shields.io/badge/License-Apache%202.0-blue)](./LICENSE.txt) [![star](https://img.shields.io/github/stars/LibCity/Bigscity-LibCity?style=social)](https://github.com/LibCity/Bigscity-LibCity/stargazers) [![fork](https://img.shields.io/github/forks/LibCity/Bigscity-LibCity?style=social)](https://github.com/LibCity/Bigscity-LibCity/network/members) 
+[![ACM SIGSpatial](https://img.shields.io/badge/ACM%20SIGSPATIAL'21-LibCity-orange)](https://dl.acm.org/doi/10.1145/3474717.3483923) [![Python](https://img.shields.io/badge/Python-3.11%2B-blue)](https://www.python.org/) [![Pytorch](https://img.shields.io/badge/Pytorch-2.6%2B-blue)](https://pytorch.org/) [![License](https://img.shields.io/badge/License-Apache%202.0-blue)](./LICENSE.txt) [![star](https://img.shields.io/github/stars/LibCity/Bigscity-LibCity?style=social)](https://github.com/LibCity/Bigscity-LibCity/stargazers) [![fork](https://img.shields.io/github/forks/LibCity/Bigscity-LibCity?style=social)](https://github.com/LibCity/Bigscity-LibCity/network/members) 
 
 # LibCity（阡陌）
 
@@ -73,48 +73,30 @@ LibCity 目前支持以下任务：
 
 ## Installation
 
-LibCity 只能从源代码安装。
-
-请执行以下命令获取源代码。
-
-```shell
-git clone https://github.com/LibCity/Bigscity-LibCity
-cd Bigscity-LibCity
-```
-
-有关环境配置的更多详细信息，请参见 [文档](https://bigscity-libcity-docs.readthedocs.io/zh_CN/latest/get_started/install.html).
+本分支从源码安装，要求 Python 3.11+、PyTorch 2.6+、NumPy 2；实际版本范围见 [pyproject.toml](pyproject.toml)。先获取本仓库的 refactor/libcity-modernization 分支，再执行以下命令。示例不依赖预先下载的数据，输出写到仓库外。
 
 ## Quick-Start
 
-在 LibCity 中运行模型之前，请确保您至少下载了一个数据集并将其放在目录 `./raw_data/` 中。 数据集链接是 [BaiduDisk with code 1231](https://pan.baidu.com/s/1qEfcXBO-QwZfiT0G3IYMpQ) 或 [Google Drive](https://drive.google.com/drive/folders/1g5v2Gq1tkOq8XO0HDCZ9nOTtRpB6-gPe?usp=sharing) 。LibCity 中所用的数据集需要被处理成[原子文件](https://bigscity-libcity-docs.readthedocs.io/zh_CN/latest/user_guide/data/atomic_files.html)的格式。
-
-脚本 `run_model.py` 用于在 LibCity 中训练和评估单个模型。 运行`run_model.py`时，必须指定以下三个参数，即**task、dataset和model**。例如：
-
-```sh
-python run_model.py --task traffic_state_pred --model GRU --dataset METR_LA
+```powershell
+python -m pip install -e .
+python tools/make_runtime_fixture.py --directory ../libcity-demo
+python run_model.py train --config ../libcity-demo/gru.json --set runtime.exp_id=train
+python run_model.py evaluate --config ../libcity-demo/gru.json --checkpoint ../libcity-demo/runs/train/checkpoints/best.pt --set runtime.exp_id=evaluate
+python run_model.py train --config ../libcity-demo/gru.json --resume ../libcity-demo/runs/train/checkpoints/last.pt --set training.epochs=3 --set runtime.exp_id=resumed
+python run_hyper.py --config ../libcity-demo/gru.json --space hyper_example.json --max-trials 4
 ```
 
-该脚本将在默认配置下，在 METR_LA 数据集上运行 GRU 模型，以进行交通状态预测任务。**目前我们已经在 [文档](https://bigscity-libcity-docs.readthedocs.io/zh_CN/latest/user_guide/data/dataset_for_task.html) 发布了数据集、模型和任务之间的对应关系表格供用户参考。**更多细节请访问 [文档](https://bigscity-libcity-docs.readthedocs.io/zh_CN/latest/get_started/quick_start.html) 。
+入口使用 train/evaluate 子命令和五区块 JSON，不再接受旧扁平参数。JSON 相对路径以配置文件所在目录为准。Python 调用 `libcity.pipeline.experiment.run_experiment`；超参搜索只比较验证集，选定模型后测试一次。
+
+当前支持 13 个运行时入口，覆盖五类任务；原始 100 个任务—模型条目中的 15 条已接入，85 条仍待迁移。模型源码保留用于后续迁移，不代表新入口已支持。详见 [完整迁移表](docs/modernization/runtime/model-migration.csv)、[五类可运行示例](examples/README.md) 与 [当前使用指南](docs/modernization/runtime/README_zh.md)。
+
+数据按目标时间窗口互斥切分，归一化只拟合训练区间；原子文件格式保留。一次实验的配置、日志、指标、best.pt、last.pt、预测均写入独立运行目录。best.pt 为纯权重，last.pt 为完整安全续训状态，旧检查点格式不自动兼容。
 
 ## TensorBoard Visualization
 
-在模型训练过程中，LibCity 会记录每个 epoch 的损失，并支持 tensorboard 可视化。
+默认不依赖 TensorBoard。安装 `python -m pip install -e '.[tensorboard]'`，训练时追加 `--set runtime.tensorboard=true`，之后运行 `tensorboard --logdir ../libcity-demo/runs/train/tensorboard`。独立评估不创建训练 writer。
 
-模型运行一次后，可以使用以下命令进行可视化：
-
-```shell
-tensorboard --logdir 'libcity/cache'
-```
-
-```
-TensorFlow installation not found - running with reduced feature set.
-Serving TensorBoard on localhost; to expose to the network, use a proxy or pass --bind_all
-TensorBoard 2.4.1 at http://localhost:6006/ (Press CTRL+C to quit)
-```
-
-在浏览器中访问这个地址（[http://localhost:6006/](http://localhost:6006/)） 可以看到可视化的结果。
-
-![](https://bigscity-libcity-docs.readthedocs.io/en/latest/_images/tensorboard.png)
+开发验收安装 `python -m pip install -e '.[dev,transformer]'`，运行 `python -m pytest -q`。CUDA/MPS 仅在可用环境验证；当前实际验收记录见 [现代化文档](docs/modernization/README.md)。
 
 ## Reproduced Model List
 

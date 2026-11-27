@@ -14,7 +14,7 @@ from libcity.executor.evaluate import model_inputs
 from libcity.executor.train import train_loop
 from libcity.executor.evaluate import ExperimentResult
 from libcity.pipeline.experiment import run_experiment
-from runtime_fixtures import atomic_fixture
+from libcity.testing.fixtures import atomic_fixture
 from runtime_helpers import make_context, tiny_config
 
 ROOT = Path(__file__).resolve().parents[1]
