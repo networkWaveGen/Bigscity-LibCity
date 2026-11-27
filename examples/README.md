@@ -176,6 +176,24 @@ binary loss, not NLL or the old sampled novelty benchmark. Source encoding is
 reused across candidate chunks; optional decoder attention and corrected user/time
 fusion are explicit model settings. Common train/evaluate/resume commands apply.
 
+`--model TTPNet` creates an ETA example with synthetic static road embeddings and
+departure-known traffic. Actual data need JSON `embeddings` in `.geo`, plus
+`grid_len`, three four-value profiles (`speeds`, `speeds_relevant1`,
+`speeds_relevant2`) and the seven-value `speeds_long` in `.dyna`. Every route point
+must have `traffic_snapshot_time` at/before departure. Dataset metadata may select
+another column with `traffic_snapshot_time_column`; this timestamp represents the
+latest availability of all supplied profiles, not the actual arrival time.
+`speed_unit` supports `km/h` (default) and `m/s`; `grid_len_unit` and `distance_unit`
+support `km` (default) and `m`. Source speed imputation and graph embedding training
+remain upstream preprocessing. Static embedding values stay trainable and use real
+road IDs. All normalizers fit training routes only. The `ttpnet_eta` protocol uses
+per-route cumulative relative RMSE for training and whole-trip MAPE for validation;
+`training.loss.eps` defaults to one second. Metrics/predictions are exported in
+seconds. The default minimum of three points matches the shared ETA benchmark;
+explicit `data.min_route_length=2` also supports two-point routes. Padding never
+enters the bidirectional state or cumulative objective. Train/evaluate/resume use
+the common runtime, including dropout RNG restoration.
+
 The complete supported-model inventory and migration details are in the
 [runtime guide](../docs/modernization/runtime/README_zh.md). Small examples prove
 execution and reproducibility, not real-city benchmark accuracy.

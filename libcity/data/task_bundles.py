@@ -173,34 +173,8 @@ def safe_statistics(values):
 
 
 def prepare_eta(data,training,evaluation,seed,logger=None):
-    from libcity.data.dataset.eta_encoder.deeptte_encoder import geo_distance
-    folder,raw=atomic(data)
-    groups,cuts=sessions(folder,raw,data)
-    users=pd.read_csv(folder/(raw.get('usr_file',data['dataset'])+'.usr'))['usr_id'].tolist()
-    vocabulary={user:index for index,user in enumerate(users)}
-    trips=[[],[],[]]
-    for group in groups:
-        if len(group)<3:
-            continue
-        time=group['time']
-        part=split_index(time.iloc[0],time.iloc[-1],cuts)
-        if part is None:
-            continue
-        coords=np.array([json.loads(item) for item in group['coordinates']])
-        if coords.shape!=(len(group),2) or not np.isfinite(coords).all():
-            raise ValueError('ETA coordinates must be finite longitude/latitude pairs')
-        distances=group['current_dis'].to_numpy() if 'current_dis' in group else np.r_[0.,np.cumsum([
-            geo_distance(*a,*b) for a,b in zip(coords[:-1],coords[1:])])]
-        durations=(time-time.iloc[0]).dt.total_seconds().to_numpy()
-        if np.any(np.diff(durations)<=0) or np.any(np.diff(distances)<0):
-            raise ValueError('ETA trip time and cumulative distance must increase')
-        trips[part].append(dict(coords=coords,distances=distances-distances[0],durations=durations,
-            state=group['current_state'].to_numpy() if 'current_state' in group else np.zeros(len(group),dtype=int),
-            uid=vocabulary[group['entity_id'].iloc[0]],weekid=time.iloc[0].day_of_week,
-            timeid=time.iloc[0].hour*60+time.iloc[0].minute,traj_id=int(group['traj_id'].iloc[0]),
-            sample_id=int(group['dyna_id'].iloc[0])))
-    if any(not part for part in trips):
-        raise ValueError('ETA needs nonempty disjoint complete-trip intervals')
+    from libcity.data.eta_routes import route_records
+    _,_,users,trips,cuts=route_records(data)
     train=trips[0]
     coordinates=np.concatenate([trip['coords'] for trip in train])
     stats=dict(longi=safe_statistics(coordinates[:,0]),lati=safe_statistics(coordinates[:,1]),
@@ -212,10 +186,12 @@ def prepare_eta(data,training,evaluation,seed,logger=None):
     rows=[[],[],[]]
     for index,part in enumerate(trips):
         for trip in part:
+            group=trip['group']
             coords=trip['coords'].copy()
             coords[:,0]=(coords[:,0]-stats['longi'][0])/stats['longi'][1]
             coords[:,1]=(coords[:,1]-stats['lati'][0])/stats['lati'][1]
-            row=dict(coords=torch.tensor(coords,dtype=torch.float32),state=torch.tensor(trip['state'],dtype=torch.long),
+            row=dict(coords=torch.tensor(coords,dtype=torch.float32),state=torch.tensor(
+                group['current_state'].to_numpy() if 'current_state' in group else np.zeros(len(group),dtype=int),dtype=torch.long),
                 distance_gaps=torch.tensor((np.diff(trip['distances'])-stats['dist_gap'][0])/stats['dist_gap'][1],dtype=torch.float32),
                 local_y_raw=torch.tensor(trip['durations'],dtype=torch.float32),
                 dist=torch.tensor([(trip['distances'][-1]-stats['dist'][0])/stats['dist'][1]],dtype=torch.float32),

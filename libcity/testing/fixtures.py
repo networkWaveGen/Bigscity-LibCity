@@ -116,6 +116,22 @@ def strnn_fixture(root,name='TaskTiny'):
     return folder
 
 
+def ttpnet_fixture(root,name='TaskTiny'):
+    folder = task_fixture(root,name)
+    geo = pd.read_csv(folder/f'{name}.geo')
+    geo['embeddings'] = [json.dumps((np.sin(np.arange(32)+index)*.1).tolist()) for index in range(len(geo))]
+    geo.to_csv(folder/f'{name}.geo',index=False)
+    frame = pd.read_csv(folder/f'{name}.dyna')
+    for name_column,offset,width in (('speeds',0,4),('speeds_relevant1',3,4),('speeds_relevant2',7,4),('speeds_long',1,7)):
+        frame[name_column] = [json.dumps([float(20+offset+(index+slot)%15) if (index+slot)%19 else 0.
+            for slot in range(width)]) for index in range(len(frame))]
+    frame['grid_len'] = .1+np.arange(len(frame))%5*.01
+    frame['traffic_snapshot_time'] = (pd.to_datetime(frame.groupby(['entity_id','traj_id'])['time'].transform('min'),utc=True)
+        -pd.Timedelta(minutes=15)).dt.strftime('%Y-%m-%dT%H:%M:%SZ')
+    frame.to_csv(folder/f'{name}.dyna',index=False)
+    return folder
+
+
 def serm_fixture(root,name='TaskTiny'):
     folder = task_fixture(root,name)
     geo = pd.read_csv(folder/f'{name}.geo')

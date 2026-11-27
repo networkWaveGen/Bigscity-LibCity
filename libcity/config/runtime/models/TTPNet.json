@@ -1,0 +1,6 @@
+{
+  "model": {"params": {"uid_emb_size": 8, "weekid_emb_size": 3, "timid_emb_size": 8, "dropout": 0.25}},
+  "training": {"epochs": 50, "batch_size": 10,
+    "optimizer": {"name": "adam", "lr": 0.001, "weight_decay": 0.00001},
+    "scheduler": {"name": "step", "interval": "epoch", "step_size": 10, "gamma": 0.5}}
+}

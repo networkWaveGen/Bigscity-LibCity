@@ -1,4 +1,5 @@
 import os
+import json
 import numpy as np
 import pandas as pd
 from datetime import datetime
@@ -48,7 +49,7 @@ class TtpnetEncoder(AbstractETAEncoder):
             'traj_id': 'int',
             'start_timestamp': 'int',
         }
-        self.traj_len_idx = len(self.feature_dict) - 1
+        self.traj_len_idx = list(self.feature_dict).index('traj_len')
         parameters_str = ''
         need_cut = self.config.get("need_cut", False)
         self.parameter_list = parameter_list_cut if need_cut else parameter_list
@@ -67,7 +68,7 @@ class TtpnetEncoder(AbstractETAEncoder):
         f_geo = pd.read_csv(path)
         self._logger.info("Loaded file " + self.geo_file + '.geo')
         for row in f_geo.itertuples():
-            embedding = eval(getattr(row, 'embeddings'))
+            embedding = json.loads(getattr(row, 'embeddings'))
             self.geo_embedding.append(embedding[:])
 
         self.uid_size = 0
@@ -92,12 +93,12 @@ class TtpnetEncoder(AbstractETAEncoder):
             end_time = datetime.strptime(traj[-1][dyna_feature_column["time"]], '%Y-%m-%dT%H:%M:%SZ')
             weekid = int(begin_time.weekday())
             timeid = int(begin_time.strftime('%H')) * 4 + int(begin_time.strftime('%M')) // 15
-            time = (end_time - begin_time).seconds
+            time = (end_time - begin_time).total_seconds()
 
             holiday = 0
             if "holiday" in dyna_feature_column:
                 holiday = traj[0][dyna_feature_column["holiday"]]
-            elif weekid == 0 or weekid == 6:
+            elif weekid >= 5:
                 holiday = 1
 
             traj_len = len(traj)
@@ -105,7 +106,7 @@ class TtpnetEncoder(AbstractETAEncoder):
             start_timestamp = datetime.timestamp(begin_time)
             last_dis = 0
             for point in traj:
-                coordinate = eval(point[dyna_feature_column["coordinates"]])
+                coordinate = json.loads(point[dyna_feature_column["coordinates"]])
                 longi, lati = float(coordinate[0]), float(coordinate[1])
                 current_longi.append(longi)
                 current_lati.append(lati)
@@ -113,16 +114,16 @@ class TtpnetEncoder(AbstractETAEncoder):
                 loc = point[dyna_feature_column["location"]]
                 current_loc.append(loc)
 
-                speed = eval(point[dyna_feature_column["speeds"]])
+                speed = json.loads(point[dyna_feature_column["speeds"]])
                 speeds.extend(speed)
 
-                speed_relevant1 = eval(point[dyna_feature_column["speeds_relevant1"]])
+                speed_relevant1 = json.loads(point[dyna_feature_column["speeds_relevant1"]])
                 speeds_relevant1.extend(speed_relevant1)
 
-                speed_relevant2 = eval(point[dyna_feature_column["speeds_relevant2"]])
+                speed_relevant2 = json.loads(point[dyna_feature_column["speeds_relevant2"]])
                 speeds_relevant2.extend(speed_relevant2)
 
-                speed_long = eval(point[dyna_feature_column["speeds_long"]])
+                speed_long = json.loads(point[dyna_feature_column["speeds_long"]])
                 speeds_long.extend(speed_long)
 
                 grid_length = point[dyna_feature_column["grid_len"]]
@@ -138,7 +139,7 @@ class TtpnetEncoder(AbstractETAEncoder):
                 current_dis.append(dis)
 
                 tim = datetime.strptime(point[dyna_feature_column["time"]], '%Y-%m-%dT%H:%M:%SZ')
-                current_tim.append(float((tim - begin_time).seconds))
+                current_tim.append(float((tim - begin_time).total_seconds()))
                 masked_current_tim.append(1)
 
             if "current_dis" in dyna_feature_column:

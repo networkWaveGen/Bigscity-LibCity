@@ -29,6 +29,9 @@ class ModelSpec:
 
 
 MODELS = {
+    'TTPNet': ModelSpec('libcity.model.eta.runtime_ttpnet:TTPNet',task='eta',protocol='ttpnet_eta',
+        prepare_data='libcity.data.ttpnet_eta:prepare_ttpnet',loss='libcity.executor.ttpnet_step:TTPNetLoss',
+        step='libcity.executor.ttpnet_step:cumulative_step',evaluate_loader='libcity.executor.task_evaluation:evaluate_task'),
     'GeoSAN': ModelSpec('libcity.model.trajectory_loc_prediction.runtime_geosan:GeoSAN',task='traj_loc_pred',
         protocol='geosan_ranking',prepare_data='libcity.data.geosan_trajectory:prepare_geosan',
         loss='libcity.executor.geosan_step:GeoSANLoss',step='libcity.executor.geosan_step:sampled_step',

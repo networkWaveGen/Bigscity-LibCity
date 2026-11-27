@@ -29,8 +29,10 @@ class EdgeLoss(TaskLoss):
 
 class ETALoss(TaskLoss):
     def raw(self,prediction,target,raw_target=None):
-        return self.bundle.scaler.inverse_transform(prediction.float()), (
-            raw_target if raw_target is not None else self.bundle.scaler.inverse_transform(target.float()))
+        prediction = prediction.float() if prediction.dtype in (torch.float16,torch.bfloat16) else prediction
+        target = target.float() if target.dtype in (torch.float16,torch.bfloat16) else target
+        return self.bundle.scaler.inverse_transform(prediction), (
+            raw_target if raw_target is not None else self.bundle.scaler.inverse_transform(target))
 
     def __call__(self,prediction,target,raw_target=None):
         prediction,target=self.raw(prediction,target,raw_target)

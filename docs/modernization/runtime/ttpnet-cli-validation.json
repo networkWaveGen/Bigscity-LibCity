@@ -1,0 +1,130 @@
+{
+  "passed": true,
+  "model": "TTPNet",
+  "source": "D:\\LibCity 2.0\\LibCity-modernization",
+  "directory": "D:\\LibCity 2.0\\.runtime-tests\\ttpnet-cli-aysef0rp",
+  "commands": [
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\tools\\make_runtime_fixture.py",
+        "--directory",
+        "D:\\LibCity 2.0\\.runtime-tests\\ttpnet-cli-aysef0rp\\case",
+        "--model",
+        "TTPNet"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\ttpnet-cli-aysef0rp",
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "train",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\ttpnet-cli-aysef0rp\\case\\ttpnet.json",
+        "--set",
+        "runtime.exp_id=train"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\ttpnet-cli-aysef0rp",
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "evaluate",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\ttpnet-cli-aysef0rp\\case\\ttpnet.json",
+        "--checkpoint",
+        "D:\\LibCity 2.0\\.runtime-tests\\ttpnet-cli-aysef0rp\\case\\runs\\train\\checkpoints\\best.pt",
+        "--set",
+        "runtime.exp_id=evaluate"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\ttpnet-cli-aysef0rp",
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "train",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\ttpnet-cli-aysef0rp\\case\\ttpnet.json",
+        "--resume",
+        "D:\\LibCity 2.0\\.runtime-tests\\ttpnet-cli-aysef0rp\\case\\runs\\train\\checkpoints\\last.pt",
+        "--set",
+        "runtime.exp_id=resumed",
+        "--set",
+        "training.epochs=3"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\ttpnet-cli-aysef0rp",
+      "exit_code": 0
+    }
+  ],
+  "training": {
+    "metrics": {
+      "MAE": 205.3613395690918,
+      "RMSE": 224.3254876730984,
+      "MAPE": 0.7211157740648428,
+      "loss": 0.72111576795578,
+      "best_validation": 0.7059020400047302
+    },
+    "artifacts": {
+      "metrics_json": "D:\\LibCity 2.0\\.runtime-tests\\ttpnet-cli-aysef0rp\\case\\runs\\train\\eval\\metrics.json",
+      "metrics_csv": "D:\\LibCity 2.0\\.runtime-tests\\ttpnet-cli-aysef0rp\\case\\runs\\train\\eval\\metrics.csv",
+      "predictions": "D:\\LibCity 2.0\\.runtime-tests\\ttpnet-cli-aysef0rp\\case\\runs\\train\\eval\\predictions.json",
+      "resolved_config": "D:\\LibCity 2.0\\.runtime-tests\\ttpnet-cli-aysef0rp\\case\\runs\\train\\resolved_config.json",
+      "runtime_info": "D:\\LibCity 2.0\\.runtime-tests\\ttpnet-cli-aysef0rp\\case\\runs\\train\\runtime_info.json",
+      "run_log": "D:\\LibCity 2.0\\.runtime-tests\\ttpnet-cli-aysef0rp\\case\\runs\\train\\run.log",
+      "best": "D:\\LibCity 2.0\\.runtime-tests\\ttpnet-cli-aysef0rp\\case\\runs\\train\\checkpoints\\best.pt",
+      "last": "D:\\LibCity 2.0\\.runtime-tests\\ttpnet-cli-aysef0rp\\case\\runs\\train\\checkpoints\\last.pt"
+    }
+  },
+  "evaluation": {
+    "metrics": {
+      "MAE": 205.3613395690918,
+      "RMSE": 224.3254876730984,
+      "MAPE": 0.7211157740648428,
+      "loss": 0.72111576795578
+    },
+    "artifacts": {
+      "metrics_json": "D:\\LibCity 2.0\\.runtime-tests\\ttpnet-cli-aysef0rp\\case\\runs\\evaluate\\eval\\metrics.json",
+      "metrics_csv": "D:\\LibCity 2.0\\.runtime-tests\\ttpnet-cli-aysef0rp\\case\\runs\\evaluate\\eval\\metrics.csv",
+      "predictions": "D:\\LibCity 2.0\\.runtime-tests\\ttpnet-cli-aysef0rp\\case\\runs\\evaluate\\eval\\predictions.json",
+      "resolved_config": "D:\\LibCity 2.0\\.runtime-tests\\ttpnet-cli-aysef0rp\\case\\runs\\evaluate\\resolved_config.json",
+      "runtime_info": "D:\\LibCity 2.0\\.runtime-tests\\ttpnet-cli-aysef0rp\\case\\runs\\evaluate\\runtime_info.json",
+      "run_log": "D:\\LibCity 2.0\\.runtime-tests\\ttpnet-cli-aysef0rp\\case\\runs\\evaluate\\run.log"
+    }
+  },
+  "resume": {
+    "metrics": {
+      "MAE": 204.06206130981445,
+      "RMSE": 222.92720621830847,
+      "MAPE": 0.7165310140085408,
+      "loss": 0.716530978679657,
+      "best_validation": 0.7012237310409546
+    },
+    "artifacts": {
+      "metrics_json": "D:\\LibCity 2.0\\.runtime-tests\\ttpnet-cli-aysef0rp\\case\\runs\\resumed\\eval\\metrics.json",
+      "metrics_csv": "D:\\LibCity 2.0\\.runtime-tests\\ttpnet-cli-aysef0rp\\case\\runs\\resumed\\eval\\metrics.csv",
+      "predictions": "D:\\LibCity 2.0\\.runtime-tests\\ttpnet-cli-aysef0rp\\case\\runs\\resumed\\eval\\predictions.json",
+      "resolved_config": "D:\\LibCity 2.0\\.runtime-tests\\ttpnet-cli-aysef0rp\\case\\runs\\resumed\\resolved_config.json",
+      "runtime_info": "D:\\LibCity 2.0\\.runtime-tests\\ttpnet-cli-aysef0rp\\case\\runs\\resumed\\runtime_info.json",
+      "run_log": "D:\\LibCity 2.0\\.runtime-tests\\ttpnet-cli-aysef0rp\\case\\runs\\resumed\\run.log",
+      "best": "D:\\LibCity 2.0\\.runtime-tests\\ttpnet-cli-aysef0rp\\case\\runs\\resumed\\checkpoints\\best.pt",
+      "last": "D:\\LibCity 2.0\\.runtime-tests\\ttpnet-cli-aysef0rp\\case\\runs\\resumed\\checkpoints\\last.pt"
+    }
+  },
+  "resumed_epoch": 3,
+  "format_version": 3,
+  "benchmark_protocol": "ttpnet_eta",
+  "traffic_inputs": "departure_known_snapshot",
+  "prediction_scale": "training_time_gap",
+  "duration_unit": "seconds",
+  "prediction_records": 4
+}

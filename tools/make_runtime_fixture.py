@@ -5,7 +5,7 @@ from pathlib import Path
 import sys
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT))
-from libcity.testing.fixtures import atomic_fixture,crann_fixture,map_fixture,task_fixture,road_feature_fixture,multiscale_fixture,tgclstm_fixture,strnn_fixture,serm_fixture
+from libcity.testing.fixtures import atomic_fixture,crann_fixture,map_fixture,task_fixture,road_feature_fixture,multiscale_fixture,tgclstm_fixture,strnn_fixture,serm_fixture,ttpnet_fixture
 from libcity.model.runtime_registry import model_spec
 
 
@@ -17,7 +17,7 @@ def main(argv=None):
     parser=argparse.ArgumentParser()
     parser.add_argument('--directory',required=True,type=Path)
     parser.add_argument('--task',choices=EXAMPLES)
-    parser.add_argument('--model',choices=('GRU','CRANN','ChebConv','GAT','ASTGCN','MSTGCN','MegaCRN','TESTAM','ToGCN','SimST','STNN','TGCLSTM','STTN','TimeMixer','STG2Seq','DeepMove','STRNN','HSTLSTM','ATSTLSTM','SERM','STAN','CARA','LSTPM','GeoSAN'),help='Optional named model example')
+    parser.add_argument('--model',choices=('GRU','CRANN','ChebConv','GAT','ASTGCN','MSTGCN','MegaCRN','TESTAM','ToGCN','SimST','STNN','TGCLSTM','STTN','TimeMixer','STG2Seq','DeepMove','STRNN','HSTLSTM','ATSTLSTM','SERM','STAN','CARA','LSTPM','GeoSAN','TTPNet'),help='Optional named model example')
     args=parser.parse_args(argv)
     selected_task = model_spec(args.model).task if args.model else args.task or 'traffic_state_pred'
     if args.model and args.task and args.task!=selected_task:
@@ -27,7 +27,7 @@ def main(argv=None):
     directory.mkdir(parents=True,exist_ok=True)
     fixture=(road_feature_fixture if args.model in ('ChebConv','GAT') else
         (tgclstm_fixture if args.model=='TGCLSTM' else crann_fixture if args.model=='CRANN' else multiscale_fixture if args.model in ('ASTGCN','MSTGCN') else atomic_fixture) if args.task=='traffic_state_pred' else
-        map_fixture if args.task=='map_matching' else serm_fixture if args.model=='SERM' else strnn_fixture if args.model in ('STRNN','HSTLSTM','ATSTLSTM','STAN','CARA','LSTPM','GeoSAN') else task_fixture)
+        map_fixture if args.task=='map_matching' else ttpnet_fixture if args.model=='TTPNet' else serm_fixture if args.model=='SERM' else strnn_fixture if args.model in ('STRNN','HSTLSTM','ATSTLSTM','STAN','CARA','LSTPM','GeoSAN') else task_fixture)
     fixture(directory/'data')
     name=args.model.lower() if args.model else EXAMPLES[args.task]
     config=json.loads((ROOT/'examples/configs'/f'{name}.json').read_text(encoding='utf-8'))

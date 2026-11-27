@@ -1,0 +1,4 @@
+{
+  "data": {"min_route_length": 3},
+  "training": {"loss": {"name": "cumulative_relative_rmse", "eps": 1.0}}
+}

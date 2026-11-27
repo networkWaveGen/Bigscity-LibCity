@@ -232,7 +232,8 @@ def validate(config, preset):
     road_losses = ('mae','mse') if spec.protocol=='road_reconstruction' else ('negative_sampling',)
     trajectory_losses = {'atst_ranking':('normalized_bpr',),'stan_ranking':('sampled_softmax',),
         'cara_ranking':('bpr',),'geosan_ranking':('weighted_binary',)}.get(spec.protocol,('nll',))
-    losses={'traj_loc_pred':trajectory_losses,'road_representation':road_losses,'eta':('mae','mse')}.get(
+    eta_losses = ('cumulative_relative_rmse',) if spec.protocol=='ttpnet_eta' else ('mae','mse')
+    losses={'traj_loc_pred':trajectory_losses,'road_representation':road_losses,'eta':eta_losses}.get(
         spec.task,('mae','mse','masked_mae','masked_mse'))
     if training['loss'].get('name') not in losses:
         raise ValueError('Unknown training.loss.name')
@@ -274,8 +275,12 @@ def validate(config, preset):
         elif training['loss']['name']!='negative_sampling':
             raise ValueError('LINE training requires loss.name=negative_sampling')
     if spec.task=='eta':
-        if training['loss']['name'] not in ('mae','mse'):
-            raise ValueError('ETA training requires mae/mse loss')
+        if training['loss']['name'] not in eta_losses:
+            raise ValueError(f'ETA training requires one of {eta_losses}')
+        if spec.protocol=='ttpnet_eta':
+            _positive(data['min_route_length'],'data.min_route_length')
+            if data['min_route_length']<2:
+                raise ValueError('TTPNet min_route_length must be at least two')
         if not 0<=training['loss'].get('alpha',.3)<=1 or training['loss'].get('eps',10.)<=0:
             raise ValueError('ETA requires alpha in [0,1] and eps>0')
     if spec.task!='traffic_state_pred' and data['cache']:

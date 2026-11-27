@@ -1,0 +1,6 @@
+{
+  "data": {"dataset": "TaskTiny", "data_dir": "data", "cache": false},
+  "model": {"name": "TTPNet", "params": {"uid_emb_size": 4, "weekid_emb_size": 2, "timid_emb_size": 3}},
+  "training": {"epochs": 2, "batch_size": 4},
+  "runtime": {"device": "cpu", "seed": 17, "output_dir": "runs"}
+}

@@ -1,5 +1,5 @@
 {
-  "scope": "Remaining-work commits 1-29; whole-library migration remains in progress",
+  "scope": "Remaining-work commits 1-30; whole-library migration remains in progress",
   "environment": {
     "python": "3.12.13",
     "torch": "2.15.0+cpu",
@@ -7,7 +7,7 @@
     "platform": "Windows-11-10.0.26200-SP0"
   },
   "full_tests": {
-    "tests": 447,
+    "tests": 463,
     "failures": 0,
     "errors": 0,
     "skipped": 0
@@ -453,6 +453,22 @@
     "test_source_changes_invalidate_cache[config]",
     "test_feature_graph_and_external_sources_have_independent_identity",
     "test_corrupt_cache_is_rebuilt_and_disabled_cache_does_not_reuse_it",
+    "test_original_speed_road_bidirectional_cumulative_predictions_and_all_gradients",
+    "test_cumulative_relative_rmse_matches_route_weighting_gradients_and_exact_fit",
+    "test_complete_training_seconds_export_and_exact_dropout_resume",
+    "test_variable_padding_batch_one_float64_and_label_free_input_ownership",
+    "test_train_only_statistics_default_benchmark_samples_units_and_static_ids",
+    "test_actual_future_elapsed_targets_do_not_change_departure_inputs",
+    "test_invalid_or_future_inputs_fail_before_training[missing_snapshot]",
+    "test_invalid_or_future_inputs_fail_before_training[future_snapshot]",
+    "test_invalid_or_future_inputs_fail_before_training[speed_width]",
+    "test_invalid_or_future_inputs_fail_before_training[negative_speed]",
+    "test_invalid_or_future_inputs_fail_before_training[bad_json]",
+    "test_invalid_or_future_inputs_fail_before_training[unknown_road]",
+    "test_invalid_or_future_inputs_fail_before_training[bad_embedding]",
+    "test_actual_cpu_amp_with_zero_speeds_and_constant_features",
+    "test_two_point_routes_and_nonfixed_road_embedding_width",
+    "test_multiday_seconds_and_legacy_safe_encoder_calendar",
     "test_trials_never_iterate_test_and_reprepare_changed_data",
     "test_search_respects_maximizing_recall_and_seeded_random_choices",
     "test_invalid_search_fails_before_creating_study[space0]",
@@ -464,8 +480,8 @@
   ],
   "inventory": {
     "total": 100,
-    "migrated": 52,
-    "pending": 48
+    "migrated": 53,
+    "pending": 47
   },
   "history": [
     {
@@ -761,6 +777,20 @@
         "migrated": 51,
         "pending": 49
       }
+    },
+    {
+      "scope": "Remaining-work commits 1-29; whole-library migration remains in progress",
+      "full_tests": {
+        "tests": 447,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "inventory": {
+        "total": 100,
+        "migrated": 52,
+        "pending": 48
+      }
     }
   ],
   "current_cli": {
@@ -883,5 +913,13 @@
     },
     "editable_install": true,
     "pip_check": true
+  },
+  "ttpnet_cli": {
+    "report": "ttpnet-cli-validation.json",
+    "commands": 3,
+    "fixture_commands": 1,
+    "format_version": 3,
+    "duration_unit": "seconds",
+    "traffic_inputs": "departure_known_snapshot"
   }
 }

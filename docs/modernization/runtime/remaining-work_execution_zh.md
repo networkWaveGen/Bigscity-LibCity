@@ -34,7 +34,8 @@
 | commit26 | 33f5f5f | fix: keep epoch schedules unchanged without optimizer updates |
 | commit27 | c9b77ca | feat: migrate CARA with author gates and causal pairwise ranking |
 | commit28 | 39ed76b | feat: migrate LSTPM with causal session attention and ranking |
-| commit29 | 随本节交付的提交 | feat: migrate GeoSAN with native geography and bounded sampling |
+| commit29 | 4fc8211 | feat: migrate GeoSAN with native geography and bounded sampling |
+| commit30 | 随本节交付的提交 | feat: migrate TTPNet with departure-known traffic and cumulative ETA training |
 
 ## commit1：修复基础交通缓存（670b325）
 
@@ -289,6 +290,20 @@ cara_ranking 协议明确 training.loss.name=bpr。每样本独立计算原成�
 训练使用 geosan_ranking 具名协议和简短 sampled_step，复用公共外层训练，无需保留原独立 Executor。KNN 在正确纬度/经度弧度上查询，近邻数截断至词表大小，显式排除正类，均匀有放回采样并记录真实概率；过滤已访问耗尽时回退到非正类近邻，无无限循环。纯静态近邻缓存上限 128，不建立全 POI 两两距离；采样器按需初始化，独立评估不创建训练索引。加权二元目标保留 softmax 权重的梯度；训练仅打分所需候选，源编码在候选块间复用。验证/测试使用完整词表和确定性加权二元损失/排名；单位置无负类时保留正类训练项。与旧过滤/随机候选实验协议的差异明确登记，不将新全词表结果声称为旧实验精度复现。
 
 验证：新增 GeoSAN **15 项**，含四种旧有效位置/解码组合的分数与全部参数梯度、冻结词表规则/Mercator 地理编码、加权二元损失和权重梯度、KNN 球面近邻/采样分布/缓存边界/访问耗尽、公共基准样本保留/训练统计隔离、真实下一事件变化后的输入隔离、因果/padding/混批/分块/float64 与候选子集梯度、非默认融合/用户/时间/奇数宽度、完整训练/独立评估/采样及 dropout RNG 精确续训、CPU AMP/单位置，以及阻止旧依赖导入后的实际训练。最后源码完整回归 **447 passed，0 failed，0 errors，0 skipped**，见 [汇总](remaining-validation.json)。未安装 TorchText/NLTK 的环境中，仓库外发布夹具、训练、独立评估和续训第三轮共 4 条实际命令成功，指标一致，见 [CLI](geosan-cli-validation.json)；editable 安装和 pip check 通过。迁移表为 **52/100**，48 条 pending；轨迹预测全部 **13 个非模板条目**均已接入，本期仍有 **39 个**其他任务的实际模型待迁移，最终全量验收保持未完成。
+
+## commit30：迁移 TTPNet 并补齐 ETA 模型覆盖
+
+问题：旧 TTPNet 把所有路线长度设为批次最大值，填充点进入道路/速度 LSTM 和双向 LSTM；最终固定取批次最后位置。模型内部归一化、反归一化并读取耗时目标，输入/训练/推理职责混合；道路嵌入固定 16384×32 且直接用原位置值索引。编码器用 eval 解析列表、.seconds 丢弃天数、把星期一/日当周末，traj_len_idx 指到最后的 start_timestamp。速度输入没有出发前可用性约束；旧相对误差开平方在精确拟合时梯度为 NaN。
+
+修改：按[作者模型](https://github.com/YibinShen/TTPNet/blob/master/TTPNet.py)与[速度网络](https://github.com/YibinShen/TTPNet/blob/master/Speed.py)保留现有 LibCity 的速度 CNN/RNN、道路/速度 LSTM、两层双向 LSTM、LayerNorm 与累计预测头，改成标准 nn.Module 和显式 Tensor 字典。所有路线递推按真实长度打包，短期三支统一批量计算，重复前缀求和改为一次 cumsum；每条路线按自身长度选择最终输出。道路向量按 .geo 的真实 ID 对齐，行数/维度不再硬编码，保留预训练值并可继续训练；普通 forward 始终只给整趟预测张量，辅助方法显式返回累计预测及掩码。
+
+新增 ETA 共享完整行程读取器，DeepTTE/TTPNet 复用目标区间互斥切分、用户映射和路线几何/距离验证。TTPNet 的所有归一化和由速度/长度推算秒数均移至数据层，仅由训练行程拟合；km/h、m/s 与 km、m 显式换算，零速度保留原 0.2 km/h 处理。短期输入为每点 3×4×3，长期为 7×3，分别明确速度、长度和预计耗时通道。每点交通快照时间必须有效且不晚于该趟出发，缺失或未来快照直接拒绝；不把途中/到达后信息当作已知输入。实际累计耗时仅为 local_y_raw/y_raw 标签。静态图嵌入和历史速度由上游提供，不宣称补上了论文未在 LibCity 提供的离线张量分解训练器。
+
+采用 ttpnet_eta 协议和公共 train_loop 的累计 step：保持训练逐路线累计相对 RMSE、验证整趟 MAPE，保留以训练 time_gap 统计量仿射输出的旧含义，逆变换放在 loss/评估。按有效点归一化后再按路线平均，填充标签不参与计算；用 vector_norm 使零误差处梯度有限，分母 eps 默认 1 秒。默认最短 3 点与 DeepTTE 默认样本一致，可显式 min_route_length=2；输出和 JSON 都标明秒。现有公共早停配置生效，patience=0 可关闭。公共 ETA 逆变换只把 FP16/BF16 提升为 FP32，保留 float64。旧参考编码器同步改用 JSON/total_seconds、修复周末和长度索引，不恢复旧执行接口。
+
+数值对照中的初次 FP32 原始坐标归一化误差约 0.006689，导致预测差约 2.58e-6；定位为旧实现先截断大经纬度再相减的精度损失。新数据层先在双精度中归一化，模型数学对照使用双精度原始坐标后，最大预测差约 3.37e-10；没有通过放宽原检查阈值掩盖差异。全部模型参数梯度对照通过。其余有意变化（真实长度、ID 对齐、时间单位和输入可用性）明确登记，不将完整旧错误路径当等价基准。
+
+验证：TTPNet 新增 **16 项通过**，覆盖旧有效非填充模型及全部梯度、按路线累计相对 RMSE/权重/梯度与精确拟合、训练/独立评估/秒级导出/dropout 参数与 RNG 精确续训、混批/变长/padding/batch=1/float64/所有权/标签隔离、完整行程共同基准/训练统计/预训练 ID 对齐/单位换算、实际未来耗时变化后输入与预测不变、非法/缺失/未来快照和速度 JSON、零速度/常量 CPU AMP、两点路线/非固定嵌入宽度、跨天总秒数和旧编码器修复。与共享任务/退役接口检查合计 **42 项通过**。当前源码完整回归 **463 passed，0 failed，0 errors，0 skipped**，见 [汇总](remaining-validation.json)；仓库外夹具、训练、独立评估、续训第三轮共 4 条实际命令成功，指标一致且预测按秒导出，见 [CLI](ttpnet-cli-validation.json)。迁移表 **53/100**，47 条 pending；两个 ETA 模型均已接入。本期仍有 **38 个**实际模型（35 交通、3 道路表征）及最终全量验收待完成。
 
 ## 持续完成的清单
 
