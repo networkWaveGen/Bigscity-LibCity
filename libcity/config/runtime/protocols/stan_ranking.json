@@ -1,0 +1,3 @@
+{
+  "training": {"loss": {"name": "sampled_softmax", "negative_samples": 10}}
+}

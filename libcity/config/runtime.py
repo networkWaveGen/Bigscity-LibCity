@@ -190,7 +190,7 @@ def validate(config, preset):
         'scheduler': ('name', 'interval', 'step_size', 'gamma', 'milestones', 'T_max', 'eta_min', 'patience',
                       'factor', 'monitor', 'mode', 'max_lr', 'total_steps', 'pct_start', 'warmup_steps',
                       'model_dim', 'lr_multiplier'),
-        'loss': ('name', 'mask_value','alpha','eps')+(('negative_samples',) if spec.protocol=='atst_ranking' else ()),
+        'loss': ('name', 'mask_value','alpha','eps')+(('negative_samples',) if spec.protocol in ('atst_ranking','stan_ranking') else ()),
         'early_stopping': ('patience', 'min_delta')}.items():
         _known(training[key], names, f'training.{key}')
     if training['optimizer'].get('name') not in ('adam', 'adamw', 'sgd', 'rmsprop', 'adagrad'):
@@ -229,7 +229,7 @@ def validate(config, preset):
         _positive(scheduler.get('warmup_steps'),'scheduler.warmup_steps')
         _number(scheduler.get('lr_multiplier',1.),'scheduler.lr_multiplier',strict=True)
     road_losses = ('mae','mse') if spec.protocol=='road_reconstruction' else ('negative_sampling',)
-    trajectory_losses = ('normalized_bpr',) if spec.protocol=='atst_ranking' else ('nll',)
+    trajectory_losses = {'atst_ranking':('normalized_bpr',),'stan_ranking':('sampled_softmax',)}.get(spec.protocol,('nll',))
     losses={'traj_loc_pred':trajectory_losses,'road_representation':road_losses,'eta':('mae','mse')}.get(
         spec.task,('mae','mse','masked_mae','masked_mse'))
     if training['loss'].get('name') not in losses:
@@ -248,7 +248,7 @@ def validate(config, preset):
     if spec.task=='traj_loc_pred':
         _number(data['session_gap_hours'],'session_gap_hours',strict=True)
         _positive(data['min_session_length'],'min_session_length')
-        if spec.protocol=='atst_ranking':
+        if spec.protocol in ('atst_ranking','stan_ranking'):
             _positive(training['loss'].get('negative_samples'),'loss.negative_samples')
     if spec.task=='road_representation':
         _positive(data['negative_samples'],'negative_samples',zero=True)

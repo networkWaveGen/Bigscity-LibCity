@@ -1,0 +1,5 @@
+{
+  "model": {"params": {"embed_dim": 50, "max_len": 100, "candidate_chunk_size": 256,
+    "time_upper": 0.0, "distance_upper": 0.0}},
+  "training": {"batch_size": 1, "epochs": 100, "optimizer": {"name": "adam", "lr": 0.003}}
+}

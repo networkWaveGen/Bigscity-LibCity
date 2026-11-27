@@ -131,6 +131,16 @@ POIs use their real IDs rather than DataFrame row numbers. The same train,
 evaluate and resume commands apply, with full-vocabulary NLL/ranking. Resume
 rejects changes to the referenced vector file before updating parameters.
 
+`--model STAN` creates a two-level spatial-temporal attention example. Hour-of-week
+and user tokens reserve zero for padding. The query time defaults to the last
+observation, with an optional explicitly known `query_offset_hours` input. Temporal
+bounds use training prefixes; static spherical geometry uses a 6371 km radius.
+`max_len` must cover every actual prefix and is checked before training. The named
+`stan_ranking` protocol uses `training.loss.name=sampled_softmax` and shared sampled
+candidates with unique positive labels. Requests for too many negatives are capped;
+full-vocabulary validation/test use deterministic NLL and ranking. Inference does
+not require labels, next-event times or a dense POI distance table.
+
 The complete supported-model inventory and migration details are in the
 [runtime guide](../docs/modernization/runtime/README_zh.md). Small examples prove
 execution and reproducibility, not real-city benchmark accuracy.

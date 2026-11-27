@@ -29,6 +29,10 @@ class ModelSpec:
 
 
 MODELS = {
+    'STAN': ModelSpec('libcity.model.trajectory_loc_prediction.runtime_stan:STAN',task='traj_loc_pred',
+        protocol='stan_ranking',prepare_data='libcity.data.stan_trajectory:prepare_stan',
+        loss='libcity.executor.stan_step:STANLoss',step='libcity.executor.stan_step:sampled_step',
+        evaluate_loader='libcity.executor.task_evaluation:evaluate_task'),
     'SERM': ModelSpec('libcity.model.trajectory_loc_prediction.runtime_serm:SERM',task='traj_loc_pred',
         prepare_data='libcity.data.semantic_trajectory:prepare_semantic',
         loss='libcity.executor.task_evaluation:RankingLoss',evaluate_loader='libcity.executor.task_evaluation:evaluate_task'),

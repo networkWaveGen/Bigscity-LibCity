@@ -1,0 +1,131 @@
+{
+  "passed": true,
+  "model": "STAN",
+  "source": "D:\\LibCity 2.0\\LibCity-modernization",
+  "directory": "D:\\LibCity 2.0\\.runtime-tests\\stan-final-cli-o5kuatta",
+  "commands": [
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\tools\\make_runtime_fixture.py",
+        "--directory",
+        "D:\\LibCity 2.0\\.runtime-tests\\stan-final-cli-o5kuatta\\case",
+        "--model",
+        "STAN"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\stan-final-cli-o5kuatta",
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "train",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\stan-final-cli-o5kuatta\\case\\stan.json",
+        "--set",
+        "runtime.exp_id=train"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\stan-final-cli-o5kuatta",
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "evaluate",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\stan-final-cli-o5kuatta\\case\\stan.json",
+        "--checkpoint",
+        "D:\\LibCity 2.0\\.runtime-tests\\stan-final-cli-o5kuatta\\case\\runs\\train\\checkpoints\\best.pt",
+        "--set",
+        "runtime.exp_id=evaluate"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\stan-final-cli-o5kuatta",
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "train",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\stan-final-cli-o5kuatta\\case\\stan.json",
+        "--resume",
+        "D:\\LibCity 2.0\\.runtime-tests\\stan-final-cli-o5kuatta\\case\\runs\\train\\checkpoints\\last.pt",
+        "--set",
+        "runtime.exp_id=resumed",
+        "--set",
+        "training.epochs=3"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\stan-final-cli-o5kuatta",
+      "exit_code": 0
+    }
+  ],
+  "training": {
+    "metrics": {
+      "Recall@1": 0.07142857142857142,
+      "Recall@5": 0.6428571428571429,
+      "Recall@10": 1.0,
+      "MRR@10": 0.31972789764404297,
+      "loss": 2.129990577697754,
+      "best_validation": 0.21428571428571427
+    },
+    "artifacts": {
+      "metrics_json": "D:\\LibCity 2.0\\.runtime-tests\\stan-final-cli-o5kuatta\\case\\runs\\train\\eval\\metrics.json",
+      "metrics_csv": "D:\\LibCity 2.0\\.runtime-tests\\stan-final-cli-o5kuatta\\case\\runs\\train\\eval\\metrics.csv",
+      "predictions": "D:\\LibCity 2.0\\.runtime-tests\\stan-final-cli-o5kuatta\\case\\runs\\train\\eval\\predictions.json",
+      "resolved_config": "D:\\LibCity 2.0\\.runtime-tests\\stan-final-cli-o5kuatta\\case\\runs\\train\\resolved_config.json",
+      "runtime_info": "D:\\LibCity 2.0\\.runtime-tests\\stan-final-cli-o5kuatta\\case\\runs\\train\\runtime_info.json",
+      "run_log": "D:\\LibCity 2.0\\.runtime-tests\\stan-final-cli-o5kuatta\\case\\runs\\train\\run.log",
+      "best": "D:\\LibCity 2.0\\.runtime-tests\\stan-final-cli-o5kuatta\\case\\runs\\train\\checkpoints\\best.pt",
+      "last": "D:\\LibCity 2.0\\.runtime-tests\\stan-final-cli-o5kuatta\\case\\runs\\train\\checkpoints\\last.pt"
+    }
+  },
+  "evaluation": {
+    "metrics": {
+      "Recall@1": 0.07142857142857142,
+      "Recall@5": 0.6428571428571429,
+      "Recall@10": 1.0,
+      "MRR@10": 0.31972789764404297,
+      "loss": 2.129990577697754
+    },
+    "artifacts": {
+      "metrics_json": "D:\\LibCity 2.0\\.runtime-tests\\stan-final-cli-o5kuatta\\case\\runs\\evaluate\\eval\\metrics.json",
+      "metrics_csv": "D:\\LibCity 2.0\\.runtime-tests\\stan-final-cli-o5kuatta\\case\\runs\\evaluate\\eval\\metrics.csv",
+      "predictions": "D:\\LibCity 2.0\\.runtime-tests\\stan-final-cli-o5kuatta\\case\\runs\\evaluate\\eval\\predictions.json",
+      "resolved_config": "D:\\LibCity 2.0\\.runtime-tests\\stan-final-cli-o5kuatta\\case\\runs\\evaluate\\resolved_config.json",
+      "runtime_info": "D:\\LibCity 2.0\\.runtime-tests\\stan-final-cli-o5kuatta\\case\\runs\\evaluate\\runtime_info.json",
+      "run_log": "D:\\LibCity 2.0\\.runtime-tests\\stan-final-cli-o5kuatta\\case\\runs\\evaluate\\run.log"
+    }
+  },
+  "resume": {
+    "metrics": {
+      "Recall@1": 0.07142857142857142,
+      "Recall@5": 0.6428571428571429,
+      "Recall@10": 1.0,
+      "MRR@10": 0.31972789764404297,
+      "loss": 2.129990577697754,
+      "best_validation": 0.21428571428571427
+    },
+    "artifacts": {
+      "metrics_json": "D:\\LibCity 2.0\\.runtime-tests\\stan-final-cli-o5kuatta\\case\\runs\\resumed\\eval\\metrics.json",
+      "metrics_csv": "D:\\LibCity 2.0\\.runtime-tests\\stan-final-cli-o5kuatta\\case\\runs\\resumed\\eval\\metrics.csv",
+      "predictions": "D:\\LibCity 2.0\\.runtime-tests\\stan-final-cli-o5kuatta\\case\\runs\\resumed\\eval\\predictions.json",
+      "resolved_config": "D:\\LibCity 2.0\\.runtime-tests\\stan-final-cli-o5kuatta\\case\\runs\\resumed\\resolved_config.json",
+      "runtime_info": "D:\\LibCity 2.0\\.runtime-tests\\stan-final-cli-o5kuatta\\case\\runs\\resumed\\runtime_info.json",
+      "run_log": "D:\\LibCity 2.0\\.runtime-tests\\stan-final-cli-o5kuatta\\case\\runs\\resumed\\run.log",
+      "best": "D:\\LibCity 2.0\\.runtime-tests\\stan-final-cli-o5kuatta\\case\\runs\\resumed\\checkpoints\\best.pt",
+      "last": "D:\\LibCity 2.0\\.runtime-tests\\stan-final-cli-o5kuatta\\case\\runs\\resumed\\checkpoints\\last.pt"
+    }
+  },
+  "resumed_epoch": 3,
+  "format_version": 3,
+  "benchmark_protocol": "stan_ranking",
+  "query_time": "last_observation",
+  "evaluation_candidates": "full_location_vocabulary"
+}
