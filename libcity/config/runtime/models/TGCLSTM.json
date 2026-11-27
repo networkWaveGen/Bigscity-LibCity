@@ -1,0 +1,5 @@
+{
+  "model": {"params": {"hops": 3, "clamp_adjacency": true}},
+  "data": {"scaler": {"name": "normal"}, "graph": {"reachability_column": "FFR_20min"}},
+  "training": {"optimizer": {"name": "rmsprop", "lr": 0.00001}, "loss": {"name": "masked_mse", "mask_value": null}}
+}

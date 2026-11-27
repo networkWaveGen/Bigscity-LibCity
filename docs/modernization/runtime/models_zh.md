@@ -1,9 +1,10 @@
 # 新运行时模型迁移范围
 
-当前共 36 个运行时入口，对应原清单中的 38 个任务—模型条目（轨迹 RNN/LSTM/GRU 共用一个入口）。完整 [100 项 CSV](model-migration.csv) 逐项记录实际能力、依赖、验证与后续动作；其余 62 项仍为 pending，不会自动回退到旧运行时。37 个特殊交通数据集的深度整理仍延后。交通数据统一使用目标时间互斥切分，三个地图匹配算法均为独立直接执行入口。
+当前共 38 个运行时入口，对应原清单中的 40 个任务—模型条目（轨迹 RNN/LSTM/GRU 共用一个入口）。完整 [100 项 CSV](model-migration.csv) 逐项记录实际能力、依赖、验证与后续动作；其余 60 项仍为 pending，不会自动回退到旧运行时。37 个特殊交通数据集的深度整理仍延后。交通数据统一使用目标时间互斥切分，三个地图匹配算法均为独立直接执行入口。
 
 | 名称 | 任务/数据 | 训练接入 | 检查点/续训能力 | 实际验证级别 |
 | --- | --- | --- | --- | --- |
+| STNN / TGCLSTM | traffic_state_pred / 潜因子动力学、图过滤循环网络 | 默认 train_loop | 需要权重；完整续训 | STNN 三种关系模式与独立时间/节点计算、网格插值梯度及原硬查表对照；TGCLSTM 旧递推/预测/目标/梯度、FFR/普通图与 clamp 分支；两模型多目标/batch=1/float64/无标签、训练/独立评估/精确续训、CPU AMP、实际 CLI |
 | ToGCN / SimST | traffic_state_pred / 图时序编码解码、邻域时间注意力 | 默认 train_loop；ToGCN 使用显式 teacher step | 需要权重；完整续训 | 旧前向/梯度、显式 teacher 与 Python RNG/dropout 精确恢复、独立邻域/日历参考、因果 mask buffer、不同窗口、多目标/batch=1/float64、65 样本批次、CPU AMP、实际 CLI |
 | TESTAM | traffic_state_pred / 三专家与记忆路由 | 默认 train_loop + 专家/门控辅助 step | 需要权重；完整续训 | 旧专家计算、修正的预测切片/路由及辅助损失梯度对照、两种路由模式、原学习率曲线、原尺度掩码、多目标/多观测/batch=1/float64、完整训练/独立评估/dropout 精确续训、CPU AMP、实际 CLI |
 | MegaCRN | traffic_state_pred / 记忆银行+显式未来协变量 | 默认 train_loop + 记忆辅助/课程 step | 需要权重；完整续训 | 旧预测/记忆/辅助目标及梯度对照、训练态纯 forward 无标签且不消耗 RNG、课程 NumPy 随机状态与下一轮逐参数恢复、无协变量/batch=1/float64、CPU AMP、实际 CLI |
@@ -55,6 +56,10 @@ MegaCRN 的普通 forward 在 train/eval 状态均只返回预测张量；记忆
 TESTAM 保留时间、动态图、注意力三个专家与记忆门控。旧 STModel 的隐藏残差通道不再作为预测参与路由；多目标按显式专家轴选择，时间通道来自元信息，未来时刻按实际预测窗和 future_features 构造。当前要求连续窗口且 output_window<=input_window，输出取对应未来区间的尾部槽位。普通 forward 始终只返回预测，辅助专家输出只在训练方法中使用；原始目标零值/NaN 不参与专家或门控监督。inverse_sqrt_cosine 调度器保留原预热/周期曲线，interval=step；修改 hidden_size 时应同步显式调整 scheduler.model_dim，避免把优化设置隐藏在模型内部。
 
 ToGCN 保留两层图卷积、逐时 LSTM 编码、历史解码预热与整批 teacher 选择。普通 forward 不读取目标或消耗 teacher RNG；训练通过显式方法传入目标，已知未来通道取 future_features，其他未来观测仅沿用最后已知历史，避免借用未来标签中的额外观测。邻接图注册 buffer，构造不改变全局 anomaly 设置；输出明确为 B×H×N×D，要求 0<=decoder_t<input_window。
+
+STNN 保留潜因子、关系 refine/discover/固定图、动力学 MLP 与时间解码。时间和节点始终使用明确轴，查表范围来自实际窗口/节点数，forward 不再改写 batch。默认 lookup=linear 用双线性插值替代 ceil 整数查表，让 ffunc 能得到梯度并实际更新；这是明确的算法变更，不能把该版本与旧硬查表实现宣称为数值等价。lookup=hard 保留量化选择用于对照，其 ffunc 不可微；旧 12×41 因子选择完全对齐，但两种模式都修正了旧时间/节点混排和解码轴错误。model.params 和 resolved_config 明确记录选择。
+
+TGCLSTM 将 K 阶邻接/FFR 过滤矩阵及细胞过滤器注册 buffer，按输入设备/类型创建状态，滚动预测不读 y。data.graph.reachability_column 默认 FFR_20min；缺少该列会明确报错，可选其他已有列或显式 null 使用普通图模式。轻量适配按 .geo 顺序对齐端点 ID，未列出的边用 0，避免旧 inf 导致 0×inf。原始缓存继续按源文件元信息失效。未来协变量仅取 future_features，其他未来观测沿用最后历史。训练保留原模型的 MSE 与有限零值目标（mask_value=null）；评估掩码仍遵循公共任务协议，用户可显式另设训练掩码。
 
 SimST 保留因果时间注意力、节点嵌入，以及出/入邻域的指定邻居与均值特征。邻域由配置选择的静态图生成；星期 one-hot 在模型输入适配中转换为原模型的 weekday/7。标准批次始终保持完整节点维，batch 大小不再决定节点采样语义；时间位置/因果 mask 使用实际输入窗，回归头同时支持任意预测窗及多目标。默认使用任务提供的图，不隐式套用旧 Dataset 的 ID 重排与距离预处理；需要距离图时应在 data.graph 明确配置。
 

@@ -1,5 +1,5 @@
 {
-  "scope": "Remaining-work commits 1-14; whole-library migration remains in progress",
+  "scope": "Remaining-work commits 1-15; whole-library migration remains in progress",
   "environment": {
     "python": "3.12.13",
     "torch": "2.15.0+cpu",
@@ -7,7 +7,7 @@
     "platform": "Windows-11-10.0.26200-SP0"
   },
   "full_tests": {
-    "tests": 271,
+    "tests": 292,
     "failures": 0,
     "errors": 0,
     "skipped": 0
@@ -173,6 +173,27 @@
     "test_neighbor_projection_is_directional_normalized_and_handles_isolated_nodes",
     "test_togcn_teacher_is_explicit_and_constructor_has_no_global_side_effect",
     "test_migration_inventory_covers_every_original_task_model_and_truthful_capabilities",
+    "test_stnn_explicit_node_time_reference_and_gradients[hard-None]",
+    "test_stnn_explicit_node_time_reference_and_gradients[hard-refine]",
+    "test_stnn_explicit_node_time_reference_and_gradients[hard-discover]",
+    "test_stnn_explicit_node_time_reference_and_gradients[linear-None]",
+    "test_stnn_explicit_node_time_reference_and_gradients[linear-refine]",
+    "test_stnn_explicit_node_time_reference_and_gradients[linear-discover]",
+    "test_stnn_hard_lookup_matches_old_12_by_41_factor_selection",
+    "test_tgclstm_original_recurrence_predictions_objective_and_gradients[False-False]",
+    "test_tgclstm_original_recurrence_predictions_objective_and_gradients[False-True]",
+    "test_tgclstm_original_recurrence_predictions_objective_and_gradients[True-False]",
+    "test_tgclstm_original_recurrence_predictions_objective_and_gradients[True-True]",
+    "test_full_lifecycle_and_exact_dropout_resume[STNN-None]",
+    "test_full_lifecycle_and_exact_dropout_resume[STNN-refine]",
+    "test_full_lifecycle_and_exact_dropout_resume[STNN-discover]",
+    "test_full_lifecycle_and_exact_dropout_resume[TGCLSTM-None]",
+    "test_multitarget_batch_one_float64_and_input_isolation[STNN]",
+    "test_multitarget_batch_one_float64_and_input_isolation[TGCLSTM]",
+    "test_actual_cpu_amp_training[STNN]",
+    "test_actual_cpu_amp_training[TGCLSTM]",
+    "test_reachability_uses_geo_order_missing_edges_zero_and_cache_invalidation",
+    "test_reachability_missing_invalid_and_explicit_opt_out",
     "test_map_bundle_and_direct_evaluation_without_training_objects[False]",
     "test_map_bundle_and_direct_evaluation_without_training_objects[True]",
     "test_map_single_metric_and_prediction_switch_remove_stale_export",
@@ -288,8 +309,8 @@
   ],
   "inventory": {
     "total": 100,
-    "migrated": 38,
-    "pending": 62
+    "migrated": 40,
+    "pending": 60
   },
   "history": [
     {
@@ -389,6 +410,20 @@
         "migrated": 36,
         "pending": 64
       }
+    },
+    {
+      "scope": "commits 1-14, through 547218b",
+      "full_tests": {
+        "tests": 271,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "inventory": {
+        "total": 100,
+        "migrated": 38,
+        "pending": 62
+      }
     }
   ],
   "current_cli": {
@@ -421,6 +456,11 @@
   },
   "graph_temporal_cli": {
     "report": "graph-temporal-cli-validation.json",
+    "commands": 6,
+    "fixture_commands": 2
+  },
+  "latent_recurrent_cli": {
+    "report": "latent-recurrent-cli-validation.json",
     "commands": 6,
     "fixture_commands": 2
   }

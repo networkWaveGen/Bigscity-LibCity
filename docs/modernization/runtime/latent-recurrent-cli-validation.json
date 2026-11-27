@@ -1,0 +1,172 @@
+{
+  "passed": true,
+  "fixture_commands": 2,
+  "commands": [
+    {
+      "arguments": [
+        "D:\\LibCity 2.0\\LibCity-modernization\\tools\\make_runtime_fixture.py",
+        "--directory",
+        "D:\\LibCity 2.0\\.runtime-tests\\latent-recurrent-cli-denwvkzg\\STNN",
+        "--model",
+        "STNN"
+      ],
+      "exit_code": 0
+    },
+    {
+      "arguments": [
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "train",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\latent-recurrent-cli-denwvkzg\\STNN\\stnn.json",
+        "--set",
+        "runtime.exp_id=train"
+      ],
+      "exit_code": 0
+    },
+    {
+      "arguments": [
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "evaluate",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\latent-recurrent-cli-denwvkzg\\STNN\\stnn.json",
+        "--checkpoint",
+        "D:\\LibCity 2.0\\.runtime-tests\\latent-recurrent-cli-denwvkzg\\STNN\\runs\\train\\checkpoints\\best.pt",
+        "--set",
+        "runtime.exp_id=evaluate"
+      ],
+      "exit_code": 0
+    },
+    {
+      "arguments": [
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "train",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\latent-recurrent-cli-denwvkzg\\STNN\\stnn.json",
+        "--resume",
+        "D:\\LibCity 2.0\\.runtime-tests\\latent-recurrent-cli-denwvkzg\\STNN\\runs\\train\\checkpoints\\last.pt",
+        "--set",
+        "runtime.exp_id=resumed",
+        "--set",
+        "training.epochs=3"
+      ],
+      "exit_code": 0
+    },
+    {
+      "arguments": [
+        "D:\\LibCity 2.0\\LibCity-modernization\\tools\\make_runtime_fixture.py",
+        "--directory",
+        "D:\\LibCity 2.0\\.runtime-tests\\latent-recurrent-cli-denwvkzg\\TGCLSTM",
+        "--model",
+        "TGCLSTM"
+      ],
+      "exit_code": 0
+    },
+    {
+      "arguments": [
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "train",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\latent-recurrent-cli-denwvkzg\\TGCLSTM\\tgclstm.json",
+        "--set",
+        "runtime.exp_id=train"
+      ],
+      "exit_code": 0
+    },
+    {
+      "arguments": [
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "evaluate",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\latent-recurrent-cli-denwvkzg\\TGCLSTM\\tgclstm.json",
+        "--checkpoint",
+        "D:\\LibCity 2.0\\.runtime-tests\\latent-recurrent-cli-denwvkzg\\TGCLSTM\\runs\\train\\checkpoints\\best.pt",
+        "--set",
+        "runtime.exp_id=evaluate"
+      ],
+      "exit_code": 0
+    },
+    {
+      "arguments": [
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "train",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\latent-recurrent-cli-denwvkzg\\TGCLSTM\\tgclstm.json",
+        "--resume",
+        "D:\\LibCity 2.0\\.runtime-tests\\latent-recurrent-cli-denwvkzg\\TGCLSTM\\runs\\train\\checkpoints\\last.pt",
+        "--set",
+        "runtime.exp_id=resumed",
+        "--set",
+        "training.epochs=3"
+      ],
+      "exit_code": 0
+    }
+  ],
+  "models": {
+    "STNN": {
+      "train": {
+        "MAE@1": 0.8976996386492694,
+        "RMSE@1": 1.1174624996284708,
+        "MAE@2": 0.9142122268676758,
+        "RMSE@2": 1.1249670028330032,
+        "loss": 0.905955970287323,
+        "best_validation": 0.9311149716377258
+      },
+      "evaluate": {
+        "MAE@1": 0.8976996386492694,
+        "RMSE@1": 1.1174624996284708,
+        "MAE@2": 0.9142122268676758,
+        "RMSE@2": 1.1249670028330032,
+        "loss": 0.905955970287323
+      },
+      "resume": {
+        "MAE@1": 0.8976996386492694,
+        "RMSE@1": 1.1174624996284708,
+        "MAE@2": 0.9142122268676758,
+        "RMSE@2": 1.1249670028330032,
+        "loss": 0.905955970287323,
+        "best_validation": 0.9311149716377258
+      },
+      "train_state": {
+        "stage": "train",
+        "epoch": 3,
+        "batches_seen": 9,
+        "optimizer_steps": 9,
+        "best_metric": 0.9311149716377258,
+        "task_state": {}
+      }
+    },
+    "TGCLSTM": {
+      "train": {
+        "MAE@1": 11.317059726426095,
+        "RMSE@1": 11.354509654035171,
+        "MAE@2": 11.48959665316524,
+        "RMSE@2": 11.523108863818708,
+        "loss": 130.85345458984375,
+        "best_validation": 107.14647674560547
+      },
+      "evaluate": {
+        "MAE@1": 11.317059726426095,
+        "RMSE@1": 11.354509654035171,
+        "MAE@2": 11.48959665316524,
+        "RMSE@2": 11.523108863818708,
+        "loss": 130.85345458984375
+      },
+      "resume": {
+        "MAE@1": 11.31629365592292,
+        "RMSE@1": 11.35373836554687,
+        "MAE@2": 11.489005481203398,
+        "RMSE@2": 11.522514374947873,
+        "loss": 130.83786010742188,
+        "best_validation": 107.1324462890625
+      },
+      "train_state": {
+        "stage": "train",
+        "epoch": 3,
+        "batches_seen": 12,
+        "optimizer_steps": 12,
+        "best_metric": 107.1324462890625,
+        "task_state": {}
+      }
+    }
+  }
+}

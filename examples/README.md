@@ -69,6 +69,16 @@ inference reads only history. SimST creates incoming/outgoing neighborhood featu
 from the configured graph and keeps the same full-node meaning for every batch
 size. Its input window and forecast window may differ.
 
+`--model STNN` uses differentiable factor interpolation (`lookup=linear`) and
+explicit time/node axes. This intentionally changes the old hard lookup, whose
+input projection received no gradients. `lookup=hard` is available for comparison;
+both modes use the actual node count and history length.
+
+`--model TGCLSTM` generates the required FFR edge columns and metadata. By default,
+the model reads `data.graph.reachability_column=FFR_20min`; set it to another
+existing column or JSON `null` for plain graph filters. Missing edges have zero
+reachability. Inference uses history and explicit known future features only.
+
 The complete supported-model inventory and migration details are in the
 [runtime guide](../docs/modernization/runtime/README_zh.md). Small examples prove
 execution and reproducibility, not real-city benchmark accuracy.

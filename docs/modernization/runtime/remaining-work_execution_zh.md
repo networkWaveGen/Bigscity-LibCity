@@ -19,6 +19,7 @@
 | commit11 | bf174ae | fix: cover matrix-only models in CPU AMP backward fallback |
 | commit12 | 04e2295 | feat: migrate TESTAM experts with explicit routing supervision |
 | commit13 | 26f4110 | fix: select native recurrent forward for unsupported CPU AMP backends |
+| commit14 | 547218b | feat: migrate graph sequence and nodewise temporal forecasts |
 
 ## commit1：修复基础交通缓存（670b325）
 
@@ -141,6 +142,14 @@ ToGCN 保留图卷积、LSTM 编码/解码、历史预热和整批 teacher forci
 SimST 保留因果时间注意力、节点嵌入、出/入方向指定邻居与邻域均值。邻域静态投影注册 buffer，向量化生成特征；按元信息将星期转换为原 weekday/7。修复位置编码/因果窗误用 output_window、邻域特征固定 12 步、batch>64 隐式改变节点维及回归头忽略多目标的问题。全节点批次不依赖 node_idx；按显式 data.graph 选择图，不再隐式使用旧 Dataset 的 ID 重排与距离变换。
 
 验证：新增 **14 项通过**，包括两种 ToGCN teacher/自回归前向与梯度对照、两种 SimST 邻域配置的独立输入参考和旧网络梯度、两模型训练/独立评估/精确续训（含 dropout 与 Python teacher RNG）、不同窗口、多目标/batch=1/float64/输入所有权/标签隔离、CPU AMP、65 样本批次一致性、无节点嵌入、因果 mask 和孤立节点方向性。完整回归 **271 passed，0 failed，0 errors，0 skipped**；仓库外两个发布夹具及 6 条生命周期命令成功，独立评估一致且续训到第三轮，见 [CLI 记录](graph-temporal-cli-validation.json)。迁移表为 **38/100**，62 条 pending；本期实际模型仍有 **53 个**待迁移，最终全量验收尚未完成。
+
+## commit15：迁移 STNN 与 TGCLSTM 潜因子/图过滤循环预测
+
+STNN 修复固定 12 步/41 节点、关系聚合混排时间/节点、解码 reshape 混排节点/预测步，以及 predict 原地改写 batch 的问题。关系和元信息只读，聚合使用明确的时间/节点轴；三种关系模式均接入公共训练。旧 ceil 整数索引令输入映射 ffunc 没有梯度，默认改用可微双线性因子插值，验证映射权重在实际训练中更新。这是有意算法变更；lookup=hard 可显式选择用于量化对照，其不可微性仍明确登记，不将完整新预测与旧混排实现声称为等价。多变量映射只生成真正使用的两个坐标，移除未使用的坐标输出。
+
+TGCLSTM 保留逐步图过滤、门控细胞与滑动窗口重编码，所有静态过滤器注册 buffer，状态随输入设备/类型创建。预测步由配置指定，不读 y，不再从 y 取未来额外观测。FFR 通过轻量原子适配显式选择列，默认 FFR_20min，支持其他列或 null 普通图模式；按 .geo ID 顺序映射，缺失边补 0，修复旧 inf×0。源文件变化触发基础缓存失效，FFR 元信息进入续训检查。训练保留原 MSE、mask_value=null 的有限零目标语义，评估继续遵循统一任务协议。
+
+验证：新增 **21 项通过**。STNN 对照独立逐时/逐节点计算和 grid_sample 插值及梯度，覆盖固定/refine/discover 与 hard/linear，原 12×41 因子硬选择一致，训练映射权重实际更新；TGCLSTM 四种 FFR/普通图、clamp/非 clamp 组合对照旧预测、目标与全部梯度。两模型均验证多目标/batch=1/float64/无标签/输入不变、完整训练/独立评估/精确续训、CPU AMP；另验证 FFR ID 顺序、缺失边零值、不可变元信息、缓存失效和错误提示。完整回归 **292 passed，0 failed，0 errors，0 skipped**。两个仓库外发布夹具与 6 条生命周期命令成功，续训到第三轮且独立评估一致，见 [CLI 记录](latent-recurrent-cli-validation.json)。迁移表为 **40/100**，60 条 pending；本期实际模型仍有 **51 个**待迁移。
 
 ## 持续完成的清单
 

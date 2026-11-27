@@ -1,0 +1,5 @@
+{
+  "model": {"params": {"mode": "refine", "nhid": 0, "nlayers": 1, "dropout_f": 0.1,
+    "dropout_d": 0.1, "lookup": "linear"}},
+  "training": {"optimizer": {"name": "adam", "lr": 0.01}}
+}

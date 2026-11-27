@@ -25,6 +25,19 @@ def atomic_fixture(root, name='Tiny', steps=48, nodes=3,interval_minutes=5):
     return folder
 
 
+def tgclstm_fixture(root,name='Tiny',steps=60,nodes=3):
+    folder = atomic_fixture(root,name=name,steps=steps,nodes=nodes)
+    edges = pd.read_csv(folder/f'{name}.rel')
+    for minutes in (5,10,15,20,25):
+        edges[f'FFR_{minutes}min'] = (np.arange(nodes)+1)/nodes*minutes/25
+    edges.to_csv(folder/f'{name}.rel',index=False)
+    path = folder/'config.json'
+    metadata = json.loads(path.read_text())
+    metadata['weight_col'] = 'distance'
+    path.write_text(json.dumps(metadata),encoding='utf-8')
+    return folder
+
+
 def multiscale_fixture(root, name='Tiny'):
     return atomic_fixture(root,name=name,steps=400,interval_minutes=60)
 

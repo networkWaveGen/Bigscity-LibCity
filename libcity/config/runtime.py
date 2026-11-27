@@ -121,7 +121,11 @@ def validate(config, preset):
                 raise TypeError(f'data.split.{key} must be an ISO timestamp')
         _known(data['features'], ('load_external', 'time_in_day', 'day_in_week', 'known_future_columns'), 'data.features')
         _known(data['scaler'], ('name',), 'data.scaler')
-        _known(data['graph'], ('name', 'symmetric', 'self_loops', 'epsilon'), 'data.graph')
+        _known(data['graph'], ('name', 'symmetric', 'self_loops', 'epsilon','reachability_column'), 'data.graph')
+        if 'reachability_column' in data['graph']:
+            column = data['graph']['reachability_column']
+            if model['name']!='TGCLSTM' or (column is not None and (not isinstance(column,str) or not column)):
+                raise ValueError('data.graph.reachability_column is a TGCLSTM column name or null')
         _known(data['sampling'], ('name','closeness','period','trend','interval_period','interval_trend',
                                   'temporal_history'), 'data.sampling')
         if data['sampling'].get('name') not in ('window','cpt','crann'):

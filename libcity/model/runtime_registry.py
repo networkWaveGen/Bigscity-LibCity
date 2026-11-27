@@ -29,6 +29,9 @@ class ModelSpec:
 
 
 MODELS = {
+    'STNN': ModelSpec('libcity.model.traffic_flow_prediction.runtime_stnn:STNN'),
+    'TGCLSTM': ModelSpec('libcity.model.traffic_speed_prediction.runtime_tgclstm:TGCLSTM',
+        prepare_data='libcity.data.tgclstm_bundle:prepare_tgclstm'),
     'ToGCN': ModelSpec('libcity.model.traffic_flow_prediction.runtime_togcn:ToGCN',
         step='libcity.model.traffic_speed_prediction.runtime_seq2seq:teacher_step'),
     'SimST': ModelSpec('libcity.model.traffic_flow_prediction.runtime_simst:SimST'),
