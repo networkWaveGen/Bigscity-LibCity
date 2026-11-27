@@ -22,6 +22,7 @@
 | commit14 | 547218b | feat: migrate graph sequence and nodewise temporal forecasts |
 | commit15 | 42ffc31 | feat: migrate latent and graph-filtered recurrent forecasts |
 | commit16 | e81011f | feat: migrate STTN with immutable graph transforms |
+| commit17 | e2c728e | feat: migrate TimeMixer with explicit scales and temporal decomposition |
 
 ## commit1：修复基础交通缓存（670b325）
 
@@ -166,6 +167,14 @@ TGCLSTM 保留逐步图过滤、门控细胞与滑动窗口重编码，所有静
 修复 DFT 原先沿隐藏通道而非时间做 FFT、误清零第一个样本、固定使用 5 而忽略 top_k、全局频率阈值以及奇数长度逆变换的问题。现在按样本/隐藏通道选时间频率，排除 DC；AMP 下仅 FFT 用 FP32。avg/max/conv 分别使用真实尺度长度，支持卷积奇数长度、零降采样层；移动平均偶数核使用保长左右填充，过度池化提前报错。删除实际未使用的时间/位置嵌入、PDM 层及 label_len/freq/embed 配置，避免提供无效开关。
 
 验证：新增 **18 项通过**，包括 avg/max/conv 下 9 种原可用组合的旧前向/梯度对照、两种通道模式的 FFT+归一化+卷积训练/独立评估/dropout 精确续训、独立时间正弦频率与 top_k 参考、显式归一化上下文、奇数尺度/偶数核、多观测/多目标/batch=1/float64/无标签/无状态修改、CPU AMP FFT 与零尺度。完整回归 **315 passed，0 failed，0 errors，0 skipped**。仓库外发布夹具及 3 条生命周期命令成功，评估一致并续训第三轮，见 [CLI 记录](timemixer-cli-validation.json)。迁移表为 **42/100**，58 条 pending；本期实际模型仍有 **49 个**待迁移。
+
+## commit18：迁移 STG2Seq 并修复图/注意力轴混排
+
+保留六层长期、三层短期图卷积、时间注意力、逐目标通道注意力及滚动预测。普通 forward 不读 y，训练通过独立 teacher step 提供归一化目标，注意力查询仅取声明的 future_features。图谱基只注册一份 buffer，显式传给图层；沿用公共有限谱基构造，修复 1 阶和退化图。输出头按实际目标数构建，不再限制 1/2 通道。
+
+原 ConvST 的时窗 reshape 和卷积输出 reshape 会混排时间、节点、通道；两种 Attention 的 reshape 还混排 batch 与时间/通道。现在用明确轴排列和收缩公式，去除这些混排。独立逐轴公式用来验证正确数学运算，不把新预测与旧错误排列声称为数值等价。时窗限定为 1<=window<=input_window；可没有未来协变量，未知未来观测不会从标签补入。训练 MSE/有限零值目标与公共评估口径分别明确保留。
+
+验证：新增 **9 项通过**。独立逐时/逐节点/逐通道图卷积与注意力的数值和全部梯度对照，覆盖 1/3 阶；完整深度训练、独立评估与 teacher/BatchNorm 参数和计数精确恢复；三目标、多观测、单节点、batch=1/float64/无标签/输入不变、显式 teacher 与未来特征、CPU AMP。完整回归 **324 passed，0 failed，0 errors，0 skipped**。仓库外发布夹具及 3 条生命周期命令成功，独立评估一致且续训第三轮，见 [CLI 记录](stg2seq-cli-validation.json)。清单为 **43/100**，57 条 pending，本期实际模型仍有 **48 个**待迁移。
 
 ## 持续完成的清单
 

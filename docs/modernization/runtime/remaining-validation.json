@@ -1,5 +1,5 @@
 {
-  "scope": "Remaining-work commits 1-17; whole-library migration remains in progress",
+  "scope": "Remaining-work commits 1-18; whole-library migration remains in progress",
   "environment": {
     "python": "3.12.13",
     "torch": "2.15.0+cpu",
@@ -7,7 +7,7 @@
     "platform": "Windows-11-10.0.26200-SP0"
   },
   "full_tests": {
-    "tests": 315,
+    "tests": 324,
     "failures": 0,
     "errors": 0,
     "skipped": 0
@@ -262,6 +262,15 @@
     "test_sparse_road_metadata_and_model_do_not_expand_dense_adjacency[ChebConv]",
     "test_sparse_road_metadata_and_model_do_not_expand_dense_adjacency[GAT]",
     "test_automatic_device_selection_respects_model_capabilities",
+    "test_graph_time_convolution_against_independent_per_axis_formula[1]",
+    "test_graph_time_convolution_against_independent_per_axis_formula[3]",
+    "test_attention_keeps_batch_and_node_axes_against_independent_formula[time]",
+    "test_attention_keeps_batch_and_node_axes_against_independent_formula[channel]",
+    "test_full_lifecycle_and_exact_teacher_and_batchnorm_resume",
+    "test_multitarget_single_node_float64_and_label_input_isolation[1]",
+    "test_multitarget_single_node_float64_and_label_input_isolation[3]",
+    "test_teacher_and_known_future_inputs_are_explicit",
+    "test_actual_cpu_amp_training",
     "test_stssl_dynamic_task_state_next_updates_and_rng_resume",
     "test_stssl_prediction_has_no_augmentation_or_labels_and_pipeline_exports",
     "test_original_first_forecast_and_gradients",
@@ -332,8 +341,8 @@
   ],
   "inventory": {
     "total": 100,
-    "migrated": 42,
-    "pending": 58
+    "migrated": 43,
+    "pending": 57
   },
   "history": [
     {
@@ -475,6 +484,20 @@
         "migrated": 41,
         "pending": 59
       }
+    },
+    {
+      "scope": "commits 1-17, through e2c728e",
+      "full_tests": {
+        "tests": 315,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "inventory": {
+        "total": 100,
+        "migrated": 42,
+        "pending": 58
+      }
     }
   ],
   "current_cli": {
@@ -522,6 +545,11 @@
   },
   "timemixer_cli": {
     "report": "timemixer-cli-validation.json",
+    "commands": 3,
+    "fixture_commands": 1
+  },
+  "stg2seq_cli": {
+    "report": "stg2seq-cli-validation.json",
     "commands": 3,
     "fixture_commands": 1
   }

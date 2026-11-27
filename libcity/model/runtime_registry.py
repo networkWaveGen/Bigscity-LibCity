@@ -29,6 +29,8 @@ class ModelSpec:
 
 
 MODELS = {
+    'STG2Seq': ModelSpec('libcity.model.traffic_demand_prediction.runtime_stg2seq:STG2Seq',
+        step='libcity.model.traffic_speed_prediction.runtime_seq2seq:teacher_step'),
     'TimeMixer': ModelSpec('libcity.model.traffic_flow_prediction.runtime_timemixer:TimeMixer'),
     'STTN': ModelSpec('libcity.model.traffic_speed_prediction.runtime_sttn:STTN'),
     'STNN': ModelSpec('libcity.model.traffic_flow_prediction.runtime_stnn:STNN'),

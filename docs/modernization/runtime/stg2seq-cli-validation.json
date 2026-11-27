@@ -1,0 +1,89 @@
+{
+  "passed": true,
+  "fixture_commands": 1,
+  "commands": [
+    {
+      "arguments": [
+        "D:\\LibCity 2.0\\LibCity-modernization\\tools\\make_runtime_fixture.py",
+        "--directory",
+        "D:\\LibCity 2.0\\.runtime-tests\\stg2seq-cli-0f2cp670\\case",
+        "--model",
+        "STG2Seq"
+      ],
+      "exit_code": 0
+    },
+    {
+      "arguments": [
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "train",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\stg2seq-cli-0f2cp670\\case\\stg2seq.json",
+        "--set",
+        "runtime.exp_id=train"
+      ],
+      "exit_code": 0
+    },
+    {
+      "arguments": [
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "evaluate",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\stg2seq-cli-0f2cp670\\case\\stg2seq.json",
+        "--checkpoint",
+        "D:\\LibCity 2.0\\.runtime-tests\\stg2seq-cli-0f2cp670\\case\\runs\\train\\checkpoints\\best.pt",
+        "--set",
+        "runtime.exp_id=evaluate"
+      ],
+      "exit_code": 0
+    },
+    {
+      "arguments": [
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "train",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\stg2seq-cli-0f2cp670\\case\\stg2seq.json",
+        "--resume",
+        "D:\\LibCity 2.0\\.runtime-tests\\stg2seq-cli-0f2cp670\\case\\runs\\train\\checkpoints\\last.pt",
+        "--set",
+        "runtime.exp_id=resumed",
+        "--set",
+        "training.epochs=3"
+      ],
+      "exit_code": 0
+    }
+  ],
+  "metrics": {
+    "train": {
+      "MAE@1": 9.88339587273421,
+      "RMSE@1": 9.920345357574078,
+      "MAE@2": 9.896079884635078,
+      "RMSE@2": 9.930499121607088,
+      "loss": 98.51403045654297,
+      "best_validation": 129.51834106445312
+    },
+    "evaluate": {
+      "MAE@1": 9.88339587273421,
+      "RMSE@1": 9.920345357574078,
+      "MAE@2": 9.896079884635078,
+      "RMSE@2": 9.930499121607088,
+      "loss": 98.51403045654297
+    },
+    "resume": {
+      "MAE@1": 9.701470372853455,
+      "RMSE@1": 9.737706974877181,
+      "MAE@2": 9.768005112806955,
+      "RMSE@2": 9.802078794444425,
+      "loss": 95.45185089111328,
+      "best_validation": 125.11750030517578
+    }
+  },
+  "resume_epoch": 3,
+  "train_state": {
+    "stage": "train",
+    "epoch": 3,
+    "batches_seen": 9,
+    "optimizer_steps": 9,
+    "best_metric": 125.11750030517578,
+    "task_state": {}
+  }
+}

@@ -90,6 +90,12 @@ convolution downsampling use their actual scale lengths; `dft_decomp` selects
 statistics stay local to the forward call, and forecasts contain only target
 channels. Unused legacy time-embedding settings are no longer accepted.
 
+`--model STG2Seq` keeps the six-layer long-term and three-layer short-term graph
+stacks, with explicit teacher targets during training. Inference is autoregressive
+and takes only declared future covariates for its attention queries. Graph and
+attention operations preserve batch/time/node axes; these correct intentional
+differences from the old reshape-based implementation.
+
 The complete supported-model inventory and migration details are in the
 [runtime guide](../docs/modernization/runtime/README_zh.md). Small examples prove
 execution and reproducibility, not real-city benchmark accuracy.

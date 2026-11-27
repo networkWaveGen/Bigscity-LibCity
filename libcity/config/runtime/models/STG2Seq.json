@@ -1,0 +1,7 @@
+{
+  "model": {"params": {"window": 3, "dim_out": 32, "ks": 3}},
+  "data": {"scaler": {"name": "minmax01"}, "graph": {"symmetric": true},
+    "features": {"time_in_day": true}},
+  "training": {"optimizer": {"name": "adam", "lr": 0.0007, "eps": 1e-7, "betas": [0.8, 0.999]},
+    "loss": {"name": "masked_mse", "mask_value": null}}
+}

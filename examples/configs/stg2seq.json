@@ -1,0 +1,7 @@
+{
+  "data": {"dataset": "Tiny", "data_dir": "data", "cache_dir": "cache", "cache": true,
+    "input_window": 4, "output_window": 2, "pad_training": false},
+  "model": {"name": "STG2Seq", "params": {"window": 2, "dim_out": 4, "ks": 2}},
+  "training": {"epochs": 2, "batch_size": 8},
+  "runtime": {"device": "cpu", "seed": 17, "output_dir": "runs"}
+}
