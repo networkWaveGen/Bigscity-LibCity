@@ -1,5 +1,5 @@
 {
-  "scope": "Remaining-work commits 1-10; whole-library migration remains in progress",
+  "scope": "Remaining-work commits 1-12; whole-library migration remains in progress",
   "environment": {
     "python": "3.12.13",
     "torch": "2.15.0+cpu",
@@ -7,7 +7,7 @@
     "platform": "Windows-11-10.0.26200-SP0"
   },
   "full_tests": {
-    "tests": 247,
+    "tests": 256,
     "failures": 0,
     "errors": 0,
     "skipped": 0
@@ -112,6 +112,7 @@
     "test_calendar_feature_does_not_implicitly_enable_external_file",
     "test_cli_model_switch_uses_new_preset_without_old_architecture_fields",
     "test_cpu_convolution_amp_lifecycle_and_backend_restoration",
+    "test_cpu_amp_fallback_does_not_require_a_convolution_module",
     "test_reference_forward_and_gradient_match_for_original_horizon",
     "test_crann_native_inputs_raw_mask_single_batch_and_target_time_split",
     "test_crann_short_training_independent_evaluation_and_exact_resume",
@@ -240,6 +241,14 @@
     "test_trajectory_cell_variants_and_batch_one[GRU]",
     "test_line_first_order_matches_original_dot_product_and_objective",
     "test_task_metrics_use_global_counts_with_short_batches_and_seconds",
+    "test_expert_reference_auxiliary_loss_and_gradients[False]",
+    "test_expert_reference_auxiliary_loss_and_gradients[True]",
+    "test_complete_training_independent_evaluation_and_exact_resume[True]",
+    "test_complete_training_independent_evaluation_and_exact_resume[False]",
+    "test_routing_labels_use_expert_axis_and_ignore_invalid_positions",
+    "test_raw_mask_multitarget_calendar_and_label_free_dtype",
+    "test_original_learning_rate_curve_and_safe_resumable_state",
+    "test_cpu_amp_and_input_guards",
     "test_target_windows_are_disjoint_and_history_can_precede_boundary",
     "test_future_inputs_are_explicit_and_never_read_targets_or_future_observations",
     "test_known_external_columns_require_explicit_declaration",
@@ -264,8 +273,8 @@
   ],
   "inventory": {
     "total": 100,
-    "migrated": 35,
-    "pending": 65
+    "migrated": 36,
+    "pending": 64
   },
   "history": [
     {
@@ -337,6 +346,20 @@
         "migrated": 34,
         "pending": 66
       }
+    },
+    {
+      "scope": "commits 1-10, through 8a1de42",
+      "full_tests": {
+        "tests": 247,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "inventory": {
+        "total": 100,
+        "migrated": 35,
+        "pending": 65
+      }
     }
   ],
   "current_cli": {
@@ -359,6 +382,11 @@
   },
   "megacrn_cli": {
     "report": "megacrn-cli-validation.json",
+    "commands": 3,
+    "fixture_commands": 1
+  },
+  "testam_cli": {
+    "report": "testam-cli-validation.json",
     "commands": 3,
     "fixture_commands": 1
   }

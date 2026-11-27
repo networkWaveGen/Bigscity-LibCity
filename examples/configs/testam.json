@@ -1,0 +1,8 @@
+{
+  "data": {"dataset": "Tiny", "data_dir": "data", "cache_dir": "cache", "cache": true,
+    "input_window": 4, "output_window": 2, "pad_training": false},
+  "model": {"name": "TESTAM", "params": {"hidden_size": 8, "layers": 1}},
+  "training": {"epochs": 2, "batch_size": 8,
+    "scheduler": {"name": "inverse_sqrt_cosine", "interval": "step", "model_dim": 8, "warmup_steps": 4}},
+  "runtime": {"device": "cpu", "seed": 17, "output_dir": "runs"}
+}

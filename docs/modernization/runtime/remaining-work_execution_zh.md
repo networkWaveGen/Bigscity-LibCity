@@ -16,6 +16,7 @@
 | commit8 | b60ca0e | feat: migrate sparse road autoencoders with explicit reconstruction protocol |
 | commit9 | abdd51b | feat: migrate multiscale graph forecasts with explicit CPT branches |
 | commit10 | 8a1de42 | feat: migrate memory forecasts with explicit curriculum and auxiliary step |
+| commit11 | bf174ae | fix: cover matrix-only models in CPU AMP backward fallback |
 
 ## commit1：修复基础交通缓存（670b325）
 
@@ -114,6 +115,14 @@ Seq2Seq 旧实现推理仍读取 y 且随机生成解码起点，现使用固定
 修复：隔离 RNG 的一次性后端探测同时执行卷积与线性投影前向/反向；所有 CPU AMP 训练按实际探测结果选择反向内核，不再按模型中是否存在 Conv 决定。仍只在反向上下文切换后端，结束时恢复设置，保留混合精度前向，CUDA 路径不受影响。
 
 验证：CPU AMP、定制训练与 STSSL 共 **13 passed**。新增无卷积 STAEformer 实际训练与回退选择验证；原卷积模型的连续/中断恢复和后端设置恢复保持通过。TESTAM 迁移与完整回归在独立提交中验收。
+
+## commit12：迁移 TESTAM 三专家与路由监督
+
+新增标准 nn.Module、训练期辅助前向与简短 expert_step，保留时间专家、动态图专家、注意力专家及记忆门控。普通 forward 始终返回预测，不读取标签。原始标签、专家误差、分位数与非分位数路由监督由训练 step 处理，验证使用公共预测指标。公共工具新增显式 inverse_sqrt_cosine 步级调度器，保留旧预热/周期学习率曲线，状态由统一检查点保存。
+
+修复：旧自适应专家把隐藏残差通道作为预测；旧路由按 input_dim 展平，破坏多观测/多目标；未来时刻固定加 12，且假定时刻总在最后一列；非分位数监督沿错误轴索引；未来时间专家的默认零输入在观测通道多于隐藏宽度时维度错误。现在按专家轴选择预测通道，时刻/观测索引来自元信息，预测时刻按实际窗口及已知 future_features 计算，目标零值和 NaN 同时从专家与路由监督中排除。当前明确要求连续输入且 output_window<=input_window，取尾部对应未来的预测槽位，不静默改变评测窗口。
+
+验证：新增 TESTAM **8 项通过**，覆盖原专家计算、修正后的路由与辅助目标及梯度、prob_mul 两种分支、两种路由训练模式、原学习率曲线、观测通道数大于隐藏宽度、多目标/batch=1/float64/无标签、原尺度缺失值掩码、CPU AMP，以及三轮 dropout 连续训练与中断恢复逐参数、步数和调度器一致。完整回归 **256 passed，0 failed，0 errors，0 skipped**。发布夹具和仓库外训练/评估/续训共 4 条命令成功，独立评估与训练后评估一致，续训至第三轮，见 [TESTAM CLI 记录](testam-cli-validation.json)。迁移表为 **36/100**，64 条 pending；按本期排除 7 个延期 Common 和 2 个模板的口径，仍有 **55 个**实际模型待迁移。
 
 ## 持续完成的清单
 

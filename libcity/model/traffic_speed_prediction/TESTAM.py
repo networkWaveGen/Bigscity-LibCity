@@ -282,7 +282,7 @@ class TemporalModel(nn.Module):
         # The user may modify this node feature into meta-learning based representation, which enables the ability to adopt the model into different dataset
         x_nemb = torch.einsum('btc, nc -> bntc', TIM, self.node_features)  # BTN 32
         if speed is None:
-            speed = torch.zeros_like(x_nemb[..., :self.in_dim])
+            speed = x_nemb.new_zeros(*x_nemb.shape[:-1],self.in_dim)
         else:
             speed = speed.permute(0, 2, 3, 1)
         # x_spd = self.spd_proj(speed.unsqueeze(dim=-1))

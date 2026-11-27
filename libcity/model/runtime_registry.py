@@ -29,6 +29,8 @@ class ModelSpec:
 
 
 MODELS = {
+    'TESTAM': ModelSpec('libcity.model.traffic_speed_prediction.runtime_testam:TESTAM',
+        step='libcity.executor.testam_step:expert_step'),
     'MegaCRN': ModelSpec('libcity.model.traffic_speed_prediction.runtime_megacrn:MegaCRN',
         step='libcity.model.traffic_speed_prediction.runtime_megacrn:memory_step'),
     'ASTGCN': ModelSpec('libcity.model.traffic_flow_prediction.runtime_multiscale:ASTGCN'),

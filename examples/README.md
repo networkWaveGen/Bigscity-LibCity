@@ -55,6 +55,14 @@ number of input samples differs from their span on the original timeline.
 future time features. Its auxiliary memory losses and curriculum targets are
 used only by the training step; ordinary forward/evaluation returns predictions
 without labels. Resume restores the curriculum counter and random generators.
+
+`--model TESTAM` creates a three-expert forecast example. Its ordinary forward
+returns a prediction tensor; expert/routing supervision is training-only.
+Time-of-day comes from metadata, and the example uses a two-step forecast from
+four historical steps. The original warmup/periodic learning-rate curve is
+configured explicitly with `inverse_sqrt_cosine`; keep `scheduler.model_dim`
+aligned with the intended optimizer scale when changing the model width.
+
 The complete supported-model inventory and migration details are in the
 [runtime guide](../docs/modernization/runtime/README_zh.md). Small examples prove
 execution and reproducibility, not real-city benchmark accuracy.

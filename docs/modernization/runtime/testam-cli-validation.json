@@ -1,0 +1,89 @@
+{
+  "passed": true,
+  "fixture_commands": 1,
+  "commands": [
+    {
+      "arguments": [
+        "D:\\LibCity 2.0\\LibCity-modernization\\tools\\make_runtime_fixture.py",
+        "--directory",
+        "D:\\LibCity 2.0\\.runtime-tests\\testam-cli-9j3s63hx\\case",
+        "--model",
+        "TESTAM"
+      ],
+      "exit_code": 0
+    },
+    {
+      "arguments": [
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "train",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\testam-cli-9j3s63hx\\case\\testam.json",
+        "--set",
+        "runtime.exp_id=train"
+      ],
+      "exit_code": 0
+    },
+    {
+      "arguments": [
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "evaluate",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\testam-cli-9j3s63hx\\case\\testam.json",
+        "--checkpoint",
+        "D:\\LibCity 2.0\\.runtime-tests\\testam-cli-9j3s63hx\\case\\runs\\train\\checkpoints\\best.pt",
+        "--set",
+        "runtime.exp_id=evaluate"
+      ],
+      "exit_code": 0
+    },
+    {
+      "arguments": [
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "train",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\testam-cli-9j3s63hx\\case\\testam.json",
+        "--resume",
+        "D:\\LibCity 2.0\\.runtime-tests\\testam-cli-9j3s63hx\\case\\runs\\train\\checkpoints\\last.pt",
+        "--set",
+        "runtime.exp_id=resumed",
+        "--set",
+        "training.epochs=3"
+      ],
+      "exit_code": 0
+    }
+  ],
+  "metrics": {
+    "train": {
+      "MAE@1": 0.8793475539595993,
+      "RMSE@1": 1.0818981377100527,
+      "MAE@2": 0.9034914440578885,
+      "RMSE@2": 1.1043595823902839,
+      "loss": 0.891419529914856,
+      "best_validation": 0.9512186646461487
+    },
+    "evaluate": {
+      "MAE@1": 0.8793475539595993,
+      "RMSE@1": 1.0818981377100527,
+      "MAE@2": 0.9034914440578885,
+      "RMSE@2": 1.1043595823902839,
+      "loss": 0.891419529914856
+    },
+    "resume": {
+      "MAE@1": 0.8921289090757016,
+      "RMSE@1": 1.103918245592336,
+      "MAE@2": 0.9163712042349356,
+      "RMSE@2": 1.1278249442497708,
+      "loss": 0.9042500853538513,
+      "best_validation": 0.9393143057823181
+    }
+  },
+  "resume_epoch": 3,
+  "train_state": {
+    "stage": "train",
+    "epoch": 3,
+    "batches_seen": 9,
+    "optimizer_steps": 9,
+    "best_metric": 0.9393143057823181,
+    "task_state": {}
+  }
+}

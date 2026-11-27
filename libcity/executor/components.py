@@ -73,6 +73,19 @@ def build_scheduler(optimizer, config, *, epochs, steps_per_epoch):
     monitor = options.pop('monitor', 'val_loss')
     if name == 'none':
         scheduler = None
+    elif name == 'inverse_sqrt_cosine':
+        dimension = options.pop('model_dim')
+        warmup = options.pop('warmup_steps')
+        multiplier = options.pop('lr_multiplier', 1.)
+        def learning_rate(step):
+            # LambdaLR initializes at zero; prepare the rate for update one.
+            update = step + 1
+            if update <= warmup:
+                return multiplier * dimension ** -.5 * min(update ** -.5, update * warmup ** -1.5)
+            return multiplier * dimension ** -.5 * warmup ** -.5 * (
+                1 + math.cos(math.pi * ((update - warmup) % warmup) / warmup))
+        base = optimizer.defaults['lr']
+        scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer,lambda step: learning_rate(step)/base)
     elif name == 'warmup_cosine':
         warmup = options.pop('warmup_steps', 0)
         total = options.pop('total_steps', epochs * steps_per_epoch)

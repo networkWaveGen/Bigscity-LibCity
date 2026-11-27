@@ -1,9 +1,10 @@
 # 新运行时模型迁移范围
 
-当前共 33 个运行时入口，对应原清单中的 35 个任务—模型条目（轨迹 RNN/LSTM/GRU 共用一个入口）。完整 [100 项 CSV](model-migration.csv) 逐项记录实际能力、依赖、验证与后续动作；其余 65 项仍为 pending，不会自动回退到旧运行时。37 个特殊交通数据集的深度整理仍延后。交通数据统一使用目标时间互斥切分，三个地图匹配算法均为独立直接执行入口。
+当前共 34 个运行时入口，对应原清单中的 36 个任务—模型条目（轨迹 RNN/LSTM/GRU 共用一个入口）。完整 [100 项 CSV](model-migration.csv) 逐项记录实际能力、依赖、验证与后续动作；其余 64 项仍为 pending，不会自动回退到旧运行时。37 个特殊交通数据集的深度整理仍延后。交通数据统一使用目标时间互斥切分，三个地图匹配算法均为独立直接执行入口。
 
 | 名称 | 任务/数据 | 训练接入 | 检查点/续训能力 | 实际验证级别 |
 | --- | --- | --- | --- | --- |
+| TESTAM | traffic_state_pred / 三专家与记忆路由 | 默认 train_loop + 专家/门控辅助 step | 需要权重；完整续训 | 旧专家计算、修正的预测切片/路由及辅助损失梯度对照、两种路由模式、原学习率曲线、原尺度掩码、多目标/多观测/batch=1/float64、完整训练/独立评估/dropout 精确续训、CPU AMP、实际 CLI |
 | MegaCRN | traffic_state_pred / 记忆银行+显式未来协变量 | 默认 train_loop + 记忆辅助/课程 step | 需要权重；完整续训 | 旧预测/记忆/辅助目标及梯度对照、训练态纯 forward 无标签且不消耗 RNG、课程 NumPy 随机状态与下一轮逐参数恢复、无协变量/batch=1/float64、CPU AMP、实际 CLI |
 | ASTGCN / MSTGCN | traffic_state_pred / 显式 CPT 三分支 | 默认 train_loop | 需要权重；完整续训 | 三分支旧前向/梯度、周期顺序、图 buffer、不同过滤器宽度及多目标、batch=1/float64、完整训练/独立评估/精确续训、CPU AMP 与单节点图、实际 CLI |
 | ChebConv / GAT | road_representation / 节点属性重建协议 | 默认 train_loop + 节点重建损失/评估 | 需要权重；完整续训 | 旧前向/梯度、互斥节点划分、训练节点归一化、常量与缺失属性、嵌入导出、完整训练/独立评估/精确续训、float64/CPU AMP、2,000 节点稀疏样例与实际 CLI；ChebConv 声明 CPU/CUDA |
@@ -49,6 +50,8 @@ ChebConv/GAT 保留全图节点属性自编码目标，使用具名 `road_recons
 ASTGCN/MSTGCN 按元信息中的 trend/period/closeness 顺序切分输入，映射到各自原有的周/日/小时分支；图谱基注册为 buffer，时间图卷积按时间轴批量计算。保留各分支注意力、图卷积、残差、归一化和矩阵融合计算。MSTGCN 后续块按时间过滤器的实际输出宽度构造；单节点/零拉普拉斯图使用有限的缩放谱基。运行日志记录 data.sampling，摘要同时记录输入样本数和原始时间轴上的 history_span_points；原 Common 变体未合并。
 
 MegaCRN 的普通 forward 在 train/eval 状态均只返回预测张量；记忆三元组/紧凑性损失与显式目标只在训练 step/forward_with_aux 使用，验证以原尺度预测指标选模。解码协变量只取 future_features 中声明为可提前获知的通道，支持没有协变量的情况；历史编码保留原实现仅使用目标通道的设计。临时状态随输入类型/设备创建，图卷积单位阵类型与支持矩阵一致，课程阈值在极大步数下安全归零。
+
+TESTAM 保留时间、动态图、注意力三个专家与记忆门控。旧 STModel 的隐藏残差通道不再作为预测参与路由；多目标按显式专家轴选择，时间通道来自元信息，未来时刻按实际预测窗和 future_features 构造。当前要求连续窗口且 output_window<=input_window，输出取对应未来区间的尾部槽位。普通 forward 始终只返回预测，辅助专家输出只在训练方法中使用；原始目标零值/NaN 不参与专家或门控监督。inverse_sqrt_cosine 调度器保留原预热/周期曲线，interval=step；修改 hidden_size 时应同步显式调整 scheduler.model_dim，避免把优化设置隐藏在模型内部。
 
 本轮有意修订的旧训练行为与原因见 [执行记录](execution_zh.md)。旧源文件中的神经网络层仍被复用；旧数学实现保留为迁移参考，旧 Executor、配置解析器与批对象已在阶段五删除。
 

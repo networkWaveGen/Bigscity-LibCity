@@ -184,7 +184,8 @@ def validate(config, preset):
     for key, names in {
         'optimizer': ('name', 'lr', 'weight_decay', 'betas', 'eps', 'momentum', 'alpha', 'groups'),
         'scheduler': ('name', 'interval', 'step_size', 'gamma', 'milestones', 'T_max', 'eta_min', 'patience',
-                      'factor', 'monitor', 'mode', 'max_lr', 'total_steps', 'pct_start', 'warmup_steps'),
+                      'factor', 'monitor', 'mode', 'max_lr', 'total_steps', 'pct_start', 'warmup_steps',
+                      'model_dim', 'lr_multiplier'),
         'loss': ('name', 'mask_value','alpha','eps'), 'early_stopping': ('patience', 'min_delta')}.items():
         _known(training[key], names, f'training.{key}')
     if training['optimizer'].get('name') not in ('adam', 'adamw', 'sgd', 'rmsprop', 'adagrad'):
@@ -207,7 +208,7 @@ def validate(config, preset):
             if key in group:
                 _number(group[key], f'optimizer group {key}', strict=key == 'lr')
     scheduler = training['scheduler']
-    if scheduler.get('name') not in ('none', 'step', 'multistep', 'cosine', 'exponential', 'plateau', 'onecycle', 'warmup_cosine'):
+    if scheduler.get('name') not in ('none', 'step', 'multistep', 'cosine', 'exponential', 'plateau', 'onecycle', 'warmup_cosine', 'inverse_sqrt_cosine'):
         raise ValueError('Unknown scheduler name')
     interval = scheduler.get('interval', 'epoch')
     if interval not in ('step', 'epoch', 'metric'):
@@ -216,8 +217,12 @@ def validate(config, preset):
         raise ValueError('scheduler.interval must be explicitly declared')
     if scheduler['name'] == 'plateau' and interval != 'metric':
         raise ValueError('plateau scheduler requires interval=metric')
-    if scheduler['name'] in ('onecycle', 'warmup_cosine') and interval != 'step':
-        raise ValueError('onecycle/warmup_cosine scheduler requires interval=step')
+    if scheduler['name'] in ('onecycle', 'warmup_cosine', 'inverse_sqrt_cosine') and interval != 'step':
+        raise ValueError('onecycle/warmup_cosine/inverse_sqrt_cosine scheduler requires interval=step')
+    if scheduler['name']=='inverse_sqrt_cosine':
+        _positive(scheduler.get('model_dim'),'scheduler.model_dim')
+        _positive(scheduler.get('warmup_steps'),'scheduler.warmup_steps')
+        _number(scheduler.get('lr_multiplier',1.),'scheduler.lr_multiplier',strict=True)
     road_losses = ('mae','mse') if spec.protocol=='road_reconstruction' else ('negative_sampling',)
     losses={'traj_loc_pred':('nll',),'road_representation':road_losses,'eta':('mae','mse')}.get(
         spec.task,('mae','mse','masked_mae','masked_mse'))
