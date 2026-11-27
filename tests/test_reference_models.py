@@ -1,116 +1,74 @@
-"""Regression coverage for evaluation, checkpoint, configuration and CPU fixes."""
-
+"""Numerical regressions for retained source, not extra runtime support."""
 import copy
 import importlib
 import logging
-from types import SimpleNamespace
-
 import numpy as np
 import pytest
 import torch
-
-from libcity.config.config_parser import ConfigParser
-from libcity.data.dataset.dataset_subclass.crann_dataset import CRANNDataset
 from libcity.data.dataset.traffic_state_datatset import TrafficStateDataset
+from libcity.data.dataset.dataset_subclass.crann_dataset import CRANNDataset
 from libcity.data.utils import generate_dataloader
-from libcity.executor.chebconv_executor import ChebConvExecutor
-from libcity.executor.traffic_state_executor import TrafficStateExecutor
+from libcity.model.traffic_od_prediction.CSTN import CSTN
 from libcity.utils.checkpoint import copy_state_to_cpu
 from libcity.utils.normalization import NoneScaler
 
 
 @pytest.fixture(autouse=True)
-def isolated_run(tmp_path, monkeypatch):
+def isolated_run(tmp_path,monkeypatch):
     monkeypatch.chdir(tmp_path)
-    previous = torch.get_num_threads()
+    previous=torch.get_num_threads()
     torch.set_num_threads(1)
     yield
     torch.set_num_threads(previous)
 
 
-class Forecast(torch.nn.Module):
-    def __init__(self):
-        super().__init__()
-        self.weight = torch.nn.Parameter(torch.tensor(0.))
-
-    def predict(self, batch):
-        return torch.zeros_like(batch['y']) + self.weight
-
-    def calculate_loss(self, batch):
-        return (self.predict(batch) - batch['y']).abs().mean()
+def reference_model(config,features):
+    paths={'STNN':'traffic_flow_prediction.STNN','DSAN':'traffic_flow_prediction.DSAN'}
+    cls=getattr(importlib.import_module('libcity.model.'+paths[config['model']]),config['model'])
+    return cls(config,features)
 
 
-def executor(executor_class=TrafficStateExecutor, **overrides):
-    config = dict(evaluator='TrafficStateEvaluator', metrics=['MAE'],
-                  evaluator_mode='single', save_mode=['csv'], device=torch.device('cpu'),
-                  exp_id=1, model='Forecast', dataset='fixture', max_epoch=2,
-                  learning_rate=0.1, saved_model=False, load_best_epoch=True,
-                  save_predictions=True)
-    config.update(overrides)
-    return executor_class(config, Forecast(), {'scaler': NoneScaler()})
+@pytest.mark.parametrize('mode', [None, 'refine', 'discover'])
+def test_stnn_forecasts_on_cpu(monkeypatch, mode):
+    monkeypatch.setattr(torch, 'set_default_tensor_type',
+                        lambda *_: pytest.fail('STNN changed the global tensor type'))
+    device = torch.device('cpu')
+    config = {'task': 'traffic_state_pred', 'model': 'STNN', 'device': device,
+              'input_window': 12, 'output_window': 2, 'mode': mode}
+    model = reference_model(config, {
+        'scaler': NoneScaler(), 'num_nodes': 41,
+        'adj_mx': np.roll(np.eye(41, dtype=np.float32), 1, axis=1),
+    })
+    batch = {'X': torch.rand(2, 12, 41, 1, device=device),
+             'y': torch.ones(2, 2, 41, 1, device=device)}
+
+    prediction = model.predict(batch)
+    assert prediction.shape == batch['y'].shape
+    assert prediction.device == model.relations.device == device
+    assert torch.isfinite(prediction).all()
+    prediction.mean().backward()
+    assert model.factors.grad is not None
 
 
-def samples():
-    return [(np.zeros((1, 1, 1)), np.full((1, 1, 1), value)) for value in (1., 2., 100.)]
+def test_dsan_forecasts_and_trains_on_cpu():
+    device = torch.device('cpu')
+    config = {'task': 'traffic_state_pred', 'model': 'DSAN', 'device': device,
+              'input_window': 2, 'output_window': 2, 'L': 1,
+              'l_d': 1, 'r_d': 0}
+    model = reference_model(config, {
+        'scaler': NoneScaler(), 'len_row': 2, 'len_column': 2, 'num_nodes': 4,
+        'feature_dim': 3, 'ext_dim': 1, 'output_dim': 2,
+    })
+    batch = {'X': torch.rand(2, 2, 2, 2, 3, device=device),
+             'y': torch.ones(2, 2, 2, 2, 2, device=device)}
 
-
-@pytest.mark.parametrize('pad', [False, True])
-def test_evaluation_and_validation_use_only_real_samples(tmp_path, pad):
-    train, valid, test = generate_dataloader(samples(), samples(), samples(),
-        {'X': 'float', 'y': 'float'}, 2, 0, pad_with_last_sample=pad)
-    assert sum(len(batch['X']) for batch in train) == (4 if pad else 3)
-    assert [value for batch in valid for value in batch['y'].reshape(-1)] == [1., 2., 100.]
-    runner = executor()
-    try:
-        assert runner._valid_epoch(valid, 0) == pytest.approx(103 / 3)
-        result = runner.evaluate(test)
-        assert result['MAE'].iloc[0] == pytest.approx(103 / 3)
-        archive = next((tmp_path / 'libcity/cache/1/evaluate_cache').glob('*.npz'))
-        with np.load(archive) as stored:
-            assert stored['truth'].shape[0] == 3
-            np.testing.assert_array_equal(stored['truth'].reshape(-1), [1., 2., 100.])
-    finally:
-        runner._writer.close()
-
-
-def test_no_disk_save_restores_best_model_and_nonempty_adam(tmp_path):
-    train, valid, _ = generate_dataloader(samples(), samples(), samples(),
-        {'X': 'float', 'y': 'float'}, 2, 0, shuffle=False)
-    runner = executor()
-    states = []
-
-    def validation(*_):
-        states.append((copy.deepcopy(runner.model.state_dict()),
-                       copy.deepcopy(runner.optimizer.state_dict())))
-        return (0.1, 1.)[len(states) - 1]
-
-    runner._valid_epoch = validation
-    try:
-        runner.train(train, valid)
-        torch.testing.assert_close(runner.model.weight, states[0][0]['weight'])
-        restored = runner.optimizer.state_dict()['state']
-        assert restored
-        for key in restored:
-            for field in restored[key]:
-                torch.testing.assert_close(restored[key][field], states[0][1]['state'][key][field])
-        assert not list((tmp_path / 'libcity/cache/1/model_cache').iterdir())
-        assert states[0][0]['weight'].item() != states[1][0]['weight'].item()
-    finally:
-        runner._writer.close()
-
-
-def test_chebconv_without_disk_save_keeps_existing_checkpoint(tmp_path):
-    runner = executor(ChebConvExecutor, max_epoch=1)
-    checkpoint = tmp_path / runner.cache_dir / 'previous-run.tar'
-    checkpoint.write_bytes(b'previous checkpoint')
-    runner._train_epoch = lambda *_: 0.
-    runner._valid_epoch = lambda *_: 0.1
-    try:
-        runner.train([], [])
-        assert list(checkpoint.parent.iterdir()) == [checkpoint]
-        assert checkpoint.read_bytes() == b'previous checkpoint'
-    finally:
-        runner._writer.close()
+    prediction = model.predict(batch)
+    assert prediction.shape == batch['y'].shape
+    assert prediction.device == device
+    loss = model.calculate_loss(batch)
+    assert torch.isfinite(loss)
+    loss.backward()
+    assert model.dsan.final_layer.weight.grad is not None
 
 
 def test_cpu_snapshot_owns_optimizer_tensors_and_state_metadata():
@@ -161,48 +119,6 @@ def test_time_splits_reject_empty_test_and_keep_fields_aligned(dataset_class, fi
     expected = [field[start:stop] for start, stop in ((0, 6), (6, 8), (8, 10)) for field in fields]
     for result, wanted in zip(actual, expected, strict=True):
         np.testing.assert_array_equal(result, wanted)
-
-
-@pytest.mark.parametrize('external', [{}, {'learning_rate': .1}])
-def test_explicit_arguments_override_search_but_search_overrides_json_defaults(external):
-    config = object.__new__(ConfigParser)
-    config.config = {}
-    config._parse_external_config('traffic_state_pred', 'GRU', 'fixture',
-                                 other_args=external, hyper_config_dict={'learning_rate': .001})
-    assert config['learning_rate'] == external.get('learning_rate', .001)
-
-
-@pytest.mark.parametrize(('train', 'cached', 'task'), [
-    (False, False, 'traffic_state_pred'), (False, True, 'traffic_state_pred'),
-    (True, False, 'traffic_state_pred'), (False, False, 'map_matching'),
-])
-def test_pipeline_uses_resolved_mode_and_never_silently_trains(monkeypatch, train, cached, task):
-    pipeline = importlib.import_module('libcity.pipeline.pipeline')
-    class Config(dict):
-        @property
-        def config(self):
-            return self
-
-    settings = Config(task=task, train=train, saved_model=False, exp_id=1, seed=0)
-    calls = []
-    monkeypatch.setattr(pipeline, 'ConfigParser', lambda *args: settings)
-    monkeypatch.setattr(pipeline.os.path, 'isfile', lambda *_: cached)
-    monkeypatch.setattr(pipeline, 'get_logger', lambda *_: logging.getLogger(__name__))
-    monkeypatch.setattr(pipeline, 'set_random_seed', lambda *_: None)
-    monkeypatch.setattr(pipeline, 'get_dataset', lambda *_: SimpleNamespace(
-        get_data=lambda: ([], [], []), get_data_feature=lambda: {}))
-    monkeypatch.setattr(pipeline, 'get_model', lambda *_: Forecast())
-    monkeypatch.setattr(pipeline, 'get_executor', lambda *_: SimpleNamespace(
-        train=lambda *_: calls.append('train'), save_model=lambda *_: calls.append('save'),
-        load_model=lambda *_: calls.append('load'), evaluate=lambda *_: calls.append('evaluate')))
-    if not train and not cached and task != 'map_matching':
-        with pytest.raises(FileNotFoundError, match='Evaluation-only mode'):
-            pipeline.run_model(task, 'GRU', 'fixture', train=True, saved_model=True)
-        assert calls == []
-    else:
-        pipeline.run_model(task, 'GRU', 'fixture', train=True, saved_model=True)
-        assert calls == (['train', 'evaluate'] if train else (
-            ['load', 'evaluate'] if task != 'map_matching' else ['evaluate']))
 
 
 @pytest.mark.parametrize('name', ['ACFM', 'ACFMCommon'])
@@ -281,3 +197,52 @@ def test_rgsl_graph_forecast_and_gradient_on_cpu():
     assert torch.isfinite(loss)
     loss.backward()
     assert model.node_embeddings.grad is not None
+
+
+@pytest.mark.parametrize('count', [1, 2, 3])
+def test_cstn_actual_batch_size_and_gradient(count):
+    model = CSTN(dict(device=torch.device('cpu'), batch_size=2, input_window=1,
+                      output_window=1, output_dim=1, n_layers=1, c_lt=2),
+                 dict(scaler=NoneScaler(), len_row=1, len_column=1))
+    batch = dict(X=torch.ones(count, 1, 1, 1, 1, 1, 1), W=torch.ones(count, 1, 29),
+                 y=torch.ones(count, 1, 1, 1, 1, 1, 1))
+    output = model.predict(batch)
+    assert output.shape == batch['y'].shape
+    loss = model.calculate_loss(batch)
+    loss.backward()
+    assert torch.isfinite(loss)
+    assert any(p.grad is not None and torch.isfinite(p.grad).all() for p in model.parameters())
+
+
+@pytest.mark.parametrize('cache', [False, True])
+def test_real_dataset_get_data_twice_preserves_loaders_values_and_scaler(cache, tmp_path):
+    runner = object.__new__(TrafficStateDataset)
+    runner.data = None
+    runner.cache_dataset = cache
+    runner.cache_file_name = str(tmp_path / 'cached.npz')
+    arrays = [np.arange(size, dtype=float).reshape(size, 1, 1, 1) + 1 for size in (6, 6, 2, 2, 2, 2)]
+    if cache:
+        np.savez(runner.cache_file_name, cache_config=np.asarray(runner._cache_config_json()), **dict(zip(
+            ('x_train', 'y_train', 'x_val', 'y_val', 'x_test', 'y_test'), arrays)))
+    calls = []
+
+    def generate():
+        calls.append(True)
+        return tuple(value.copy() for value in arrays)
+
+    runner._generate_train_val_test = generate
+    runner.robustness_test = False
+    runner.scaler_type, runner.ext_scaler_type = 'standard', 'none'
+    runner.output_dim, runner.normal_external = 1, False
+    runner.feature_name = {'X': 'float', 'y': 'float'}
+    runner.batch_size, runner.num_workers, runner.pad_with_last_sample = 2, 0, False
+    runner._logger = logging.getLogger(__name__)
+    first = runner.get_data()
+    mean, std = runner.scaler.mean, runner.scaler.std
+    before = [copy.deepcopy(loader.dataset[0]) for loader in first]
+    second = runner.get_data()
+    assert all(a is b for a, b in zip(first, second))
+    assert (runner.scaler.mean, runner.scaler.std) == (mean, std)
+    for loader, original in zip(second, before):
+        np.testing.assert_array_equal(loader.dataset[0][0], original[0])
+    assert len(calls) == (0 if cache else 1)

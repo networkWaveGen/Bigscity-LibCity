@@ -1,3 +1,4 @@
+"""Historical mathematical reference; not a supported runtime or CLI."""
 import sys
 import os
 import json
@@ -108,7 +109,3 @@ def main():
     y_pred, y_true = run_SVR(data)
     evaluate_model(y_pred=y_pred, y_true=y_true, metrics=config['metrics'],
                    path=config['model']+'_'+config['dataset']+'_metrics.csv')
-
-
-if __name__ == '__main__':
-    main()

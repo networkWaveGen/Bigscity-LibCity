@@ -252,14 +252,6 @@ class GeoSAN(AbstractModel):
         output = torch.sum(output * loc_emb_trg, dim=-1)
         return output
 
-    def save(self, path):
-        torch.save(self.state_dict(), path)
-
-    def load(self, path):
-        from libcity.utils.checkpoint import load_checkpoint, unpack_checkpoint
-        state, _, _ = unpack_checkpoint(load_checkpoint(path, next(self.parameters()).device))
-        self.load_state_dict(state)
-
 
 class Embedding(nn.Module):
     def __init__(self, vocab_size, num_units, zeros_pad=True, scale=True):

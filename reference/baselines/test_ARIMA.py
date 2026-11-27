@@ -1,3 +1,4 @@
+"""Historical mathematical reference; not a supported runtime or CLI."""
 import json
 import warnings
 import os
@@ -122,7 +123,3 @@ def main():
     y_pred = arima(testx)
     evaluate_model(y_pred=y_pred, y_true=testy, metrics=config['metrics'],
                    path=config['model']+'_'+config['dataset']+'_metrics.csv')
-
-
-if __name__ == '__main__':
-    main()

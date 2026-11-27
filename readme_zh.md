@@ -4,7 +4,7 @@
 
 ------
 
-[![ACM SIGSpatial](https://img.shields.io/badge/ACM%20SIGSPATIAL'21-LibCity-orange)](https://dl.acm.org/doi/10.1145/3474717.3483923) [![Python](https://img.shields.io/badge/Python-3.11%2B-blue)](https://www.python.org/) [![Pytorch](https://img.shields.io/badge/Pytorch-2.6%2B-blue)](https://pytorch.org/) [![License](https://img.shields.io/badge/License-Apache%202.0-blue)](./LICENSE.txt) [![star](https://img.shields.io/github/stars/LibCity/Bigscity-LibCity?style=social)](https://github.com/LibCity/Bigscity-LibCity/stargazers) [![fork](https://img.shields.io/github/forks/LibCity/Bigscity-LibCity?style=social)](https://github.com/LibCity/Bigscity-LibCity/network/members) 
+[![ACM SIGSpatial](https://img.shields.io/badge/ACM%20SIGSPATIAL'21-LibCity-orange)](https://dl.acm.org/doi/10.1145/3474717.3483923) [![Python](https://img.shields.io/badge/Python-3.11%2B-blue)](https://www.python.org/) [![Pytorch](https://img.shields.io/badge/Pytorch-2.6%2B-blue)](https://pytorch.org/) [![License](https://img.shields.io/badge/License-Apache%202.0-blue)](./LICENSE.txt) [![star](https://img.shields.io/github/stars/LibCity/Bigscity-LibCity?style=social)](https://github.com/LibCity/Bigscity-LibCity/stargazers) [![fork](https://img.shields.io/github/forks/LibCity/Bigscity-LibCity?style=social)](https://github.com/LibCity/Bigscity-LibCity/network/members)
 
 # LibCity（阡陌）
 
@@ -156,7 +156,7 @@ LibCity 主要由北航智慧城市兴趣小组 ([BIGSCITY](https://www.bigcity.
 
 ```
 @article{libcitylong,
-  title={LibCity: A Unified Library Towards Efficient and Comprehensive Urban Spatial-Temporal Prediction}, 
+  title={LibCity: A Unified Library Towards Efficient and Comprehensive Urban Spatial-Temporal Prediction},
   author={Jiang, Jiawei and Han, Chengkai and Jiang, Wenjun and Zhao, Wayne Xin and Wang, Jingyuan},
   journal={arXiv preprint arXiv:2304.14343},
   year={2023}

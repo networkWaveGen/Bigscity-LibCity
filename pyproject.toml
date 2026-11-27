@@ -35,7 +35,7 @@ dev = ["pytest>=8,<10", "build>=1", "packaging>=24", "tensorboard>=2.18,<3"]
 include = ["libcity*"]
 
 [tool.setuptools.package-data]
-libcity = ["config/**/*.json", "config/*.json"]
+libcity = ["config/runtime/**/*.json", "config/task_config.json"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

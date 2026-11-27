@@ -11,6 +11,13 @@ import torch
 from libcity.utils.checkpoint import copy_state_to_cpu
 
 
+def require_pt(path):
+    path=Path(path)
+    if path.suffix.lower()!='.pt':
+        raise ValueError('Runtime checkpoints must be .pt files: best.pt for evaluation, last.pt for resume')
+    return path
+
+
 def resume_settings(config):
     data = {key: value for key, value in config['data'].items() if key not in ('data_dir', 'cache_dir', 'cache')}
     training = {key: value for key, value in config['training'].items() if key != 'epochs'}
@@ -93,8 +100,10 @@ class CheckpointManager:
         return self._save('last.pt', payload)
 
     def load_last(self, path, context, prepare=None):
-        payload = torch.load(path, map_location='cpu', weights_only=True)
-        required = {'model', 'optimizer', 'scheduler', 'train_state', 'rng', 'early_stopper', 'best_model', 'amp_scaler'}
+        payload = torch.load(require_pt(path), map_location='cpu', weights_only=True)
+        required = {'format_version','model', 'optimizer', 'scheduler', 'train_state', 'rng',
+                    'early_stopper', 'best_model', 'amp_scaler','model_name','model_params',
+                    'resume_settings','data_state'}
         if not isinstance(payload, dict) or not required <= payload.keys():
             raise ValueError('Resume requires a complete last.pt; best.pt contains inference weights only')
         if payload['model_name'] != context.config['model']['name'] or payload['model_params'] != context.config['model']['params']:
@@ -125,7 +134,7 @@ class CheckpointManager:
 
     @staticmethod
     def load_weights(path, model):
-        state = torch.load(path, map_location='cpu', weights_only=True)
+        state = torch.load(require_pt(path), map_location='cpu', weights_only=True)
         if not isinstance(state, dict) or not all(isinstance(value, torch.Tensor) for value in state.values()):
             raise ValueError('Evaluation requires a pure model state_dict (best.pt)')
         model.load_state_dict(state)

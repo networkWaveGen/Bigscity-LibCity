@@ -1,0 +1,281 @@
+{
+  "baseline": "3dcae47",
+  "note": "Functions listed once; parameterized counts differ. Retired API tests replaced, not skipped.",
+  "tests": [
+    {
+      "original": "test_modern_core.py::test_core_imports_do_not_load_optional_stacks",
+      "disposition": "Executor/factory retired; train/evaluate/resume/global metrics and no-test tuning covered natively",
+      "evidence": "tests/test_runtime_engine.py;tests/test_runtime_tasks.py;tests/test_runtime_tuning.py"
+    },
+    {
+      "original": "test_modern_core.py::test_dense_batch_values_and_source_ownership",
+      "disposition": "Custom batch API retired; ownership/padding/lengths/spawn covered with Tensor dictionaries",
+      "evidence": "tests/test_runtime_retirement.py"
+    },
+    {
+      "original": "test_modern_core.py::test_padding_and_ragged_fields_do_not_mutate_samples",
+      "disposition": "Custom batch API retired; ownership/padding/lengths/spawn covered with Tensor dictionaries",
+      "evidence": "tests/test_runtime_retirement.py"
+    },
+    {
+      "original": "test_modern_core.py::test_padded_loader_keeps_batch_type_without_padding_fields",
+      "disposition": "Custom batch API retired; ownership/padding/lengths/spawn covered with Tensor dictionaries",
+      "evidence": "tests/test_runtime_retirement.py"
+    },
+    {
+      "original": "test_modern_core.py::test_padded_collator_rejects_extra_sample_fields",
+      "disposition": "Custom batch API retired; ownership/padding/lengths/spawn covered with Tensor dictionaries",
+      "evidence": "tests/test_runtime_retirement.py"
+    },
+    {
+      "original": "test_modern_core.py::test_loader_works_with_spawn_worker",
+      "disposition": "Custom batch API retired; ownership/padding/lengths/spawn covered with Tensor dictionaries",
+      "evidence": "tests/test_runtime_retirement.py"
+    },
+    {
+      "original": "test_modern_core.py::test_last_sample_padding_handles_different_input_and_target_shapes",
+      "disposition": "Custom batch API retired; ownership/padding/lengths/spawn covered with Tensor dictionaries",
+      "evidence": "tests/test_runtime_retirement.py"
+    },
+    {
+      "original": "test_modern_core.py::test_cpu_device_selection",
+      "disposition": "Flat API retired; current layered merge/type/path/CPU coverage",
+      "evidence": "tests/test_runtime_config_data.py;tests/test_runtime_engine.py"
+    },
+    {
+      "original": "test_modern_core.py::test_config_name_preserves_dotted_stem",
+      "disposition": "Flat API retired; current layered merge/type/path/CPU coverage",
+      "evidence": "tests/test_runtime_config_data.py;tests/test_runtime_engine.py"
+    },
+    {
+      "original": "test_modern_core.py::test_packaged_defaults_and_explicit_json_path",
+      "disposition": "Executor/factory retired; train/evaluate/resume/global metrics and no-test tuning covered natively",
+      "evidence": "tests/test_runtime_engine.py;tests/test_runtime_tasks.py;tests/test_runtime_tuning.py"
+    },
+    {
+      "original": "test_modern_core.py::test_factory_does_not_hide_constructor_errors",
+      "disposition": "Executor/factory retired; train/evaluate/resume/global metrics and no-test tuning covered natively",
+      "evidence": "tests/test_runtime_engine.py;tests/test_runtime_tasks.py;tests/test_runtime_tuning.py"
+    },
+    {
+      "original": "test_modern_core.py::test_forecast_forward_backward_and_checkpoint",
+      "disposition": "Executor/factory retired; train/evaluate/resume/global metrics and no-test tuning covered natively",
+      "evidence": "tests/test_runtime_engine.py;tests/test_runtime_tasks.py;tests/test_runtime_tuning.py"
+    },
+    {
+      "original": "test_modern_core.py::test_stnn_forecasts_on_cpu",
+      "disposition": "Preserved numerical/data regression; direct reference imports replace retired factories",
+      "evidence": "tests/test_reference_models.py::test_stnn_forecasts_on_cpu"
+    },
+    {
+      "original": "test_modern_core.py::test_dsan_forecasts_and_trains_on_cpu",
+      "disposition": "Preserved numerical/data regression; direct reference imports replace retired factories",
+      "evidence": "tests/test_reference_models.py::test_dsan_forecasts_and_trains_on_cpu"
+    },
+    {
+      "original": "test_modern_core.py::test_evaluation_preserves_global_metrics_and_prediction_archive",
+      "disposition": "Executor/factory retired; train/evaluate/resume/global metrics and no-test tuning covered natively",
+      "evidence": "tests/test_runtime_engine.py;tests/test_runtime_tasks.py;tests/test_runtime_tuning.py"
+    },
+    {
+      "original": "test_modern_core.py::test_atomic_files_to_training_and_evaluation",
+      "disposition": "Executor/factory retired; train/evaluate/resume/global metrics and no-test tuning covered natively",
+      "evidence": "tests/test_runtime_engine.py;tests/test_runtime_tasks.py;tests/test_runtime_tuning.py"
+    },
+    {
+      "original": "test_runtime_regressions.py::test_evaluation_and_validation_use_only_real_samples",
+      "disposition": "Executor/factory retired; train/evaluate/resume/global metrics and no-test tuning covered natively",
+      "evidence": "tests/test_runtime_engine.py;tests/test_runtime_tasks.py;tests/test_runtime_tuning.py"
+    },
+    {
+      "original": "test_runtime_regressions.py::test_no_disk_save_restores_best_model_and_nonempty_adam",
+      "disposition": "Executor/factory retired; train/evaluate/resume/global metrics and no-test tuning covered natively",
+      "evidence": "tests/test_runtime_engine.py;tests/test_runtime_tasks.py;tests/test_runtime_tuning.py"
+    },
+    {
+      "original": "test_runtime_regressions.py::test_chebconv_without_disk_save_keeps_existing_checkpoint",
+      "disposition": "Executor/factory retired; train/evaluate/resume/global metrics and no-test tuning covered natively",
+      "evidence": "tests/test_runtime_engine.py;tests/test_runtime_tasks.py;tests/test_runtime_tuning.py"
+    },
+    {
+      "original": "test_runtime_regressions.py::test_cpu_snapshot_owns_optimizer_tensors_and_state_metadata",
+      "disposition": "Preserved numerical/data regression; direct reference imports replace retired factories",
+      "evidence": "tests/test_reference_models.py::test_cpu_snapshot_owns_optimizer_tensors_and_state_metadata"
+    },
+    {
+      "original": "test_runtime_regressions.py::test_invalid_split_ratios_fail",
+      "disposition": "Preserved numerical/data regression; direct reference imports replace retired factories",
+      "evidence": "tests/test_reference_models.py::test_invalid_split_ratios_fail"
+    },
+    {
+      "original": "test_runtime_regressions.py::test_time_splits_reject_empty_test_and_keep_fields_aligned",
+      "disposition": "Preserved numerical/data regression; direct reference imports replace retired factories",
+      "evidence": "tests/test_reference_models.py::test_time_splits_reject_empty_test_and_keep_fields_aligned"
+    },
+    {
+      "original": "test_runtime_regressions.py::test_explicit_arguments_override_search_but_search_overrides_json_defaults",
+      "disposition": "Flat API retired; current layered merge/type/path/CPU coverage",
+      "evidence": "tests/test_runtime_config_data.py;tests/test_runtime_engine.py"
+    },
+    {
+      "original": "test_runtime_regressions.py::test_pipeline_uses_resolved_mode_and_never_silently_trains",
+      "disposition": "Executor/factory retired; train/evaluate/resume/global metrics and no-test tuning covered natively",
+      "evidence": "tests/test_runtime_engine.py;tests/test_runtime_tasks.py;tests/test_runtime_tuning.py"
+    },
+    {
+      "original": "test_runtime_regressions.py::test_convolution_recurrent_states_follow_cpu_and_dtype",
+      "disposition": "Preserved numerical/data regression; direct reference imports replace retired factories",
+      "evidence": "tests/test_reference_models.py::test_convolution_recurrent_states_follow_cpu_and_dtype"
+    },
+    {
+      "original": "test_runtime_regressions.py::test_dstagnn_constructs_forecasts_and_backpropagates_on_cpu",
+      "disposition": "Preserved numerical/data regression; direct reference imports replace retired factories",
+      "evidence": "tests/test_reference_models.py::test_dstagnn_constructs_forecasts_and_backpropagates_on_cpu"
+    },
+    {
+      "original": "test_runtime_regressions.py::test_stssl_temporal_loss_accepts_real_short_cpu_batch",
+      "disposition": "Preserved numerical/data regression; direct reference imports replace retired factories",
+      "evidence": "tests/test_reference_models.py::test_stssl_temporal_loss_accepts_real_short_cpu_batch"
+    },
+    {
+      "original": "test_runtime_regressions.py::test_stssl_graph_is_a_device_following_nonpersistent_buffer",
+      "disposition": "Preserved numerical/data regression; direct reference imports replace retired factories",
+      "evidence": "tests/test_reference_models.py::test_stssl_graph_is_a_device_following_nonpersistent_buffer"
+    },
+    {
+      "original": "test_runtime_regressions.py::test_sstban_temporal_embedding_and_masked_attention_stay_on_cpu",
+      "disposition": "Preserved numerical/data regression; direct reference imports replace retired factories",
+      "evidence": "tests/test_reference_models.py::test_sstban_temporal_embedding_and_masked_attention_stay_on_cpu"
+    },
+    {
+      "original": "test_runtime_regressions.py::test_rgsl_graph_forecast_and_gradient_on_cpu",
+      "disposition": "Preserved numerical/data regression; direct reference imports replace retired factories",
+      "evidence": "tests/test_reference_models.py::test_rgsl_graph_forecast_and_gradient_on_cpu"
+    },
+    {
+      "original": "test_followup_regressions.py::test_cstn_actual_batch_size_and_gradient",
+      "disposition": "Preserved numerical/data regression; direct reference imports replace retired factories",
+      "evidence": "tests/test_reference_models.py::test_cstn_actual_batch_size_and_gradient"
+    },
+    {
+      "original": "test_followup_regressions.py::test_all_batched_validation_overrides_account_for_real_samples",
+      "disposition": "Custom batch API retired; ownership/padding/lengths/spawn covered with Tensor dictionaries",
+      "evidence": "tests/test_runtime_retirement.py"
+    },
+    {
+      "original": "test_followup_regressions.py::test_real_config_json_flags_and_explicit_overrides",
+      "disposition": "Flat API retired; current layered merge/type/path/CPU coverage",
+      "evidence": "tests/test_runtime_config_data.py;tests/test_runtime_engine.py"
+    },
+    {
+      "original": "test_followup_regressions.py::test_real_cli_passes_layered_config_and_explicit_overrides",
+      "disposition": "Flat API retired; current layered merge/type/path/CPU coverage",
+      "evidence": "tests/test_runtime_config_data.py;tests/test_runtime_engine.py"
+    },
+    {
+      "original": "test_followup_regressions.py::test_json_evaluation_mode_does_not_start_data_preparation",
+      "disposition": "Executor/factory retired; train/evaluate/resume/global metrics and no-test tuning covered natively",
+      "evidence": "tests/test_runtime_engine.py;tests/test_runtime_tasks.py;tests/test_runtime_tuning.py"
+    },
+    {
+      "original": "test_followup_regressions.py::test_search_objective_rejects_disabled_training",
+      "disposition": "Executor/factory retired; train/evaluate/resume/global metrics and no-test tuning covered natively",
+      "evidence": "tests/test_runtime_engine.py;tests/test_runtime_tasks.py;tests/test_runtime_tuning.py"
+    },
+    {
+      "original": "test_followup_regressions.py::test_real_dataset_get_data_twice_preserves_loaders_values_and_scaler",
+      "disposition": "Preserved numerical/data regression; direct reference imports replace retired factories",
+      "evidence": "tests/test_reference_models.py::test_real_dataset_get_data_twice_preserves_loaders_values_and_scaler"
+    },
+    {
+      "original": "test_followup_regressions.py::test_trajectory_best_model_optimizer_scheduler_and_export_agree",
+      "disposition": "Executor retired; current tasks cover metrics/resume/repeated-trajectory exports/ranking",
+      "evidence": "tests/test_runtime_tasks.py;tests/test_runtime_retirement.py"
+    },
+    {
+      "original": "test_followup_regressions.py::test_trajectory_sample_mode_tail_has_matching_targets",
+      "disposition": "Executor retired; current tasks cover metrics/resume/repeated-trajectory exports/ranking",
+      "evidence": "tests/test_runtime_tasks.py;tests/test_runtime_retirement.py"
+    },
+    {
+      "original": "test_component_entrypoints.py::test_real_model_executor_and_evaluator_factories",
+      "disposition": "Executor/factory retired; train/evaluate/resume/global metrics and no-test tuning covered natively",
+      "evidence": "tests/test_runtime_engine.py;tests/test_runtime_tasks.py;tests/test_runtime_tuning.py"
+    },
+    {
+      "original": "test_component_entrypoints.py::test_real_dataset_and_encoder_factories",
+      "disposition": "Executor/factory retired; train/evaluate/resume/global metrics and no-test tuning covered natively",
+      "evidence": "tests/test_runtime_engine.py;tests/test_runtime_tasks.py;tests/test_runtime_tuning.py"
+    },
+    {
+      "original": "test_component_entrypoints.py::test_trajectory_gru_forward_and_backward",
+      "disposition": "Executor retired; current tasks cover metrics/resume/repeated-trajectory exports/ranking",
+      "evidence": "tests/test_runtime_tasks.py;tests/test_runtime_retirement.py"
+    },
+    {
+      "original": "test_component_entrypoints.py::test_eta_deeptte_forward_and_backward",
+      "disposition": "Executor/factory retired; train/evaluate/resume/global metrics and no-test tuning covered natively",
+      "evidence": "tests/test_runtime_engine.py;tests/test_runtime_tasks.py;tests/test_runtime_tuning.py"
+    },
+    {
+      "original": "test_component_entrypoints.py::test_road_line_loss_and_backward",
+      "disposition": "Executor/factory retired; train/evaluate/resume/global metrics and no-test tuning covered natively",
+      "evidence": "tests/test_runtime_engine.py;tests/test_runtime_tasks.py;tests/test_runtime_tuning.py"
+    },
+    {
+      "original": "test_checkpoint_resume.py::test_adam_resume_matches_uninterrupted_next_step",
+      "disposition": "Executor/factory retired; train/evaluate/resume/global metrics and no-test tuning covered natively",
+      "evidence": "tests/test_runtime_engine.py;tests/test_runtime_tasks.py;tests/test_runtime_tuning.py"
+    },
+    {
+      "original": "test_checkpoint_resume.py::test_device_forwarding_and_weights_only_default",
+      "disposition": "Migration API removed; reject legacy formats and require safe .pt loading",
+      "evidence": "tests/test_runtime_retirement.py"
+    },
+    {
+      "original": "test_checkpoint_resume.py::test_model_only_checkpoint_cannot_silently_reset_optimizer",
+      "disposition": "Executor/factory retired; train/evaluate/resume/global metrics and no-test tuning covered natively",
+      "evidence": "tests/test_runtime_engine.py;tests/test_runtime_tasks.py;tests/test_runtime_tuning.py"
+    },
+    {
+      "original": "test_checkpoint_resume.py::test_checkpoint_migration_keeps_values_and_optimizer",
+      "disposition": "Migration API removed; reject legacy formats and require safe .pt loading",
+      "evidence": "tests/test_runtime_retirement.py"
+    },
+    {
+      "original": "test_cache_eta_scalers.py::test_cache_separates_selected_columns_and_source_files",
+      "disposition": "Preserved; loaders return owned Tensor dictionaries",
+      "evidence": "tests/test_cache_eta_scalers.py::test_cache_separates_selected_columns_and_source_files"
+    },
+    {
+      "original": "test_cache_eta_scalers.py::test_cache_rebuilds_missing_or_mismatched_metadata",
+      "disposition": "Preserved; loaders return owned Tensor dictionaries",
+      "evidence": "tests/test_cache_eta_scalers.py::test_cache_rebuilds_missing_or_mismatched_metadata"
+    },
+    {
+      "original": "test_cache_eta_scalers.py::test_simst_reuses_cache_and_keeps_real_evaluation_tail",
+      "disposition": "Preserved; loaders return owned Tensor dictionaries",
+      "evidence": "tests/test_cache_eta_scalers.py::test_simst_reuses_cache_and_keeps_real_evaluation_tail"
+    },
+    {
+      "original": "test_cache_eta_scalers.py::test_legacy_cache_is_preserved_and_not_reused",
+      "disposition": "Preserved; loaders return owned Tensor dictionaries",
+      "evidence": "tests/test_cache_eta_scalers.py::test_legacy_cache_is_preserved_and_not_reused"
+    },
+    {
+      "original": "test_cache_eta_scalers.py::test_eta_export_keeps_all_trajectories_for_repeated_users",
+      "disposition": "Executor retired; current tasks cover metrics/resume/repeated-trajectory exports/ranking",
+      "evidence": "tests/test_runtime_tasks.py;tests/test_runtime_retirement.py"
+    },
+    {
+      "original": "test_cache_eta_scalers.py::test_scaler_finite_roundtrip_and_nonconstant_behavior",
+      "disposition": "Preserved; loaders return owned Tensor dictionaries",
+      "evidence": "tests/test_cache_eta_scalers.py::test_scaler_finite_roundtrip_and_nonconstant_behavior"
+    },
+    {
+      "original": "test_cache_eta_scalers.py::test_constant_data_is_finite_through_real_dataset",
+      "disposition": "Preserved; loaders return owned Tensor dictionaries",
+      "evidence": "tests/test_cache_eta_scalers.py::test_constant_data_is_finite_through_real_dataset"
+    }
+  ]
+}

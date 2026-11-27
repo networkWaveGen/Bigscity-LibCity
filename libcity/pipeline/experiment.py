@@ -87,6 +87,9 @@ def run_experiment(mode, config_file=None, *, config=None, overrides=None, check
     if checkpoint is not None and not spec.requires_checkpoint:
         raise ValueError('This algorithm does not use a checkpoint')
     for label, path in (('checkpoint', checkpoint), ('resume', resume)):
+        if path is not None:
+            from libcity.utils.runtime_checkpoint import require_pt
+            require_pt(path)
         if path is not None and not Path(path).is_file():
             raise FileNotFoundError(f'{label} file does not exist: {path}')
     if cfg['runtime']['device']=='auto' and spec.device_types==('cpu',):

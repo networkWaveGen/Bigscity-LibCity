@@ -3,7 +3,7 @@ import json
 import pandas as pd
 import math
 from tqdm import tqdm
-from libcity.registry import load_component
+from libcity.data.encoder_registry import load_encoder
 from logging import getLogger
 
 from libcity.data.dataset.abstract_dataset import AbstractDataset
@@ -246,5 +246,5 @@ class TrajectoryDataset(AbstractDataset):
         return train_data, eval_data, test_data
 
     def get_encoder(self):
-        encoder = load_component('traj_encoder', self.config['traj_encoder'])
+        encoder = load_encoder('traj_encoder', self.config['traj_encoder'])
         return encoder(self.config)

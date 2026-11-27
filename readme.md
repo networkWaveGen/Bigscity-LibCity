@@ -4,11 +4,11 @@
 
 ------
 
-[![ACM SIGSpatial](https://img.shields.io/badge/ACM%20SIGSPATIAL'21-LibCity-orange)](https://dl.acm.org/doi/10.1145/3474717.3483923) [![Python](https://img.shields.io/badge/Python-3.11%2B-blue)](https://www.python.org/) [![Pytorch](https://img.shields.io/badge/Pytorch-2.6%2B-blue)](https://pytorch.org/) [![License](https://img.shields.io/badge/License-Apache%202.0-blue)](./LICENSE.txt) [![star](https://img.shields.io/github/stars/LibCity/Bigscity-LibCity?style=social)](https://github.com/LibCity/Bigscity-LibCity/stargazers) [![fork](https://img.shields.io/github/forks/LibCity/Bigscity-LibCity?style=social)](https://github.com/LibCity/Bigscity-LibCity/network/members) 
+[![ACM SIGSpatial](https://img.shields.io/badge/ACM%20SIGSPATIAL'21-LibCity-orange)](https://dl.acm.org/doi/10.1145/3474717.3483923) [![Python](https://img.shields.io/badge/Python-3.11%2B-blue)](https://www.python.org/) [![Pytorch](https://img.shields.io/badge/Pytorch-2.6%2B-blue)](https://pytorch.org/) [![License](https://img.shields.io/badge/License-Apache%202.0-blue)](./LICENSE.txt) [![star](https://img.shields.io/github/stars/LibCity/Bigscity-LibCity?style=social)](https://github.com/LibCity/Bigscity-LibCity/stargazers) [![fork](https://img.shields.io/github/forks/LibCity/Bigscity-LibCity?style=social)](https://github.com/LibCity/Bigscity-LibCity/network/members)
 
 # LibCity（阡陌）
 
-[HomePage](https://libcity.ai/) | [Docs](https://bigscity-libcity-docs.readthedocs.io/en/latest/index.html) | [Datasets](https://github.com/LibCity/Bigscity-LibCity-Datasets) | [Conference Paper](https://dl.acm.org/doi/10.1145/3474717.3483923) | [Full Paper](https://arxiv.org/abs/2304.14343) | [Paper List](https://github.com/LibCity/Bigscity-LibCity-Paper) | [Experiment Tool](https://github.com/LibCity/Bigscity-LibCity-WebTool) | [EA&B Track Paper](https://arxiv.org/abs/2308.12899) | [中文版](https://github.com/LibCity/Bigscity-LibCity/blob/master/readme_zh.md) 
+[HomePage](https://libcity.ai/) | [Docs](https://bigscity-libcity-docs.readthedocs.io/en/latest/index.html) | [Datasets](https://github.com/LibCity/Bigscity-LibCity-Datasets) | [Conference Paper](https://dl.acm.org/doi/10.1145/3474717.3483923) | [Full Paper](https://arxiv.org/abs/2304.14343) | [Paper List](https://github.com/LibCity/Bigscity-LibCity-Paper) | [Experiment Tool](https://github.com/LibCity/Bigscity-LibCity-WebTool) | [EA&B Track Paper](https://arxiv.org/abs/2308.12899) | [中文版](https://github.com/LibCity/Bigscity-LibCity/blob/master/readme_zh.md)
 
 LibCity is a unified, comprehensive, and extensible library, which provides researchers with a credible experimental tool and a convenient development framework in the traffic prediction field. Our library is implemented based on PyTorch and includes all the necessary steps or components related to traffic prediction into a systematic pipeline, allowing researchers to conduct comprehensive experiments. Our library will contribute to the standardization and reproducibility in the field of traffic prediction.
 
@@ -29,7 +29,7 @@ LibCity currently supports the following tasks:
 
 * **Unified**: LibCity builds a systematic pipeline to implement, use and evaluate traffic prediction models in a unified platform. We design basic spatial-temporal data storage, unified model instantiation interfaces, and standardized evaluation procedure.
 
-* **Comprehensive**: The original library provides a broad reference model warehouse; the current runtime supports the explicitly listed migrated models. Meanwhile, LibCity collects 52 commonly used datasets of different sources and implements a series of commonly used evaluation metrics and strategies for performance evaluation. 
+* **Comprehensive**: The original library provides a broad reference model warehouse; the current runtime supports the explicitly listed migrated models. Meanwhile, LibCity collects 52 commonly used datasets of different sources and implements a series of commonly used evaluation metrics and strategies for performance evaluation.
 
 * **Extensible**: LibCity enables a modular design of different components, allowing users to flexibly insert customized components into the library. Therefore, new researchers can easily develop new models with the support of LibCity.
 
@@ -41,7 +41,7 @@ LibCity currently supports the following tasks:
 
 [![new](https://github.com/RUCAIBox/RecBole/raw/master/asset/new.gif)](https://github.com/RUCAIBox/RecBole/blob/master/asset/new.gif)**08/24/2023:** We published a paper titled *Unified Data Management and Comprehensive Performance Evaluation for Urban Spatial-Temporal Prediction [Experiment, Analysis & Benchmark]*, including (1) a Unified Storage Format for urban spatial-temporal data, (2) a Technical Development Roadmap for urban spatial-temporal prediction models, (3) Extensive Experiments and Performance Evaluation using 18 models and 20 datasets. [[Paper]](https://arxiv.org/abs/2308.12899).
 
-[![new](https://github.com/RUCAIBox/RecBole/raw/master/asset/new.gif)](https://github.com/RUCAIBox/RecBole/blob/master/asset/new.gif)**06/20/2023:** We released the Beijing trajectory dataset collected in November 2015, including 1018312 trajectories. We obtained the corresponding road network data from OpenStreetMap and preprocessed the trajectory data to get the Beijing trajectory dataset matched to the road network, and we believed that this dataset could promote the development of urban trajectory mining tasks. Please refer to this [link](https://github.com/aptx1231/START) to obtain it and ensure that this data is **used for research purposes only**. 
+[![new](https://github.com/RUCAIBox/RecBole/raw/master/asset/new.gif)](https://github.com/RUCAIBox/RecBole/blob/master/asset/new.gif)**06/20/2023:** We released the Beijing trajectory dataset collected in November 2015, including 1018312 trajectories. We obtained the corresponding road network data from OpenStreetMap and preprocessed the trajectory data to get the Beijing trajectory dataset matched to the road network, and we believed that this dataset could promote the development of urban trajectory mining tasks. Please refer to this [link](https://github.com/aptx1231/START) to obtain it and ensure that this data is **used for research purposes only**.
 
 [![new](https://github.com/RUCAIBox/RecBole/raw/master/asset/new.gif)](https://github.com/RUCAIBox/RecBole/blob/master/asset/new.gif) **06/04/2023**: LibCity won the second prize in the 3rd China Science Open Source Software Creativity Competition! [Weixin](https://mp.weixin.qq.com/s?__biz=MzA3NzM4OTc4Mw==&mid=2454775999&idx=1&sn=881a31468c5cd472ed72967b487837cf&chksm=88f68207bf810b1157ac622ae0beba0a1f2ca8ece38fa5c743c4e082c30d9e27d23b92b61530&scene=126&sessionid=1687198811#rd)
 
@@ -138,7 +138,7 @@ In order to facilitate users to use LibCity, we provide users with some tutorial
 
 ## Contribution
 
-The LibCity is mainly developed and maintained by Beihang Interest Group on SmartCity ([BIGSCITY](https://www.bigcity.ai/)). The core developers of this library are [@aptx1231](https://github.com/aptx1231) and [@WenMellors](https://github.com/WenMellors). 
+The LibCity is mainly developed and maintained by Beihang Interest Group on SmartCity ([BIGSCITY](https://www.bigcity.ai/)). The core developers of this library are [@aptx1231](https://github.com/aptx1231) and [@WenMellors](https://github.com/WenMellors).
 
 Several co-developers have also participated in the reproduction of  the model, the list of contributions of which is presented in the [reproduction contribution list](./contribution_list.md).
 
@@ -171,7 +171,7 @@ For the long paper, please cite it as follows:
 
 ```
 @article{libcitylong,
-  title={LibCity: A Unified Library Towards Efficient and Comprehensive Urban Spatial-Temporal Prediction}, 
+  title={LibCity: A Unified Library Towards Efficient and Comprehensive Urban Spatial-Temporal Prediction},
   author={Jiang, Jiawei and Han, Chengkai and Jiang, Wenjun and Zhao, Wayne Xin and Wang, Jingyuan},
   journal={arXiv preprint arXiv:2304.14343},
   year={2023}

@@ -1,6 +1,6 @@
 import os
 import pandas as pd
-from libcity.registry import load_component
+from libcity.data.encoder_registry import load_encoder
 import json
 import math
 from tqdm import tqdm
@@ -38,7 +38,7 @@ class ETADataset(AbstractDataset):
         self.pad_item = None  # 因为若是使用缓存, pad_item 是记录在缓存文件中的而不是 encoder
 
     def _get_encoder(self):
-        encoder = load_component('eta_encoder', self.config['eta_encoder'])
+        encoder = load_encoder('eta_encoder', self.config['eta_encoder'])
         return encoder(self.config)
 
     def _load_dyna(self):

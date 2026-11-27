@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 from torch.utils.data import DataLoader
 
-from libcity.data.batch import Batch
+from libcity.data.utils import TensorCollator
 from libcity.data.dataset.traffic_state_point_dataset import TrafficStatePointDataset
 from libcity.data.list_dataset import ListDataset
 from libcity.utils.filesystem import ensure_dir
@@ -356,11 +356,7 @@ class SimSTDataset(TrafficStatePointDataset):
         eval_dataset = ListDataset(eval_data)
         test_dataset = ListDataset(test_data)
 
-        def collator(indices):
-            batch = Batch(self.feature_name)
-            for item in indices:
-                batch.append(copy.deepcopy(item))
-            return batch
+        collator = TensorCollator(self.feature_name)
 
         self.train_dataloader = DataLoader(dataset=train_dataset, batch_size=self.batch_size,
                                            num_workers=self.num_workers, collate_fn=collator,

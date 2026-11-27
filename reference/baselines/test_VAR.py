@@ -1,24 +1,26 @@
+"""Historical mathematical reference; not a supported runtime or CLI."""
 import pandas as pd
 import numpy as np
 import json
 import sys
 import os
+from statsmodels.tsa.api import VAR
 root_path = os.path.abspath(__file__)
 root_path = '/'.join(root_path.split('/')[:-2])
 sys.path.append(root_path)
 from libcity.evaluator.utils import evaluate_model
+from libcity.utils.normalization import StandardScaler
+from libcity.utils.dataset import preprocess_data
 
 
 config = {
-    'model': 'HA',
-    'lag': [24 * 7 * 12],
-    'weight': [1],
+    'model': 'VAR',
+    'maxlags': 1,
     'dataset': 'METR_LA',
     'train_rate': 0.7,
     'eval_rate': 0.1,
     'input_window': 12,
     'output_windows': 3,
-    'null_value': 0,
     'metrics': ['MAE', 'MAPE', 'MSE', 'RMSE', 'masked_MAE',
                 'masked_MAPE', 'masked_MSE', 'masked_RMSE', 'R2', 'EVAR']
 }
@@ -71,57 +73,35 @@ def get_data(dataset):
     return data
 
 
-def historical_average(data):
-    t, n, f = data.shape
+def run_VAR(data, inputs):
+    ts, points, f = data.shape
     train_rate = config.get('train_rate', 0.7)
     eval_rate = config.get('eval_rate', 0.1)
     output_window = config.get('output_window', 3)
-    lag = config.get('lag', 7 * 24 * 12)
-    weight = config.get('weight', 1.0)
-    null_value = config.get('null_value', 0)
+    maxlags = config.get("maxlag", 1)
 
-    if isinstance(lag, int):
-        lag = [lag]
-    if isinstance(weight, int) or isinstance(weight, float):
-        weight = [weight]
-    assert sum(weight) == 1
+    data = data.reshape(ts, -1)[:int(ts * (train_rate + eval_rate))]  # (train_size, N * F)
+    scaler = StandardScaler(data.mean(), data.std())
+    data = scaler.transform(data)
 
-    y_true = []
-    y_pred = []
-    for i in range(int(t * (train_rate + eval_rate)), t):
-        # y_true
-        y_true.append(data[i, :, :])  # (N, F)
-        # y_pred
-        y_pred_i = 0
-        for j in range(len(lag)):
-            # 隔lag[j]时间步在整个训练集采样, 得到(n_sample, N, F)取平均值得到(N, F), 最后用weight[j]加权
-            inds = [j for j in range(i % lag[j], int(t * (train_rate + eval_rate)), lag[j])]
-            history = data[inds, :, :]
-            # 对得到的history数据去除空值后求平均
-            null_mask = (history == null_value)
-            history[null_mask] = np.nan
-            y_pred_i += weight[j] * np.nanmean(history, axis=0)
-            y_pred_i[np.isnan(y_pred_i)] = 0
-        y_pred.append(y_pred_i)  # (N, F)
+    model = VAR(data)
+    results = model.fit(maxlags=maxlags, ic='aic')
 
-    y_pred = np.array(y_pred)  # (test_size, N, F)
-    y_true = np.array(y_true)  # (test_size, N, F)
-    y_pred = np.expand_dims(y_pred, axis=1)  # (test_size, 1, N, F)
-    y_true = np.expand_dims(y_true, axis=1)  # (test_size, 1, N, F)
-    y_pred = np.repeat(y_pred, output_window, axis=1)  # (test_size, out, N, F)
-    y_true = np.repeat(y_true, output_window, axis=1)  # (test_size, out, N, F)
-    return y_pred, y_true
+    inputs = inputs.reshape(inputs.shape[0], inputs.shape[1], -1)  # (num_samples, out, N * F)
+    y_pred = []  # (num_samples, out, N, F)
+    for sample in inputs:  # (out, N * F)
+        sample = scaler.transform(sample[-maxlags:])  # (T, N, F)
+        out = results.forecast(sample, output_window)  # (out, N * F)
+        out = scaler.inverse_transform(out)  # (out, N * F)
+        y_pred.append(out.reshape(output_window, points, f))
+    y_pred = np.array(y_pred)  # (num_samples, out, N, F)
+    return y_pred
 
 
 def main():
     print(config)
     data = get_data(config.get('dataset', ''))
-    y_pred, y_true = historical_average(data)
-    # y_pred = y_pred[:, :, :, 0]
-    # y_true = y_true[:, :, :, 0]
-    evaluate_model(y_pred=y_pred, y_true=y_true, metrics=config['metrics'],
-                   path=config['model'] + '_' + config['dataset'] + '_metrics.csv')
-
-
-if __name__ == '__main__':
-    main()
+    trainx, trainy, testx, testy = preprocess_data(data, config)
+    y_pred = run_VAR(data, testx)
+    evaluate_model(y_pred=y_pred, y_true=testy, metrics=config['metrics'],
+                   path=config['model']+'_'+config['dataset']+'_metrics.csv')

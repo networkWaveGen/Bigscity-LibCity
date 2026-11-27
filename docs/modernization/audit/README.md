@@ -13,18 +13,6 @@
 - `model_compatibility.csv` 汇总模型依赖、配置和导入状态。
 - `validation_environment.json` 和 `validation_results.json` 保存验收环境与测试记录。
 
-当前 CSV、JSON 仍是显式导入改造前的归档。安装项目 `dev` 可选组后，可以从仓库根目录运行以下命令。报告默认写入本目录。
+这些 CSV/JSON 是早期审计归档，不代表阶段五后的可执行入口。使用旧 ConfigParser/registry 的审计脚本已随旧 API 删除；如需重现历史审计，请在独立 checkout 的 3dcae47 或更早版本执行对应版本脚本。
 
-```shell
-python docs/modernization/audit/baseline_audit.py
-python docs/modernization/audit/entrypoint_audit.py
-python docs/modernization/audit/compatibility_report.py --runtime-report docs/modernization/audit/registration_imports.csv
-```
-
-基线审计直接从固定提交 `5a6391d` 读取旧组件配置和依赖清单。
-
-依赖审计确认：TensorBoardX、aioredis、aiohttp、idna 在本轮项目源码中没有直接用途，也不在当前平台现代核心依赖闭包内，因此不保留为基础安装的直接依赖。Ray 等可选栈若需要其中某项，应由该可选栈自己的依赖声明安装，不能据此强制所有基础实验安装它们。flake8、pep8-naming 属于历史静态检查工具，不是运行核心；pytest 属于 `dev`。其他旧依赖均逐项对应现代核心或已保留的可选组。现代基础安装没有未分类的旧直接依赖。
-
-已有实验检索覆盖原 LibCity 参考副本、`LibCity2.0-main/LibCity` 和当前工作副本的缓存、日志目录，排除约定不处理的 AgentCity。检索时没有找到可归档的历史实验日志、检查点或指标产物。`.runtime-tests` 中的结果是本轮生成的合成测试，不能作为历史真实数据精度基线。该项完成的是“保存已有可用记录”的核查与结论归档，不表示获得了原本不存在的历史精度结果。
-
-此审计读取 Git 提交中的源码、普通文件内容及包元数据，不做文件哈希校验。依赖闭包结论针对已记录的 Windows CPU 环境，不构成所有平台和可选栈的完整锁定文件。
+当前迁移清单用 `python tools/build_runtime_migration_table.py` 生成，完整回归用 `python -m pytest -q` 执行。当前验收记录见 [阶段五](../runtime/phase5_acceptance_zh.md)。

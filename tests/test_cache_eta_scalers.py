@@ -12,8 +12,6 @@ import torch
 from libcity.data.dataset.traffic_state_point_dataset import TrafficStatePointDataset
 from libcity.data.dataset.dataset_subclass.simst_dataset import SimSTDataset
 from libcity.data.utils import generate_dataloader
-from libcity.evaluator.eta_evaluator import ETAEvaluator
-from libcity.executor.eta_executor import ETAExecutor
 from libcity.utils.normalization import NormalScaler, StandardScaler, MinMax01Scaler, MinMax11Scaler
 
 
@@ -112,36 +110,6 @@ def test_legacy_cache_is_preserved_and_not_reused(traffic_data):
         assert cached['sentinel'].item() == 999.
 
 
-@pytest.mark.parametrize('batch_size', [1, 2])
-def test_eta_export_keeps_all_trajectories_for_repeated_users(tmp_path, monkeypatch, batch_size):
-    monkeypatch.chdir(tmp_path)
-    runner = object.__new__(ETAExecutor)
-    runner.config = dict(model='DeepTTE', dataset='fixture', metrics=['MAE'], save_modes=['json'])
-    runner.device = torch.device('cpu')
-    runner.output_pred = True
-    runner._logger = logging.getLogger(__name__)
-    runner.evaluate_res_dir = str(tmp_path)
-    runner.evaluator = ETAEvaluator(runner.config)
-
-    class Predictor(torch.nn.Module):
-        def predict(self, batch):
-            return batch['time'] + 1.
-
-    runner.model = Predictor()
-    samples = [([10.], [1], [101], [116.1], [39.1], [1], [0]),
-               ([20.], [1], [102], [116.2], [39.2], [1], [0]),
-               ([30.], [2], [201], [116.3], [39.3], [1], [0])]
-    fields = dict(time='float', uid='int', traj_id='int', current_longi='float',
-                  current_lati='float', traj_len='int', start_timestamp='int')
-    _, _, test = generate_dataloader(samples, samples, samples, fields, batch_size, 0)
-    runner.evaluate(test)
-    result = json.loads(next(tmp_path.glob('*_predictions.json')).read_text())
-    assert set(result) == {'1', '2'}
-    assert set(result['1']) == {'101', '102'}
-    assert set(result['2']) == {'201'}
-    assert result['1']['101']['truth'] == 10.
-    assert result['1']['102']['prediction'] == 21.
-    assert runner.evaluator.evaluate()['MAE'] == pytest.approx(1.)
 
 
 def scaler_case(kind, constant):
@@ -185,7 +153,6 @@ def test_constant_data_is_finite_through_real_dataset(traffic_data, kind):
     dataset = TrafficStatePointDataset({**traffic_data, 'scaler': kind})
     for loader in dataset.get_data():
         for batch in loader:
-            batch.to_tensor('cpu')
             assert torch.isfinite(batch['X']).all()
             assert torch.isfinite(batch['y']).all()
             torch.testing.assert_close(dataset.scaler.inverse_transform(batch['X']),

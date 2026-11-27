@@ -2,15 +2,16 @@ import pandas as pd
 import json
 from libcity.utils.filesystem import ensure_dir
 import os
+from pathlib import Path
 
 
 class VisHelper:
     def __init__(self, _config):
 
         self.config = _config
-        self.raw_path = './raw_data/'
+        self.raw_path = os.path.join(str(Path(_config['data_dir']).expanduser().resolve()), '')
         self.dataset = _config.get("dataset", "")
-        self.save_path = _config.get("save_path", "./visualized_data/")
+        self.save_path = str(Path(_config['output_dir']).expanduser().resolve())
 
         # get type
         self.config_path = self.raw_path + self.dataset + '/config.json'
@@ -95,11 +96,11 @@ class VisHelper:
             feature_i['properties'] = feature_dct
             feature_i['geometry'] = {}
             feature_i['geometry']['type'] = row['type']
-            feature_i['geometry']['coordinates'] = eval(row['coordinates'])
+            feature_i['geometry']['coordinates'] = json.loads(row['coordinates'])
             geojson_obj['features'].append(feature_i)
 
         ensure_dir(self.save_path)
-        save_name = "_".join(self.dyna_path.split('/')[-1].split('.')) + '.json'
+        save_name = "_".join(Path(self.dyna_path).name.split('.')) + '.json'
         print(f"visualization file saved at {save_name}")
         json.dump(geojson_obj, open(self.save_path + '/' + save_name, 'w',
                                     encoding='utf-8'),
@@ -129,11 +130,11 @@ class VisHelper:
             feature_i['properties'] = feature_dct
             feature_i['geometry'] = {}
             feature_i['geometry']['type'] = row['type']
-            feature_i['geometry']['coordinates'] = eval(row['coordinates'])
+            feature_i['geometry']['coordinates'] = json.loads(row['coordinates'])
             geojson_obj['features'].append(feature_i)
 
         ensure_dir(self.save_path)
-        save_name = "_".join(self.grid_path.split('/')[-1].split('.')) + '.json'
+        save_name = "_".join(Path(self.grid_path).name.split('.')) + '.json'
         print(f"visualization file saved at {save_name}")
         json.dump(geojson_obj, open(self.save_path + '/' + save_name, 'w',
                                     encoding='utf-8'),
@@ -152,13 +153,13 @@ class VisHelper:
             feature_i['properties'] = feature_dct
             feature_i['geometry'] = {}
             feature_i['geometry']['type'] = row['type']
-            feature_i['geometry']['coordinates'] = eval(row['coordinates'])
+            feature_i['geometry']['coordinates'] = json.loads(row['coordinates'])
             if len(feature_i['geometry']['coordinates']) == 0:
                 return
             geojson_obj['features'].append(feature_i)
 
         ensure_dir(self.save_path)
-        save_name = "_".join(self.geo_path.split('/')[-1].split('.')) + '.json'
+        save_name = "_".join(Path(self.geo_path).name.split('.')) + '.json'
         print(f"visualization file saved at {save_name}")
         json.dump(geojson_obj, open(self.save_path + '/' + save_name, 'w',
                                     encoding='utf-8'),
@@ -187,10 +188,10 @@ class VisHelper:
                     feature_i['geometry']['coordinates'] = []
                     if GPS_traj:
                         for _, row in traj_value.iterrows():
-                            feature_i['geometry']['coordinates'].append(eval(row['coordinates']))
+                            feature_i['geometry']['coordinates'].append(json.loads(row['coordinates']))
                     else:
                         for _, row in traj_value.iterrows():
-                            coor = eval(geo_file.loc[row['location']]['coordinates'])
+                            coor = json.loads(geo_file.loc[row['location']]['coordinates'])
                             if _ == 0:
                                 feature_i['geometry']['coordinates'].append(coor[0])
                             feature_i['geometry']['coordinates'].append(coor[1])
@@ -206,17 +207,17 @@ class VisHelper:
                 feature_i['geometry']['coordinates'] = []
                 if GPS_traj:
                     for _, row in entity_value.iterrows():
-                        feature_i['geometry']['coordinates'].append(eval(row['coordinates']))
+                        feature_i['geometry']['coordinates'].append(json.loads(row['coordinates']))
                 else:
                     for _, row in entity_value.iterrows():
-                        coor = eval(geo_file.loc[row['location']]['coordinates'])
+                        coor = json.loads(geo_file.loc[row['location']]['coordinates'])
                         if _ == 0:
                             feature_i['geometry']['coordinates'].append(coor[0])
                         feature_i['geometry']['coordinates'].append(coor[1])
                 geojson_obj['features'].append(feature_i)
 
         ensure_dir(self.save_path)
-        save_name = "_".join(self.dyna_path.split('/')[-1].split('.')) + '.json'
+        save_name = "_".join(Path(self.dyna_path).name.split('.')) + '.json'
         print(f"visualization file saved at {save_name}")
         json.dump(geojson_obj, open(self.save_path + '/' + save_name, 'w',
                                     encoding='utf-8'),
