@@ -28,6 +28,12 @@ class ModelSpec:
 
 
 MODELS = {
+    'STMatching': ModelSpec('libcity.model.map_matching.runtime_matching:create_stmatching', task='map_matching',
+        requires_checkpoint=False, supports_resume=False, supports_validation=False,
+        evaluate='libcity.model.map_matching.runtime_hmmm:evaluate', kind='direct', device_types=('cpu',)),
+    'IVMM': ModelSpec('libcity.model.map_matching.runtime_matching:create_ivmm', task='map_matching',
+        requires_checkpoint=False, supports_resume=False, supports_validation=False,
+        evaluate='libcity.model.map_matching.runtime_hmmm:evaluate', kind='direct', device_types=('cpu',)),
     'STID': ModelSpec('libcity.model.traffic_speed_prediction.runtime_identity:STID'),
     'STAEformer': ModelSpec('libcity.model.traffic_speed_prediction.runtime_identity:STAEformer'),
     'FreTS': ModelSpec('libcity.model.traffic_flow_prediction.runtime_frets:FreTS'),

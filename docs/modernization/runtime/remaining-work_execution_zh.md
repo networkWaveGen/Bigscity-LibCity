@@ -10,6 +10,7 @@
 | commit2 | 956c1d5 | feat: migrate CRANN with explicit inputs and resumable shared training |
 | commit3 | 23bf934 | feat: migrate six standard forecasts with native training contracts |
 | commit4 | 1a8eb2e | fix: support CPU AMP when oneDNN convolution backward is unavailable |
+| commit5 | 0c0a20d | feat: migrate calendar spectral and normalization forecasts |
 
 ## commit1：修复基础交通缓存（670b325）
 
@@ -56,6 +57,14 @@ Seq2Seq 旧实现推理仍读取 y 且随机生成解码起点，现使用固定
 日历布局元信息扩充后，续训仍严格校验输入布局；旧布局不一致的 last.pt 会明确拒绝，纯 best.pt 权重评估仍须匹配模型结构。
 
 前五批之后完整回归 **207 passed，0 failed，0 errors，0 skipped**，机器记录 [remaining-validation.json](remaining-validation.json) 保留此前 180 项结果的范围，并明确区分早前 CRANN CLI 记录和当前完整测试。
+
+## commit6：接入全部地图匹配算法
+
+新增 STMatching 与 IVMM 的无权重直接评估入口，与 HMMM 共用原子路网 DataBundle、路线评估和 JSON/CSV 导出，三种地图匹配算法均完成迁移。每条轨迹创建独立算法状态，修复旧 run 将上一条轨迹候选集合累加到下一条的问题；两算法修复尾部空候选时先索引再检查界限的越界错误。
+
+验证：新增 **12 项通过**，包括两种算法有/无时间戳的多轨迹评估，逐轨迹对照原算法，重复运行的状态隔离，尾部无候选、全部无候选和单点轨迹，以及实际 CLI 和拒绝训练/续训/检查点请求。代表路网上 RMF=0、AN=1、AL=1。未初始化优化器、TensorBoard 或检查点。迁移表为 29/100，71 条 pending。
+
+限制明确保留：原算法 temporal_analysis 是空实现，本轮沿用其空间/投票数学逻辑，时间戳保留用于输出，不声称已实现论文中的额外时间速度评分。
 
 ## 持续完成的清单
 

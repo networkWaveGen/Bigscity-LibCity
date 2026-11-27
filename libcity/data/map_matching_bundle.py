@@ -38,14 +38,14 @@ def prepare_map_matching(data_config,training_config,evaluation_config,seed,logg
         identity=road['geo_id']
         coordinates=json.loads(road['coordinates'])
         if np.asarray(coordinates).shape!=(2,2) or not np.isfinite(coordinates).all():
-            raise ValueError('HMMM atomic adapter requires finite two-endpoint LineString segments')
+            raise ValueError('Map-matching atomic adapter requires finite two-endpoint LineString segments')
         start,end=coordinates
         origin,destination=find(indices[identity]+len(ids)),find(indices[identity])
         for vertex,coordinate in ((origin,start),(destination,end)):
             if vertex not in graph:
                 graph.add_node(vertex,lon=float(coordinate[0]),lat=float(coordinate[1]))
         if graph.has_edge(origin,destination):
-            raise ValueError('HMMM adapter cannot collapse parallel road segments into a DiGraph')
+            raise ValueError('Map-matching adapter cannot collapse parallel road segments into a DiGraph')
         distance=road.get('distance',dist(angle2radian(start[1]),angle2radian(start[0]),
                                         angle2radian(end[1]),angle2radian(end[0])))
         if not np.isfinite(distance) or distance<=0:

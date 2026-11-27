@@ -193,7 +193,7 @@ class STMatching(AbstractTraditionModel):
             j = i - 1
             if len(self.candidates[i]) == 0:
                 k = i + 1
-                while len(self.candidates[k]) == 0 and k < len(self.candidates):
+                while k < len(self.candidates) and len(self.candidates[k]) == 0:
                     k += 1
                 if k == len(self.candidates):
                     break
