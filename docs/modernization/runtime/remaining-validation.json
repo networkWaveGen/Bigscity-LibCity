@@ -1,5 +1,5 @@
 {
-  "scope": "Remaining-work commits 1-15; whole-library migration remains in progress",
+  "scope": "Remaining-work commits 1-16; whole-library migration remains in progress",
   "environment": {
     "python": "3.12.13",
     "torch": "2.15.0+cpu",
@@ -7,7 +7,7 @@
     "platform": "Windows-11-10.0.26200-SP0"
   },
   "full_tests": {
-    "tests": 292,
+    "tests": 297,
     "failures": 0,
     "errors": 0,
     "skipped": 0
@@ -264,6 +264,11 @@
     "test_automatic_device_selection_respects_model_capabilities",
     "test_stssl_dynamic_task_state_next_updates_and_rng_resume",
     "test_stssl_prediction_has_no_augmentation_or_labels_and_pipeline_exports",
+    "test_original_first_forecast_and_gradients",
+    "test_full_training_independent_evaluation_and_dropout_exact_resume",
+    "test_static_graph_multitarget_float64_label_and_rng_isolation[1]",
+    "test_static_graph_multitarget_float64_label_and_rng_isolation[3]",
+    "test_cpu_amp_training_and_invalid_position_size",
     "test_atomic_task_train_independent_evaluate_and_label_free_forward[RNN]",
     "test_atomic_task_train_independent_evaluate_and_label_free_forward[DeepTTE]",
     "test_atomic_task_train_independent_evaluate_and_label_free_forward[LINE]",
@@ -309,8 +314,8 @@
   ],
   "inventory": {
     "total": 100,
-    "migrated": 40,
-    "pending": 60
+    "migrated": 41,
+    "pending": 59
   },
   "history": [
     {
@@ -424,6 +429,20 @@
         "migrated": 38,
         "pending": 62
       }
+    },
+    {
+      "scope": "commits 1-15, through 42ffc31",
+      "full_tests": {
+        "tests": 292,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "inventory": {
+        "total": 100,
+        "migrated": 40,
+        "pending": 60
+      }
     }
   ],
   "current_cli": {
@@ -463,5 +482,10 @@
     "report": "latent-recurrent-cli-validation.json",
     "commands": 6,
     "fixture_commands": 2
+  },
+  "sttn_cli": {
+    "report": "sttn-cli-validation.json",
+    "commands": 3,
+    "fixture_commands": 1
   }
 }

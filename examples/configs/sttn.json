@@ -1,0 +1,8 @@
+{
+  "data": {"dataset": "Tiny", "data_dir": "data", "cache_dir": "cache", "cache": true,
+    "input_window": 4, "output_window": 2, "pad_training": false},
+  "model": {"name": "STTN", "params": {"embed_dim": 4, "num_layers": 1, "num_heads": 2,
+    "forward_expansion": 2, "dropout_rate": 0.1}},
+  "training": {"epochs": 2, "batch_size": 8},
+  "runtime": {"device": "cpu", "seed": 17, "output_dir": "runs"}
+}

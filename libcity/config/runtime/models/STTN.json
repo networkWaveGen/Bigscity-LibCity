@@ -1,0 +1,4 @@
+{
+  "model": {"params": {"embed_dim": 64, "num_layers": 3, "num_heads": 2,
+    "forward_expansion": 4, "dropout_rate": 0.0, "position_size": 0}}
+}

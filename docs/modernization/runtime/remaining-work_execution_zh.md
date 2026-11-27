@@ -20,6 +20,7 @@
 | commit12 | 04e2295 | feat: migrate TESTAM experts with explicit routing supervision |
 | commit13 | 26f4110 | fix: select native recurrent forward for unsupported CPU AMP backends |
 | commit14 | 547218b | feat: migrate graph sequence and nodewise temporal forecasts |
+| commit15 | 42ffc31 | feat: migrate latent and graph-filtered recurrent forecasts |
 
 ## commit1：修复基础交通缓存（670b325）
 
@@ -150,6 +151,12 @@ STNN 修复固定 12 步/41 节点、关系聚合混排时间/节点、解码 re
 TGCLSTM 保留逐步图过滤、门控细胞与滑动窗口重编码，所有静态过滤器注册 buffer，状态随输入设备/类型创建。预测步由配置指定，不读 y，不再从 y 取未来额外观测。FFR 通过轻量原子适配显式选择列，默认 FFR_20min，支持其他列或 null 普通图模式；按 .geo ID 顺序映射，缺失边补 0，修复旧 inf×0。源文件变化触发基础缓存失效，FFR 元信息进入续训检查。训练保留原 MSE、mask_value=null 的有限零目标语义，评估继续遵循统一任务协议。
 
 验证：新增 **21 项通过**。STNN 对照独立逐时/逐节点计算和 grid_sample 插值及梯度，覆盖固定/refine/discover 与 hard/linear，原 12×41 因子硬选择一致，训练映射权重实际更新；TGCLSTM 四种 FFR/普通图、clamp/非 clamp 组合对照旧预测、目标与全部梯度。两模型均验证多目标/batch=1/float64/无标签/输入不变、完整训练/独立评估/精确续训、CPU AMP；另验证 FFR ID 顺序、缺失边零值、不可变元信息、缓存失效和错误提示。完整回归 **292 passed，0 failed，0 errors，0 skipped**。两个仓库外发布夹具与 6 条生命周期命令成功，续训到第三轮且独立评估一致，见 [CLI 记录](latent-recurrent-cli-validation.json)。迁移表为 **40/100**，60 条 pending；本期实际模型仍有 **51 个**待迁移。
+
+## commit16：迁移 STTN 并修复前向图状态漂移
+
+新增标准 nn.Module，复用图卷积、空间/时间注意力与融合门，公共训练/评估/检查点负责生命周期。静态邻接图注册 buffer，可学习空间嵌入独立复制；每次归一化原图而非覆盖 self.adj_mx，修复重复 forward/评估导致图逐步变化和检查点未保存该状态的问题。单节点图给出有限零中心结果；临时时刻索引随输入设备创建，移除内部 device 属性；按时刻收集结果后一次 stack，替代空 Tensor 与循环 cat。位置容量从采样元信息推导并至少覆盖输入窗，可显式指定并校验。
+
+验证：新增 **5 项通过**，对照独立原首轮归一化公式、原网络预测与全部梯度；两层 dropout 训练、独立评估和中断续训参数/调度器/计数完全一致；单节点与三节点多目标、batch=1/float64、无标签和 RNG/输入隔离、多次调用全部 state_dict 不变、CPU AMP、位置容量错误提示。完整回归 **297 passed，0 failed，0 errors，0 skipped**。仓库外发布夹具及 3 条训练/评估/续训命令成功，独立评估一致并续训第三轮，见 [CLI 记录](sttn-cli-validation.json)。清单为 **41/100**，59 条 pending；本期实际模型仍有 **50 个**待迁移，最终全量验收尚未完成。
 
 ## 持续完成的清单
 

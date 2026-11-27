@@ -79,6 +79,10 @@ the model reads `data.graph.reachability_column=FFR_20min`; set it to another
 existing column or JSON `null` for plain graph filters. Missing edges have zero
 reachability. Inference uses history and explicit known future features only.
 
+`--model STTN` creates a spatial/temporal transformer example. Its graph is an
+immutable buffer, so repeated inference starts from the same graph. Positional
+capacity is inferred from metadata unless `position_size` is explicitly supplied.
+
 The complete supported-model inventory and migration details are in the
 [runtime guide](../docs/modernization/runtime/README_zh.md). Small examples prove
 execution and reproducibility, not real-city benchmark accuracy.

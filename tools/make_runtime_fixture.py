@@ -16,7 +16,7 @@ def main(argv=None):
     parser=argparse.ArgumentParser()
     parser.add_argument('--directory',required=True,type=Path)
     parser.add_argument('--task',choices=EXAMPLES)
-    parser.add_argument('--model',choices=('GRU','CRANN','ChebConv','GAT','ASTGCN','MSTGCN','MegaCRN','TESTAM','ToGCN','SimST','STNN','TGCLSTM'),help='Optional named model example')
+    parser.add_argument('--model',choices=('GRU','CRANN','ChebConv','GAT','ASTGCN','MSTGCN','MegaCRN','TESTAM','ToGCN','SimST','STNN','TGCLSTM','STTN'),help='Optional named model example')
     args=parser.parse_args(argv)
     selected_task = 'road_representation' if args.model in ('ChebConv','GAT') else 'traffic_state_pred'
     if args.model and args.task and args.task!=selected_task:

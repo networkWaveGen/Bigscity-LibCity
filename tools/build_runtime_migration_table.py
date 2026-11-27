@@ -9,6 +9,7 @@ from libcity.model.runtime_registry import MODELS
 
 
 VALIDATION={
+    'STTN':'original_first_graph_forecast_and_gradients;stateless_graph_normalization;graph_buffer_and_input_device;multi_target_single_node_batch_one_float64;short_train;independent_evaluate;dropout_exact_resume;CPU_AMP',
     'STNN':'corrected_time_node_reference_forecast_and_gradients;bilinear_grid_reference;hard_lookup_original_12x41;all_relation_modes;trainable_input_mapping;multi_target_batch_one_float64;short_train;independent_evaluate;dropout_exact_resume;CPU_AMP',
     'TGCLSTM':'original_recurrence_prediction_objective_and_gradients;FFR_and_plain_graph;clamped_and_unclamped;geo_ID_order;missing_edge_zero;cache_invalidation;explicit_future_inputs;multi_target_batch_one_float64;short_train;independent_evaluate;exact_resume;CPU_AMP',
     'ToGCN':'original_autoregressive_and_teacher_forecast_gradients;explicit_teacher_inputs;no_global_anomaly_state;multi_target_batch_one_float64;short_train;independent_evaluate;Python_RNG_and_dropout_exact_resume;CPU_AMP',
