@@ -41,4 +41,20 @@ run_hyper.py 变成薄 CLI，调用 pipeline/runtime_tuning.py；网格与固定
 
 专项 8 项通过，包括给 test loader 加迭代禁令、四组数据预处理变化、独立 trial 目录、Recall 最大化、固定种子随机搜索、非法空间启动前拒绝以及仓库外目录实际运行 run_hyper.py。旧 Hyperopt/Ray 内部实现保留为阶段五清理对象，新入口不再调用它们。
 
-继续完成五类任务代表组合、标准与定制模型批次、全模型审计状态表、统一调参及最终验收。此记录不将尚未执行的内容标为完成。
+## 第五批：清单、示例与最终验收
+
+原清单 100 个任务—模型条目逐项登记，13 个新运行时入口对应 15 条已迁移记录，85 条仍为 pending。GeoSAN、DGL、Gensim、DTW/小波及 ODE 相关模型均登记隔离、替代或重写步骤；不将历史导入记录等同于当前训练能力。
+
+最终完整回归为 **214 项全部通过，0 失败、0 跳过**。基础环境从仓库外执行 19 条实际 CLI 命令，五类任务、监督任务续训和统一调参均通过；该环境未安装 TensorBoard/einops/Ray/Hyperopt/DGL/TorchText。原阶段一、二报告按历史保留，当前结果见 [阶段三、四验收](phases34_acceptance_zh.md)。
+
+阶段三的三项和阶段四的三项验收已打钩；阶段五和后续讨论项未打钩。此处阶段四按原文代表组合与分批清单验收，不表示 100 个模型全部迁入新运行时。
+
+## Commit 映射（从早到晚）
+
+| 顺序 | Commit 与标题 | 内容 |
+| --- | --- | --- |
+| commit1 | f9f75b0 — fix: separate forecast inputs and split complete target timelines | 数据语义、CRANN 目标互斥、原尺度掩码和实数据短跑 |
+| commit2 | d81d5b4 — feat: extend shared training to standard forecasts and urban tasks | FNN/GWNET、轨迹 RNN、DeepTTE、LINE 及可组合的数据/损失/评估 |
+| commit3 | cdfd125 — feat: migrate STSSL with resumable dynamic task weighting | STSSL 的跨轮次动态权重与增强状态恢复 |
+| commit4 | bc9151b — feat: tune unified experiments on validation data only | 统一调参，每个 trial 不评估测试集，最终只测试一次 |
+| commit5 | 本执行记录所在提交 — test: validate phase three and four and record migration coverage | 全模型清单、额外排名/单位与变体验收、五类 CLI 示例、使用及验收文档 |

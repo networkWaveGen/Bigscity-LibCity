@@ -62,6 +62,14 @@ def test_future_inputs_are_explicit_and_never_read_targets_or_future_observation
     poisoned={**batch,'y':torch.full_like(batch['y'],float('nan')),'y_raw':torch.full_like(batch['y_raw'],1e9)}
     torch.testing.assert_close(prediction,model(model_inputs(poisoned,1)))
     assert set(without_labels)=={'X','future_features'}
+    original=prediction[:1].detach()
+    positions=frame.groupby('entity_id',sort=False).cumcount()
+    frame.loc[positions>=60,'congestion']=1e9
+    frame.to_csv(folder/'Tiny.dyna',index=False)
+    changed=next(iter(prepare(cfg).val))
+    # The first validation history is unchanged; unavailable future congestion
+    # cannot alter the prediction even when its actual future values change.
+    torch.testing.assert_close(original,model(model_inputs(changed,1))[:1])
 
 
 def test_known_external_columns_require_explicit_declaration(tmp_path):

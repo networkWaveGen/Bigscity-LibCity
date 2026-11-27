@@ -1,8 +1,8 @@
-# 新运行时：阶段一、二
+# 新运行时：阶段一到四
 
 实施依据和逐项状态分别见 [方案](plan_zh.md) 与 [验收记录](execution_zh.md)。本轮入口采用五区块 JSON；原来的扁平 CLI 参数已被子命令替换。旧模型和 Executor 文件保留到后续迁移清理阶段，未迁移模型不会静默回退到旧运行时。
 
-阶段一、二已通过 **184 项**回归。实际支持范围、依赖与验证级别见 [模型迁移表](models_zh.md)，逐项验收见 [最终报告](acceptance_zh.md)。
+阶段一、二的 184 项记录保留为历史基线。阶段三修复预测输入和目标时间轴，阶段四接入五类任务代表组合及统一调参。当前范围、依赖与验证级别见 [模型迁移表](models_zh.md)，新增实施记录见 [阶段三、四记录](phases34_execution_zh.md) 和 [验收报告](phases34_acceptance_zh.md)。
 
 ## GRU 完整例子
 
@@ -40,9 +40,13 @@ last.pt 格式版本为 2，还校验只读数据元信息、采样布局和归�
 
 `training.optimizer.groups` 接受模块前缀、lr、weight_decay 和 freeze。调度器显式设置 interval=step/epoch/metric。梯度累积按真实有效目标数归一化，并在每轮最后一个不足累积组的尾批完成更新；只有实际优化器更新才步进 step 调度器。默认循环支持最小化或最大化指定监控指标、早停、CPU/CUDA/MPS 设备选择和 AMP。当前实际验收硬件是 Windows CPU，未声称执行了 CUDA/MPS。
 
-## 本阶段的数据边界
+## 预测输入与目标时间轴
 
-数据适配继续复用现有滑窗样本、训练集 padding 和训练集 scaler 拟合规则，便于与基线数值对照。验证和测试保持真实样本数。结果中的 `split.semantics=legacy_window_count` 明确表示尚未实施阶段三的目标时间轴互斥切分；已知未来特征与标签的数据语义整理同样留在阶段三。
+交通适配现在记录 `split.semantics=target_time_v1`。按原始时间点确定边界，只有目标窗口完整属于该区间的样本才能进入对应集合；丢弃跨边界目标窗口，历史可使用切分点前的已知观测。归一化只拟合原始训练时间区间，验证和测试不 padding。除默认比例外，可在 data.split 中同时提供 train_end/val_end（ISO 时间戳，右侧区间从该时刻开始）。真实 METR-LA 运行记录见 [报告](metr-la-phase3.json)。
+
+批次的 X 只包含历史；y 是归一化后的预测目标，y_raw 是原始目标。损失与评估用 y_raw 判定零值掩码，不经过归一化再还原。future_features 只含日历和明确声明的已知未来协变量。例如 `data.features={"load_external":true,"known_future_columns":["holiday"]}` 允许从 .ext 读取 holiday 的未来值，其余外部观测只保留历史。GRU 的不可提前获取的辅助观测沿用最后历史值，不读取真实未来；Teacher Forcing 只在显式训练步使用 y。
+
+旧展开滑窗缓存不再使用；cache 参数保留独立目录，但本适配每次读取原始时间序列。缓存结构的深度重构仍在后续事项内。阶段一、二按旧切分生成的 last.pt 不自动续到新语义；数据/采样元信息检查会拒绝不一致状态。
 
 ASTGNN 使用 data.sampling.name=cpt 及只读采样布局，实际历史长度与请求窗口的差异进入运行摘要。data.graph 控制二值/加权/距离图、对称化和自环，模型预设不会悄悄更改统一切分、窗口或指标协议。
 
@@ -54,3 +58,35 @@ python run_model.py evaluate --config ../map-demo/hmmm.json --set runtime.exp_id
 ```
 
 HMMM 直接评估，training 区块为空；不需要 checkpoint，不支持 train/resume。这里的轻量原子适配要求双端点 LineString 路段及每条轨迹的真值路线，不读取旧 pickle 缓存。预测保存为 predictions.json；metrics.json/csv 为逐轨迹指标的宏平均，metrics_by_trajectory.json 保留明细。它与交通模型共用实验目录与结构化结果，未强行套用窗口、损失或优化器配置。
+
+## 轨迹、ETA 与道路表征
+
+生成器可为五类任务生成小型原子示例。以下路径均可放到仓库外：
+
+```powershell
+python tools/make_runtime_fixture.py --directory ../trajectory-demo --task traj_loc_pred
+python run_model.py train --config ../trajectory-demo/rnn.json --set runtime.exp_id=train
+python run_model.py evaluate --config ../trajectory-demo/rnn.json --checkpoint ../trajectory-demo/runs/train/checkpoints/best.pt --set runtime.exp_id=eval
+python tools/make_runtime_fixture.py --directory ../eta-demo --task eta
+python run_model.py train --config ../eta-demo/deeptte.json --set runtime.exp_id=train
+python tools/make_runtime_fixture.py --directory ../road-demo --task road_representation
+python run_model.py train --config ../road-demo/line.json --set runtime.exp_id=train
+```
+
+RNN 是轨迹模型族，model.params.rnn_type 可选 RNN/LSTM/GRU；交通 GRU 仍使用 model.name=GRU。轨迹批次提供 lengths，评估在完整 POI 候选集合计算 Recall/MRR/NDCG，padding 不参加排名。默认监控 val_Recall@1、direction=max。
+
+DeepTTE 的输入是已知计划路线几何、距离、用户与出发日历，逐点实际耗时只用于训练目标；不能把实际耗时作为预测输入。数据按完整行程时间区间切分，主损失 MAE/MSE，局部辅助 MAPE 在独立 step 中计算。评估导出 predictions.json，明确 prediction_seconds/truth_seconds。每条路线长度必须达到 kernel_size，当前适配需 .usr 和含 traj_id/coordinates 的 .dyna。
+
+LINE 支持 first/second order。训练使用独立正边集合及负采样，独立评估导出 embeddings.npy 与 node_ids.json；验证指标是持出边损失/准确率，尚不提供下游道路分类基准。STSSL 需要显式设置 output_window=1、input_window>=9，完整续训保留动态损失权重。
+
+三个监督任务均使用相同 train/evaluate/resume 命令。完整基础环境 CLI 验证（五类任务、续训与调参，共 19 条命令）见 [记录](phases34-cli-validation.json)。
+
+## 统一调参
+
+搜索空间为 JSON，例如 `{"training.optimizer.lr":[0.001,0.002],"data.input_window":[4,6]}`。保存为 space.json 后：
+
+```powershell
+python run_hyper.py --config ../runtime-demo/gru.json --space space.json --algorithm grid --max-trials 4
+```
+
+也可调用 `from libcity.pipeline.runtime_tuning import run_search`，传入 config/space 字典。grid 与带固定种子的 random 都是标准库有限搜索，不需要调参可选包。每个 trial 的配置、数据预处理、权重、训练指标和目录相互独立；trial 只用训练与验证，选定验证最佳权重后测试集只评估一次。search.json 记录所有分数、参数、最佳 trial 和最终测试指标。不支持验证的 HMMM 会在启动前被拒绝；Optuna/Ray 的后端选型仍延后。

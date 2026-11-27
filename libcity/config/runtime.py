@@ -169,9 +169,9 @@ def validate(config, preset):
         raise ValueError('evaluation.metrics must be a nonempty list')
     allowed_metrics = {'MAE', 'MSE', 'RMSE', 'MAPE', 'R2', 'EVAR'}
     if spec.task=='traj_loc_pred':
-        allowed_metrics = {f'{name}@{k}' for name in ('Recall','MRR','NDCG') for k in evaluation['topk']}
-        if not evaluation['topk'] or any(type(k) is not int or k<1 for k in evaluation['topk']):
+        if not isinstance(evaluation['topk'],list) or not evaluation['topk'] or any(type(k) is not int or k<1 for k in evaluation['topk']):
             raise ValueError('evaluation.topk requires positive integers')
+        allowed_metrics = {f'{name}@{k}' for name in ('Recall','MRR','NDCG') for k in evaluation['topk']}
     elif spec.task=='road_representation':
         allowed_metrics={'loss','accuracy'}
     elif spec.task=='eta':

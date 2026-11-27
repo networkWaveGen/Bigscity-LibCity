@@ -7,6 +7,12 @@ Existing model names continue to work in experiment configuration. Python
 callers should import components from their implementation modules.
 AgentCity is outside this change.
 
+Phases 3–4 add target-time splitting, five representative task pipelines and
+validation-only finite search. See the [implementation record](runtime/phases34_execution_zh.md)
+and [acceptance report](runtime/phases34_acceptance_zh.md). The full
+[100-entry migration inventory](runtime/model-migration.csv) distinguishes supported
+representatives from pending models; it does not certify the whole model catalog.
+
 The source CLI now uses `run_model.py train/evaluate --config ...` and layered
 JSON configuration. See the [new runtime guide](runtime/README_zh.md) and
 [phase acceptance record](runtime/execution_zh.md). Historical executor audits

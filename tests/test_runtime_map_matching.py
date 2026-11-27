@@ -44,7 +44,7 @@ def test_map_bundle_and_direct_evaluation_without_training_objects(tmp_path,monk
     assert (run/'eval/metrics.csv').exists()
     info=json.loads(result.artifacts['runtime_info'].read_text())
     assert info['split']['test']==2
-    assert info['capabilities']=={'requires_checkpoint':False,'supports_resume':False}
+    assert info['capabilities']=={'requires_checkpoint':False,'supports_resume':False,'supports_validation':False}
 
 
 def test_map_single_metric_and_prediction_switch_remove_stale_export(tmp_path):

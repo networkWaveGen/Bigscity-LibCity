@@ -114,3 +114,59 @@ def test_standard_models_match_reference_and_use_default_loop(tmp_path,name):
     context.tracker.close()
     result=run_experiment('train',config=cfg)
     assert result.artifacts['last'].is_file() and np.isfinite(result.metrics['loss'])
+
+
+@pytest.mark.parametrize('cell',['RNN','LSTM','GRU'])
+def test_trajectory_cell_variants_and_batch_one(tmp_path,cell):
+    task_fixture(tmp_path/'raw')
+    cfg=configuration(tmp_path,'RNN',cell)
+    cfg['model']['params']['rnn_type']=cell
+    cfg['training'].update(epochs=1,batch_size=1)
+    cfg['evaluation']=dict(batch_size=1)
+    result=run_experiment('train',config=cfg)
+    assert np.isfinite(result.metrics['loss']) and result.artifacts['best'].is_file()
+
+
+def test_line_first_order_matches_original_dot_product_and_objective(tmp_path):
+    task_fixture(tmp_path/'raw')
+    cfg=configuration(tmp_path,'LINE','first-order')
+    cfg['model']['params']['order']='first'
+    context=make_context(cfg)
+    batch=next(iter(context.bundle.train))
+    from libcity.model.road_representation.LINE import LINE_FIRST
+    reference=LINE_FIRST(8,4)
+    reference.load_state_dict(context.model.embed.state_dict())
+    prediction=context.model(context.loss_fn.inputs(batch))
+    torch.testing.assert_close(prediction,reference(batch['I'],batch['J']))
+    loss=-torch.nn.functional.logsigmoid(prediction*batch['y']).mean()
+    torch.testing.assert_close(context.loss_fn(prediction,batch['y']).loss,loss)
+    context.tracker.close()
+
+
+def test_task_metrics_use_global_counts_with_short_batches_and_seconds():
+    from types import SimpleNamespace
+    from libcity.data.bundle import DatasetMetadata
+    from libcity.executor.task_evaluation import RankingLoss,ETALoss,evaluate_task
+    from libcity.utils.normalization import StandardScaler
+    class Fixed(torch.nn.Module):
+        def forward(self,batch):
+            return batch['score']
+    metadata=DatasetMetadata('math',info={'location_ids':[10,20,30]},input_layout={'kind':'padded_trajectory'})
+    loss=RankingLoss(SimpleNamespace(metadata=metadata),{'name':'nll'})
+    prediction=torch.log_softmax(torch.tensor([[9.,8.,7.],[7.,8.,9.],[8.,9.,7.]]),dim=1)
+    target=torch.tensor([0,0,1])
+    loader=[{'score':prediction[:2],'y':target[:2]},{'score':prediction[2:],'y':target[2:]}]
+    result=evaluate_task(Fixed(),loader,device=torch.device('cpu'),loss_fn=loss,
+        evaluation=dict(metrics=['Recall@1','Recall@3','MRR@3'],topk=[1,3],save_predictions=False))
+    assert result.metrics['Recall@1']==pytest.approx(2/3)
+    assert result.metrics['Recall@3']==1.
+    assert result.metrics['MRR@3']==pytest.approx((1+1/3+1)/3)
+    metadata=DatasetMetadata('math',input_layout={'kind':'planned_route'})
+    loss=ETALoss(SimpleNamespace(metadata=metadata,scaler=StandardScaler(100.,10.)),{'name':'mae'})
+    loader=[dict(score=torch.tensor([[0.],[1.]]),y=torch.tensor([[0.],[0.]]),y_raw=torch.tensor([[100.],[100.]])),
+            dict(score=torch.tensor([[2.]]),y=torch.tensor([[0.]]),y_raw=torch.tensor([[100.]]))]
+    result=evaluate_task(Fixed(),loader,device=torch.device('cpu'),loss_fn=loss,
+        evaluation=dict(metrics=['MAE','RMSE','MAPE'],save_predictions=False))
+    assert result.metrics['MAE']==10.
+    assert result.metrics['RMSE']==pytest.approx((500/3)**.5)
+    assert result.metrics['MAPE']==pytest.approx(.1)
