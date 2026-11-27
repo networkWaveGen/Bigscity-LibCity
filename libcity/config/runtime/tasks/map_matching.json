@@ -1,0 +1,7 @@
+{
+  "data": {"dataset": null, "data_dir": "raw_data", "cache_dir": "cache", "cache": false},
+  "model": {"name": null, "params": {}},
+  "training": {},
+  "evaluation": {"metrics": ["RMF", "AN", "AL"], "save_predictions": true},
+  "runtime": {"task": "map_matching", "device": "cpu", "seed": 0, "exp_id": null, "output_dir": "runs", "tensorboard": false, "deterministic": true, "num_threads": 1}
+}

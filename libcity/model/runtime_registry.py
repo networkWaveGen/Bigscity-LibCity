@@ -18,6 +18,9 @@ class ModelSpec:
     supports_resume: bool = True
     prepare_resume: str | None = None
     updates_per_epoch: str | None = None
+    evaluate: str | None = None
+    kind: str = 'neural'
+    device_types: tuple = ('cpu','cuda','mps')
 
 
 MODELS = {
@@ -30,6 +33,9 @@ MODELS = {
         train='libcity.executor.astgnn_train:train',prepare_resume='libcity.executor.astgnn_train:prepare_resume'),
     'MTGNN': ModelSpec('libcity.model.traffic_speed_prediction.runtime_mtgnn:MTGNN',
         train='libcity.executor.mtgnn_train:train',updates_per_epoch='libcity.executor.mtgnn_train:updates_per_epoch'),
+    'HMMM': ModelSpec('libcity.model.map_matching.runtime_hmmm:create_model',task='map_matching',
+        requires_checkpoint=False,supports_resume=False,evaluate='libcity.model.map_matching.runtime_hmmm:evaluate',
+        kind='direct',device_types=('cpu',)),
 }
 
 

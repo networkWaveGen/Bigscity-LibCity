@@ -66,6 +66,21 @@ def supervised_step(loss_fn):
     return step
 
 
+def write_metrics(metrics,directory):
+    directory=Path(directory)
+    directory.mkdir(parents=True,exist_ok=True)
+    path=directory/'metrics.json'
+    path.write_text(json.dumps(metrics,indent=2,allow_nan=False)+'\n',encoding='utf-8')
+    artifacts={'metrics_json':path}
+    path=directory/'metrics.csv'
+    with path.open('w',newline='',encoding='utf-8') as stream:
+        writer=csv.writer(stream)
+        writer.writerow(('metric','value'))
+        writer.writerows(metrics.items())
+    artifacts['metrics_csv']=path
+    return artifacts
+
+
 def evaluate_loop(model, loader, *, device, loss_fn, evaluation, directory=None, prefix=''):
     model.eval()
     accumulator = ForecastMetrics(evaluation['metrics'], evaluation['mask_value'], evaluation['mode'])
@@ -89,16 +104,7 @@ def evaluate_loop(model, loader, *, device, loss_fn, evaluation, directory=None,
     artifacts = {}
     if directory is not None:
         directory = Path(directory)
-        directory.mkdir(parents=True, exist_ok=True)
-        path = directory / 'metrics.json'
-        path.write_text(json.dumps(metrics, indent=2, allow_nan=False)+'\n', encoding='utf-8')
-        artifacts['metrics_json'] = path
-        path = directory / 'metrics.csv'
-        with path.open('w', newline='', encoding='utf-8') as stream:
-            writer = csv.writer(stream)
-            writer.writerow(('metric', 'value'))
-            writer.writerows(metrics.items())
-        artifacts['metrics_csv'] = path
+        artifacts=write_metrics(metrics,directory)
         path = directory / 'predictions.npz'
         if export:
             np.savez_compressed(path, prediction=np.concatenate(predictions), truth=np.concatenate(targets))

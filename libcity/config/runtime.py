@@ -61,6 +61,19 @@ def _number(value, path, minimum=0., strict=False):
         raise ValueError(f'{path} must be a finite number {">" if strict else ">="} {minimum}')
 
 
+def _validate_runtime(runtime):
+    _positive(runtime['seed'],'runtime.seed',zero=True)
+    _positive(runtime['num_threads'],'runtime.num_threads')
+    for key in ('tensorboard','deterministic'):
+        if type(runtime[key]) is not bool:
+            raise TypeError(f'runtime.{key} must be boolean')
+    if runtime['exp_id'] is not None and (not isinstance(runtime['exp_id'],str) or not runtime['exp_id']
+            or runtime['exp_id'] in ('.','..') or any(c in runtime['exp_id'] for c in '/\\')):
+        raise ValueError('runtime.exp_id must be a single nonempty directory name')
+    if not isinstance(runtime['device'],str):
+        raise TypeError('runtime.device must be a device string')
+
+
 def validate(config, preset):
     _known(config, ('data', 'model', 'training', 'evaluation', 'runtime'), 'config')
     for block in config:
@@ -84,6 +97,18 @@ def validate(config, preset):
             raise TypeError(f'model.params.{key} must be an integer')
         if type(default) is float and (type(value) not in (int, float) or not math.isfinite(value)):
             raise TypeError(f'model.params.{key} must be a finite number')
+    _validate_runtime(runtime)
+    if spec.task=='map_matching':
+        if type(data['cache']) is not bool:
+            raise TypeError('data.cache must be boolean')
+        if data['cache']:
+            raise ValueError('The map-matching adapter currently requires data.cache=false')
+        if type(evaluation['save_predictions']) is not bool:
+            raise TypeError('evaluation.save_predictions must be boolean')
+        if (not isinstance(evaluation['metrics'],list) or not evaluation['metrics']
+                or any(name not in ('RMF','AN','AL') for name in evaluation['metrics'])):
+            raise ValueError('Map-matching metrics must be a nonempty list of RMF/AN/AL')
+        return
     _known(data['split'], ('train', 'val'), 'data.split')
     rates = [data['split'].get(name) for name in ('train', 'val')]
     if any(type(rate) not in (int, float) or not math.isfinite(rate) or not 0 < rate < 1 for rate in rates) or sum(rates) >= 1:
@@ -115,12 +140,9 @@ def validate(config, preset):
             _positive(block[key], key)
     for block in (training, evaluation):
         _positive(block['num_workers'], 'num_workers', zero=True)
-    _positive(runtime['seed'], 'runtime.seed', zero=True)
-    _positive(runtime['num_threads'], 'runtime.num_threads')
     for value, name in [(data['cache'], 'data.cache'), (data['pad_training'], 'data.pad_training'),
                         (training['shuffle'], 'training.shuffle'), (training['amp'], 'training.amp'),
-                        (evaluation['save_predictions'], 'evaluation.save_predictions'),
-                        (runtime['tensorboard'], 'runtime.tensorboard'), (runtime['deterministic'], 'runtime.deterministic')]:
+                        (evaluation['save_predictions'], 'evaluation.save_predictions')]:
         if type(value) is not bool:
             raise TypeError(f'{name} must be a JSON boolean')
     for name, value in data['features'].items():
@@ -187,11 +209,6 @@ def validate(config, preset):
         if value is not None and (type(value) not in (int, float) or not math.isfinite(value)):
             raise ValueError('mask_value must be a finite number or null')
     _object(training['strategy'], 'training.strategy')
-    if runtime['exp_id'] is not None and (not isinstance(runtime['exp_id'], str) or not runtime['exp_id']
-            or runtime['exp_id'] in ('.', '..') or any(c in runtime['exp_id'] for c in '/\\')):
-        raise ValueError('runtime.exp_id must be a single nonempty directory name')
-    if not isinstance(runtime['device'], str):
-        raise TypeError('runtime.device must be a device string')
 
 
 def _resource(group, name):
@@ -220,18 +237,25 @@ def load_config(config_file=None, overrides=None, *, config=None):
     if not isinstance(name, str):
         raise ValueError('model.name is required')
     model_spec(name)
-    task = selectors.get('runtime', {}).get('task', 'traffic_state_pred')
+    task = selectors.get('runtime', {}).get('task', model_spec(name).task)
     defaults = _paths(_resource('tasks', task), Path.cwd())
+    defaults['model']['name']=name
+    user_model=user.get('model',{})
+    if isinstance(user_model,dict) and user_model.get('name',name)!=name:
+        # A CLI model switch selects the new preset rather than retaining the
+        # previous model's architecture fields from the user JSON.
+        user['model']={'name':name}
     preset = _resource('models', name)
     protected = [('data', 'split'), ('data', 'input_window'), ('data', 'output_window'),
                  ('evaluation', 'metrics'), ('evaluation', 'mask_value'), ('evaluation', 'mode')]
     for block, key in protected:
-        if key in preset.get(block, {}) and preset[block][key] != defaults[block][key]:
+        if key in preset.get(block, {}) and preset[block][key] != defaults[block].get(key):
             raise ValueError(f'Model preset cannot silently change benchmark field {block}.{key}')
     result = merge_config(merge_config(defaults, preset), _paths(user, base))
     result = merge_config(result, _paths(cli, Path.cwd()))
     validate(result, preset)
-    deviations = [f'{block}.{key}' for block, key in protected if result[block][key] != defaults[block][key]]
+    deviations = [f'{block}.{key}' for block, key in protected
+                  if key in defaults[block] and result[block][key] != defaults[block][key]]
     if deviations:
         warnings.warn('Explicit benchmark protocol changes: ' + ', '.join(deviations), UserWarning, stacklevel=2)
     return result

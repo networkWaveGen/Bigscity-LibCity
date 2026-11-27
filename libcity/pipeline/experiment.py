@@ -65,7 +65,8 @@ def protocol_changes(config):
     defaults = _resource('tasks', config['runtime']['task'])
     fields = [('data', 'split'), ('data', 'input_window'), ('data', 'output_window'),
               ('evaluation', 'metrics'), ('evaluation', 'mask_value'), ('evaluation', 'mode')]
-    return {f'{block}.{key}': config[block][key] for block, key in fields if config[block][key] != defaults[block][key]}
+    return {f'{block}.{key}': config[block][key] for block, key in fields
+            if key in defaults[block] and config[block][key] != defaults[block][key]}
 
 
 def run_experiment(mode, config_file=None, *, config=None, overrides=None, checkpoint=None, resume=None):
@@ -81,10 +82,16 @@ def run_experiment(mode, config_file=None, *, config=None, overrides=None, check
         raise ValueError('Use --resume last.pt for training, or --checkpoint best.pt for evaluation')
     if mode == 'evaluate' and spec.requires_checkpoint and checkpoint is None:
         raise ValueError('Evaluation requires --checkpoint best.pt')
+    if checkpoint is not None and not spec.requires_checkpoint:
+        raise ValueError('This algorithm does not use a checkpoint')
     for label, path in (('checkpoint', checkpoint), ('resume', resume)):
         if path is not None and not Path(path).is_file():
             raise FileNotFoundError(f'{label} file does not exist: {path}')
+    if cfg['runtime']['device']=='auto' and spec.device_types==('cpu',):
+        cfg['runtime']['device']='cpu'
     device = initialize_runtime(cfg['runtime'])
+    if device.type not in spec.device_types:
+        raise ValueError(f'{cfg["model"]["name"]} supports devices {spec.device_types}')
     cfg['runtime']['device'] = str(device)
     cfg['runtime']['exp_id'] = cfg['runtime']['exp_id'] or uuid.uuid4().hex[:12]
     directory = Path(cfg['runtime']['output_dir']) / cfg['runtime']['exp_id']
@@ -94,13 +101,22 @@ def run_experiment(mode, config_file=None, *, config=None, overrides=None, check
     logger = run_logger(directory)
     context = None
     try:
-        if cfg['runtime']['task'] != 'traffic_state_pred':
+        if cfg['runtime']['task']=='traffic_state_pred':
+            adapter=prepare_traffic
+        elif cfg['runtime']['task']=='map_matching':
+            from libcity.data.map_matching_bundle import prepare_map_matching
+            adapter=prepare_map_matching
+        else:
             raise ValueError('Task adapter is not migrated yet')
-        bundle = prepare_traffic(cfg['data'], cfg['training'], cfg['evaluation'], cfg['runtime']['seed'], logger=logger)
-        model = resolve(spec.factory)(metadata=bundle.metadata, input_window=cfg['data']['input_window'],
-            output_window=cfg['data']['output_window'], **cfg['model']['params']).to(device)
+        bundle = adapter(cfg['data'], cfg['training'], cfg['evaluation'], cfg['runtime']['seed'], logger=logger)
+        arguments=dict(metadata=bundle.metadata,**cfg['model']['params'])
+        if spec.kind=='neural':
+            arguments.update(input_window=cfg['data']['input_window'],output_window=cfg['data']['output_window'])
+        model = resolve(spec.factory)(**arguments)
+        if spec.kind=='neural':
+            model=model.to(device)
         changes = protocol_changes(cfg)
-        if bundle.split_summary['input_window']!=cfg['data']['input_window']:
+        if (spec.task=='traffic_state_pred' and bundle.split_summary['input_window']!=cfg['data']['input_window']):
             changes['data.effective_input_window'] = bundle.split_summary['input_window']
         if changes:
             logger.warning('Explicit benchmark protocol changes: %s', changes)
@@ -123,11 +139,14 @@ def run_experiment(mode, config_file=None, *, config=None, overrides=None, check
                 score = train_loop(context, step)
             if not isinstance(score, (float, int)) or not np.isfinite(score):
                 raise ValueError('Training entry must return a finite scalar validation score')
-        else:
+        elif spec.requires_checkpoint:
             CheckpointManager.load_weights(checkpoint, model)
-        result = evaluate_loop(model, bundle.test, device=device,
-            loss_fn=ForecastLoss(cfg['training']['loss'], bundle.scaler, bundle.metadata.output_dim),
-            evaluation=cfg['evaluation'], directory=directory / 'eval')
+        if spec.evaluate:
+            result=resolve(spec.evaluate)(model,bundle,cfg['evaluation'],directory=directory/'eval',logger=logger)
+        else:
+            result = evaluate_loop(model, bundle.test, device=device,
+                loss_fn=ForecastLoss(cfg['training']['loss'], bundle.scaler, bundle.metadata.output_dim),
+                evaluation=cfg['evaluation'], directory=directory / 'eval')
         result.artifacts.update(resolved_config=directory / 'resolved_config.json', runtime_info=directory / 'runtime_info.json',
                                 run_log=directory / 'run.log')
         if context is not None:

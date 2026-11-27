@@ -21,9 +21,9 @@
 - [x] ASTGNN 多阶段训练、标签提取与反归一化。
 - [x] MTGNN 独立训练及单 batch 多次更新。
 - [x] step/epoch/metric 调度、完整状态恢复、指标全局聚合及预测开关。
-- [ ] 一个非交通任务的 DataBundle 与无权重/训练能力约束验证。
+- [x] 一个非交通任务的 DataBundle 与无权重/训练能力约束验证：HMMM 地图匹配。
 
-最终验收前，未打钩项目均不视为完成。本记录随功能提交更新；本轮不做文件哈希校验，提交不添加 co-author。
+阶段一、二均已在 Windows CPU 通过验收。逐项依据见 [最终验收报告](acceptance_zh.md)，模型范围见 [迁移表](models_zh.md)，完整机器记录见 `acceptance.json`。本轮不做文件哈希校验，提交不添加 co-author。
 
 ## 阶段二首批计算对照
 
@@ -36,7 +36,7 @@ STGCN、DCRNN、Trafformer 均以旧模块的同一份权重进行前向、损�
 - Trafformer 解码长度改为 history+horizon，支持不等长窗口；等长条件下与旧模型对照。所有推理只读取 X 和显式 future_features。
 - 图预处理作为 data.graph 配置明确指定，默认二值图，STGCN 预设对称化，避免把旧缺边的 inf 距离直接送入图卷积。时间特征开关与 .ext 文件读取分开控制。上述适配不改变目标窗口所属的集合，时间轴修复仍留在阶段三。
 
-首批图模型及配置数据专项验收 19 项通过；最终阶段二完整验收将在 ASTGNN、MTGNN 和非交通适配完成后执行。
+首批图模型及配置数据专项验收 19 项通过；ASTGNN、MTGNN 和非交通适配完成后的最终结果见下文及验收报告。
 
 ## 定制训练验收
 
@@ -46,4 +46,23 @@ ASTGNN 的有意修正包括：kernel_size=1 时的因果卷积不再因 `:-0` �
 
 MTGNN 注册独立 train 函数，按子图更新并组合公共优化器、AMP、裁剪、调度、早停和检查点组件。batches_seen 记录输入批次，optimizer_steps 记录真实参数更新，课程学习子步与节点排列另存 task_state。每次子图更新前清零梯度，修正旧执行器同一 batch 内残留上一次梯度的问题；top-k 不超过当前子图节点数。对照覆盖旧模型相同全图条件下的两次 Adam 更新，以及修正梯度清理的子图参考训练、更新次数与学习率；真实子图课程学习和 OneCycle 中断续训逐参数一致。
 
-当前完整回归 173 项通过。跨任务适配仍在进行，尚未宣布阶段二完成。
+定制训练完成时完整回归为 173 项；跨任务和最终核对后为 **184 项全部通过**。历史阶段一 156 项记录保留原语义。
+
+## 最终跨任务与完整状态验收
+
+HMMM 使用 `.geo/.rel/.usr/.dyna` 原子文件及真值路线，DataBundle.train/val 为 None，不创建优化器、TensorBoard、metrics.jsonl 或检查点。CLI/Python 的两条轨迹结果一致，RMF=0、AN=1、AL=1；测试覆盖有/无时间戳、仅选 AN、预测开关与不支持的训练/续训请求。复用的评估器修复了 road_id=0 被当成空值过滤、以及只选 AN/AL 时未初始化结果字典的问题。
+
+最终核对补充了带 dropout 和 shuffle 的逐参数精确续训、真实早停及已经停止后的零更新恢复、裁剪在归一化之后执行、数据集元信息改变时拒绝续训，以及 MTGNN 静态图单节点子图的有限值检查。完整 last.pt 使用格式版本 2，额外记录元信息、采样布局及归一化状态；无需新训练轮次的续训也会在新实验目录保留 last.pt。
+
+MTGNN 预定义邻接仅清除已有对角，不再无条件减去单位矩阵，以免缺自环的小子图出现零分母。TensorBoard 从基础依赖移到可选组，dev 组为旧测试保留它；默认新运行时在不安装该包的独立基础环境中验收，记录为 minimal-environment.json。
+
+## Commit 顺序
+
+1. `4e408b4` — test: capture runtime migration baseline and atomic fixture
+2. `fb618b5` — feat: add layered runtime configuration and traffic data bundle
+3. `fe2e862` — feat: run complete GRU experiments with resumable native training
+4. `0f9f7a1` — feat: migrate graph forecasts and curriculum steps to shared training
+5. `1939621` — feat: compose staged and subgraph training with complete task state
+6. 本次最终交付提交 — feat: validate direct-task runtime and complete phase acceptance
+
+全部为新提交，不改写原有提交。阶段三到五以及方案第 8 节均未作为本轮完成项。

@@ -129,11 +129,21 @@ class EarlyStopper:
 class MetricTracker:
     def __init__(self, directory, logger, *, tensorboard=False):
         self.logger = logger
+        writer_class=None
+        if tensorboard:
+            try:
+                from torch.utils.tensorboard import SummaryWriter
+            except ImportError as error:
+                raise ImportError('TensorBoard recording requires pip install -e .[tensorboard]') from error
+            writer_class=SummaryWriter
         self.stream = (directory / 'metrics.jsonl').open('a', encoding='utf-8')
         self.writer = None
-        if tensorboard:
-            from torch.utils.tensorboard import SummaryWriter
-            self.writer = SummaryWriter(str(directory / 'tensorboard'))
+        try:
+            if writer_class is not None:
+                self.writer = writer_class(str(directory / 'tensorboard'))
+        except BaseException:
+            self.stream.close()
+            raise
 
     def record(self, state, metrics):
         record = dict(stage=state.stage, epoch=state.epoch, batches_seen=state.batches_seen,

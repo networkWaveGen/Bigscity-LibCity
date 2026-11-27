@@ -1,5 +1,6 @@
 """Safe tensor-only inference weights and independent complete training snapshots."""
 from dataclasses import asdict
+from collections.abc import Mapping
 import os
 from pathlib import Path
 import random
@@ -17,6 +18,25 @@ def resume_settings(config):
             or 'fine_tune_epochs' in config['training']['strategy']):
         training['epochs'] = config['training']['epochs']
     return dict(data=data, model=config['model'], training=training)
+
+
+def plain(value):
+    if isinstance(value,Mapping):
+        return {key:plain(item) for key,item in value.items()}
+    if isinstance(value,(tuple,list)):
+        return [plain(item) for item in value]
+    if isinstance(value,np.ndarray):
+        return value.tolist()
+    if isinstance(value,np.generic):
+        return value.item()
+    return value
+
+
+def data_state(bundle):
+    metadata=bundle.metadata
+    return dict(name=metadata.name,num_nodes=metadata.num_nodes,feature_dim=metadata.feature_dim,
+        output_dim=metadata.output_dim,info=plain(metadata.info),input_layout=plain(metadata.input_layout),
+        scaler=dict(name=type(bundle.scaler).__name__,state=plain(vars(bundle.scaler))))
 
 
 def rng_state():
@@ -63,13 +83,13 @@ class CheckpointManager:
         return self._save('best.pt', self.best_state)
 
     def save_last(self, context):
-        payload = dict(format_version=1, model=copy_state_to_cpu(context.model.state_dict()),
+        payload = dict(format_version=2, model=copy_state_to_cpu(context.model.state_dict()),
             optimizer=copy_state_to_cpu(context.optimizer.state_dict()), scheduler=context.schedule.state_dict(),
             amp_scaler=context.amp_scaler.state_dict(), train_state=asdict(context.state),
             early_stopper=context.stopper.state_dict(), best_model=self.best_state, rng=rng_state(),
             loader_rng=context.bundle.generator.get_state() if context.bundle.generator is not None else None,
             model_name=context.config['model']['name'], model_params=context.config['model']['params'],
-            resume_settings=resume_settings(context.config))
+            resume_settings=resume_settings(context.config),data_state=data_state(context.bundle))
         return self._save('last.pt', payload)
 
     def load_last(self, path, context, prepare=None):
@@ -81,6 +101,8 @@ class CheckpointManager:
             raise ValueError('Resume model configuration does not match checkpoint')
         if payload['resume_settings'] != resume_settings(context.config):
             raise ValueError('Resume data/training configuration does not match checkpoint')
+        if payload.get('format_version')!=2 or payload.get('data_state')!=data_state(context.bundle):
+            raise ValueError('Resume dataset metadata/normalization state does not match checkpoint')
         if prepare is not None:
             prepare(context,payload['train_state'])
         context.model.load_state_dict(payload['model'])
@@ -96,6 +118,9 @@ class CheckpointManager:
         if payload.get('loader_rng') is not None and context.bundle.generator is not None:
             context.bundle.generator.set_state(payload['loader_rng'])
         restore_rng(payload['rng'])
+        # A completed/early-stopped resume may perform no further epoch, but
+        # its new experiment directory must still contain the full last state.
+        self._save('last.pt',payload)
         return payload
 
     @staticmethod

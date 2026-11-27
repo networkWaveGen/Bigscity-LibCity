@@ -39,7 +39,9 @@ class MTGNN(nn.Module):
             raise ValueError('MTGNN convolution output supports output_dim=1')
         self.input_window,self.output_window = input_window,output_window
         self.register_buffer('idx',torch.arange(self.num_nodes))
-        self.register_buffer('predefined_A',torch.tensor(metadata.adjacency.copy(),dtype=torch.float32)-torch.eye(self.num_nodes))
+        predefined=torch.tensor(metadata.adjacency.copy(),dtype=torch.float32)
+        predefined.fill_diagonal_(0.)
+        self.register_buffer('predefined_A',predefined)
         self.filter_convs,self.gate_convs = nn.ModuleList(),nn.ModuleList()
         self.residual_convs,self.skip_convs = nn.ModuleList(),nn.ModuleList()
         self.gconv1,self.gconv2,self.norm = nn.ModuleList(),nn.ModuleList(),nn.ModuleList()

@@ -1,0 +1,96 @@
+{
+  "passed": true,
+  "cwd": "D:\\LibCity 2.0\\.runtime-tests\\architecture-docs-362a5f83",
+  "commands": [
+    {
+      "arguments": [
+        "D:\\LibCity 2.0\\LibCity-modernization\\tools\\make_runtime_fixture.py",
+        "--directory",
+        "D:\\LibCity 2.0\\.runtime-tests\\architecture-docs-362a5f83\\traffic"
+      ],
+      "exit_code": 0
+    },
+    {
+      "arguments": [
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "train",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\architecture-docs-362a5f83\\traffic\\gru.json",
+        "--set",
+        "runtime.exp_id=train"
+      ],
+      "exit_code": 0
+    },
+    {
+      "arguments": [
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "evaluate",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\architecture-docs-362a5f83\\traffic\\gru.json",
+        "--checkpoint",
+        "D:\\LibCity 2.0\\.runtime-tests\\architecture-docs-362a5f83\\traffic\\runs\\train\\checkpoints\\best.pt",
+        "--set",
+        "runtime.exp_id=independent"
+      ],
+      "exit_code": 0
+    },
+    {
+      "arguments": [
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "train",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\architecture-docs-362a5f83\\traffic\\gru.json",
+        "--resume",
+        "D:\\LibCity 2.0\\.runtime-tests\\architecture-docs-362a5f83\\traffic\\runs\\train\\checkpoints\\last.pt",
+        "--set",
+        "training.epochs=3",
+        "--set",
+        "runtime.exp_id=resumed"
+      ],
+      "exit_code": 0
+    },
+    {
+      "arguments": [
+        "D:\\LibCity 2.0\\LibCity-modernization\\tools\\make_runtime_fixture.py",
+        "--directory",
+        "D:\\LibCity 2.0\\.runtime-tests\\architecture-docs-362a5f83\\map",
+        "--task",
+        "map_matching"
+      ],
+      "exit_code": 0
+    },
+    {
+      "arguments": [
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "evaluate",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\architecture-docs-362a5f83\\map\\hmmm.json",
+        "--set",
+        "runtime.exp_id=direct"
+      ],
+      "exit_code": 0
+    }
+  ],
+  "gru_train": {
+    "MAE@1": 0.9391778663352683,
+    "RMSE@1": 1.0640175624679578,
+    "MAE@2": 1.0540769718311451,
+    "RMSE@2": 1.1656971007765287,
+    "loss": 0.9966274499893188,
+    "best_validation": 0.9921593070030212
+  },
+  "gru_evaluate": {
+    "MAE@1": 0.9391778663352683,
+    "RMSE@1": 1.0640175624679578,
+    "MAE@2": 1.0540769718311451,
+    "RMSE@2": 1.1656971007765287,
+    "loss": 0.9966274499893188
+  },
+  "resumed_epoch": 3,
+  "map_matching": {
+    "RMF": 0.0,
+    "AN": 1.0,
+    "AL": 1.0
+  },
+  "note": "Actual documentation generator + CLI commands, executed outside the repository, CPU only."
+}

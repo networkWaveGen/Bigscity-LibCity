@@ -1,0 +1,73 @@
+{
+  "passed": true,
+  "installation": "python -m pip install -e .",
+  "cwd": "D:\\LibCity 2.0\\.runtime-tests\\runtime-minimal-7kyamuwa",
+  "python": "3.12.13",
+  "core_versions": {
+    "libcity": "0.4.0.dev0",
+    "torch": "2.15.0",
+    "numpy": "2.5.5"
+  },
+  "optional_packages_present": {
+    "tensorboard": false,
+    "pytest": false,
+    "einops": false,
+    "ray": false,
+    "hyperopt": false,
+    "dgl": false,
+    "torchtext": false
+  },
+  "commands": [
+    {
+      "arguments": [
+        "D:\\LibCity 2.0\\LibCity-modernization\\tools\\make_runtime_fixture.py",
+        "--directory",
+        "D:\\LibCity 2.0\\.runtime-tests\\runtime-minimal-7kyamuwa\\traffic"
+      ],
+      "exit_code": 0
+    },
+    {
+      "arguments": [
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "train",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\runtime-minimal-7kyamuwa\\traffic\\gru.json",
+        "--set",
+        "runtime.exp_id=train"
+      ],
+      "exit_code": 0
+    },
+    {
+      "arguments": [
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "evaluate",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\runtime-minimal-7kyamuwa\\traffic\\gru.json",
+        "--checkpoint",
+        "D:\\LibCity 2.0\\.runtime-tests\\runtime-minimal-7kyamuwa\\traffic\\runs\\train\\checkpoints\\best.pt",
+        "--set",
+        "runtime.exp_id=evaluate"
+      ],
+      "exit_code": 0
+    },
+    {
+      "arguments": [
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "train",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\runtime-minimal-7kyamuwa\\traffic\\gru.json",
+        "--resume",
+        "D:\\LibCity 2.0\\.runtime-tests\\runtime-minimal-7kyamuwa\\traffic\\runs\\train\\checkpoints\\last.pt",
+        "--set",
+        "training.epochs=3",
+        "--set",
+        "runtime.exp_id=resumed"
+      ],
+      "exit_code": 0
+    }
+  ],
+  "resumed_epoch": 3,
+  "tensorboard_request_error": "TensorBoard recording requires pip install -e .[tensorboard]",
+  "no_partial_metric_stream": true,
+  "evaluate_has_no_training_metrics": true
+}

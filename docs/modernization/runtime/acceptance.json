@@ -1,0 +1,905 @@
+{
+  "baseline": "6ddc6ee7d0dc8467831c678e69b9e70aa131a763",
+  "implementation_parent": "1939621",
+  "scope": "Final changes and this report are committed together; stages 1 and 2 only.",
+  "command": "python -B -m pytest -q --junitxml ../.runtime-tests/architecture-acceptance.xml",
+  "tests": 184,
+  "passed": 184,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "seconds": 31.76,
+  "environment": {
+    "python": "3.12.13",
+    "torch": "2.15.0+cpu",
+    "numpy": "2.5.5",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "cuda_available": false,
+    "mps_available": false,
+    "optional_packages": {
+      "einops": "0.8.2",
+      "ray": null,
+      "hyperopt": null,
+      "dgl": null,
+      "torchtext": null,
+      "tensorboard": "2.21.0"
+    },
+    "dependencies": [
+      "absl-py==2.5.1",
+      "build==1.6.1",
+      "cloudpickle==3.1.3",
+      "colorama==0.4.6",
+      "einops==0.8.2",
+      "filelock==4.3.1",
+      "fsspec==2026.9.0",
+      "geographiclib==2.1",
+      "geopy==2.5.0",
+      "grpcio==1.85.4",
+      "iniconfig==2.3.1",
+      "Jinja2==3.1.6",
+      "joblib==1.6.0",
+      "-e git+https://github.com/networkWaveGen/Bigscity-LibCity.git@1939621ccf0298e8fc13d90fb2e411d17a003036#egg=libcity",
+      "Markdown==3.11.4",
+      "MarkupSafe==3.0.4",
+      "mpmath==1.3.0",
+      "narwhals==2.29.0",
+      "networkx==3.7",
+      "numpy==2.5.5",
+      "packaging==26.4",
+      "pandas==3.1.1",
+      "pillow==13.0.0",
+      "pluggy==1.7.0",
+      "protobuf==7.36.2",
+      "Pygments==2.21.0",
+      "pyproject_hooks==1.3.3",
+      "pytest==9.2.0",
+      "python-dateutil==4.0.0",
+      "scikit-learn==1.9.1",
+      "scipy==1.18.1",
+      "setuptools==84.2.1",
+      "sympy==1.14.0",
+      "tabulate==0.10.0",
+      "tensorboard==2.21.0",
+      "tensorboard-data-server==0.7.2",
+      "threadpoolctl==3.8.0",
+      "torch==2.15.0",
+      "tqdm==4.70.1",
+      "typing_extensions==4.16.0",
+      "tzdata==2026.6",
+      "Werkzeug==3.1.9"
+    ]
+  },
+  "module_counts": {
+    "tests.test_cache_eta_scalers": 28,
+    "tests.test_checkpoint_resume": 10,
+    "tests.test_component_entrypoints": 10,
+    "tests.test_followup_regressions": 32,
+    "tests.test_modern_core": 24,
+    "tests.test_runtime_config_data": 12,
+    "tests.test_runtime_custom_training": 9,
+    "tests.test_runtime_engine": 19,
+    "tests.test_runtime_graph_models": 8,
+    "tests.test_runtime_map_matching": 5,
+    "tests.test_runtime_regressions": 27
+  },
+  "requirements": {
+    "phase1.numeric_baseline": [
+      "tests.test_runtime_config_data::test_adapter_matches_atomic_baseline_and_metadata_is_readonly"
+    ],
+    "phase1.layered_config": [
+      "tests.test_runtime_config_data::test_config_layers_paths_and_component_replacement",
+      "tests.test_runtime_config_data::test_invalid_config_fails_at_entry[changes0-model.name]",
+      "tests.test_runtime_config_data::test_invalid_config_fails_at_entry[changes1-not migrated]",
+      "tests.test_runtime_config_data::test_invalid_config_fails_at_entry[changes2-Unknown]",
+      "tests.test_runtime_config_data::test_invalid_config_fails_at_entry[changes3-boolean]",
+      "tests.test_runtime_config_data::test_invalid_config_fails_at_entry[changes4-integer]",
+      "tests.test_runtime_config_data::test_invalid_config_fails_at_entry[changes5-metric]",
+      "tests.test_runtime_config_data::test_invalid_config_fails_at_entry[changes6-split]",
+      "tests.test_runtime_config_data::test_invalid_config_fails_at_entry[changes7-metric]",
+      "tests.test_runtime_config_data::test_adapter_matches_atomic_baseline_and_metadata_is_readonly",
+      "tests.test_runtime_config_data::test_calendar_feature_does_not_implicitly_enable_external_file",
+      "tests.test_runtime_config_data::test_cli_model_switch_uses_new_preset_without_old_architecture_fields"
+    ],
+    "phase1.cli_python_train_evaluate_resume": [
+      "tests.test_runtime_engine::test_gru_cli_python_train_evaluate_and_resume"
+    ],
+    "phase1.inference_optional_isolation": [
+      "tests.test_runtime_engine::test_checkpoint_errors_and_optional_import_isolation"
+    ],
+    "phase2.stgcn": [
+      "tests.test_runtime_graph_models::test_forward_loss_and_short_updates_match_legacy_computation[STGCN]"
+    ],
+    "phase2.dcrnn": [
+      "tests.test_runtime_graph_models::test_dcrnn_curriculum_resume_retains_progress_rng_and_next_updates"
+    ],
+    "phase2.trafformer": [
+      "tests.test_runtime_graph_models::test_trafformer_unequal_horizon_flushes_short_accumulation_group"
+    ],
+    "phase2.custom_training": [
+      "tests.test_runtime_custom_training::test_astgnn_teacher_labels_and_original_scale_short_update_match",
+      "tests.test_runtime_custom_training::test_astgnn_multiple_stages_resume_and_reset_optimizer_once[teacher]",
+      "tests.test_runtime_custom_training::test_astgnn_multiple_stages_resume_and_reset_optimizer_once[fine_tune]",
+      "tests.test_runtime_custom_training::test_astgnn_temporal_encoding_keeps_projection_gradients_and_pipeline",
+      "tests.test_runtime_custom_training::test_mtg_model_matches_legacy_forward_loss_and_adam_updates",
+      "tests.test_runtime_custom_training::test_mtg_multiple_updates_match_corrected_reference_and_lr",
+      "tests.test_runtime_custom_training::test_mtg_curriculum_subgraphs_and_step_schedule_resume_exactly",
+      "tests.test_runtime_custom_training::test_mtg_independent_trainer_uses_pipeline_and_prediction_switch",
+      "tests.test_runtime_custom_training::test_mtg_static_graph_keeps_self_support_for_single_node_subgraphs"
+    ],
+    "phase2.scheduler_resume": [
+      "tests.test_runtime_engine::test_complete_resume_matches_next_updates_lr_counters_and_best[scheduler0]",
+      "tests.test_runtime_engine::test_complete_resume_matches_next_updates_lr_counters_and_best[scheduler1]",
+      "tests.test_runtime_engine::test_complete_resume_matches_next_updates_lr_counters_and_best[scheduler2]",
+      "tests.test_runtime_engine::test_complete_resume_matches_next_updates_lr_counters_and_best[scheduler3]",
+      "tests.test_runtime_engine::test_complete_resume_matches_next_updates_lr_counters_and_best[scheduler4]"
+    ],
+    "phase2.metric_aggregation": [
+      "tests.test_runtime_engine::test_global_metrics_with_tail_missing_mask_and_multiple_horizons[single]",
+      "tests.test_runtime_engine::test_global_metrics_with_tail_missing_mask_and_multiple_horizons[average]"
+    ],
+    "phase2.early_stopping": [
+      "tests.test_runtime_engine::test_early_stop_and_completed_resume_perform_no_extra_update"
+    ],
+    "phase2.stochastic_resume": [
+      "tests.test_runtime_engine::test_dropout_and_shuffled_loader_rng_resume_exactly"
+    ],
+    "phase2.gradient_clip": [
+      "tests.test_runtime_engine::test_clip_is_applied_after_objective_normalization"
+    ],
+    "phase2.direct_task": [
+      "tests.test_runtime_map_matching::test_map_bundle_and_direct_evaluation_without_training_objects[False]",
+      "tests.test_runtime_map_matching::test_map_bundle_and_direct_evaluation_without_training_objects[True]",
+      "tests.test_runtime_map_matching::test_map_single_metric_and_prediction_switch_remove_stale_export",
+      "tests.test_runtime_map_matching::test_map_capabilities_fail_before_data_or_training_initialization",
+      "tests.test_runtime_map_matching::test_map_cli_matches_python_with_no_checkpoint"
+    ]
+  },
+  "tests_detail": [
+    {
+      "name": "tests.test_cache_eta_scalers::test_cache_separates_selected_columns_and_source_files[selection0-109.0]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_cache_eta_scalers::test_cache_separates_selected_columns_and_source_files[selection1-209.0]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_cache_eta_scalers::test_cache_rebuilds_missing_or_mismatched_metadata[missing]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_cache_eta_scalers::test_cache_rebuilds_missing_or_mismatched_metadata[mismatched]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_cache_eta_scalers::test_simst_reuses_cache_and_keeps_real_evaluation_tail",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_cache_eta_scalers::test_legacy_cache_is_preserved_and_not_reused",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_cache_eta_scalers::test_eta_export_keeps_all_trajectories_for_repeated_users[1]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_cache_eta_scalers::test_eta_export_keeps_all_trajectories_for_repeated_users[2]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_cache_eta_scalers::test_scaler_finite_roundtrip_and_nonconstant_behavior[numpy-False-normal]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_cache_eta_scalers::test_scaler_finite_roundtrip_and_nonconstant_behavior[numpy-False-standard]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_cache_eta_scalers::test_scaler_finite_roundtrip_and_nonconstant_behavior[numpy-False-minmax01]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_cache_eta_scalers::test_scaler_finite_roundtrip_and_nonconstant_behavior[numpy-False-minmax11]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_cache_eta_scalers::test_scaler_finite_roundtrip_and_nonconstant_behavior[numpy-True-normal]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_cache_eta_scalers::test_scaler_finite_roundtrip_and_nonconstant_behavior[numpy-True-standard]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_cache_eta_scalers::test_scaler_finite_roundtrip_and_nonconstant_behavior[numpy-True-minmax01]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_cache_eta_scalers::test_scaler_finite_roundtrip_and_nonconstant_behavior[numpy-True-minmax11]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_cache_eta_scalers::test_scaler_finite_roundtrip_and_nonconstant_behavior[torch-False-normal]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_cache_eta_scalers::test_scaler_finite_roundtrip_and_nonconstant_behavior[torch-False-standard]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_cache_eta_scalers::test_scaler_finite_roundtrip_and_nonconstant_behavior[torch-False-minmax01]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_cache_eta_scalers::test_scaler_finite_roundtrip_and_nonconstant_behavior[torch-False-minmax11]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_cache_eta_scalers::test_scaler_finite_roundtrip_and_nonconstant_behavior[torch-True-normal]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_cache_eta_scalers::test_scaler_finite_roundtrip_and_nonconstant_behavior[torch-True-standard]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_cache_eta_scalers::test_scaler_finite_roundtrip_and_nonconstant_behavior[torch-True-minmax01]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_cache_eta_scalers::test_scaler_finite_roundtrip_and_nonconstant_behavior[torch-True-minmax11]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_cache_eta_scalers::test_constant_data_is_finite_through_real_dataset[normal]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_cache_eta_scalers::test_constant_data_is_finite_through_real_dataset[standard]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_cache_eta_scalers::test_constant_data_is_finite_through_real_dataset[minmax01]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_cache_eta_scalers::test_constant_data_is_finite_through_real_dataset[minmax11]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_checkpoint_resume::test_adam_resume_matches_uninterrupted_next_step[traffic]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_checkpoint_resume::test_adam_resume_matches_uninterrupted_next_step[trajectory]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_checkpoint_resume::test_adam_resume_matches_uninterrupted_next_step[epoch]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_checkpoint_resume::test_device_forwarding_and_weights_only_default",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_checkpoint_resume::test_model_only_checkpoint_cannot_silently_reset_optimizer",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_checkpoint_resume::test_checkpoint_migration_keeps_values_and_optimizer[pair]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_checkpoint_resume::test_checkpoint_migration_keeps_values_and_optimizer[epoch]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_checkpoint_resume::test_checkpoint_migration_keeps_values_and_optimizer[state_dict]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_checkpoint_resume::test_checkpoint_migration_keeps_values_and_optimizer[weights]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_checkpoint_resume::test_checkpoint_migration_keeps_values_and_optimizer[object]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_component_entrypoints::test_real_model_executor_and_evaluator_factories[traffic_state_pred-GRU]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_component_entrypoints::test_real_model_executor_and_evaluator_factories[traj_loc_pred-GRU]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_component_entrypoints::test_real_model_executor_and_evaluator_factories[eta-DeepTTE]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_component_entrypoints::test_real_model_executor_and_evaluator_factories[map_matching-HMMM]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_component_entrypoints::test_real_model_executor_and_evaluator_factories[road_representation-LINE]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_component_entrypoints::test_real_dataset_and_encoder_factories[traj_loc_pred-GRU]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_component_entrypoints::test_real_dataset_and_encoder_factories[eta-DeepTTE]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_component_entrypoints::test_trajectory_gru_forward_and_backward",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_component_entrypoints::test_eta_deeptte_forward_and_backward",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_component_entrypoints::test_road_line_loss_and_backward",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_followup_regressions::test_cstn_actual_batch_size_and_gradient[1]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_followup_regressions::test_cstn_actual_batch_size_and_gradient[2]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_followup_regressions::test_cstn_actual_batch_size_and_gradient[3]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_followup_regressions::test_all_batched_validation_overrides_account_for_real_samples[False-traffic_state_executor-TrafficStateExecutor]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_followup_regressions::test_all_batched_validation_overrides_account_for_real_samples[False-dcrnn_executor-DCRNNExecutor]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_followup_regressions::test_all_batched_validation_overrides_account_for_real_samples[False-mtgnn_executor-MTGNNExecutor]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_followup_regressions::test_all_batched_validation_overrides_account_for_real_samples[False-pdformer_executor-PDFormerExecutor]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_followup_regressions::test_all_batched_validation_overrides_account_for_real_samples[False-astgnn_executor-ASTGNNExecutor]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_followup_regressions::test_all_batched_validation_overrides_account_for_real_samples[False-sstban_executor-SSTBANExecutor]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_followup_regressions::test_all_batched_validation_overrides_account_for_real_samples[False-fogs_executor-FOGSExecutor]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_followup_regressions::test_all_batched_validation_overrides_account_for_real_samples[True-traffic_state_executor-TrafficStateExecutor]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_followup_regressions::test_all_batched_validation_overrides_account_for_real_samples[True-dcrnn_executor-DCRNNExecutor]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_followup_regressions::test_all_batched_validation_overrides_account_for_real_samples[True-mtgnn_executor-MTGNNExecutor]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_followup_regressions::test_all_batched_validation_overrides_account_for_real_samples[True-pdformer_executor-PDFormerExecutor]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_followup_regressions::test_all_batched_validation_overrides_account_for_real_samples[True-astgnn_executor-ASTGNNExecutor]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_followup_regressions::test_all_batched_validation_overrides_account_for_real_samples[True-sstban_executor-SSTBANExecutor]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_followup_regressions::test_all_batched_validation_overrides_account_for_real_samples[True-fogs_executor-FOGSExecutor]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_followup_regressions::test_real_config_json_flags_and_explicit_overrides[json_flags0-explicit0-extra0-expected0]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_followup_regressions::test_real_config_json_flags_and_explicit_overrides[json_flags1-explicit1-extra1-expected1]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_followup_regressions::test_real_config_json_flags_and_explicit_overrides[json_flags2-explicit2-extra2-expected2]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_followup_regressions::test_real_config_json_flags_and_explicit_overrides[json_flags3-explicit3-extra3-expected3]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_followup_regressions::test_real_config_json_flags_and_explicit_overrides[json_flags4-explicit4-extra4-expected4]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_followup_regressions::test_real_cli_passes_layered_config_and_explicit_overrides[arguments0]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_followup_regressions::test_real_cli_passes_layered_config_and_explicit_overrides[arguments1]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_followup_regressions::test_json_evaluation_mode_does_not_start_data_preparation",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_followup_regressions::test_search_objective_rejects_disabled_training",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_followup_regressions::test_real_dataset_get_data_twice_preserves_loaders_values_and_scaler[False]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_followup_regressions::test_real_dataset_get_data_twice_preserves_loaders_values_and_scaler[True]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_followup_regressions::test_trajectory_best_model_optimizer_scheduler_and_export_agree[False]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_followup_regressions::test_trajectory_best_model_optimizer_scheduler_and_export_agree[True]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_followup_regressions::test_trajectory_sample_mode_tail_has_matching_targets[validation]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_followup_regressions::test_trajectory_sample_mode_tail_has_matching_targets[evaluation]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_modern_core::test_core_imports_do_not_load_optional_stacks",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_modern_core::test_dense_batch_values_and_source_ownership[False]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_modern_core::test_dense_batch_values_and_source_ownership[True]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_modern_core::test_padding_and_ragged_fields_do_not_mutate_samples",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_modern_core::test_padded_loader_keeps_batch_type_without_padding_fields",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_modern_core::test_padded_collator_rejects_extra_sample_fields",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_modern_core::test_loader_works_with_spawn_worker",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_modern_core::test_last_sample_padding_handles_different_input_and_target_shapes",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_modern_core::test_cpu_device_selection[False]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_modern_core::test_cpu_device_selection[True]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_modern_core::test_config_name_preserves_dotted_stem",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_modern_core::test_packaged_defaults_and_explicit_json_path",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_modern_core::test_factory_does_not_hide_constructor_errors",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_modern_core::test_forecast_forward_backward_and_checkpoint[GRU]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_modern_core::test_forecast_forward_backward_and_checkpoint[STGCN]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_modern_core::test_stnn_forecasts_on_cpu[None]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_modern_core::test_stnn_forecasts_on_cpu[refine]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_modern_core::test_stnn_forecasts_on_cpu[discover]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_modern_core::test_dsan_forecasts_and_trains_on_cpu",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_modern_core::test_evaluation_preserves_global_metrics_and_prediction_archive[False-single]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_modern_core::test_evaluation_preserves_global_metrics_and_prediction_archive[False-average]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_modern_core::test_evaluation_preserves_global_metrics_and_prediction_archive[True-single]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_modern_core::test_evaluation_preserves_global_metrics_and_prediction_archive[True-average]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_modern_core::test_atomic_files_to_training_and_evaluation",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_runtime_config_data::test_config_layers_paths_and_component_replacement",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_runtime_config_data::test_invalid_config_fails_at_entry[changes0-model.name]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_runtime_config_data::test_invalid_config_fails_at_entry[changes1-not migrated]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_runtime_config_data::test_invalid_config_fails_at_entry[changes2-Unknown]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_runtime_config_data::test_invalid_config_fails_at_entry[changes3-boolean]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_runtime_config_data::test_invalid_config_fails_at_entry[changes4-integer]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_runtime_config_data::test_invalid_config_fails_at_entry[changes5-metric]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_runtime_config_data::test_invalid_config_fails_at_entry[changes6-split]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_runtime_config_data::test_invalid_config_fails_at_entry[changes7-metric]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_runtime_config_data::test_adapter_matches_atomic_baseline_and_metadata_is_readonly",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_runtime_config_data::test_calendar_feature_does_not_implicitly_enable_external_file",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_runtime_config_data::test_cli_model_switch_uses_new_preset_without_old_architecture_fields",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_runtime_custom_training::test_astgnn_teacher_labels_and_original_scale_short_update_match",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_runtime_custom_training::test_astgnn_multiple_stages_resume_and_reset_optimizer_once[teacher]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_runtime_custom_training::test_astgnn_multiple_stages_resume_and_reset_optimizer_once[fine_tune]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_runtime_custom_training::test_astgnn_temporal_encoding_keeps_projection_gradients_and_pipeline",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_runtime_custom_training::test_mtg_model_matches_legacy_forward_loss_and_adam_updates",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_runtime_custom_training::test_mtg_multiple_updates_match_corrected_reference_and_lr",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_runtime_custom_training::test_mtg_curriculum_subgraphs_and_step_schedule_resume_exactly",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_runtime_custom_training::test_mtg_independent_trainer_uses_pipeline_and_prediction_switch",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_runtime_custom_training::test_mtg_static_graph_keeps_self_support_for_single_node_subgraphs",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_runtime_engine::test_gru_cli_python_train_evaluate_and_resume",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_runtime_engine::test_complete_resume_matches_next_updates_lr_counters_and_best[scheduler0]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_runtime_engine::test_complete_resume_matches_next_updates_lr_counters_and_best[scheduler1]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_runtime_engine::test_complete_resume_matches_next_updates_lr_counters_and_best[scheduler2]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_runtime_engine::test_complete_resume_matches_next_updates_lr_counters_and_best[scheduler3]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_runtime_engine::test_complete_resume_matches_next_updates_lr_counters_and_best[scheduler4]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_runtime_engine::test_accumulation_matches_combined_batches_and_flushes_short_tail",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_runtime_engine::test_global_metrics_with_tail_missing_mask_and_multiple_horizons[single]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_runtime_engine::test_global_metrics_with_tail_missing_mask_and_multiple_horizons[average]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_runtime_engine::test_optimizer_groups_freeze_and_reject_overlap",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_runtime_engine::test_checkpoint_errors_and_optional_import_isolation",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_runtime_engine::test_best_weights_are_not_resume_state_and_changed_settings_fail",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_runtime_engine::test_best_and_last_remain_distinct_for_min_and_max[min-val_loss-values0]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_runtime_engine::test_best_and_last_remain_distinct_for_min_and_max[max-val_Recall@1-values1]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_runtime_engine::test_cpu_amp_and_opt_in_tensorboard",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_runtime_engine::test_early_stop_and_completed_resume_perform_no_extra_update",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_runtime_engine::test_dropout_and_shuffled_loader_rng_resume_exactly",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_runtime_engine::test_clip_is_applied_after_objective_normalization",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_runtime_engine::test_resume_rejects_changed_readonly_source_metadata",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_runtime_graph_models::test_forward_loss_and_short_updates_match_legacy_computation[STGCN]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_runtime_graph_models::test_forward_loss_and_short_updates_match_legacy_computation[DCRNN]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_runtime_graph_models::test_forward_loss_and_short_updates_match_legacy_computation[Trafformer]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_runtime_graph_models::test_dcrnn_curriculum_resume_retains_progress_rng_and_next_updates",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_runtime_graph_models::test_trafformer_unequal_horizon_flushes_short_accumulation_group",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_runtime_graph_models::test_graph_models_use_shared_experiment_entry_and_inference_weights[STGCN]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_runtime_graph_models::test_graph_models_use_shared_experiment_entry_and_inference_weights[DCRNN]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_runtime_graph_models::test_graph_models_use_shared_experiment_entry_and_inference_weights[Trafformer]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_runtime_map_matching::test_map_bundle_and_direct_evaluation_without_training_objects[False]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_runtime_map_matching::test_map_bundle_and_direct_evaluation_without_training_objects[True]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_runtime_map_matching::test_map_single_metric_and_prediction_switch_remove_stale_export",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_runtime_map_matching::test_map_capabilities_fail_before_data_or_training_initialization",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_runtime_map_matching::test_map_cli_matches_python_with_no_checkpoint",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_runtime_regressions::test_evaluation_and_validation_use_only_real_samples[False]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_runtime_regressions::test_evaluation_and_validation_use_only_real_samples[True]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_runtime_regressions::test_no_disk_save_restores_best_model_and_nonempty_adam",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_runtime_regressions::test_chebconv_without_disk_save_keeps_existing_checkpoint",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_runtime_regressions::test_cpu_snapshot_owns_optimizer_tensors_and_state_metadata",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_runtime_regressions::test_invalid_split_ratios_fail[1.0-0.0]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_runtime_regressions::test_invalid_split_ratios_fail[0.9-0.2]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_runtime_regressions::test_invalid_split_ratios_fail[-0.1-0.2]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_runtime_regressions::test_invalid_split_ratios_fail[nan-0.2]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_runtime_regressions::test_invalid_split_ratios_fail[0.7-0.0]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_runtime_regressions::test_time_splits_reject_empty_test_and_keep_fields_aligned[TrafficStateDataset-2]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_runtime_regressions::test_time_splits_reject_empty_test_and_keep_fields_aligned[CRANNDataset-4]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_runtime_regressions::test_explicit_arguments_override_search_but_search_overrides_json_defaults[external0]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_runtime_regressions::test_explicit_arguments_override_search_but_search_overrides_json_defaults[external1]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_runtime_regressions::test_pipeline_uses_resolved_mode_and_never_silently_trains[False-False-traffic_state_pred]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_runtime_regressions::test_pipeline_uses_resolved_mode_and_never_silently_trains[False-True-traffic_state_pred]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_runtime_regressions::test_pipeline_uses_resolved_mode_and_never_silently_trains[True-False-traffic_state_pred]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_runtime_regressions::test_pipeline_uses_resolved_mode_and_never_silently_trains[False-False-map_matching]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_runtime_regressions::test_convolution_recurrent_states_follow_cpu_and_dtype[False-ACFM]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_runtime_regressions::test_convolution_recurrent_states_follow_cpu_and_dtype[False-ACFMCommon]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_runtime_regressions::test_convolution_recurrent_states_follow_cpu_and_dtype[True-ACFM]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_runtime_regressions::test_convolution_recurrent_states_follow_cpu_and_dtype[True-ACFMCommon]",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_runtime_regressions::test_dstagnn_constructs_forecasts_and_backpropagates_on_cpu",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_runtime_regressions::test_stssl_temporal_loss_accepts_real_short_cpu_batch",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_runtime_regressions::test_stssl_graph_is_a_device_following_nonpersistent_buffer",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_runtime_regressions::test_sstban_temporal_embedding_and_masked_attention_stay_on_cpu",
+      "status": "passed"
+    },
+    {
+      "name": "tests.test_runtime_regressions::test_rgsl_graph_forecast_and_gradient_on_cpu",
+      "status": "passed"
+    }
+  ],
+  "limits": [
+    "Windows CPU and reproducible small atomic data only; no real traffic accuracy benchmark",
+    "No actual CUDA/MPS execution",
+    "Legacy window-count/CPT split retained; stage 3 target timeline and exact raw-mask changes deferred",
+    "Other models/tasks, tuning migration, Common variants, deep cache redesign, distribution and LLM/DDP work deferred"
+  ],
+  "additional_acceptance_records": [
+    "examples-validation.json",
+    "minimal-environment.json"
+  ]
+}

@@ -76,6 +76,7 @@ class MapMatchingEvaluator(AbstractEvaluator):
         for usr_id, usr_value in self.route.items():
             for traj_id, route in usr_value.items():
                 route = route[:, 1]
+                self.evaluate_result.setdefault(usr_id,{})[traj_id]={}
                 lcs = self.lcs[usr_id][traj_id]
                 merged_result = self.merged_result[usr_id][traj_id]
                 if 'RMF' in self.metrics:
@@ -107,10 +108,7 @@ class MapMatchingEvaluator(AbstractEvaluator):
 
                     RMF = (d_plus + d_sub) / d_total
 
-                    if usr_id not in self.evaluate_result.keys():
-                        self.evaluate_result[usr_id] = {traj_id: {'RMF': RMF}}
-                    else:
-                        self.evaluate_result[usr_id][traj_id] = {'RMF': RMF}
+                    self.evaluate_result[usr_id][traj_id]['RMF']=RMF
 
                 if 'AN' in self.metrics:
                     AN = len(lcs) / len(route)
@@ -324,7 +322,7 @@ class MapMatchingEvaluator(AbstractEvaluator):
         for usr_id, usr_value in self.result.items():
             for traj_id, result in usr_value.items():
                 result = list(result[:, 1])
-                result = list(filter(None, result))
+                result = [road for road in result if road is not None]
                 merged_result = []
                 i = 0
                 last_road = None

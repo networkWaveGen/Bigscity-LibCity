@@ -206,3 +206,78 @@ def test_cpu_amp_and_opt_in_tensorboard(data):
     assert list((data/'runs/run/tensorboard').glob('events.*'))
     state = torch.load(result.artifacts['last'], weights_only=True)
     assert state['train_state']['optimizer_steps'] > 0
+
+
+def test_early_stop_and_completed_resume_perform_no_extra_update(data,monkeypatch):
+    cfg=tiny_config(data,epochs=5,early_stopping={'patience':1,'min_delta':0.})
+    context=make_context(cfg)
+    scores=iter([3.,1.,2.])
+    monkeypatch.setattr('libcity.executor.train.evaluate_loop',
+                        lambda *args,**kwargs:ExperimentResult({'val_loss':next(scores)}))
+    train_loop(context)
+    assert context.state.epoch==3 and context.stopper.stopped
+    saved=torch.load(context.directory/'checkpoints/last.pt',weights_only=True)
+    resumed=make_context({**cfg,'runtime':{**cfg['runtime'],'exp_id':'resumed'}})
+    resumed.checkpoints.load_last(context.directory/'checkpoints/last.pt',resumed)
+    train_loop(resumed)
+    assert resumed.state.optimizer_steps==saved['train_state']['optimizer_steps']
+    assert (resumed.directory/'checkpoints/last.pt').exists()
+    close(context,resumed)
+
+
+def test_dropout_and_shuffled_loader_rng_resume_exactly(data):
+    cfg=tiny_config(data,epochs=2,shuffle=True)
+    cfg['model']['params'].update(num_layers=2,dropout=.2)
+    full=make_context(cfg)
+    train_loop(full)
+    expected=torch.load(full.directory/'checkpoints/last.pt',weights_only=True)
+    partial=make_context({**cfg,'runtime':{**cfg['runtime'],'exp_id':'partial'}})
+    train_loop(partial,until_epoch=1)
+    resumed=make_context({**cfg,'runtime':{**cfg['runtime'],'exp_id':'resumed'}})
+    resumed.checkpoints.load_last(partial.directory/'checkpoints/last.pt',resumed)
+    train_loop(resumed)
+    actual=torch.load(resumed.directory/'checkpoints/last.pt',weights_only=True)
+    for key in actual['model']:
+        torch.testing.assert_close(actual['model'][key],expected['model'][key],rtol=0,atol=0)
+    torch.testing.assert_close(actual['loader_rng'],expected['loader_rng'],rtol=0,atol=0)
+    assert actual['train_state']==expected['train_state']
+    close(full,partial,resumed)
+
+
+def test_clip_is_applied_after_objective_normalization(data):
+    context=make_context(tiny_config(data,epochs=1,batch_size=128,clip_grad_norm=.05,
+                                    optimizer={'name':'sgd','lr':.1}))
+    reference=copy.deepcopy(context.model)
+    batch=next(iter(context.bundle.train))
+    loss=context.loss_fn(reference(model_inputs(batch,1)),batch['y'])
+    loss.loss.backward()
+    norm=torch.stack([param.grad.norm() for param in reference.parameters()]).norm()
+    assert norm>.05
+    with torch.no_grad():
+        for param in reference.parameters():
+            param.sub_(.1*param.grad*min(1.,.05/(norm.item()+1e-6)))
+    train_loop(context)
+    state=torch.load(context.directory/'checkpoints/last.pt',weights_only=True)
+    for key,value in reference.state_dict().items():
+        torch.testing.assert_close(state['model'][key],value,rtol=1e-6,atol=1e-7)
+    close(context)
+
+
+def test_resume_rejects_changed_readonly_source_metadata(data):
+    context=make_context(tiny_config(data,epochs=1))
+    train_loop(context)
+    # Keep experiment config and tensor shapes identical, but choose a different
+    # intrinsic source column through the dataset's own config.json.
+    import pandas as pd
+    path=data/'raw/Tiny/Tiny.dyna'
+    frame=pd.read_csv(path)
+    frame['flow']=frame['speed']+100
+    frame.to_csv(path,index=False)
+    path=data/'raw/Tiny/config.json'
+    metadata=json.loads(path.read_text())
+    metadata['data_col']=['flow']
+    path.write_text(json.dumps(metadata))
+    changed=make_context(tiny_config(data,'changed',epochs=1))
+    with pytest.raises(ValueError,match='metadata/normalization'):
+        changed.checkpoints.load_last(context.directory/'checkpoints/last.pt',changed)
+    close(context,changed)

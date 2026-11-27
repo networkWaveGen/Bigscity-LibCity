@@ -94,3 +94,15 @@ def test_calendar_feature_does_not_implicitly_enable_external_file(tmp_path):
     cfg = load_config(config=cfg)
     bundle = prepare_traffic(cfg['data'],cfg['training'],cfg['evaluation'],17)
     assert bundle.metadata.feature_dim==2
+
+
+def test_cli_model_switch_uses_new_preset_without_old_architecture_fields(tmp_path):
+    config=minimal(tmp_path)
+    config['model']['params']={'hidden_size':7}
+    path=tmp_path/'model.json'
+    path.write_text(json.dumps(config))
+    selected=load_config(path,{'model':{'name':'STGCN','params':{'Ks':2}}})
+    assert selected['model']['name']=='STGCN'
+    assert selected['model']['params']['Ks']==2
+    assert 'hidden_size' not in selected['model']['params']
+    assert selected['training']['loss']=={'name':'mse'}

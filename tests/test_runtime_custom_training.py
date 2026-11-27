@@ -230,3 +230,13 @@ def test_mtg_independent_trainer_uses_pipeline_and_prediction_switch(data):
     evaluated=run_experiment('evaluate',config=cfg,checkpoint=result.artifacts['best'],
                             overrides={'runtime':{'exp_id':'independent'}})
     assert evaluated.metrics['loss']==pytest.approx(result.metrics['loss'])
+
+
+def test_mtg_static_graph_keeps_self_support_for_single_node_subgraphs(data):
+    cfg=mtg_config(data)
+    cfg['model']['params']['buildA_true']=False
+    result=run_experiment('train',config=cfg)
+    assert np.isfinite(list(result.metrics.values())).all()
+    saved=torch.load(result.artifacts['last'],weights_only=True)
+    assert saved['train_state']['optimizer_steps']==2*saved['train_state']['batches_seen']
+    assert torch.all(saved['model']['predefined_A'].diag()==0)
