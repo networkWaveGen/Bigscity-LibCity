@@ -38,7 +38,7 @@ print(result.artifacts['best'])
 
 last.pt 格式版本为 2，还校验只读数据元信息、采样布局和归一化状态。ASTGNN 的两阶段计划同样必须保持一致。旧 `.m/.tar` 和本轮开发中较早的 runtime 格式不自动迁移。换成其他模型时，CLI 的 model.name 选择新预设并丢弃用户 JSON 中前一个模型的结构参数；其余显式实验参数仍按优先级保留。
 
-`training.optimizer.groups` 接受模块前缀、lr、weight_decay 和 freeze。调度器显式设置 interval=step/epoch/metric。梯度累积按真实有效目标数归一化，并在每轮最后一个不足累积组的尾批完成更新；只有实际优化器更新才步进 step 调度器。默认循环支持最小化或最大化指定监控指标、早停、CPU/CUDA/MPS 设备选择和 AMP。当前实际验收硬件是 Windows CPU，未声称执行了 CUDA/MPS。
+`training.optimizer.groups` 接受模块前缀、lr、weight_decay 和 freeze。调度器显式设置 interval=step/epoch/metric。梯度累积按真实有效目标数归一化，并在每轮最后一个不足累积组的尾批完成更新；只有实际优化器更新才步进 step 调度器。默认循环支持最小化或最大化指定监控指标、早停、CPU/CUDA/MPS 设备选择和 AMP。CPU AMP 使用 bfloat16，并实际探测 oneDNN 卷积反向能力；后端不支持时使用原生反向内核，退出后恢复设置，前向仍保留 AMP。硬件覆盖以各批次记录为准；阶段五已有代表模型 CUDA 记录，MPS 尚未认证。
 
 ## 预测输入与目标时间轴
 

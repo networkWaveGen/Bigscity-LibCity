@@ -2,7 +2,7 @@
 import numpy as np
 import torch
 from libcity.executor.evaluate import evaluate_loop,move_batch
-from libcity.executor.train import autocast_context,optimizer_update,complete_epoch
+from libcity.executor.train import autocast_context,optimizer_update,complete_epoch,backward
 
 
 def updates_per_epoch(config,bundle):
@@ -61,7 +61,7 @@ def train(context, *,until_epoch=None):
                     result = context.loss_fn(prediction,target,raw_target)
                 if not torch.isfinite(result.loss):
                     raise ValueError('MTGNN training loss must be finite')
-                context.amp_scaler.scale(result.loss*result.weight).backward()
+                backward(context,result.loss*result.weight)
                 optimizer_update(context,result.weight)
                 context.state.task_state['subgraph_steps'] = progress+1
                 context.state.task_state['task_level'] = level

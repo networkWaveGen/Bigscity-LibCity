@@ -8,6 +8,7 @@
 | --- | --- | --- |
 | commit1 | 670b325 | fix: persist and reuse split-independent atomic traffic caches |
 | commit2 | 956c1d5 | feat: migrate CRANN with explicit inputs and resumable shared training |
+| commit3 | 23bf934 | feat: migrate six standard forecasts with native training contracts |
 
 ## commit1：修复基础交通缓存（670b325）
 
@@ -34,6 +35,14 @@ Seq2Seq 旧实现推理仍读取 y 且随机生成解码起点，现使用固定
 验证：新增 21 项，逐模型对照旧前向及梯度（Seq2Seq 明确使用相同零起点）；TGCN 同时核对原正则目标；六个模型分别完整训练、独立评估及中断续训参数逐项一致；RNN/LSTM/Seq2Seq 覆盖两层 dropout 与随机 teacher forcing 的恢复；所有模型覆盖 batch=1、无标签确定性及 float64。与既有训练引擎合计 **40 passed**。清单更新为 22/100 已迁移，78 条仍 pending。
 
 前三批完成后的完整回归为 **180 passed，0 failed，0 errors，0 skipped**。CRANN 发布示例实际 CLI 训练两轮、独立评估及续训至第三轮均成功；独立评估指标与训练后评估一致，评估/续训命中原始缓存。机器记录见 [remaining-validation.json](remaining-validation.json)。测试临时目录显式设置在工作区；系统沙箱临时路径下旧相对缓存测试曾遇到路径访问失败，同样测试在工作区独立临时目录 26/26 通过后，完整 180 项通过。
+
+## commit4：修复 CPU AMP 卷积反向后端
+
+新问题：当前 CPU/oneDNN 支持 BF16 卷积前向，却在反向报 `DNNL does not support bf16/f16 backward on the platform with avx2_vnni_2`。STID、STNorm、ATDM 的实际 AMP 短训暴露了此公共问题；仅检查 AMP 前向无法发现。
+
+修复：对 CPU AMP 卷积反向做一次实际小探测，隔离并恢复随机状态；仅后端不支持时，在反向阶段使用 PyTorch 原生卷积内核，保留 BF16 前向与 AMP。公共 backward 组件同时供默认循环、MTGNN、STSSL 使用；上下文退出恢复后端设置，不永久关闭 oneDNN，不修改 CUDA 路径。
+
+验证：STGCN 实际 CPU BF16 训练、两轮连续/中断恢复逐参数相同及后端设置恢复；与既有定制训练、STSSL 测试共 12 项通过。下一批五模型的 AMP 测试也全部通过，随模型迁移独立记录。
 
 ## 持续完成的清单
 

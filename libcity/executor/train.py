@@ -1,6 +1,7 @@
 """The default loop owns updates; custom steps own only their scalar objective."""
 from contextlib import nullcontext
 from dataclasses import dataclass, field
+from functools import lru_cache
 import math
 
 import torch
@@ -36,6 +37,23 @@ class TrainingContext:
     stopper: EarlyStopper
     loss_fn: object
     evaluate_fn: object = None
+    native_cpu_amp_backward: bool = False
+
+
+@lru_cache(maxsize=1)
+def cpu_amp_convolution_backward_supported():
+    """Probe the actual backend without advancing the experiment's random state."""
+    with torch.random.fork_rng(devices=[]):
+        layer = torch.nn.Conv2d(1, 1, 1)
+        with torch.autocast('cpu', dtype=torch.bfloat16):
+            prediction = layer(torch.ones(2, 1, 2, 2))
+        try:
+            prediction.float().square().mean().backward()
+        except RuntimeError as error:
+            if 'does not support bf16/f16 backward' in str(error):
+                return False
+            raise
+    return True
 
 
 def build_context(model, bundle, config, device, directory, logger, *, steps_per_epoch=None, loss_fn=None, evaluate_fn=None):
@@ -49,9 +67,16 @@ def build_context(model, bundle, config, device, directory, logger, *, steps_per
     stopper = EarlyStopper(training['direction'], **training['early_stopping'])
     loss = loss_fn if loss_fn is not None else ForecastLoss(training['loss'], bundle.scaler, bundle.metadata.output_dim)
     tracker = MetricTracker(directory, logger, tensorboard=config['runtime']['tensorboard'])
+    convolutions = (torch.nn.Conv1d, torch.nn.Conv2d, torch.nn.Conv3d,
+                    torch.nn.ConvTranspose1d, torch.nn.ConvTranspose2d, torch.nn.ConvTranspose3d)
+    native_cpu_backward = (training['amp'] and device.type=='cpu' and torch.backends.mkldnn.enabled
+        and any(isinstance(module, convolutions) for module in model.modules())
+        and not cpu_amp_convolution_backward_supported())
+    if native_cpu_backward:
+        logger.info('CPU AMP: oneDNN bfloat16 convolution backward is unavailable; using native backward kernels')
     return TrainingContext(model, bundle, config, device, directory, tracker,
         CheckpointManager(directory / 'checkpoints'), TrainState(), optimizer, schedule, scaler, stopper, loss,
-        evaluate_fn)
+        evaluate_fn, native_cpu_backward)
 
 
 def autocast_context(context):
@@ -59,6 +84,13 @@ def autocast_context(context):
     if not training['amp']:
         return nullcontext()
     return torch.autocast(context.device.type, dtype=getattr(torch, training['amp_dtype']))
+
+
+def backward(context, weighted_loss):
+    """Keep AMP enabled while using native CPU convolution backward if required."""
+    backend = torch.backends.mkldnn.flags(enabled=False) if context.native_cpu_amp_backward else nullcontext()
+    with backend:
+        context.amp_scaler.scale(weighted_loss).backward()
 
 
 def optimizer_update(context, divisor):
@@ -124,7 +156,7 @@ def train_loop(context, step_fn=None, *, until_epoch=None, epochs=None):
                 raise ValueError('Training loss must be finite')
             # Weighted micro-batches give the same gradient as their combined
             # objective, including missing targets and a short last batch.
-            context.amp_scaler.scale(result.loss * result.weight).backward()
+            backward(context, result.loss * result.weight)
             group_weight += result.weight
             total += result.loss.item() * result.weight
             count += result.weight

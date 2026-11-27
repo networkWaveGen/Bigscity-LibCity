@@ -1,7 +1,7 @@
 """Dynamic weighting over epochs, composed with common updates/checkpoints."""
 import torch
 from libcity.executor.evaluate import evaluate_loop,move_batch
-from libcity.executor.train import autocast_context,optimizer_update,complete_epoch
+from libcity.executor.train import autocast_context,optimizer_update,complete_epoch,backward
 
 
 def dynamic_weights(previous,older,temperature):
@@ -37,7 +37,7 @@ def train(context,*,until_epoch=None):
             if not torch.isfinite(loss):
                 raise ValueError('STSSL auxiliary objective must be finite')
             size=len(batch['X'])
-            context.amp_scaler.scale(loss*size).backward()
+            backward(context,loss*size)
             group_weight+=size
             separate+=torch.tensor([value.detach().item() for value in components])*size
             weighted_loss+=loss.item()*size
