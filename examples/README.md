@@ -107,6 +107,11 @@ actual next-event timestamps and target coordinates are excluded. Automatic time
 bounds use training prefixes, while spatial bounds use the declared static POIs.
 The model returns full-vocabulary log probabilities for common NLL/ranking.
 
+`--model HSTLSTM` creates an observed-interval trajectory example. Time gaps are
+seconds and distances are WGS84 geodesic kilometres. Slot bounds use training
+prefixes only; validation/test values are clamped without refitting. The corrected
+ST-LSTM output uses its updated memory cell. Padded steps leave the state intact.
+
 The complete supported-model inventory and migration details are in the
 [runtime guide](../docs/modernization/runtime/README_zh.md). Small examples prove
 execution and reproducibility, not real-city benchmark accuracy.

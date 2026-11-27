@@ -1,0 +1,3 @@
+{
+  "model": {"params": {"tim_slot_len": 100, "dis_slot_len": 100, "embed_size": 256, "hidden_size": 512}}
+}

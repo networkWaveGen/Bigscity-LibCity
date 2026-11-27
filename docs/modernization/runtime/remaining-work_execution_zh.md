@@ -26,6 +26,7 @@
 | commit18 | 5244e90 | feat: migrate STG2Seq with explicit graph and attention axes |
 | commit19 | 81d5572 | fix: reject resume when atomic source versions change |
 | commit20 | 20c3437 | feat: migrate DeepMove with causal history and masked attention |
+| commit21 | a1734bd | feat: migrate STRNN with explicit candidate geometry |
 
 ## commit1：修复基础交通缓存（670b325）
 
@@ -204,6 +205,14 @@ TGCLSTM 保留逐步图过滤、门控细胞与滑动窗口重编码，所有静
 相同历史位置先聚合，再按候选块计算，避免 B×V×L×H 中间量；padding、查询偏移与位置词表有显式校验。forward 始终返回去除 padding 类的全词表 log_softmax，公共 NLL 替代旧对整个 batch 的正样本总分做 logistic 的损失，消除样本耦合并加入分类负类监督。上述为有意修复，不与旧错误 predict/loss 声称等价；原转移矩阵本身按每个候选对照。
 
 验证：新增 **8 项通过**，包括原转移矩阵逐候选分数、NLL 与全部梯度；训练/独立排名评估/导出/精确续训；分块、单独/混批、padding、batch=1/float64/目标字段隔离、几何状态的独立解析公式、训练边界与前缀时间核对、修改下一事件时间后输入/预测不变、重合坐标/零时间跨度、坐标错误与 CPU AMP。完整回归 **353 passed，0 failed，0 errors，0 skipped**。仓库外发布夹具及 3 条生命周期命令成功，评估一致并续训第三轮，见 [CLI 记录](strnn-cli-validation.json)。迁移表为 **45/100**，55 条 pending，本期仍有 **46 个**实际模型待迁移。
+
+## commit22：迁移 HSTLSTM 并修复记忆单元与分桶泄漏
+
+原 ST-LSTM 的 next_hidden 使用 out_gate*tanh(cell_gate)，而非 out_gate*tanh(next_cell)，导致更新后的记忆未正确参与输出。现保留位置与时空嵌入门控，修正该递推；padding 步不更新隐藏/记忆，只保存最后有效状态，避免堆叠整个序列的两套状态。模型为标准 nn.Module，不持有 device/scaler/logger，推理不读取标签；公共循环负责 NLL、全词表排名、选模、导出和完整续训。
+
+新轻量数据适配只取当前已观察前缀，时间间隔为秒、距离保留 WGS84 测地线千米，首点仍为 0 秒/0.5 千米。原编码器在全量数据上计算分桶上界，现仅在训练前缀拟合，保留旧最小边界与向上取整；验证/测试超界夹紧，不重新拟合。桶作为 buffer 随模型迁移，保留浮点边界，用向量化 searchsorted/插值替代逐元素 Python 查桶、tolist 和固定 FP32/device 转换。仍对应仓库单层分类实现，不声称另行完成论文的额外层级结构；记忆公式修复和浮点分桶为有意变化，不宣称与旧错误计算逐值等价。
+
+验证：新增 **10 项通过**。覆盖独立门控/记忆计算和全部梯度、显式修正旧记忆公式后的原分类前向/梯度、浮点槽边界/插值/夹紧、WGS84 原子前缀核对、修改真实下一事件时间后输入/预测不变、测试前缀超远距离不扩大训练桶、collate 所有权、padding/混批/batch=1/float64/无标签、零间隔/重合坐标、完整训练/独立排名评估/导出/逐参数精确续训、CPU AMP。完整回归 **363 passed，0 failed，0 errors，0 skipped**；仓库外发布夹具和 3 条生命周期命令成功，独立评估一致并续训第三轮，见 [CLI 记录](hstlstm-cli-validation.json)。迁移清单为 **46/100**，54 条 pending；排除延期 Common 和模板后，本期仍有 **45 个**实际模型待迁移。
 
 ## 持续完成的清单
 

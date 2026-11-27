@@ -29,6 +29,9 @@ class ModelSpec:
 
 
 MODELS = {
+    'HSTLSTM': ModelSpec('libcity.model.trajectory_loc_prediction.runtime_hstlstm:HSTLSTM',task='traj_loc_pred',
+        prepare_data='libcity.data.interval_trajectory:prepare_intervals',
+        loss='libcity.executor.task_evaluation:RankingLoss',evaluate_loader='libcity.executor.task_evaluation:evaluate_task'),
     'STRNN': ModelSpec('libcity.model.trajectory_loc_prediction.runtime_strnn:STRNN',task='traj_loc_pred',
         prepare_data='libcity.data.spatiotemporal_trajectory:prepare_spatiotemporal',
         loss='libcity.executor.task_evaluation:RankingLoss',evaluate_loader='libcity.executor.task_evaluation:evaluate_task'),
