@@ -18,6 +18,16 @@
 
 清理后的首轮完整测试 147 项通过；随后补充可视化 CLI 检查，专项 13 项通过。最终数量以干净环境完整验收记录为准，不能与旧接口的 214 项机械比较。删除和参考配置清单见 [phase5-retirement.json](phase5-retirement.json)。
 
-## 待完成的验收
+## commit3：干净 CPU、系统只读与实际 CUDA 验收
 
-独立 CPU 环境已安装源码及 dev/transformer 依赖；继续执行系统权限限制下的只读源码/数据、完整回归与端到端生命周期，随后更新方案勾选和最终报告。
+独立 CPU venv 不继承系统包，通过源码安装 dev/transformer；pip check 通过。用 Git 跟踪文件建立单独源码副本、复制小型原子数据，仅对临时副本设置当前身份的继承拒绝 Write/Delete 权限，原仓库和原数据权限不变。四个新文件/现有文件写入探针均被拒绝；子进程导入路径确认为只读副本。沙箱内 ACL 不生效的尝试没有算通过，最终在原生权限执行环境验证。
+
+在此只读副本中完成 **148 项完整测试，0 失败、0 跳过**；pytest 缓存和临时目录均在独立可写目录。随后从仓库外通过 run_model.py 绝对路径执行训练、独立评估及续训到第三轮，指标一致，权限在结束后恢复。记录见 [只读验收](phase5-readonly-validation.json)。
+
+另一个基础环境未安装 TensorBoard/einops/Ray/Hyperopt/DGL/TorchText，五类任务的 19 条 CLI 命令全部通过，见 [CLI 记录](phase5-cli-validation.json)。当前源码重新执行真实 METR-LA 前七天、207 节点短训练与独立评估，见 [实数据记录](phase5-metr-la-validation.json)；该记录不宣称全量精度基准。
+
+发现机器有现成 CUDA PyTorch 后，建立只继承该 CUDA 栈的独立 venv，不改动原环境。RTX 5060 上 GRU、STGCN、DCRNN 的训练、独立评估和续训均通过，前向钩子确认输入、参数和图 buffer 均在 CUDA；GRU 使用 CUDA float16 AMP，续训参数、计数和 GradScaler 与连续训练对照一致。见 [GPU 记录](phase5-cuda-validation.json)。Windows 没有 MPS，本轮未作 MPS 认证。
+
+## 最终文档交付
+
+继续核对所有完成勾选、当前使用入口和历史归档链接，最终提交将汇总逐项验收及 Commit 映射。

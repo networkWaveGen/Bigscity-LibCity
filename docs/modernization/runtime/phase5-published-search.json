@@ -1,0 +1,62 @@
+{
+  "algorithm": "grid",
+  "seed": 17,
+  "direction": "min",
+  "monitor": "val_loss",
+  "test_evaluations": 1,
+  "trials": [
+    {
+      "index": 0,
+      "parameters": {
+        "training.optimizer.lr": 0.001,
+        "model.params.hidden_size": 8
+      },
+      "status": "complete",
+      "validation_score": 0.9908915162086487,
+      "resolved_config": "D:\\LibCity 2.0\\.runtime-tests\\phase5-base-cli\\traffic_state_pred\\runs\\search-3aa0332c0ead\\trials\\trial-000\\resolved_config.json",
+      "checkpoint": "D:\\LibCity 2.0\\.runtime-tests\\phase5-base-cli\\traffic_state_pred\\runs\\search-3aa0332c0ead\\trials\\trial-000\\checkpoints\\best.pt"
+    },
+    {
+      "index": 1,
+      "parameters": {
+        "training.optimizer.lr": 0.001,
+        "model.params.hidden_size": 16
+      },
+      "status": "complete",
+      "validation_score": 1.0206156969070435,
+      "resolved_config": "D:\\LibCity 2.0\\.runtime-tests\\phase5-base-cli\\traffic_state_pred\\runs\\search-3aa0332c0ead\\trials\\trial-001\\resolved_config.json",
+      "checkpoint": "D:\\LibCity 2.0\\.runtime-tests\\phase5-base-cli\\traffic_state_pred\\runs\\search-3aa0332c0ead\\trials\\trial-001\\checkpoints\\best.pt"
+    },
+    {
+      "index": 2,
+      "parameters": {
+        "training.optimizer.lr": 0.002,
+        "model.params.hidden_size": 8
+      },
+      "status": "complete",
+      "validation_score": 0.9643598198890686,
+      "resolved_config": "D:\\LibCity 2.0\\.runtime-tests\\phase5-base-cli\\traffic_state_pred\\runs\\search-3aa0332c0ead\\trials\\trial-002\\resolved_config.json",
+      "checkpoint": "D:\\LibCity 2.0\\.runtime-tests\\phase5-base-cli\\traffic_state_pred\\runs\\search-3aa0332c0ead\\trials\\trial-002\\checkpoints\\best.pt"
+    },
+    {
+      "index": 3,
+      "parameters": {
+        "training.optimizer.lr": 0.002,
+        "model.params.hidden_size": 16
+      },
+      "status": "complete",
+      "validation_score": 0.9587206244468689,
+      "resolved_config": "D:\\LibCity 2.0\\.runtime-tests\\phase5-base-cli\\traffic_state_pred\\runs\\search-3aa0332c0ead\\trials\\trial-003\\resolved_config.json",
+      "checkpoint": "D:\\LibCity 2.0\\.runtime-tests\\phase5-base-cli\\traffic_state_pred\\runs\\search-3aa0332c0ead\\trials\\trial-003\\checkpoints\\best.pt"
+    }
+  ],
+  "best_trial": 3,
+  "best_validation": 0.9587206244468689,
+  "test_metrics": {
+    "MAE@1": 0.7449681670577438,
+    "RMSE@1": 0.9333824767746792,
+    "MAE@2": 0.7797335871943721,
+    "RMSE@2": 0.9924173376690391,
+    "loss": 0.762350857257843
+  }
+}

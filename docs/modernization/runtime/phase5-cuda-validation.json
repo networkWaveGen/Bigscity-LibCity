@@ -1,0 +1,87 @@
+{
+  "passed": true,
+  "python": "3.11.1",
+  "torch": "2.10.0+cu128",
+  "numpy": "2.4.5",
+  "cuda_runtime": "12.8",
+  "device": "NVIDIA GeForce RTX 5060 Laptop GPU",
+  "models": {
+    "GRU": {
+      "passed": true,
+      "metrics": {
+        "MAE@1": 1.3497478418182909,
+        "RMSE@1": 1.6576219732747328,
+        "MAE@2": 1.3532398541768391,
+        "RMSE@2": 1.6716725041080704,
+        "loss": 1.3514939546585083
+      },
+      "observed_devices": {
+        "parameters": "cuda",
+        "inputs": "cuda",
+        "buffers": {}
+      },
+      "resumed_epoch": 3,
+      "optimizer_steps": 12,
+      "amp_scaler": {
+        "scale": 1024.0,
+        "growth_factor": 2.0,
+        "backoff_factor": 0.5,
+        "growth_interval": 2000,
+        "_growth_tracker": 11
+      },
+      "amp_resume_matches_continuous": true
+    },
+    "STGCN": {
+      "passed": true,
+      "metrics": {
+        "MAE@1": 1.4075400452864797,
+        "RMSE@1": 1.6750100774122232,
+        "MAE@2": 1.3975861950924522,
+        "RMSE@2": 1.6470276421074581,
+        "loss": 2.7591793537139893
+      },
+      "observed_devices": {
+        "parameters": "cuda",
+        "inputs": "cuda",
+        "buffers": {
+          "Lk": "cuda:0",
+          "st_conv1.sconv.Lk": "cuda:0",
+          "st_conv2.sconv.Lk": "cuda:0"
+        }
+      },
+      "resumed_epoch": 3,
+      "optimizer_steps": 18,
+      "amp_scaler": {},
+      "amp_resume_matches_continuous": false
+    },
+    "DCRNN": {
+      "passed": true,
+      "metrics": {
+        "MAE@1": 1.362831851892304,
+        "RMSE@1": 1.6828842513126772,
+        "MAE@2": 1.4450290077611019,
+        "RMSE@2": 1.787402001276043,
+        "loss": 1.403930425643921
+      },
+      "observed_devices": {
+        "parameters": "cuda",
+        "inputs": "cuda",
+        "buffers": {
+          "encoder_model.dcgru_layers.0._fn.support_0": "cuda:0",
+          "encoder_model.dcgru_layers.0._fn.support_1": "cuda:0",
+          "encoder_model.dcgru_layers.0._gconv.support_0": "cuda:0",
+          "encoder_model.dcgru_layers.0._gconv.support_1": "cuda:0",
+          "decoder_model.dcgru_layers.0._fn.support_0": "cuda:0",
+          "decoder_model.dcgru_layers.0._fn.support_1": "cuda:0",
+          "decoder_model.dcgru_layers.0._gconv.support_0": "cuda:0",
+          "decoder_model.dcgru_layers.0._gconv.support_1": "cuda:0"
+        }
+      },
+      "resumed_epoch": 3,
+      "optimizer_steps": 18,
+      "amp_scaler": {},
+      "amp_resume_matches_continuous": false
+    }
+  },
+  "environment": "Isolated venv inheriting existing CUDA torch; fresh CPU environment is validated separately"
+}

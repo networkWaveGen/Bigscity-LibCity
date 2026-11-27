@@ -1,0 +1,299 @@
+{
+  "passed": true,
+  "python": "3.12.13",
+  "torch": "2.15.0+cpu",
+  "cwd": "D:\\LibCity 2.0\\.runtime-tests\\phase5-base-cli",
+  "optional_packages_present": {
+    "tensorboard": false,
+    "einops": false,
+    "ray": false,
+    "hyperopt": false,
+    "dgl": false,
+    "torchtext": false
+  },
+  "tasks": {
+    "traffic_state_pred": {
+      "metrics": {
+        "MAE@1": 0.814822550173159,
+        "RMSE@1": 1.0454472579851217,
+        "MAE@2": 0.8494176158198604,
+        "RMSE@2": 1.0860088273508313,
+        "loss": 0.8321201205253601
+      },
+      "resumed_epoch": 3,
+      "evaluate_has_no_training_writer": true
+    },
+    "traj_loc_pred": {
+      "metrics": {
+        "Recall@1": 0.9285714285714286,
+        "Recall@5": 1.0,
+        "Recall@10": 1.0,
+        "MRR@10": 0.9428571292332241,
+        "loss": 1.6446988582611084
+      },
+      "resumed_epoch": 3,
+      "evaluate_has_no_training_writer": true
+    },
+    "eta": {
+      "metrics": {
+        "MAE": 81.78399658203125,
+        "RMSE": 99.43593352413839,
+        "MAPE": 0.29447158636593207,
+        "loss": 81.78399658203125
+      },
+      "resumed_epoch": 3,
+      "evaluate_has_no_training_writer": true
+    },
+    "road_representation": {
+      "metrics": {
+        "loss": 2.8032233715057373,
+        "accuracy": 0.3333333333333333
+      },
+      "resumed_epoch": 3,
+      "evaluate_has_no_training_writer": true
+    },
+    "map_matching": {
+      "metrics": {
+        "RMF": 0.0,
+        "AN": 1.0,
+        "AL": 1.0
+      },
+      "checkpoint_required": false
+    }
+  },
+  "tuning": {
+    "trials": 2,
+    "test_evaluations": 1
+  },
+  "commands": [
+    {
+      "arguments": [
+        "D:\\LibCity 2.0\\LibCity-modernization\\tools\\make_runtime_fixture.py",
+        "--directory",
+        "D:\\LibCity 2.0\\.runtime-tests\\phase5-base-cli\\traffic_state_pred",
+        "--task",
+        "traffic_state_pred"
+      ],
+      "exit_code": 0
+    },
+    {
+      "arguments": [
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "train",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\phase5-base-cli\\traffic_state_pred\\gru.json",
+        "--set",
+        "runtime.exp_id=train"
+      ],
+      "exit_code": 0
+    },
+    {
+      "arguments": [
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "evaluate",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\phase5-base-cli\\traffic_state_pred\\gru.json",
+        "--checkpoint",
+        "D:\\LibCity 2.0\\.runtime-tests\\phase5-base-cli\\traffic_state_pred\\runs\\train\\checkpoints\\best.pt",
+        "--set",
+        "runtime.exp_id=eval"
+      ],
+      "exit_code": 0
+    },
+    {
+      "arguments": [
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "train",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\phase5-base-cli\\traffic_state_pred\\gru.json",
+        "--resume",
+        "D:\\LibCity 2.0\\.runtime-tests\\phase5-base-cli\\traffic_state_pred\\runs\\train\\checkpoints\\last.pt",
+        "--set",
+        "training.epochs=3",
+        "--set",
+        "runtime.exp_id=resumed"
+      ],
+      "exit_code": 0
+    },
+    {
+      "arguments": [
+        "D:\\LibCity 2.0\\LibCity-modernization\\tools\\make_runtime_fixture.py",
+        "--directory",
+        "D:\\LibCity 2.0\\.runtime-tests\\phase5-base-cli\\traj_loc_pred",
+        "--task",
+        "traj_loc_pred"
+      ],
+      "exit_code": 0
+    },
+    {
+      "arguments": [
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "train",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\phase5-base-cli\\traj_loc_pred\\rnn.json",
+        "--set",
+        "runtime.exp_id=train"
+      ],
+      "exit_code": 0
+    },
+    {
+      "arguments": [
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "evaluate",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\phase5-base-cli\\traj_loc_pred\\rnn.json",
+        "--checkpoint",
+        "D:\\LibCity 2.0\\.runtime-tests\\phase5-base-cli\\traj_loc_pred\\runs\\train\\checkpoints\\best.pt",
+        "--set",
+        "runtime.exp_id=eval"
+      ],
+      "exit_code": 0
+    },
+    {
+      "arguments": [
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "train",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\phase5-base-cli\\traj_loc_pred\\rnn.json",
+        "--resume",
+        "D:\\LibCity 2.0\\.runtime-tests\\phase5-base-cli\\traj_loc_pred\\runs\\train\\checkpoints\\last.pt",
+        "--set",
+        "training.epochs=3",
+        "--set",
+        "runtime.exp_id=resumed"
+      ],
+      "exit_code": 0
+    },
+    {
+      "arguments": [
+        "D:\\LibCity 2.0\\LibCity-modernization\\tools\\make_runtime_fixture.py",
+        "--directory",
+        "D:\\LibCity 2.0\\.runtime-tests\\phase5-base-cli\\eta",
+        "--task",
+        "eta"
+      ],
+      "exit_code": 0
+    },
+    {
+      "arguments": [
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "train",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\phase5-base-cli\\eta\\deeptte.json",
+        "--set",
+        "runtime.exp_id=train"
+      ],
+      "exit_code": 0
+    },
+    {
+      "arguments": [
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "evaluate",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\phase5-base-cli\\eta\\deeptte.json",
+        "--checkpoint",
+        "D:\\LibCity 2.0\\.runtime-tests\\phase5-base-cli\\eta\\runs\\train\\checkpoints\\best.pt",
+        "--set",
+        "runtime.exp_id=eval"
+      ],
+      "exit_code": 0
+    },
+    {
+      "arguments": [
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "train",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\phase5-base-cli\\eta\\deeptte.json",
+        "--resume",
+        "D:\\LibCity 2.0\\.runtime-tests\\phase5-base-cli\\eta\\runs\\train\\checkpoints\\last.pt",
+        "--set",
+        "training.epochs=3",
+        "--set",
+        "runtime.exp_id=resumed"
+      ],
+      "exit_code": 0
+    },
+    {
+      "arguments": [
+        "D:\\LibCity 2.0\\LibCity-modernization\\tools\\make_runtime_fixture.py",
+        "--directory",
+        "D:\\LibCity 2.0\\.runtime-tests\\phase5-base-cli\\road_representation",
+        "--task",
+        "road_representation"
+      ],
+      "exit_code": 0
+    },
+    {
+      "arguments": [
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "train",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\phase5-base-cli\\road_representation\\line.json",
+        "--set",
+        "runtime.exp_id=train"
+      ],
+      "exit_code": 0
+    },
+    {
+      "arguments": [
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "evaluate",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\phase5-base-cli\\road_representation\\line.json",
+        "--checkpoint",
+        "D:\\LibCity 2.0\\.runtime-tests\\phase5-base-cli\\road_representation\\runs\\train\\checkpoints\\best.pt",
+        "--set",
+        "runtime.exp_id=eval"
+      ],
+      "exit_code": 0
+    },
+    {
+      "arguments": [
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "train",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\phase5-base-cli\\road_representation\\line.json",
+        "--resume",
+        "D:\\LibCity 2.0\\.runtime-tests\\phase5-base-cli\\road_representation\\runs\\train\\checkpoints\\last.pt",
+        "--set",
+        "training.epochs=3",
+        "--set",
+        "runtime.exp_id=resumed"
+      ],
+      "exit_code": 0
+    },
+    {
+      "arguments": [
+        "D:\\LibCity 2.0\\LibCity-modernization\\tools\\make_runtime_fixture.py",
+        "--directory",
+        "D:\\LibCity 2.0\\.runtime-tests\\phase5-base-cli\\map_matching",
+        "--task",
+        "map_matching"
+      ],
+      "exit_code": 0
+    },
+    {
+      "arguments": [
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "evaluate",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\phase5-base-cli\\map_matching\\hmmm.json",
+        "--set",
+        "runtime.exp_id=direct"
+      ],
+      "exit_code": 0
+    },
+    {
+      "arguments": [
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_hyper.py",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\phase5-base-cli\\search-config.json",
+        "--space",
+        "D:\\LibCity 2.0\\.runtime-tests\\phase5-base-cli\\space.json",
+        "--max-trials",
+        "2"
+      ],
+      "exit_code": 0
+    }
+  ]
+}

@@ -1,0 +1,165 @@
+{
+  "passed": true,
+  "source_loader": "https://github.com/benedekrozemberczki/pytorch_geometric_temporal/blob/master/torch_geometric_temporal/dataset/metr_la.py",
+  "source_url": "https://anl.app.box.com/shared/static/plgsv3te0akmqluiuqva34su60nn93c2",
+  "full_shape": [
+    34272,
+    207,
+    2
+  ],
+  "used_steps": 2016,
+  "used_nodes": 207,
+  "subset": "first seven days",
+  "coordinate_note": "Sensor coordinates are not in this archive; empty geometry placeholders are unused by GRU.",
+  "time_origin": "2012-03-01T00:00:00, regular five-minute sampling",
+  "config": {
+    "data": {
+      "dataset": "METR_LA",
+      "data_dir": "D:\\LibCity 2.0\\.runtime-tests\\phase5-metr-la\\data",
+      "cache_dir": "D:\\LibCity 2.0\\.runtime-tests\\phase5-metr-la\\cache",
+      "cache": false,
+      "pad_training": false,
+      "input_window": 12,
+      "output_window": 12,
+      "split": {
+        "train": 0.7,
+        "val": 0.1
+      }
+    },
+    "model": {
+      "name": "GRU",
+      "params": {
+        "hidden_size": 16
+      }
+    },
+    "training": {
+      "epochs": 1,
+      "batch_size": 32
+    },
+    "runtime": {
+      "device": "cpu",
+      "seed": 17,
+      "exp_id": "metr-la-gru",
+      "output_dir": "D:\\LibCity 2.0\\.runtime-tests\\phase5-metr-la\\runs"
+    }
+  },
+  "runtime": {
+    "python": "3.12.13",
+    "pytorch": "2.15.0+cpu",
+    "numpy": "2.5.5",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "mode": "train",
+    "device": "cpu",
+    "seed": 17,
+    "split": {
+      "train": 1388,
+      "val": 190,
+      "test": 393,
+      "train_padded": false,
+      "semantics": "target_time_v1",
+      "input_window": 12,
+      "requested_input_window": 12,
+      "adapter": "window",
+      "intervals": {
+        "train": {
+          "samples": 1388,
+          "target_start": "2012-03-01T01:00:00.000000000",
+          "target_end": "2012-03-05T21:30:00.000000000",
+          "target_index_start": 12,
+          "target_index_end": 1410
+        },
+        "val": {
+          "samples": 190,
+          "target_start": "2012-03-05T21:35:00.000000000",
+          "target_end": "2012-03-06T14:15:00.000000000",
+          "target_index_start": 1411,
+          "target_index_end": 1611
+        },
+        "test": {
+          "samples": 393,
+          "target_start": "2012-03-06T14:20:00.000000000",
+          "target_end": "2012-03-07T23:55:00.000000000",
+          "target_index_start": 1612,
+          "target_index_end": 2015
+        }
+      },
+      "train_end": "2012-03-05T21:35:00.000000000",
+      "val_end": "2012-03-06T14:20:00.000000000",
+      "scaler_fit_end_exclusive": "2012-03-05T21:35:00.000000000",
+      "discarded_boundary_windows": 22,
+      "cache": "raw_reader_no_expanded_windows"
+    },
+    "protocol_changes": {
+      "data.split": {
+        "train": 0.7,
+        "val": 0.1
+      },
+      "data.output_window": 12
+    },
+    "capabilities": {
+      "requires_checkpoint": true,
+      "supports_resume": true,
+      "supports_validation": true
+    }
+  },
+  "metrics": {
+    "MAE@1": 10.409255091700429,
+    "RMSE@1": 14.733325479044137,
+    "MAE@2": 8.900353002279967,
+    "RMSE@2": 13.765779368517704,
+    "MAE@3": 8.559842401087385,
+    "RMSE@3": 13.720712562649322,
+    "MAE@4": 8.453500011299754,
+    "RMSE@4": 13.770756120415538,
+    "MAE@5": 8.433374269034239,
+    "RMSE@5": 13.846555623744004,
+    "MAE@6": 8.44663751427482,
+    "RMSE@6": 13.921418351552498,
+    "MAE@7": 8.462785104160329,
+    "RMSE@7": 13.979573138245161,
+    "MAE@8": 8.476278033759797,
+    "RMSE@8": 14.022569289950543,
+    "MAE@9": 8.489500375345818,
+    "RMSE@9": 14.056215756879086,
+    "MAE@10": 8.503789441654776,
+    "RMSE@10": 14.084416305374468,
+    "MAE@11": 8.514006697179083,
+    "RMSE@11": 14.10619423562899,
+    "MAE@12": 8.519983067250543,
+    "RMSE@12": 14.121283418328234,
+    "loss": 8.68061099926361,
+    "best_validation": 7.003580518792498
+  },
+  "independent_evaluation": {
+    "MAE@1": 10.409255091700429,
+    "RMSE@1": 14.733325479044137,
+    "MAE@2": 8.900353002279967,
+    "RMSE@2": 13.765779368517704,
+    "MAE@3": 8.559842401087385,
+    "RMSE@3": 13.720712562649322,
+    "MAE@4": 8.453500011299754,
+    "RMSE@4": 13.770756120415538,
+    "MAE@5": 8.433374269034239,
+    "RMSE@5": 13.846555623744004,
+    "MAE@6": 8.44663751427482,
+    "RMSE@6": 13.921418351552498,
+    "MAE@7": 8.462785104160329,
+    "RMSE@7": 13.979573138245161,
+    "MAE@8": 8.476278033759797,
+    "RMSE@8": 14.022569289950543,
+    "MAE@9": 8.489500375345818,
+    "RMSE@9": 14.056215756879086,
+    "MAE@10": 8.503789441654776,
+    "RMSE@10": 14.084416305374468,
+    "MAE@11": 8.514006697179083,
+    "RMSE@11": 14.10619423562899,
+    "MAE@12": 8.519983067250543,
+    "RMSE@12": 14.121283418328234,
+    "loss": 8.68061099926361
+  },
+  "environment": {
+    "python": "3.12.13",
+    "torch": "2.15.0+cpu",
+    "numpy": "2.5.5"
+  }
+}
