@@ -32,6 +32,8 @@
 | commit24 | 1307e31 | feat: migrate SERM with intact pretrained semantic embeddings |
 | commit25 | 4bf8c9c | feat: migrate STAN with causal attention and bounded sampling |
 | commit26 | 33f5f5f | fix: keep epoch schedules unchanged without optimizer updates |
+| commit27 | c9b77ca | feat: migrate CARA with author gates and causal pairwise ranking |
+| commit28 | 随本节交付的提交 | feat: migrate LSTPM with causal session attention and ranking |
 
 ## commit1：修复基础交通缓存（670b325）
 
@@ -262,6 +264,18 @@ TGCLSTM 保留逐步图过滤、门控细胞与滑动窗口重编码，所有静
 cara_ranking 协议明确 training.loss.name=bpr。每样本独立计算原成对目标及常数 1，再在批次取均值；负采样优先排除已访问/正类，无未访问位置时退回非正类，单位置无负对时跳过更新。验证/测试固定使用完整词表，报告所有非正类平均 BPR 和公共排名，不将 BPR 当 NLL 或把此协议声称为作者随机候选精度复现。采样 RNG、调度器和参数通过公共格式 3 检查点恢复；门控、输入与损失修复均为有意变化，不宣称与旧错误完整路径等价。
 
 验证：CARA 新增 **12 项通过**，覆盖显式纠正激活后的作者兼容递推/候选分数/全部梯度、逐样本 BPR 与样本独立性、跨周末午夜的真实间隔/查询、修改真实下一事件后输入/预测不变、均匀负采样/词表耗尽/单位置零更新、候选子集与全量梯度且只编码一次、128 步有限前向/梯度与最近窗口对照、球面小数距离、padding/混批/分块/batch=1/float64/输入所有权、三轮训练/独立全词表排名/导出及采样 RNG/逐参数精确续训、CPU AMP。共享函数的 STAN/HSTLSTM/ATSTLSTM 验收保持通过。完整回归 **418 passed，0 failed，0 errors，0 skipped**；仓库外发布夹具及 3 条生命周期命令成功，独立评估一致并续训第三轮，见 [CLI 记录](cara-cli-validation.json)。迁移表为 **50/100**，50 条 pending，本期仍有 **41 个**实际模型待迁移。
+
+## commit28：迁移 LSTPM 与因果历史行程适配
+
+问题：旧时间槽相似度从全量行程统计，混入验证/测试位置；首行程被直接丢弃、空历史会在拼接时报错。空间最近父索引对每个增长前缀重新计算；批次内逐用户/逐点运行 LSTMCell，模型持有 device、CPU FloatTensor 和未注册的时间相似度。历史输入及距离为嵌套列表，旧 Batch 接口已经退役。
+
+修改：接入标准 Tensor 字典和统一训练/排名生命周期。复用严格已完成历史银行，新增显式历史行程长度，保持跨历史行程连续 LSTM 状态、行程内部时间权重及两级注意力；对照[作者源码](https://github.com/NLPWM-WHU/LSTPM/blob/master/train/train.py)确认跨行程状态传递，并不将其误改为每条行程重置。历史一次展平打包运行，再按行程索引 scatter 聚合，避免展开行程×全部历史点的稠密权重表。空间父索引每条行程预计算一次，各前缀共享视图，逐时间步批量运行；用不可变状态列表保证 backward 正确，避免原地改写状态银行造成 autograd 版本错误。
+
+时间相似度只在原子训练时间区间统计各槽已访问位置集合，保持 48 槽对角线及空槽约定，padding 行列额外为零。空间距离沿用原 LibCity 的 6371 km 球面、三位小数千米取整和最近先前点同距时选择较近时间索引；历史距离保持最后观察 POI 到算术行程质心、至少 1 km，不改成作者仓库的逐点平均距离。共享 NumPy 球面函数从 STAN 适配中移入公共静态点工具，避免 LSTPM 依赖另一模型的数据适配。历史只含当前行程开始前已完成的行程，空历史为零长期上下文，保留全部公共基准样本；时间/位置均不读取真实下一事件。
+
+原有效路径前向和全部梯度对齐；有意变化为去掉 padding 类后使用公共平均 NLL（原为包含 padding 的 summed NLL）、训练统计去泄漏、首行程保留，以及移除从未被调用的 dropout 配置。时间相似度注册 buffer，临时状态随输入设备与类型，模型不持有 device/scaler/logger。发布 lstpm.json 和 --model LSTPM 夹具。补齐前表 commit27 与 c9b77ca 的映射。
+
+验证：新增 **14 项通过**，覆盖原两级注意力/跨行程状态/膨胀递推/全部参数梯度，显式行程边界与质心距离、训练原子时间相似度/空槽、每个前缀空间父索引/同距规则、重叠行程排除/首行程保留、真实下一事件变更后输入与预测不变、完整训练/独立全词表排名/导出/精确续训、padding/混批/全空历史/batch=1/float64/输入与 buffer 所有权、错误输入、CPU AMP。完整回归 **432 passed，0 failed，0 errors，0 skipped**，见 [汇总](remaining-validation.json)；仓库外实际夹具、训练、独立评估、续训第三轮共 4 条命令成功，见 [CLI 记录](lstpm-cli-validation.json)。迁移表为 **51/100**，49 条 pending；排除 7 个延期 Common 和 2 个模板后，本期仍有 **40 个**实际模型待迁移，最终全量验收尚未完成。
 
 ## 持续完成的清单
 

@@ -6,15 +6,7 @@ from scipy.spatial import cKDTree
 import torch
 
 from libcity.data.task_bundles import atomic,prepare_personalized_trajectory,sessions
-from libcity.data.trajectory_points import read_points
-
-
-def spherical_distance(left,right):
-    left,right = np.deg2rad(left),np.deg2rad(right)
-    difference = left-right
-    a = np.sin(difference[...,1]/2)**2+np.cos(left[...,1])*np.cos(right[...,1])*np.sin(difference[...,0]/2)**2
-    a = np.clip(a,0,1)
-    return 2*6371*np.arctan2(np.sqrt(a),np.sqrt(1-a))
+from libcity.data.trajectory_points import read_points,spherical_distance
 
 
 def spherical_diameter(coordinates):

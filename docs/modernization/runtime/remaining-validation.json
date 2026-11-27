@@ -1,5 +1,5 @@
 {
-  "scope": "Remaining-work commits 1-27; whole-library migration remains in progress",
+  "scope": "Remaining-work commits 1-28; whole-library migration remains in progress",
   "environment": {
     "python": "3.12.13",
     "torch": "2.15.0+cpu",
@@ -7,7 +7,7 @@
     "platform": "Windows-11-10.0.26200-SP0"
   },
   "full_tests": {
-    "tests": 418,
+    "tests": 432,
     "failures": 0,
     "errors": 0,
     "skipped": 0
@@ -242,6 +242,20 @@
     "test_actual_cpu_amp_training[TGCLSTM]",
     "test_reachability_uses_geo_order_missing_edges_zero_and_cache_invalidation",
     "test_reachability_missing_invalid_and_explicit_opt_out",
+    "test_original_two_level_attention_dilated_recurrence_and_all_gradients",
+    "test_causal_completed_sessions_centroids_and_preserved_cold_start_samples",
+    "test_time_similarity_fits_atomic_training_points_only_including_empty_slots",
+    "test_spatial_parents_match_original_rounding_ties_and_every_prefix",
+    "test_full_training_ranking_export_and_exact_resume",
+    "test_padding_mixed_batches_float64_and_empty_history_are_finite[False]",
+    "test_padding_mixed_batches_float64_and_empty_history_are_finite[True]",
+    "test_real_next_event_never_changes_prediction_inputs_or_time_fit",
+    "test_invalid_sequence_contracts_fail_explicitly[parent]",
+    "test_invalid_sequence_contracts_fail_explicitly[lengths]",
+    "test_invalid_sequence_contracts_fail_explicitly[sessions]",
+    "test_invalid_sequence_contracts_fail_explicitly[distance]",
+    "test_invalid_sequence_contracts_fail_explicitly[time]",
+    "test_actual_cpu_amp_training_and_identical_coordinates",
     "test_map_bundle_and_direct_evaluation_without_training_objects[False]",
     "test_map_bundle_and_direct_evaluation_without_training_objects[True]",
     "test_map_single_metric_and_prediction_switch_remove_stale_export",
@@ -435,8 +449,8 @@
   ],
   "inventory": {
     "total": 100,
-    "migrated": 50,
-    "pending": 50
+    "migrated": 51,
+    "pending": 49
   },
   "history": [
     {
@@ -704,6 +718,20 @@
         "migrated": 49,
         "pending": 51
       }
+    },
+    {
+      "scope": "Remaining-work commits 1-27; whole-library migration remains in progress",
+      "full_tests": {
+        "tests": 418,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "inventory": {
+        "total": 100,
+        "migrated": 50,
+        "pending": 50
+      }
     }
   ],
   "current_cli": {
@@ -805,6 +833,12 @@
   },
   "cara_cli": {
     "report": "cara-cli-validation.json",
+    "commands": 3,
+    "fixture_commands": 1,
+    "format_version": 3
+  },
+  "lstpm_cli": {
+    "report": "lstpm-cli-validation.json",
     "commands": 3,
     "fixture_commands": 1,
     "format_version": 3

@@ -1,0 +1,6 @@
+{
+  "data": {"dataset": "TaskTiny", "data_dir": "data", "cache": false},
+  "model": {"name": "LSTPM", "params": {"emb_size": 4, "hidden_size": 4}},
+  "training": {"epochs": 2, "batch_size": 8},
+  "runtime": {"device": "cpu", "seed": 17, "output_dir": "runs"}
+}

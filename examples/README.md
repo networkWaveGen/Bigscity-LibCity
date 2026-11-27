@@ -151,6 +151,17 @@ protocol uses per-sample BPR (`training.loss.name=bpr`) and bounded negative sam
 Validation/test rank the full vocabulary with deterministic mean BPR. Prefix states
 are reused across candidate chunks rather than replaying the sequence per candidate.
 
+`--model LSTPM` creates a long/short-term session example with distinct POI geometry.
+Only sessions completed before the current trip are history; explicit session
+lengths preserve the carried historical LSTM state and two-level attention.
+Time-slot Jaccard similarity uses atomic training observations only. Spatial
+parents choose the nearest earlier observation, resolving metre-rounded ties in
+favour of the latest earlier point. History distances retain LibCity's arithmetic
+session-centroid definition with a 1 km floor. Empty history becomes zero context;
+first-trip samples remain in the benchmark. Full-vocabulary mean NLL replaces the
+old summed NLL including the padding class. Train/evaluate/resume use the shared
+runtime; the unused legacy dropout option is removed.
+
 The complete supported-model inventory and migration details are in the
 [runtime guide](../docs/modernization/runtime/README_zh.md). Small examples prove
 execution and reproducibility, not real-city benchmark accuracy.

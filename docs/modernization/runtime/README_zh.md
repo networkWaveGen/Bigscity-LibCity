@@ -93,6 +93,8 @@ STAN 可用 --model STAN 生成两级时空注意力示例。stan_ranking 协议
 
 CARA 可用 --model CARA 生成上下文门控示例。cara_ranking 协议使用逐样本 BPR，默认读取完整已知前缀（history_window=0），可显式限制为最近若干点。时间间隔来自实际时间戳，候选时刻默认最后观测，可在模型输入提供已知 query_offset_hours；实际下一事件不参与预测。训练负采样有界且排除正类，全词表评估不随机抽取候选。门控已按作者实现纠正激活，前缀编码在候选间复用；细节及有意修订见 [模型迁移说明](models_zh.md)。
 
+LSTPM 可用 --model LSTPM 生成历史行程示例，复用 train/evaluate/resume。时间相似度仅用原子训练观测拟合，历史必须在当前行程开始前完成；显式行程边界保留连续历史 LSTM 与两级注意力。空间父索引只选较早观察、同距取最近时间索引，历史质心距离至少 1 km。空历史使用零上下文，首行程样本保留；训练改用排除 padding 类的公共平均 NLL。对旧计算的保留和有意变化见 [模型迁移说明](models_zh.md)。
+
 ## 统一调参
 
 搜索空间为 JSON，例如 `{"training.optimizer.lr":[0.001,0.002],"data.input_window":[4,6]}`。保存为 space.json 后：

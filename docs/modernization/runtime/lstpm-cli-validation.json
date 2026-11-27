@@ -1,0 +1,136 @@
+{
+  "passed": true,
+  "model": "LSTPM",
+  "source": "D:\\LibCity 2.0\\LibCity-modernization",
+  "directory": "D:\\LibCity 2.0\\.runtime-tests\\lstpm-cli-ratcju85",
+  "commands": [
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\tools\\make_runtime_fixture.py",
+        "--directory",
+        "D:\\LibCity 2.0\\.runtime-tests\\lstpm-cli-ratcju85\\case",
+        "--model",
+        "LSTPM"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\lstpm-cli-ratcju85",
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "train",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\lstpm-cli-ratcju85\\case\\lstpm.json",
+        "--set",
+        "runtime.exp_id=train"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\lstpm-cli-ratcju85",
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "evaluate",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\lstpm-cli-ratcju85\\case\\lstpm.json",
+        "--checkpoint",
+        "D:\\LibCity 2.0\\.runtime-tests\\lstpm-cli-ratcju85\\case\\runs\\train\\checkpoints\\best.pt",
+        "--set",
+        "runtime.exp_id=evaluate"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\lstpm-cli-ratcju85",
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "train",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\lstpm-cli-ratcju85\\case\\lstpm.json",
+        "--resume",
+        "D:\\LibCity 2.0\\.runtime-tests\\lstpm-cli-ratcju85\\case\\runs\\train\\checkpoints\\last.pt",
+        "--set",
+        "runtime.exp_id=resumed",
+        "--set",
+        "training.epochs=3"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\lstpm-cli-ratcju85",
+      "exit_code": 0
+    }
+  ],
+  "training": {
+    "metrics": {
+      "Recall@1": 0.14285714285714285,
+      "Recall@5": 0.5,
+      "Recall@10": 1.0,
+      "MRR@10": 0.32151358468191965,
+      "loss": 2.0870211124420166,
+      "best_validation": 0.07142857142857142
+    },
+    "artifacts": {
+      "metrics_json": "D:\\LibCity 2.0\\.runtime-tests\\lstpm-cli-ratcju85\\case\\runs\\train\\eval\\metrics.json",
+      "metrics_csv": "D:\\LibCity 2.0\\.runtime-tests\\lstpm-cli-ratcju85\\case\\runs\\train\\eval\\metrics.csv",
+      "predictions": "D:\\LibCity 2.0\\.runtime-tests\\lstpm-cli-ratcju85\\case\\runs\\train\\eval\\predictions.json",
+      "resolved_config": "D:\\LibCity 2.0\\.runtime-tests\\lstpm-cli-ratcju85\\case\\runs\\train\\resolved_config.json",
+      "runtime_info": "D:\\LibCity 2.0\\.runtime-tests\\lstpm-cli-ratcju85\\case\\runs\\train\\runtime_info.json",
+      "run_log": "D:\\LibCity 2.0\\.runtime-tests\\lstpm-cli-ratcju85\\case\\runs\\train\\run.log",
+      "best": "D:\\LibCity 2.0\\.runtime-tests\\lstpm-cli-ratcju85\\case\\runs\\train\\checkpoints\\best.pt",
+      "last": "D:\\LibCity 2.0\\.runtime-tests\\lstpm-cli-ratcju85\\case\\runs\\train\\checkpoints\\last.pt"
+    }
+  },
+  "evaluation": {
+    "metrics": {
+      "Recall@1": 0.14285714285714285,
+      "Recall@5": 0.5,
+      "Recall@10": 1.0,
+      "MRR@10": 0.32151358468191965,
+      "loss": 2.0870211124420166
+    },
+    "artifacts": {
+      "metrics_json": "D:\\LibCity 2.0\\.runtime-tests\\lstpm-cli-ratcju85\\case\\runs\\evaluate\\eval\\metrics.json",
+      "metrics_csv": "D:\\LibCity 2.0\\.runtime-tests\\lstpm-cli-ratcju85\\case\\runs\\evaluate\\eval\\metrics.csv",
+      "predictions": "D:\\LibCity 2.0\\.runtime-tests\\lstpm-cli-ratcju85\\case\\runs\\evaluate\\eval\\predictions.json",
+      "resolved_config": "D:\\LibCity 2.0\\.runtime-tests\\lstpm-cli-ratcju85\\case\\runs\\evaluate\\resolved_config.json",
+      "runtime_info": "D:\\LibCity 2.0\\.runtime-tests\\lstpm-cli-ratcju85\\case\\runs\\evaluate\\runtime_info.json",
+      "run_log": "D:\\LibCity 2.0\\.runtime-tests\\lstpm-cli-ratcju85\\case\\runs\\evaluate\\run.log"
+    }
+  },
+  "resume": {
+    "metrics": {
+      "Recall@1": 0.14285714285714285,
+      "Recall@5": 0.5,
+      "Recall@10": 1.0,
+      "MRR@10": 0.32151358468191965,
+      "loss": 2.0870211124420166,
+      "best_validation": 0.07142857142857142
+    },
+    "artifacts": {
+      "metrics_json": "D:\\LibCity 2.0\\.runtime-tests\\lstpm-cli-ratcju85\\case\\runs\\resumed\\eval\\metrics.json",
+      "metrics_csv": "D:\\LibCity 2.0\\.runtime-tests\\lstpm-cli-ratcju85\\case\\runs\\resumed\\eval\\metrics.csv",
+      "predictions": "D:\\LibCity 2.0\\.runtime-tests\\lstpm-cli-ratcju85\\case\\runs\\resumed\\eval\\predictions.json",
+      "resolved_config": "D:\\LibCity 2.0\\.runtime-tests\\lstpm-cli-ratcju85\\case\\runs\\resumed\\resolved_config.json",
+      "runtime_info": "D:\\LibCity 2.0\\.runtime-tests\\lstpm-cli-ratcju85\\case\\runs\\resumed\\runtime_info.json",
+      "run_log": "D:\\LibCity 2.0\\.runtime-tests\\lstpm-cli-ratcju85\\case\\runs\\resumed\\run.log",
+      "best": "D:\\LibCity 2.0\\.runtime-tests\\lstpm-cli-ratcju85\\case\\runs\\resumed\\checkpoints\\best.pt",
+      "last": "D:\\LibCity 2.0\\.runtime-tests\\lstpm-cli-ratcju85\\case\\runs\\resumed\\checkpoints\\last.pt"
+    }
+  },
+  "resumed_epoch": 3,
+  "format_version": 3,
+  "benchmark_protocol": "task_default",
+  "time_similarity_fitted_on": "atomic_training_observations",
+  "cold_start_samples": {
+    "train": 5,
+    "val": 0,
+    "test": 0
+  },
+  "evaluation_candidates": "full_location_vocabulary"
+}

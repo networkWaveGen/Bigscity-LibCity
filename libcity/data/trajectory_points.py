@@ -5,6 +5,15 @@ import numpy as np
 import pandas as pd
 
 
+def spherical_distance(left,right):
+    """Broadcast WGS84 point coordinates on the original 6371 km sphere."""
+    left,right = np.deg2rad(left),np.deg2rad(right)
+    difference = left-right
+    a = np.sin(difference[...,1]/2)**2+np.cos(left[...,1])*np.cos(right[...,1])*np.sin(difference[...,0]/2)**2
+    a = np.clip(a,0,1)
+    return 2*6371*np.arctan2(np.sqrt(a),np.sqrt(1-a))
+
+
 def read_points(folder,metadata,dataset,num_nodes,model_name):
     geo = pd.read_csv(folder/(metadata.get('geo_file',dataset)+'.geo'))
     try:

@@ -29,6 +29,9 @@ class ModelSpec:
 
 
 MODELS = {
+    'LSTPM': ModelSpec('libcity.model.trajectory_loc_prediction.runtime_lstpm:LSTPM',task='traj_loc_pred',
+        prepare_data='libcity.data.lstpm_trajectory:prepare_lstpm',
+        loss='libcity.executor.task_evaluation:RankingLoss',evaluate_loader='libcity.executor.task_evaluation:evaluate_task'),
     'CARA': ModelSpec('libcity.model.trajectory_loc_prediction.runtime_cara:CARA',task='traj_loc_pred',
         protocol='cara_ranking',prepare_data='libcity.data.cara_trajectory:prepare_cara',
         loss='libcity.executor.cara_step:CARALoss',step='libcity.executor.cara_step:pairwise_step',
