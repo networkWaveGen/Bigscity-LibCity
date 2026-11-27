@@ -1,0 +1,8 @@
+{
+  "data": {"dataset": "Tiny", "data_dir": "data", "cache_dir": "cache", "cache": true,
+    "input_window": 4, "output_window": 2, "pad_training": false},
+  "model": {"name": "MegaCRN", "params": {"rnn_units": 4, "num_layers": 2, "cheb_k": 3,
+    "mem_num": 5, "mem_dim": 3, "cl_decay_steps": 3}},
+  "training": {"epochs": 2, "batch_size": 8},
+  "runtime": {"device": "cpu", "seed": 17, "output_dir": "runs"}
+}

@@ -50,6 +50,11 @@ For all three temporal branches of ASTGCN/MSTGCN, generate with `--model ASTGCN`
 or `--model MSTGCN`. The published hourly fixture covers weekly, daily and recent
 segments. Runs record the CPT sampling layout and `history_span_points`; the
 number of input samples differs from their span on the original timeline.
+
+`--model MegaCRN` creates a memory-augmented forecast example with explicit known
+future time features. Its auxiliary memory losses and curriculum targets are
+used only by the training step; ordinary forward/evaluation returns predictions
+without labels. Resume restores the curriculum counter and random generators.
 The complete supported-model inventory and migration details are in the
 [runtime guide](../docs/modernization/runtime/README_zh.md). Small examples prove
 execution and reproducibility, not real-city benchmark accuracy.

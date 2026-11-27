@@ -14,6 +14,7 @@
 | commit6 | 2a085e1 | feat: migrate direct map matchers with isolated trajectory state |
 | commit7 | c626860 | feat: migrate FPMC with personalized inputs and valid ranking loss |
 | commit8 | b60ca0e | feat: migrate sparse road autoencoders with explicit reconstruction protocol |
+| commit9 | abdd51b | feat: migrate multiscale graph forecasts with explicit CPT branches |
 
 ## commit1：修复基础交通缓存（670b325）
 
@@ -96,6 +97,14 @@ Seq2Seq 旧实现推理仍读取 y 且随机生成解码起点，现使用固定
 修复：MSTGCN 后续块把图过滤器宽度当成时间过滤器输出宽度，在二者不相等时维度错误；图谱归一化对单节点/零拉普拉斯图除零。谱基构造不再依赖随机特征值迭代；图卷积沿时间轴批量计算。周期采样差异写入 protocol_changes，摘要增加 history_span_points，避免把输入样本数误认为实际历史跨度。
 
 验证：新增 **8 项通过**，覆盖三分支旧前向/梯度对照、明确周期顺序、完整训练/独立评估/精确续训、不同过滤器宽度与多目标、batch=1/float64/无标签和输入所有权、CPU AMP 与单节点图。完整回归 **243 passed，0 failed，0 errors，0 skipped**。两个发布夹具及仓库外 6 条 CLI 生命周期命令通过，续训到第三轮，见 [周期模型 CLI 记录](multiscale-cli-validation.json)。清单为 34/100 已迁移，66 条 pending。
+
+## commit10：迁移 MegaCRN 记忆与课程训练
+
+新增标准 nn.Module 与记忆辅助训练 step，保留自适应双图、编码/解码、记忆查询、分离与紧凑性正则。普通 forward 始终返回预测，不读取标签或依赖训练态返回类型；归一化目标和 batches_seen 由训练步显式传入。解码仅接收声明的已知 future_features，临时隐状态按输入设备/类型创建；公共检查点恢复课程计数和 NumPy 随机采样。
+
+修复：旧调用在无标签或缺 batches_seen 时仍尝试课程学习；旧图卷积单位阵固定 FP32 导致 float64/混合精度类型不一致；长训练的 exp 课程阈值可能溢出。现在无标签 forward 不消耗课程 RNG，显式训练辅助路径执行采样，阈值在极大步数安全归零。验证使用纯预测指标，辅助记忆正则只参与训练。
+
+验证：新增 **4 项通过**，覆盖旧预测、记忆输出、训练目标和逐参数梯度对照，纯 forward 的标签/RNG 隔离，三轮课程训练/独立评估/中断恢复且 NumPy 状态、计数、调度器及每个参数一致，无协变量/batch=1/float64，以及 CPU AMP。完整回归 **247 passed，0 failed，0 errors，0 skipped**。发布夹具和仓库外 3 条 CLI 训练/评估/续训命令通过，续训第三轮，见 [MegaCRN CLI 记录](megacrn-cli-validation.json)。清单为 35/100，65 条 pending。
 
 ## 持续完成的清单
 

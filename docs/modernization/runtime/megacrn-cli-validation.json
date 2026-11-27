@@ -1,0 +1,61 @@
+{
+  "passed": true,
+  "fixture_commands": 1,
+  "commands": [
+    {
+      "arguments": [
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "train",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\remaining-megacrn-cli-3ney9g21\\MegaCRN\\megacrn.json",
+        "--set",
+        "runtime.exp_id=train"
+      ],
+      "returncode": 0
+    },
+    {
+      "arguments": [
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "evaluate",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\remaining-megacrn-cli-3ney9g21\\MegaCRN\\megacrn.json",
+        "--set",
+        "runtime.exp_id=evaluate",
+        "--checkpoint",
+        "D:\\LibCity 2.0\\.runtime-tests\\remaining-megacrn-cli-3ney9g21\\MegaCRN\\runs\\train\\checkpoints\\best.pt"
+      ],
+      "returncode": 0
+    },
+    {
+      "arguments": [
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "train",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\remaining-megacrn-cli-3ney9g21\\MegaCRN\\megacrn.json",
+        "--set",
+        "runtime.exp_id=resumed",
+        "--resume",
+        "D:\\LibCity 2.0\\.runtime-tests\\remaining-megacrn-cli-3ney9g21\\MegaCRN\\runs\\train\\checkpoints\\last.pt",
+        "--set",
+        "training.epochs=3"
+      ],
+      "returncode": 0
+    }
+  ],
+  "metrics": {
+    "MAE@1": 0.7431403972484447,
+    "RMSE@1": 0.853914420882862,
+    "MAE@2": 0.7333259582519531,
+    "RMSE@2": 0.8443088103976936,
+    "loss": 0.7382331490516663
+  },
+  "resume_epoch": 3,
+  "train_state": {
+    "stage": "train",
+    "epoch": 3,
+    "batches_seen": 9,
+    "optimizer_steps": 9,
+    "best_metric": 1.2589234113693237,
+    "task_state": {}
+  }
+}

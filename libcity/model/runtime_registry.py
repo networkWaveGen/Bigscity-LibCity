@@ -29,6 +29,8 @@ class ModelSpec:
 
 
 MODELS = {
+    'MegaCRN': ModelSpec('libcity.model.traffic_speed_prediction.runtime_megacrn:MegaCRN',
+        step='libcity.model.traffic_speed_prediction.runtime_megacrn:memory_step'),
     'ASTGCN': ModelSpec('libcity.model.traffic_flow_prediction.runtime_multiscale:ASTGCN'),
     'MSTGCN': ModelSpec('libcity.model.traffic_flow_prediction.runtime_multiscale:MSTGCN'),
     'ChebConv': ModelSpec('libcity.model.road_representation.runtime_reconstruction:ChebConv',task='road_representation',

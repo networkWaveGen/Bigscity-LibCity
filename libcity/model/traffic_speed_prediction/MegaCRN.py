@@ -22,7 +22,7 @@ class AGCN(nn.Module):
         x_g = []
         support_set = []
         for support in supports:
-            support_ks = [torch.eye(support.shape[0]).to(support.device), support]
+            support_ks = [torch.eye(support.shape[0],device=support.device,dtype=support.dtype), support]
             for k in range(2, self.cheb_k):
                 support_ks.append(torch.matmul(2 * support, support_ks[-1]) - support_ks[-2])
             support_set.extend(support_ks)
