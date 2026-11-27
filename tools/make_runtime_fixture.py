@@ -6,6 +6,7 @@ import sys
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT))
 from libcity.testing.fixtures import atomic_fixture,crann_fixture,map_fixture,task_fixture,road_feature_fixture,multiscale_fixture,tgclstm_fixture
+from libcity.model.runtime_registry import model_spec
 
 
 EXAMPLES={'traffic_state_pred':'gru','traj_loc_pred':'rnn','eta':'deeptte',
@@ -16,9 +17,9 @@ def main(argv=None):
     parser=argparse.ArgumentParser()
     parser.add_argument('--directory',required=True,type=Path)
     parser.add_argument('--task',choices=EXAMPLES)
-    parser.add_argument('--model',choices=('GRU','CRANN','ChebConv','GAT','ASTGCN','MSTGCN','MegaCRN','TESTAM','ToGCN','SimST','STNN','TGCLSTM','STTN','TimeMixer','STG2Seq'),help='Optional named model example')
+    parser.add_argument('--model',choices=('GRU','CRANN','ChebConv','GAT','ASTGCN','MSTGCN','MegaCRN','TESTAM','ToGCN','SimST','STNN','TGCLSTM','STTN','TimeMixer','STG2Seq','DeepMove'),help='Optional named model example')
     args=parser.parse_args(argv)
-    selected_task = 'road_representation' if args.model in ('ChebConv','GAT') else 'traffic_state_pred'
+    selected_task = model_spec(args.model).task if args.model else args.task or 'traffic_state_pred'
     if args.model and args.task and args.task!=selected_task:
         parser.error('--model and --task select different tasks')
     args.task = args.task or selected_task

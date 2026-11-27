@@ -24,6 +24,7 @@
 | commit16 | e81011f | feat: migrate STTN with immutable graph transforms |
 | commit17 | e2c728e | feat: migrate TimeMixer with explicit scales and temporal decomposition |
 | commit18 | 5244e90 | feat: migrate STG2Seq with explicit graph and attention axes |
+| commit19 | 81d5572 | fix: reject resume when atomic source versions change |
 
 ## commit1：修复基础交通缓存（670b325）
 
@@ -186,6 +187,14 @@ TGCLSTM 保留逐步图过滤、门控细胞与滑动窗口重编码，所有静
 完整检查点格式升至 **3**；旧完整格式缺少来源信息，明确拒绝续训，纯 best.pt 评估保持有效。该检查是文件元信息版本检查，不是内容相等证明；单独修改 mtime 也会保守拒绝，刻意同时保持大小/mtime 的内容变化无法据此识别，未引入文件内容哈希。
 
 验证：新增 **7 项通过**，包括真实数值和 STGCN 静态图变化后在任何更新前拒绝、mtime 单独变化、保留文件版本后迁移目录并精确恢复下一轮、嵌套/外部引用和缓存文件排除、旧格式拒绝且纯权重评估有效、训练过程中源文件改变后检查点仍记录原上下文快照。与训练引擎/定制训练/STSSL 合计 37 项通过；完整回归 **331 passed，0 failed，0 errors，0 skipped**。仓库外实际发布夹具、训练/评估/续训及修改数据后拒绝续训共 5 条命令按预期完成，见 [来源检查 CLI 记录](source-resume-cli-validation.json)。迁移范围仍为 **43/100**，本期 **48 个**实际模型与最终全量验收继续实施。
+
+## commit20：迁移 DeepMove 历史轨迹注意力
+
+新增标准 nn.Module 与历史轨迹 DataBundle 适配。历史只取当前行程开始前已结束的同用户有效行程，重叠行程不提前进入历史；按完成时间建立用户 Tensor 银行，样本共享前缀视图，collate 拷贝保证输入所有权。无历史样本使用零上下文，不再通过删除首条行程改变基准样本集合。公共轨迹入口同时校验非空唯一位置词表与有效时间。
+
+修复旧历史 padding 参与 softmax、预测受同批其他行程长度影响的问题；支持显式长度、全空历史和无效填充值隔离。RNN 分支使用正确 RNN 解码器，补齐旧未完成的 concat 注意力并初始化其参数，移除未使用的 fc_attn。仅对最后当前状态做注意力，去除重复计算；默认隐状态随输入设备/类型创建，forward 不读标签，输出去除 padding 类后的全词表 log_softmax。
+
+验证：新增 **14 项通过**，包括 GRU/LSTM×dot/general 四种旧可用非填充分支的条件词表分数、NLL 与梯度对照；RNN/GRU/LSTM 三种训练/独立评估/导出/dropout 精确续训；历史/当前 padding、混批与独立推理等价、全空历史、batch=1/float64/无标签、concat 独立分数、基准样本 ID 保留、历史严格时间与重叠行程、collate 所有权、三种循环单元 CPU AMP。完整回归 **345 passed，0 failed，0 errors，0 skipped**。仓库外发布夹具与 3 条生命周期命令成功，独立评估一致并续训第三轮，见 [CLI 记录](deepmove-cli-validation.json)。示例生成器按注册信息选择任务，不再把新命名模型默认为交通预测。迁移清单为 **44/100**，56 条 pending，本期仍有 **47 个**实际模型待迁移。
 
 ## 持续完成的清单
 

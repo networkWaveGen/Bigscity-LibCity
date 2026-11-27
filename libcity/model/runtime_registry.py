@@ -29,6 +29,9 @@ class ModelSpec:
 
 
 MODELS = {
+    'DeepMove': ModelSpec('libcity.model.trajectory_loc_prediction.runtime_deepmove:DeepMove',task='traj_loc_pred',
+        prepare_data='libcity.data.task_bundles:prepare_history_trajectory',
+        loss='libcity.executor.task_evaluation:RankingLoss',evaluate_loader='libcity.executor.task_evaluation:evaluate_task'),
     'STG2Seq': ModelSpec('libcity.model.traffic_demand_prediction.runtime_stg2seq:STG2Seq',
         step='libcity.model.traffic_speed_prediction.runtime_seq2seq:teacher_step'),
     'TimeMixer': ModelSpec('libcity.model.traffic_flow_prediction.runtime_timemixer:TimeMixer'),

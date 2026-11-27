@@ -1,0 +1,82 @@
+{
+  "passed": true,
+  "fixture_commands": 1,
+  "commands": [
+    {
+      "arguments": [
+        "D:\\LibCity 2.0\\LibCity-modernization\\tools\\make_runtime_fixture.py",
+        "--directory",
+        "D:\\LibCity 2.0\\.runtime-tests\\deepmove-cli-q88ium_x\\case",
+        "--model",
+        "DeepMove"
+      ],
+      "exit_code": 0
+    },
+    {
+      "arguments": [
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "train",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\deepmove-cli-q88ium_x\\case\\deepmove.json",
+        "--set",
+        "runtime.exp_id=train"
+      ],
+      "exit_code": 0
+    },
+    {
+      "arguments": [
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "evaluate",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\deepmove-cli-q88ium_x\\case\\deepmove.json",
+        "--checkpoint",
+        "D:\\LibCity 2.0\\.runtime-tests\\deepmove-cli-q88ium_x\\case\\runs\\train\\checkpoints\\best.pt",
+        "--set",
+        "runtime.exp_id=evaluate"
+      ],
+      "exit_code": 0
+    },
+    {
+      "arguments": [
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "train",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\deepmove-cli-q88ium_x\\case\\deepmove.json",
+        "--resume",
+        "D:\\LibCity 2.0\\.runtime-tests\\deepmove-cli-q88ium_x\\case\\runs\\train\\checkpoints\\last.pt",
+        "--set",
+        "runtime.exp_id=resumed",
+        "--set",
+        "training.epochs=3"
+      ],
+      "exit_code": 0
+    }
+  ],
+  "metrics": {
+    "train": {
+      "Recall@1": 0.14285714285714285,
+      "Recall@5": 0.5714285714285714,
+      "Recall@10": 1.0,
+      "MRR@10": 0.3614795889173235,
+      "loss": 2.073317289352417,
+      "best_validation": 0.21428571428571427
+    },
+    "evaluate": {
+      "Recall@1": 0.14285714285714285,
+      "Recall@5": 0.5714285714285714,
+      "Recall@10": 1.0,
+      "MRR@10": 0.3614795889173235,
+      "loss": 2.073317289352417
+    },
+    "resume": {
+      "Recall@1": 0.14285714285714285,
+      "Recall@5": 0.5714285714285714,
+      "Recall@10": 1.0,
+      "MRR@10": 0.3614795889173235,
+      "loss": 2.073317289352417,
+      "best_validation": 0.21428571428571427
+    }
+  },
+  "resume_epoch": 3,
+  "format_version": 3
+}

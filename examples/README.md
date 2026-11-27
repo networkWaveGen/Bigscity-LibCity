@@ -96,6 +96,11 @@ and takes only declared future covariates for its attention queries. Graph and
 attention operations preserve batch/time/node axes; these correct intentional
 differences from the old reshape-based implementation.
 
+`--model DeepMove` creates a trajectory example with masked historical attention.
+History contains only the same user's sessions completed before the current trip
+started. Empty history becomes zero context without dropping benchmark samples.
+RNN/GRU/LSTM and dot/general/concat attention use the standard ranking lifecycle.
+
 The complete supported-model inventory and migration details are in the
 [runtime guide](../docs/modernization/runtime/README_zh.md). Small examples prove
 execution and reproducibility, not real-city benchmark accuracy.

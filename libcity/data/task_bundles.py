@@ -1,5 +1,6 @@
 """Small atomic adapters for variable-length trajectories, ETA and road edges."""
 import json
+from bisect import bisect_left
 from pathlib import Path
 import numpy as np
 import pandas as pd
@@ -75,10 +76,28 @@ def split_index(start,end,cuts):
     return None
 
 
-def prepare_trajectory(data,training,evaluation,seed,logger=None,*,include_users=False):
+def history_banks(encoded_groups):
+    users = {}
+    for group,locations,times in encoded_groups:
+        users.setdefault(group['entity_id'].iloc[0],[]).append((group['time'].iloc[-1].value,locations,times))
+    result = {}
+    for user,entries in users.items():
+        entries.sort(key=lambda row:row[0])
+        endings,offsets,locations,times = [],[0],[],[]
+        for ending,loc,tim in entries:
+            endings.append(ending)
+            locations.extend(loc);times.extend(tim)
+            offsets.append(len(locations))
+        result[user] = (endings,offsets,torch.tensor(locations,dtype=torch.long),torch.tensor(times,dtype=torch.long))
+    return result
+
+
+def prepare_trajectory(data,training,evaluation,seed,logger=None,*,include_users=False,include_history=False):
     folder,raw=atomic(data)
     geo=pd.read_csv(folder/(raw.get('geo_file',data['dataset'])+'.geo'))
     ids=geo['geo_id'].tolist()
+    if not ids or len(set(ids))!=len(ids):
+        raise ValueError('Trajectory location vocabulary must be nonempty and unique')
     locations={value:index+1 for index,value in enumerate(ids)}
     groups,cuts=sessions(folder,raw,data)
     users = None
@@ -89,7 +108,7 @@ def prepare_trajectory(data,training,evaluation,seed,logger=None,*,include_users
         if not identities or len(set(identities)) != len(identities):
             raise ValueError('Trajectory user vocabulary must be nonempty and unique')
         users = {identity:index for index,identity in enumerate(identities)}
-    rows=[[],[],[]]
+    encoded_groups = []
     for group in groups:
         if len(group)<data['min_session_length']:
             continue
@@ -99,7 +118,20 @@ def prepare_trajectory(data,training,evaluation,seed,logger=None,*,include_users
         except KeyError as error:
             raise ValueError('Trajectory location is absent from .geo vocabulary') from error
         time=group['time']
+        if time.isna().any():
+            raise ValueError('Trajectory timestamps must be finite')
         encoded=(time.dt.hour+24*(time.dt.day_of_week>=5)).tolist()
+        encoded_groups.append((group,loc,encoded))
+    histories = history_banks(encoded_groups) if include_history else None
+    rows=[[],[],[]]
+    for group,loc,encoded in encoded_groups:
+        time = group['time']
+        history = {}
+        if histories is not None:
+            endings,offsets,bank_loc,bank_tim = histories[group['entity_id'].iloc[0]]
+            stop = offsets[bisect_left(endings,time.iloc[0].value)]
+            # Views share the immutable user bank; collation creates owned tensors.
+            history = dict(history_loc=bank_loc[:stop],history_tim=bank_tim[:stop],history_lengths=torch.tensor(stop))
         for position in range(1,len(group)):
             part=split_index(time.iloc[position],time.iloc[position],cuts)
             row = dict(current_loc=torch.tensor(loc[:position]),current_tim=torch.tensor(encoded[:position]),
@@ -110,19 +142,28 @@ def prepare_trajectory(data,training,evaluation,seed,logger=None,*,include_users
                 if user not in users:
                     raise ValueError('Trajectory user is absent from .usr vocabulary')
                 row['uid'] = torch.tensor(users[user])
+            row.update(history)
             rows[part].append(row)
     info = dict(location_ids=ids,loc_size=len(ids)+1,tim_size=49,loc_pad=0,tim_pad=48)
     if users is not None:
         info.update(uid_size=len(users),user_ids=identities)
-    metadata=DatasetMetadata(data['dataset'],num_nodes=len(ids),output_dim=len(ids),
-        info=info,
-        input_layout=dict(kind='padded_trajectory',target_semantics='next_location',time_encoding='weekday_weekend_hour'))
+    layout = dict(kind='padded_trajectory',target_semantics='next_location',time_encoding='weekday_weekend_hour')
+    summary = dict(semantics='target_timestamp',train_end=str(cuts[0]),val_end=str(cuts[1]))
+    if include_history:
+        layout.update(history_semantics='completed_before_session_start',history_order='completion_time',empty_history='zero_context')
+        summary['cold_start_samples'] = {name:sum(int(row['history_lengths'])==0 for row in part)
+            for name,part in zip(('train','val','test'),rows)}
+    metadata=DatasetMetadata(data['dataset'],num_nodes=len(ids),output_dim=len(ids),info=info,input_layout=layout)
     return bundle(rows,metadata,NoneScaler(),training,evaluation,seed,
-        dict(semantics='target_timestamp',train_end=str(cuts[0]),val_end=str(cuts[1])))
+        summary)
 
 
 def prepare_personalized_trajectory(data,training,evaluation,seed,logger=None):
     return prepare_trajectory(data,training,evaluation,seed,logger,include_users=True)
+
+
+def prepare_history_trajectory(data,training,evaluation,seed,logger=None):
+    return prepare_trajectory(data,training,evaluation,seed,logger,include_history=True)
 
 
 def safe_statistics(values):

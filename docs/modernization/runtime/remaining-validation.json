@@ -1,5 +1,5 @@
 {
-  "scope": "Remaining-work commits 1-19; whole-library migration remains in progress",
+  "scope": "Remaining-work commits 1-20; whole-library migration remains in progress",
   "environment": {
     "python": "3.12.13",
     "torch": "2.15.0+cpu",
@@ -7,7 +7,7 @@
     "platform": "Windows-11-10.0.26200-SP0"
   },
   "full_tests": {
-    "tests": 331,
+    "tests": 345,
     "failures": 0,
     "errors": 0,
     "skipped": 0
@@ -127,6 +127,20 @@
     "test_mtg_curriculum_subgraphs_and_step_schedule_resume_exactly",
     "test_mtg_independent_trainer_uses_pipeline_and_prediction_switch",
     "test_mtg_static_graph_keeps_self_support_for_single_node_subgraphs",
+    "test_original_nonpadded_recurrent_attention_and_gradients[dot-GRU]",
+    "test_original_nonpadded_recurrent_attention_and_gradients[dot-LSTM]",
+    "test_original_nonpadded_recurrent_attention_and_gradients[general-GRU]",
+    "test_original_nonpadded_recurrent_attention_and_gradients[general-LSTM]",
+    "test_complete_training_ranking_export_and_exact_dropout_resume[GRU-dot]",
+    "test_complete_training_ranking_export_and_exact_dropout_resume[LSTM-general]",
+    "test_complete_training_ranking_export_and_exact_dropout_resume[RNN-concat]",
+    "test_padding_batch_independence_float64_and_empty_history[False]",
+    "test_padding_batch_independence_float64_and_empty_history[True]",
+    "test_concat_attention_against_explicit_scores_and_all_empty_mask",
+    "test_history_is_causal_and_benchmark_samples_are_preserved",
+    "test_actual_cpu_amp_training[RNN]",
+    "test_actual_cpu_amp_training[GRU]",
+    "test_actual_cpu_amp_training[LSTM]",
     "test_gru_cli_python_train_evaluate_and_resume",
     "test_complete_resume_matches_next_updates_lr_counters_and_best[scheduler0]",
     "test_complete_resume_matches_next_updates_lr_counters_and_best[scheduler1]",
@@ -348,8 +362,8 @@
   ],
   "inventory": {
     "total": 100,
-    "migrated": 43,
-    "pending": 57
+    "migrated": 44,
+    "pending": 56
   },
   "history": [
     {
@@ -519,6 +533,20 @@
         "migrated": 43,
         "pending": 57
       }
+    },
+    {
+      "scope": "commits 1-19, through 81d5572",
+      "full_tests": {
+        "tests": 331,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "inventory": {
+        "total": 100,
+        "migrated": 43,
+        "pending": 57
+      }
     }
   ],
   "current_cli": {
@@ -581,5 +609,11 @@
     "format_version": 3,
     "modified_data_rejected": true,
     "content_hashing": false
+  },
+  "deepmove_cli": {
+    "report": "deepmove-cli-validation.json",
+    "commands": 3,
+    "fixture_commands": 1,
+    "format_version": 3
   }
 }
