@@ -1,9 +1,10 @@
 # 新运行时模型迁移范围
 
-当前共 13 个运行时入口，对应原清单中的 15 个任务—模型条目（轨迹 RNN/LSTM/GRU 共用一个入口）。完整 [100 项 CSV](model-migration.csv) 逐项记录实际能力、依赖、验证与后续动作；其余 85 项仍为 pending，不会自动回退到旧运行时。37 个特殊交通数据集的深度整理仍延后。交通数据统一使用目标时间互斥切分，HMMM 为独立直接执行算法。
+当前共 14 个运行时入口，对应原清单中的 16 个任务—模型条目（轨迹 RNN/LSTM/GRU 共用一个入口）。完整 [100 项 CSV](model-migration.csv) 逐项记录实际能力、依赖、验证与后续动作；其余 84 项仍为 pending，不会自动回退到旧运行时。37 个特殊交通数据集的深度整理仍延后。交通数据统一使用目标时间互斥切分，HMMM 为独立直接执行算法。
 
 | 名称 | 任务/数据 | 训练接入 | 检查点/续训能力 | 实际验证级别 |
 | --- | --- | --- | --- | --- |
+| CRANN | traffic_state_pred / crann 双历史 + 显式未来协变量 | 默认 train_loop | 需要权重；完整续训 | 原版 24 步前向及梯度对照、任意预测窗、batch=1、原尺度掩码、完整短训/独立评估/精确续训；temporal_channel 明确选择历史通道，网格覆盖全部节点 |
 | GRU | traffic_state_pred / point window | 默认 train_loop | 需要权重；完整续训 | 固定旧权重前向/损失、CLI/Python 训练评估续训等价、dropout+shuffle 精确恢复、CPU AMP |
 | STGCN | traffic_state_pred / point + 显式静态图 | 默认 train_loop，无模型专用训练函数 | 需要权重；公共完整续训 | 旧权重前向/损失及两次 Adam 更新对照、图 buffer/dtype 迁移、短训及独立评估 |
 | DCRNN | traffic_state_pred / point + diffusion buffers | 三参数 curriculum step_fn | 需要权重；完整续训 | 旧计算短训对照、NumPy 课程采样、batches_seen 和下一步参数精确恢复、独立评估 |

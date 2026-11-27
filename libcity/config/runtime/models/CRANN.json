@@ -1,0 +1,10 @@
+{
+  "model": {"params": {"dim_x": 5, "dim_y": 6, "n_hidden_tem": 100,
+    "n_layers_tem": 1, "n_hidden_dns": 0, "n_layers_dns": 1, "n_ar": 4,
+    "temporal_channel": 1}},
+  "data": {"sampling": {"name": "crann", "temporal_history": 336},
+    "scaler": {"name": "minmax01"}, "features": {"load_external": true}},
+  "training": {"optimizer": {"name": "adam", "lr": 0.001, "weight_decay": 0.005},
+    "scheduler": {"name": "plateau", "interval": "metric", "monitor": "val_loss", "patience": 10},
+    "early_stopping": {"patience": 50}}
+}

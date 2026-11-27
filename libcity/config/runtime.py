@@ -122,9 +122,12 @@ def validate(config, preset):
         _known(data['features'], ('load_external', 'time_in_day', 'day_in_week', 'known_future_columns'), 'data.features')
         _known(data['scaler'], ('name',), 'data.scaler')
         _known(data['graph'], ('name', 'symmetric', 'self_loops', 'epsilon'), 'data.graph')
-        _known(data['sampling'], ('name','closeness','period','trend','interval_period','interval_trend'), 'data.sampling')
-        if data['sampling'].get('name') not in ('window','cpt'):
+        _known(data['sampling'], ('name','closeness','period','trend','interval_period','interval_trend',
+                                  'temporal_history'), 'data.sampling')
+        if data['sampling'].get('name') not in ('window','cpt','crann'):
             raise ValueError('Unknown data.sampling.name')
+        if data['sampling']['name']=='crann':
+            _positive(data['sampling'].get('temporal_history'), 'data.sampling.temporal_history')
         if data['sampling']['name']=='cpt':
             for key in ('closeness','period','trend'):
                 _positive(data['sampling'].get(key,0),f'data.sampling.{key}',zero=True)

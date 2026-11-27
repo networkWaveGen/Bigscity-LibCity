@@ -14,7 +14,7 @@ class CRANNDataset(TrafficStatePointDataset):
 
     def __init__(self, config):
         super().__init__(config)
-        self.feature_name = {'x_time': 'float', 'x_space': 'float', 'x_ext': 'float', 'y': 'float'}
+        self.feature_name = {'x_time': 'float', 'x_space': 'float', 'x_ext': 'float', 'y': 'float', 'y_raw': 'float'}
         self.cache_file_name = self._get_cache_file_name('crann_target_time_v1')
         self.n_timesteps = self.config.get('n_timesteps', 24*14)
         self.dim_x = self.config.get('dim_x', 5)
@@ -141,22 +141,23 @@ class CRANNDataset(TrafficStatePointDataset):
         # 数据归一化
         self.feature_dim = x_time_train.shape[-1]
         self.ext_dim = x_ext_train.shape[-1]
+        y_raw_train, y_raw_val, y_raw_test = (values.copy() for values in (y_train, y_val, y_test))
         self.scaler = self._get_scalar(self.scaler_type, x_space_train, y_train)
         x_time_train[..., :self.output_dim] = self.scaler.transform(x_time_train[..., :self.output_dim])
-        x_space_train[..., :self.output_dim] = self.scaler.transform(x_space_train[..., :self.output_dim])
+        x_space_train = self.scaler.transform(x_space_train)
         x_ext_train[..., :self.output_dim] = self.scaler.transform(x_ext_train[..., :self.output_dim])
-        y_train[..., :self.output_dim] = self.scaler.transform(y_train[..., :self.output_dim])
+        y_train = self.scaler.transform(y_train)
         x_time_val[..., :self.output_dim] = self.scaler.transform(x_time_val[..., :self.output_dim])
-        x_space_val[..., :self.output_dim] = self.scaler.transform(x_space_val[..., :self.output_dim])
+        x_space_val = self.scaler.transform(x_space_val)
         x_ext_val[..., :self.output_dim] = self.scaler.transform(x_ext_val[..., :self.output_dim])
-        y_val[..., :self.output_dim] = self.scaler.transform(y_val[..., :self.output_dim])
+        y_val = self.scaler.transform(y_val)
         x_time_test[..., :self.output_dim] = self.scaler.transform(x_time_test[..., :self.output_dim])
-        x_space_test[..., :self.output_dim] = self.scaler.transform(x_space_test[..., :self.output_dim])
+        x_space_test = self.scaler.transform(x_space_test)
         x_ext_test[..., :self.output_dim] = self.scaler.transform(x_ext_test[..., :self.output_dim])
-        y_test[..., :self.output_dim] = self.scaler.transform(y_test[..., :self.output_dim])
-        train_data = list(zip(x_time_train, x_space_train, x_ext_train, y_train))
-        eval_data = list(zip(x_time_val, x_space_val, x_ext_val, y_val))
-        test_data = list(zip(x_time_test, x_space_test, x_ext_test, y_test))
+        y_test = self.scaler.transform(y_test)
+        train_data = list(zip(x_time_train, x_space_train, x_ext_train, y_train, y_raw_train))
+        eval_data = list(zip(x_time_val, x_space_val, x_ext_val, y_val, y_raw_val))
+        test_data = list(zip(x_time_test, x_space_test, x_ext_test, y_test, y_raw_test))
         self.train_dataloader, self.eval_dataloader, self.test_dataloader = \
             generate_dataloader(train_data, eval_data, test_data, self.feature_name,
                                 self.batch_size, self.num_workers, pad_with_last_sample=self.pad_with_last_sample)

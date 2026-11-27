@@ -9,6 +9,7 @@ from libcity.model.runtime_registry import MODELS
 
 
 VALIDATION={
+    'CRANN':'reference_forward_and_gradients;target_time_split;raw_target_mask;batch_one;short_train;independent_evaluate;exact_resume',
     'GRU':'fixed_reference;forward;short_train;CLI_API_equality;exact_resume;real_METR_LA_prefix;CUDA_AMP_resume',
     'STGCN':'reference_forward_and_updates;buffer_dtype;short_train;independent_evaluate;shared_resume;CUDA_lifecycle',
     'DCRNN':'reference_forward_and_updates;curriculum_exact_resume;short_train;independent_evaluate;CUDA_lifecycle',

@@ -115,6 +115,10 @@ def prepare_traffic(data, training, evaluation, seed, logger=None):
     horizon, sampling = data['output_window'], data['sampling']
     offsets = np.arange(-data['input_window'], 0)
     layout = dict(kind='window', length=len(offsets))
+    if sampling['name']=='crann':
+        length = max(data['input_window'], sampling['temporal_history'])
+        offsets = np.arange(-length, 0)
+        layout = dict(kind='crann', length=length, temporal_history=sampling['temporal_history'])
     if sampling['name']=='cpt':
         points = 3600//metadata.get('time_intervals', 300)
         if points < horizon:

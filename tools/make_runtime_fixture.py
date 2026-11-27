@@ -5,7 +5,7 @@ from pathlib import Path
 import sys
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT))
-from libcity.testing.fixtures import atomic_fixture,map_fixture,task_fixture
+from libcity.testing.fixtures import atomic_fixture,crann_fixture,map_fixture,task_fixture
 
 
 EXAMPLES={'traffic_state_pred':'gru','traj_loc_pred':'rnn','eta':'deeptte',
@@ -16,12 +16,15 @@ def main(argv=None):
     parser=argparse.ArgumentParser()
     parser.add_argument('--directory',required=True,type=Path)
     parser.add_argument('--task',choices=EXAMPLES,default='traffic_state_pred')
+    parser.add_argument('--model',choices=('GRU','CRANN'),help='Optional traffic model example')
     args=parser.parse_args(argv)
+    if args.model and args.task!='traffic_state_pred':
+        parser.error('--model currently selects traffic examples; choose --task traffic_state_pred')
     directory=args.directory.expanduser().resolve()
     directory.mkdir(parents=True,exist_ok=True)
-    fixture=atomic_fixture if args.task=='traffic_state_pred' else map_fixture if args.task=='map_matching' else task_fixture
+    fixture=(crann_fixture if args.model=='CRANN' else atomic_fixture) if args.task=='traffic_state_pred' else map_fixture if args.task=='map_matching' else task_fixture
     fixture(directory/'data')
-    name=EXAMPLES[args.task]
+    name='crann' if args.model=='CRANN' else EXAMPLES[args.task]
     config=json.loads((ROOT/'examples/configs'/f'{name}.json').read_text(encoding='utf-8'))
     path=directory/f'{name}.json'
     path.write_text(json.dumps(config,indent=2)+'\n',encoding='utf-8')

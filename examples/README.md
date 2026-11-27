@@ -29,6 +29,12 @@ HMMM uses `evaluate --config .../hmmm.json` without a checkpoint and has no trai
 or resume mode. The other tasks use the same train/evaluate/resume lifecycle above.
 
 The Python equivalent is `from libcity.pipeline.experiment import run_experiment`.
+For the CRANN spatial/temporal example, generate with
+`python tools/make_runtime_fixture.py --directory ../crann-demo --model CRANN`,
+then use `../crann-demo/crann.json` with the same train/evaluate/resume commands.
+CRANN explicitly declares long temporal history and spatial grid dimensions;
+only `known_future_columns` become future covariates. Other external observations
+are restricted to historical inputs.
 The complete supported-model inventory and migration details are in the
 [runtime guide](../docs/modernization/runtime/README_zh.md). Small examples prove
 execution and reproducibility, not real-city benchmark accuracy.

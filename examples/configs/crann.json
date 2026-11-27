@@ -1,0 +1,11 @@
+{
+  "data": {
+    "dataset": "Tiny", "data_dir": "data", "cache_dir": "cache", "cache": true,
+    "input_window": 4, "output_window": 2, "pad_training": false,
+    "sampling": {"name": "crann", "temporal_history": 6},
+    "features": {"load_external": true, "known_future_columns": ["holiday"]}
+  },
+  "model": {"name": "CRANN", "params": {"dim_x": 1, "dim_y": 3, "n_hidden_tem": 4, "n_ar": 2}},
+  "runtime": {"device": "cpu", "seed": 17, "output_dir": "runs"},
+  "training": {"epochs": 2, "batch_size": 8}
+}

@@ -25,6 +25,14 @@ def atomic_fixture(root, name='Tiny', steps=48, nodes=3,interval_minutes=5):
     return folder
 
 
+def crann_fixture(root, name='Tiny', steps=100):
+    folder = atomic_fixture(root, name=name, steps=steps)
+    times = pd.read_csv(folder/f'{name}.dyna')['time'].drop_duplicates().to_numpy()
+    pd.DataFrame(dict(ext_id=range(steps), time=times, temperature=np.arange(steps)*.01,
+                      weather=np.arange(steps)*.1, holiday=np.arange(steps)%2)).to_csv(folder/f'{name}.ext', index=False)
+    return folder
+
+
 def map_fixture(root,name='RoadTiny',with_time=False):
     folder=Path(root)/name
     folder.mkdir(parents=True,exist_ok=True)

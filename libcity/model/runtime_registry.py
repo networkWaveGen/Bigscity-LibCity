@@ -28,6 +28,7 @@ class ModelSpec:
 
 
 MODELS = {
+    'CRANN': ModelSpec('libcity.model.traffic_flow_prediction.runtime_crann:CRANN'),
     'FNN': ModelSpec('libcity.model.traffic_speed_prediction.runtime_standard:FNN'),
     'GWNET': ModelSpec('libcity.model.traffic_speed_prediction.runtime_standard:GWNET'),
     'STSSL': ModelSpec('libcity.model.traffic_flow_prediction.runtime_stssl:STSSL',
