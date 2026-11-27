@@ -83,6 +83,13 @@ reachability. Inference uses history and explicit known future features only.
 immutable buffer, so repeated inference starts from the same graph. Positional
 capacity is inferred from metadata unless `position_size` is explicitly supplied.
 
+`--model TimeMixer` creates a multi-scale example with explicit normalization.
+`channel_independence` and `use_norm` are JSON booleans. Average, max and learned
+convolution downsampling use their actual scale lengths; `dft_decomp` selects
+`top_k` temporal frequencies independently per sample/channel. Normalization
+statistics stay local to the forward call, and forecasts contain only target
+channels. Unused legacy time-embedding settings are no longer accepted.
+
 The complete supported-model inventory and migration details are in the
 [runtime guide](../docs/modernization/runtime/README_zh.md). Small examples prove
 execution and reproducibility, not real-city benchmark accuracy.

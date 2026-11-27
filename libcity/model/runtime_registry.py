@@ -29,6 +29,7 @@ class ModelSpec:
 
 
 MODELS = {
+    'TimeMixer': ModelSpec('libcity.model.traffic_flow_prediction.runtime_timemixer:TimeMixer'),
     'STTN': ModelSpec('libcity.model.traffic_speed_prediction.runtime_sttn:STTN'),
     'STNN': ModelSpec('libcity.model.traffic_flow_prediction.runtime_stnn:STNN'),
     'TGCLSTM': ModelSpec('libcity.model.traffic_speed_prediction.runtime_tgclstm:TGCLSTM',

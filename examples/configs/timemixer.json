@@ -1,0 +1,8 @@
+{
+  "data": {"dataset": "Tiny", "data_dir": "data", "cache_dir": "cache", "cache": true,
+    "input_window": 8, "output_window": 2, "pad_training": false},
+  "model": {"name": "TimeMixer", "params": {"d_model": 4, "d_ff": 8, "e_layers": 1,
+    "moving_avg": 3, "use_norm": true}},
+  "training": {"epochs": 2, "batch_size": 8},
+  "runtime": {"device": "cpu", "seed": 17, "output_dir": "runs"}
+}

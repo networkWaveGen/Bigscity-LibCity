@@ -21,6 +21,7 @@
 | commit13 | 26f4110 | fix: select native recurrent forward for unsupported CPU AMP backends |
 | commit14 | 547218b | feat: migrate graph sequence and nodewise temporal forecasts |
 | commit15 | 42ffc31 | feat: migrate latent and graph-filtered recurrent forecasts |
+| commit16 | e81011f | feat: migrate STTN with immutable graph transforms |
 
 ## commit1：修复基础交通缓存（670b325）
 
@@ -157,6 +158,14 @@ TGCLSTM 保留逐步图过滤、门控细胞与滑动窗口重编码，所有静
 新增标准 nn.Module，复用图卷积、空间/时间注意力与融合门，公共训练/评估/检查点负责生命周期。静态邻接图注册 buffer，可学习空间嵌入独立复制；每次归一化原图而非覆盖 self.adj_mx，修复重复 forward/评估导致图逐步变化和检查点未保存该状态的问题。单节点图给出有限零中心结果；临时时刻索引随输入设备创建，移除内部 device 属性；按时刻收集结果后一次 stack，替代空 Tensor 与循环 cat。位置容量从采样元信息推导并至少覆盖输入窗，可显式指定并校验。
 
 验证：新增 **5 项通过**，对照独立原首轮归一化公式、原网络预测与全部梯度；两层 dropout 训练、独立评估和中断续训参数/调度器/计数完全一致；单节点与三节点多目标、batch=1/float64、无标签和 RNG/输入隔离、多次调用全部 state_dict 不变、CPU AMP、位置容量错误提示。完整回归 **297 passed，0 failed，0 errors，0 skipped**。仓库外发布夹具及 3 条训练/评估/续训命令成功，独立评估一致并续训第三轮，见 [CLI 记录](sttn-cli-validation.json)。清单为 **41/100**，59 条 pending；本期实际模型仍有 **50 个**待迁移，最终全量验收尚未完成。
+
+## commit17：迁移 TimeMixer 并补齐全部预测分支
+
+新增标准 nn.Module，保留多尺度季节/趋势混合、逐尺度预测及残差融合，使用公共训练闭环。归一化上下文作为局部值显式传递，避免旧 mean/stdev 临时属性被其他前向覆盖；按明确节点轴恢复四维预测。输出只含目标维，修复独立通道模式把 feature_dim 错乘进 reshape；标量独立通道保留原来的直接预测头，非独立模式保留逐尺度输出头的偏置累积语义。
+
+修复 DFT 原先沿隐藏通道而非时间做 FFT、误清零第一个样本、固定使用 5 而忽略 top_k、全局频率阈值以及奇数长度逆变换的问题。现在按样本/隐藏通道选时间频率，排除 DC；AMP 下仅 FFT 用 FP32。avg/max/conv 分别使用真实尺度长度，支持卷积奇数长度、零降采样层；移动平均偶数核使用保长左右填充，过度池化提前报错。删除实际未使用的时间/位置嵌入、PDM 层及 label_len/freq/embed 配置，避免提供无效开关。
+
+验证：新增 **18 项通过**，包括 avg/max/conv 下 9 种原可用组合的旧前向/梯度对照、两种通道模式的 FFT+归一化+卷积训练/独立评估/dropout 精确续训、独立时间正弦频率与 top_k 参考、显式归一化上下文、奇数尺度/偶数核、多观测/多目标/batch=1/float64/无标签/无状态修改、CPU AMP FFT 与零尺度。完整回归 **315 passed，0 failed，0 errors，0 skipped**。仓库外发布夹具及 3 条生命周期命令成功，评估一致并续训第三轮，见 [CLI 记录](timemixer-cli-validation.json)。迁移表为 **42/100**，58 条 pending；本期实际模型仍有 **49 个**待迁移。
 
 ## 持续完成的清单
 

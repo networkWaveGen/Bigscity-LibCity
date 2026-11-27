@@ -1,5 +1,5 @@
 {
-  "scope": "Remaining-work commits 1-16; whole-library migration remains in progress",
+  "scope": "Remaining-work commits 1-17; whole-library migration remains in progress",
   "environment": {
     "python": "3.12.13",
     "torch": "2.15.0+cpu",
@@ -7,7 +7,7 @@
     "platform": "Windows-11-10.0.26200-SP0"
   },
   "full_tests": {
-    "tests": 297,
+    "tests": 315,
     "failures": 0,
     "errors": 0,
     "skipped": 0
@@ -296,6 +296,24 @@
     "test_raw_zero_mask_survives_normalization_rounding",
     "test_explicit_timestamp_boundaries_and_invalid_short_splits",
     "test_crann_all_four_fields_follow_disjoint_target_intervals",
+    "test_original_supported_branches_forecast_and_gradients[avg-False-False]",
+    "test_original_supported_branches_forecast_and_gradients[avg-True-False]",
+    "test_original_supported_branches_forecast_and_gradients[avg-True-True]",
+    "test_original_supported_branches_forecast_and_gradients[max-False-False]",
+    "test_original_supported_branches_forecast_and_gradients[max-True-False]",
+    "test_original_supported_branches_forecast_and_gradients[max-True-True]",
+    "test_original_supported_branches_forecast_and_gradients[conv-False-False]",
+    "test_original_supported_branches_forecast_and_gradients[conv-True-False]",
+    "test_original_supported_branches_forecast_and_gradients[conv-True-True]",
+    "test_full_lifecycle_and_exact_dropout_resume[False]",
+    "test_full_lifecycle_and_exact_dropout_resume[True]",
+    "test_multitarget_odd_scales_even_kernel_float64_and_no_mutation[False]",
+    "test_multitarget_odd_scales_even_kernel_float64_and_no_mutation[True]",
+    "test_frequency_decomposition_uses_time_axis_per_sample_and_requested_top_k",
+    "test_normalization_context_is_explicit_and_does_not_leak_between_calls",
+    "test_actual_cpu_amp_fft_training[False]",
+    "test_actual_cpu_amp_fft_training[True]",
+    "test_zero_scale_layers_and_excessive_pooling_guard",
     "test_cache_hit_avoids_atomic_reader_and_recomputes_windows_and_scaler",
     "test_source_changes_invalidate_cache[dyna]",
     "test_source_changes_invalidate_cache[rel]",
@@ -314,8 +332,8 @@
   ],
   "inventory": {
     "total": 100,
-    "migrated": 41,
-    "pending": 59
+    "migrated": 42,
+    "pending": 58
   },
   "history": [
     {
@@ -443,6 +461,20 @@
         "migrated": 40,
         "pending": 60
       }
+    },
+    {
+      "scope": "commits 1-16, through e81011f",
+      "full_tests": {
+        "tests": 297,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "inventory": {
+        "total": 100,
+        "migrated": 41,
+        "pending": 59
+      }
     }
   ],
   "current_cli": {
@@ -485,6 +517,11 @@
   },
   "sttn_cli": {
     "report": "sttn-cli-validation.json",
+    "commands": 3,
+    "fixture_commands": 1
+  },
+  "timemixer_cli": {
+    "report": "timemixer-cli-validation.json",
     "commands": 3,
     "fixture_commands": 1
   }

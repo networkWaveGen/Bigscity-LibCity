@@ -1,0 +1,89 @@
+{
+  "passed": true,
+  "fixture_commands": 1,
+  "commands": [
+    {
+      "arguments": [
+        "D:\\LibCity 2.0\\LibCity-modernization\\tools\\make_runtime_fixture.py",
+        "--directory",
+        "D:\\LibCity 2.0\\.runtime-tests\\timemixer-cli-zodbfkd0\\case",
+        "--model",
+        "TimeMixer"
+      ],
+      "exit_code": 0
+    },
+    {
+      "arguments": [
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "train",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\timemixer-cli-zodbfkd0\\case\\timemixer.json",
+        "--set",
+        "runtime.exp_id=train"
+      ],
+      "exit_code": 0
+    },
+    {
+      "arguments": [
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "evaluate",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\timemixer-cli-zodbfkd0\\case\\timemixer.json",
+        "--checkpoint",
+        "D:\\LibCity 2.0\\.runtime-tests\\timemixer-cli-zodbfkd0\\case\\runs\\train\\checkpoints\\best.pt",
+        "--set",
+        "runtime.exp_id=evaluate"
+      ],
+      "exit_code": 0
+    },
+    {
+      "arguments": [
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "train",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\timemixer-cli-zodbfkd0\\case\\timemixer.json",
+        "--resume",
+        "D:\\LibCity 2.0\\.runtime-tests\\timemixer-cli-zodbfkd0\\case\\runs\\train\\checkpoints\\last.pt",
+        "--set",
+        "runtime.exp_id=resumed",
+        "--set",
+        "training.epochs=3"
+      ],
+      "exit_code": 0
+    }
+  ],
+  "metrics": {
+    "train": {
+      "MAE@1": 1.8584283192952473,
+      "RMSE@1": 2.272967183223004,
+      "MAE@2": 1.7396531634860568,
+      "RMSE@2": 2.122586343226832,
+      "loss": 1.7990407943725586,
+      "best_validation": 1.3337557315826416
+    },
+    "evaluate": {
+      "MAE@1": 1.8584283192952473,
+      "RMSE@1": 2.272967183223004,
+      "MAE@2": 1.7396531634860568,
+      "RMSE@2": 2.122586343226832,
+      "loss": 1.7990407943725586
+    },
+    "resume": {
+      "MAE@1": 1.8440702226426866,
+      "RMSE@1": 2.255615615263362,
+      "MAE@2": 1.723618542706525,
+      "RMSE@2": 2.1039525970593744,
+      "loss": 1.7838444709777832,
+      "best_validation": 1.3278218507766724
+    }
+  },
+  "resume_epoch": 3,
+  "train_state": {
+    "stage": "train",
+    "epoch": 3,
+    "batches_seen": 9,
+    "optimizer_steps": 9,
+    "best_metric": 1.3278218507766724,
+    "task_state": {}
+  }
+}
