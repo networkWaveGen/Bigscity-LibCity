@@ -1,0 +1,68 @@
+{
+  "data": {
+    "dataset": null,
+    "data_dir": "raw_data",
+    "cache_dir": "cache",
+    "cache": false,
+    "split": {
+      "train": 0.6,
+      "val": 0.2
+    }
+  },
+  "model": {
+    "name": null,
+    "params": {}
+  },
+  "training": {
+    "epochs": 10,
+    "batch_size": 64,
+    "num_workers": 0,
+    "shuffle": true,
+    "optimizer": {
+      "name": "adam",
+      "lr": 0.001,
+      "weight_decay": 0.0
+    },
+    "scheduler": {
+      "name": "none",
+      "interval": "epoch"
+    },
+    "loss": {
+      "name": "mae",
+      "mask_value": null
+    },
+    "accumulation_steps": 1,
+    "clip_grad_norm": null,
+    "amp": false,
+    "amp_dtype": "bfloat16",
+    "monitor": "val_loss",
+    "direction": "min",
+    "early_stopping": {
+      "patience": 20,
+      "min_delta": 0.0
+    },
+    "strategy": {}
+  },
+  "evaluation": {
+    "batch_size": 64,
+    "num_workers": 0,
+    "metrics": [
+      "MAE",
+      "RMSE",
+      "MAPE"
+    ],
+    "mask_value": null,
+    "mode": "single",
+    "save_predictions": true
+  },
+  "runtime": {
+    "task": "eta",
+    "device": "auto",
+    "seed": 0,
+    "exp_id": null,
+    "output_dir": "runs",
+    "tensorboard": false,
+    "deterministic": true,
+    "num_threads": 1
+  }
+}

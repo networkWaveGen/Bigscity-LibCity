@@ -19,13 +19,19 @@ def tiny_config(root, name='run', **training):
 def make_context(config):
     config = load_config(config=config)
     device = initialize_runtime(config['runtime'])
-    bundle = prepare_traffic(config['data'], config['training'], config['evaluation'], config['runtime']['seed'])
     spec = model_spec(config['model']['name'])
-    model = resolve(spec.factory)(metadata=bundle.metadata, input_window=config['data']['input_window'],
-        output_window=config['data']['output_window'], **config['model']['params']).to(device)
+    adapter=resolve(spec.prepare_data) if spec.prepare_data else prepare_traffic
+    bundle = adapter(config['data'], config['training'], config['evaluation'], config['runtime']['seed'])
+    arguments=dict(metadata=bundle.metadata,**config['model']['params'])
+    if spec.task=='traffic_state_pred':
+        arguments.update(input_window=config['data']['input_window'],output_window=config['data']['output_window'])
+    model = resolve(spec.factory)(**arguments).to(device)
     directory = config['runtime']['output_dir']
     from pathlib import Path
     directory = Path(directory) / config['runtime']['exp_id']
     directory.mkdir(parents=True, exist_ok=True)
     updates = resolve(spec.updates_per_epoch)(config,bundle) if spec.updates_per_epoch else None
-    return build_context(model, bundle, config, device, directory, logging.getLogger('runtime-test'),steps_per_epoch=updates)
+    loss_fn=resolve(spec.loss)(bundle,config['training']['loss']) if spec.loss else None
+    evaluator=resolve(spec.evaluate_loader) if spec.evaluate_loader else None
+    return build_context(model, bundle, config, device, directory, logging.getLogger('runtime-test'),steps_per_epoch=updates,
+        loss_fn=loss_fn,evaluate_fn=evaluator)

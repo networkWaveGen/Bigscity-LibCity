@@ -1,0 +1,11 @@
+{
+  "model": {
+    "params": {
+      "loc_emb_size": 32,
+      "tim_emb_size": 8,
+      "hidden_size": 64,
+      "rnn_type": "GRU",
+      "dropout_p": 0.1
+    }
+  }
+}

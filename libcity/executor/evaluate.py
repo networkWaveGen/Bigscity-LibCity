@@ -38,6 +38,9 @@ class ForecastLoss:
         self.name, self.mask_value = config['name'], config.get('mask_value', 0.)
         self.scaler, self.output_dim = scaler, output_dim
 
+    def inputs(self,batch):
+        return model_inputs(batch,self.output_dim)
+
     def raw(self, prediction, target, raw_target=None):
         target = target[..., :self.output_dim]
         return self.scaler.inverse_transform(prediction.float()), (raw_target[..., :self.output_dim]
@@ -62,7 +65,7 @@ class ForecastLoss:
 
 def supervised_step(loss_fn):
     def step(model, batch, state):
-        return loss_fn(model(model_inputs(batch, loss_fn.output_dim)), batch['y'], batch.get('y_raw'))
+        return loss_fn(model(loss_fn.inputs(batch)), batch['y'], batch.get('y_raw'))
     return step
 
 

@@ -35,9 +35,10 @@ class TrainingContext:
     amp_scaler: object
     stopper: EarlyStopper
     loss_fn: object
+    evaluate_fn: object = None
 
 
-def build_context(model, bundle, config, device, directory, logger, *, steps_per_epoch=None):
+def build_context(model, bundle, config, device, directory, logger, *, steps_per_epoch=None, loss_fn=None, evaluate_fn=None):
     training = config['training']
     optimizer = build_optimizer(model, training['optimizer'])
     updates = steps_per_epoch or math.ceil(len(bundle.train) / training['accumulation_steps'])
@@ -46,10 +47,11 @@ def build_context(model, bundle, config, device, directory, logger, *, steps_per
         raise ValueError('CPU AMP requires bfloat16')
     scaler = torch.amp.GradScaler('cuda', enabled=training['amp'] and device.type == 'cuda')
     stopper = EarlyStopper(training['direction'], **training['early_stopping'])
-    loss = ForecastLoss(training['loss'], bundle.scaler, bundle.metadata.output_dim)
+    loss = loss_fn if loss_fn is not None else ForecastLoss(training['loss'], bundle.scaler, bundle.metadata.output_dim)
     tracker = MetricTracker(directory, logger, tensorboard=config['runtime']['tensorboard'])
     return TrainingContext(model, bundle, config, device, directory, tracker,
-        CheckpointManager(directory / 'checkpoints'), TrainState(), optimizer, schedule, scaler, stopper, loss)
+        CheckpointManager(directory / 'checkpoints'), TrainState(), optimizer, schedule, scaler, stopper, loss,
+        evaluate_fn)
 
 
 def autocast_context(context):
@@ -130,7 +132,8 @@ def train_loop(context, step_fn=None, *, until_epoch=None, epochs=None):
             if (index + 1) % accumulation == 0 or index + 1 == len(context.bundle.train):
                 optimizer_update(context, group_weight)
                 group_weight = 0
-        metrics = evaluate_loop(context.model, context.bundle.val, device=context.device,
+        evaluator = context.evaluate_fn or evaluate_loop
+        metrics = evaluator(context.model, context.bundle.val, device=context.device,
             loss_fn=context.loss_fn, evaluation=context.config['evaluation'], prefix='val_').metrics
         context.state.epoch = epoch + 1
         if complete_epoch(context, metrics, total / count if count else 0.):

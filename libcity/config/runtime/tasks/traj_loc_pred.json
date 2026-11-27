@@ -1,0 +1,73 @@
+{
+  "data": {
+    "dataset": null,
+    "data_dir": "raw_data",
+    "cache_dir": "cache",
+    "cache": false,
+    "split": {
+      "train": 0.6,
+      "val": 0.2
+    },
+    "session_gap_hours": 24.0,
+    "min_session_length": 2
+  },
+  "model": {
+    "name": null,
+    "params": {}
+  },
+  "training": {
+    "epochs": 10,
+    "batch_size": 64,
+    "num_workers": 0,
+    "shuffle": true,
+    "optimizer": {
+      "name": "adam",
+      "lr": 0.001,
+      "weight_decay": 0.0
+    },
+    "scheduler": {
+      "name": "none",
+      "interval": "epoch"
+    },
+    "loss": {
+      "name": "nll"
+    },
+    "accumulation_steps": 1,
+    "clip_grad_norm": null,
+    "amp": false,
+    "amp_dtype": "bfloat16",
+    "monitor": "val_Recall@1",
+    "direction": "max",
+    "early_stopping": {
+      "patience": 20,
+      "min_delta": 0.0
+    },
+    "strategy": {}
+  },
+  "evaluation": {
+    "batch_size": 64,
+    "num_workers": 0,
+    "save_predictions": true,
+    "topk": [
+      1,
+      5,
+      10
+    ],
+    "metrics": [
+      "Recall@1",
+      "Recall@5",
+      "Recall@10",
+      "MRR@10"
+    ]
+  },
+  "runtime": {
+    "task": "traj_loc_pred",
+    "device": "auto",
+    "seed": 0,
+    "exp_id": null,
+    "output_dir": "runs",
+    "tensorboard": false,
+    "deterministic": true,
+    "num_threads": 1
+  }
+}

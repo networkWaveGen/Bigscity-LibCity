@@ -113,66 +113,76 @@ def validate(config, preset):
     rates = [data['split'].get(name) for name in ('train', 'val')]
     if any(type(rate) not in (int, float) or not math.isfinite(rate) or not 0 < rate < 1 for rate in rates) or sum(rates) >= 1:
         raise ValueError('data.split requires positive train and val rates whose sum is below 1')
-    if ('train_end' in data['split']) != ('val_end' in data['split']):
-        raise ValueError('Explicit splitting requires train_end and val_end')
-    for key in ('train_end','val_end'):
-        if key in data['split'] and not isinstance(data['split'][key],str):
-            raise TypeError(f'data.split.{key} must be an ISO timestamp')
-    _known(data['features'], ('load_external', 'time_in_day', 'day_in_week', 'known_future_columns'), 'data.features')
-    _known(data['scaler'], ('name',), 'data.scaler')
-    _known(data['graph'], ('name', 'symmetric', 'self_loops', 'epsilon'), 'data.graph')
-    _known(data['sampling'], ('name','closeness','period','trend','interval_period','interval_trend'), 'data.sampling')
-    if data['sampling'].get('name') not in ('window','cpt'):
-        raise ValueError('Unknown data.sampling.name')
-    if data['sampling']['name']=='cpt':
-        for key in ('closeness','period','trend'):
-            _positive(data['sampling'].get(key,0),f'data.sampling.{key}',zero=True)
-        if not sum(data['sampling'].get(key,0) for key in ('closeness','period','trend')):
-            raise ValueError('CPT sampling requires at least one history segment')
-        for key in ('interval_period','interval_trend'):
-            _positive(data['sampling'].get(key,1),f'data.sampling.{key}')
-    if data['graph'].get('name') not in ('binary', 'weighted', 'distance'):
-        raise ValueError('Unknown data.graph.name')
-    for key in ('symmetric', 'self_loops'):
-        if type(data['graph'].get(key, False)) is not bool:
-            raise TypeError(f'data.graph.{key} must be boolean')
-    if data['scaler'].get('name') not in ('none', 'normal', 'standard', 'minmax01', 'minmax11', 'log'):
-        raise ValueError('Unknown data.scaler.name')
-    for key in ('input_window', 'output_window'):
-        _positive(data[key], f'data.{key}')
+    if spec.task=='traffic_state_pred':
+        if ('train_end' in data['split']) != ('val_end' in data['split']):
+            raise ValueError('Explicit splitting requires train_end and val_end')
+        for key in ('train_end','val_end'):
+            if key in data['split'] and not isinstance(data['split'][key],str):
+                raise TypeError(f'data.split.{key} must be an ISO timestamp')
+        _known(data['features'], ('load_external', 'time_in_day', 'day_in_week', 'known_future_columns'), 'data.features')
+        _known(data['scaler'], ('name',), 'data.scaler')
+        _known(data['graph'], ('name', 'symmetric', 'self_loops', 'epsilon'), 'data.graph')
+        _known(data['sampling'], ('name','closeness','period','trend','interval_period','interval_trend'), 'data.sampling')
+        if data['sampling'].get('name') not in ('window','cpt'):
+            raise ValueError('Unknown data.sampling.name')
+        if data['sampling']['name']=='cpt':
+            for key in ('closeness','period','trend'):
+                _positive(data['sampling'].get(key,0),f'data.sampling.{key}',zero=True)
+            if not sum(data['sampling'].get(key,0) for key in ('closeness','period','trend')):
+                raise ValueError('CPT sampling requires at least one history segment')
+            for key in ('interval_period','interval_trend'):
+                _positive(data['sampling'].get(key,1),f'data.sampling.{key}')
+        if data['graph'].get('name') not in ('binary', 'weighted', 'distance'):
+            raise ValueError('Unknown data.graph.name')
+        for key in ('symmetric', 'self_loops'):
+            if type(data['graph'].get(key, False)) is not bool:
+                raise TypeError(f'data.graph.{key} must be boolean')
+        if data['scaler'].get('name') not in ('none', 'normal', 'standard', 'minmax01', 'minmax11', 'log'):
+            raise ValueError('Unknown data.scaler.name')
+        for key in ('input_window', 'output_window'):
+            _positive(data[key], f'data.{key}')
     for block, keys in ((training, ('epochs', 'batch_size', 'accumulation_steps')), (evaluation, ('batch_size',))):
         for key in keys:
             _positive(block[key], key)
     for block in (training, evaluation):
         _positive(block['num_workers'], 'num_workers', zero=True)
-    for value, name in [(data['cache'], 'data.cache'), (data['pad_training'], 'data.pad_training'),
-                        (training['shuffle'], 'training.shuffle'), (training['amp'], 'training.amp'),
-                        (evaluation['save_predictions'], 'evaluation.save_predictions')]:
+    boolean_values = [(data['cache'],'data.cache'), (training['shuffle'],'training.shuffle'),
+                      (training['amp'],'training.amp'), (evaluation['save_predictions'],'evaluation.save_predictions')]
+    if spec.task=='traffic_state_pred':
+        boolean_values.append((data['pad_training'],'data.pad_training'))
+        for name,value in data['features'].items():
+            if name=='known_future_columns':
+                if not isinstance(value,list) or any(not isinstance(item,str) for item in value) or len(set(value))!=len(value):
+                    raise TypeError('known_future_columns must be a list of unique column names')
+            else:
+                boolean_values.append((value,'data.features.'+name))
+    for value,name in boolean_values:
         if type(value) is not bool:
             raise TypeError(f'{name} must be a JSON boolean')
-    for name, value in data['features'].items():
-        if name=='known_future_columns':
-            if not isinstance(value,list) or any(not isinstance(item,str) for item in value) or len(set(value))!=len(value):
-                raise TypeError('known_future_columns must be a list of unique column names')
-            continue
-        if type(value) is not bool:
-            raise TypeError(f'data.features.{name} must be a JSON boolean')
     if training['direction'] not in ('min', 'max'):
         raise ValueError('training.direction must be min or max')
     if training['amp_dtype'] not in ('float16', 'bfloat16'):
         raise ValueError('training.amp_dtype must be float16 or bfloat16')
-    if evaluation['mode'] not in ('single', 'average'):
+    if spec.task=='traffic_state_pred' and evaluation['mode'] not in ('single', 'average'):
         raise ValueError('evaluation.mode must be single or average')
     if not isinstance(evaluation['metrics'], list) or not evaluation['metrics']:
         raise ValueError('evaluation.metrics must be a nonempty list')
     allowed_metrics = {'MAE', 'MSE', 'RMSE', 'MAPE', 'R2', 'EVAR'}
+    if spec.task=='traj_loc_pred':
+        allowed_metrics = {f'{name}@{k}' for name in ('Recall','MRR','NDCG') for k in evaluation['topk']}
+        if not evaluation['topk'] or any(type(k) is not int or k<1 for k in evaluation['topk']):
+            raise ValueError('evaluation.topk requires positive integers')
+    elif spec.task=='road_representation':
+        allowed_metrics={'loss','accuracy'}
+    elif spec.task=='eta':
+        allowed_metrics={'MAE','MSE','RMSE','MAPE'}
     if any(not isinstance(name, str) or name.removeprefix('masked_') not in allowed_metrics for name in evaluation['metrics']):
         raise ValueError('Unknown evaluation metric')
     for key, names in {
         'optimizer': ('name', 'lr', 'weight_decay', 'betas', 'eps', 'momentum', 'alpha', 'groups'),
         'scheduler': ('name', 'interval', 'step_size', 'gamma', 'milestones', 'T_max', 'eta_min', 'patience',
                       'factor', 'monitor', 'mode', 'max_lr', 'total_steps', 'pct_start', 'warmup_steps'),
-        'loss': ('name', 'mask_value'), 'early_stopping': ('patience', 'min_delta')}.items():
+        'loss': ('name', 'mask_value','alpha','eps'), 'early_stopping': ('patience', 'min_delta')}.items():
         _known(training[key], names, f'training.{key}')
     if training['optimizer'].get('name') not in ('adam', 'adamw', 'sgd', 'rmsprop', 'adagrad'):
         raise ValueError('Unknown optimizer name')
@@ -205,7 +215,9 @@ def validate(config, preset):
         raise ValueError('plateau scheduler requires interval=metric')
     if scheduler['name'] in ('onecycle', 'warmup_cosine') and interval != 'step':
         raise ValueError('onecycle/warmup_cosine scheduler requires interval=step')
-    if training['loss'].get('name') not in ('mae', 'mse', 'masked_mae', 'masked_mse'):
+    losses={'traj_loc_pred':('nll',),'road_representation':('negative_sampling',),'eta':('mae','mse')}.get(
+        spec.task,('mae','mse','masked_mae','masked_mse'))
+    if training['loss'].get('name') not in losses:
         raise ValueError('Unknown training.loss.name')
     _positive(training['early_stopping']['patience'], 'early_stopping.patience', zero=True)
     _number(training['early_stopping']['min_delta'], 'early_stopping.min_delta')
@@ -218,6 +230,22 @@ def validate(config, preset):
         if value is not None and (type(value) not in (int, float) or not math.isfinite(value)):
             raise ValueError('mask_value must be a finite number or null')
     _object(training['strategy'], 'training.strategy')
+    if spec.task=='traj_loc_pred':
+        _number(data['session_gap_hours'],'session_gap_hours',strict=True)
+        _positive(data['min_session_length'],'min_session_length')
+        if training['loss']['name']!='nll':
+            raise ValueError('Trajectory training requires loss.name=nll')
+    if spec.task=='road_representation':
+        _positive(data['negative_samples'],'negative_samples',zero=True)
+        if training['loss']['name']!='negative_sampling':
+            raise ValueError('LINE training requires loss.name=negative_sampling')
+    if spec.task=='eta':
+        if training['loss']['name'] not in ('mae','mse'):
+            raise ValueError('ETA training requires mae/mse loss')
+        if not 0<=training['loss'].get('alpha',.3)<=1 or training['loss'].get('eps',10.)<=0:
+            raise ValueError('ETA requires alpha in [0,1] and eps>0')
+    if spec.task!='traffic_state_pred' and data['cache']:
+        raise ValueError('This task adapter currently requires data.cache=false')
 
 
 def _resource(group, name):

@@ -1,0 +1,7 @@
+{
+  "model": {
+    "params": {
+      "hidden_size": 128
+    }
+  }
+}

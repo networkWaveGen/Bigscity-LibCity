@@ -1,0 +1,8 @@
+{
+  "model": {
+    "params": {
+      "embedding_dim": 32,
+      "order": "second"
+    }
+  }
+}

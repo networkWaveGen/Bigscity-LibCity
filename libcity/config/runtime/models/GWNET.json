@@ -1,0 +1,14 @@
+{
+  "model": {
+    "params": {
+      "nhid": 32,
+      "blocks": 4,
+      "layers": 2,
+      "kernel_size": 2,
+      "dropout": 0.3,
+      "gcn_bool": true,
+      "addaptadj": true,
+      "aptonly": true
+    }
+  }
+}

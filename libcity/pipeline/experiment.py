@@ -101,7 +101,9 @@ def run_experiment(mode, config_file=None, *, config=None, overrides=None, check
     logger = run_logger(directory)
     context = None
     try:
-        if cfg['runtime']['task']=='traffic_state_pred':
+        if spec.prepare_data:
+            adapter=resolve(spec.prepare_data)
+        elif cfg['runtime']['task']=='traffic_state_pred':
             adapter=prepare_traffic
         elif cfg['runtime']['task']=='map_matching':
             from libcity.data.map_matching_bundle import prepare_map_matching
@@ -110,7 +112,7 @@ def run_experiment(mode, config_file=None, *, config=None, overrides=None, check
             raise ValueError('Task adapter is not migrated yet')
         bundle = adapter(cfg['data'], cfg['training'], cfg['evaluation'], cfg['runtime']['seed'], logger=logger)
         arguments=dict(metadata=bundle.metadata,**cfg['model']['params'])
-        if spec.kind=='neural':
+        if spec.task=='traffic_state_pred':
             arguments.update(input_window=cfg['data']['input_window'],output_window=cfg['data']['output_window'])
         model = resolve(spec.factory)(**arguments)
         if spec.kind=='neural':
@@ -128,7 +130,10 @@ def run_experiment(mode, config_file=None, *, config=None, overrides=None, check
         (directory / 'runtime_info.json').write_text(json.dumps(info, indent=2)+'\n', encoding='utf-8')
         if mode == 'train':
             updates = resolve(spec.updates_per_epoch)(cfg,bundle) if spec.updates_per_epoch else None
-            context = build_context(model, bundle, cfg, device, directory, logger,steps_per_epoch=updates)
+            loss_fn=resolve(spec.loss)(bundle,cfg['training']['loss']) if spec.loss else None
+            evaluator=resolve(spec.evaluate_loader) if spec.evaluate_loader else None
+            context = build_context(model, bundle, cfg, device, directory, logger,steps_per_epoch=updates,
+                loss_fn=loss_fn,evaluate_fn=evaluator)
             if resume is not None:
                 prepare = resolve(spec.prepare_resume) if spec.prepare_resume else None
                 context.checkpoints.load_last(resume, context,prepare=prepare)
@@ -144,8 +149,10 @@ def run_experiment(mode, config_file=None, *, config=None, overrides=None, check
         if spec.evaluate:
             result=resolve(spec.evaluate)(model,bundle,cfg['evaluation'],directory=directory/'eval',logger=logger)
         else:
-            result = evaluate_loop(model, bundle.test, device=device,
-                loss_fn=ForecastLoss(cfg['training']['loss'], bundle.scaler, bundle.metadata.output_dim),
+            evaluator=resolve(spec.evaluate_loader) if spec.evaluate_loader else evaluate_loop
+            loss_fn=resolve(spec.loss)(bundle,cfg['training']['loss']) if spec.loss else ForecastLoss(cfg['training']['loss'],bundle.scaler,bundle.metadata.output_dim)
+            result = evaluator(model, bundle.test, device=device,
+                loss_fn=loss_fn,
                 evaluation=cfg['evaluation'], directory=directory / 'eval')
         result.artifacts.update(resolved_config=directory / 'resolved_config.json', runtime_info=directory / 'runtime_info.json',
                                 run_log=directory / 'run.log')

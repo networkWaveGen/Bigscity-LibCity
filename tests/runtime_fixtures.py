@@ -46,3 +46,23 @@ def map_fixture(root,name='RoadTiny',with_time=False):
     pd.DataFrame(rows).to_csv(folder/f'{name}.dyna',index=False)
     pd.DataFrame(truth).to_csv(folder/f'{name}_truth.dyna',index=False)
     return folder
+
+
+def task_fixture(root,name='TaskTiny'):
+    folder=Path(root)/name
+    folder.mkdir(parents=True,exist_ok=True)
+    (folder/'config.json').write_text(json.dumps(dict(geo_file=name,rel_file=name,dyna_file=name,usr_file=name)),encoding='utf-8')
+    pd.DataFrame(dict(geo_id=range(10,18),type=['Point']*8,coordinates=['[116,39]']*8)).to_csv(folder/f'{name}.geo',index=False)
+    pairs=[(10+origin,10+(origin+step)%8) for origin in range(8) for step in (1,2)]
+    pd.DataFrame(dict(rel_id=range(len(pairs)),type='geo',origin_id=[a for a,b in pairs],destination_id=[b for a,b in pairs])).to_csv(folder/f'{name}.rel',index=False)
+    pd.DataFrame({'usr_id':[100,200]}).to_csv(folder/f'{name}.usr',index=False)
+    rows=[]
+    for trip in range(20):
+        start=pd.Timestamp('2024-01-01',tz='UTC')+pd.Timedelta(days=trip)
+        for point in range(3+trip%4):
+            rows.append(dict(dyna_id=len(rows),type='trajectory',entity_id=100+100*(trip%2),traj_id=trip,
+                time=(start+pd.Timedelta(seconds=point*(60+trip))).strftime('%Y-%m-%dT%H:%M:%SZ'),
+                location=10+(trip+point)%8,coordinates=json.dumps([116+point*.001,39+trip*.0001]),
+                current_dis=point*.1,current_state=point%2))
+    pd.DataFrame(rows).to_csv(folder/f'{name}.dyna',index=False)
+    return folder

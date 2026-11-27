@@ -19,11 +19,25 @@ class ModelSpec:
     prepare_resume: str | None = None
     updates_per_epoch: str | None = None
     evaluate: str | None = None
+    prepare_data: str | None = None
+    loss: str | None = None
+    evaluate_loader: str | None = None
     kind: str = 'neural'
     device_types: tuple = ('cpu','cuda','mps')
 
 
 MODELS = {
+    'FNN': ModelSpec('libcity.model.traffic_speed_prediction.runtime_standard:FNN'),
+    'GWNET': ModelSpec('libcity.model.traffic_speed_prediction.runtime_standard:GWNET'),
+    'RNN': ModelSpec('libcity.model.trajectory_loc_prediction.runtime_rnn:RNN',task='traj_loc_pred',
+        prepare_data='libcity.data.task_bundles:prepare_trajectory',loss='libcity.executor.task_evaluation:RankingLoss',
+        evaluate_loader='libcity.executor.task_evaluation:evaluate_task'),
+    'DeepTTE': ModelSpec('libcity.model.eta.runtime_deeptte:DeepTTE',task='eta',
+        prepare_data='libcity.data.task_bundles:prepare_eta',loss='libcity.executor.task_evaluation:ETALoss',
+        step='libcity.executor.task_evaluation:eta_step',evaluate_loader='libcity.executor.task_evaluation:evaluate_task'),
+    'LINE': ModelSpec('libcity.model.road_representation.runtime_line:LINE',task='road_representation',
+        prepare_data='libcity.data.task_bundles:prepare_road',loss='libcity.executor.task_evaluation:EdgeLoss',
+        evaluate_loader='libcity.executor.task_evaluation:evaluate_task'),
     'GRU': ModelSpec('libcity.model.traffic_speed_prediction.runtime_rnn:GRU'),
     'STGCN': ModelSpec('libcity.model.traffic_speed_prediction.runtime_stgcn:STGCN'),
     'DCRNN': ModelSpec('libcity.model.traffic_speed_prediction.runtime_dcrnn:DCRNN',

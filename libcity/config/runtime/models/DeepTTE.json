@@ -1,0 +1,24 @@
+{
+  "model": {
+    "params": {
+      "uid_emb_size": 16,
+      "weekid_emb_size": 3,
+      "timid_emb_size": 8,
+      "kernel_size": 3,
+      "num_filter": 32,
+      "hidden_size": 64,
+      "num_final_fcs": 2,
+      "final_fc_size": 64,
+      "rnn_type": "LSTM",
+      "pooling_method": "attention"
+    }
+  },
+  "training": {
+    "loss": {
+      "name": "mae",
+      "mask_value": null,
+      "alpha": 0.3,
+      "eps": 10.0
+    }
+  }
+}
