@@ -9,6 +9,7 @@ import torch
 from libcity.executor.components import EarlyStopper, MetricTracker, build_optimizer, build_scheduler
 from libcity.executor.evaluate import ForecastLoss, evaluate_loop, move_batch, supervised_step
 from libcity.utils.runtime_checkpoint import CheckpointManager
+from libcity.data.sources import atomic_sources
 
 
 @dataclass
@@ -39,6 +40,7 @@ class TrainingContext:
     evaluate_fn: object = None
     native_cpu_amp_backward: bool = False
     native_cpu_amp_forward: bool = False
+    atomic_sources: list = field(default_factory=list)
 
 
 @lru_cache(maxsize=1)
@@ -61,6 +63,7 @@ def cpu_amp_backward_supported():
 
 def build_context(model, bundle, config, device, directory, logger, *, steps_per_epoch=None, loss_fn=None, evaluate_fn=None):
     training = config['training']
+    sources = atomic_sources(config['data'])
     optimizer = build_optimizer(model, training['optimizer'])
     updates = steps_per_epoch or math.ceil(len(bundle.train) / training['accumulation_steps'])
     schedule = build_scheduler(optimizer, training['scheduler'], epochs=training['epochs'], steps_per_epoch=updates)
@@ -79,7 +82,7 @@ def build_context(model, bundle, config, device, directory, logger, *, steps_per
         logger.info('CPU AMP: recurrent forward must also use native kernels to avoid a oneDNN backward workspace')
     return TrainingContext(model, bundle, config, device, directory, tracker,
         CheckpointManager(directory / 'checkpoints'), TrainState(), optimizer, schedule, scaler, stopper, loss,
-        evaluate_fn, native_cpu_backward, native_cpu_forward)
+        evaluate_fn, native_cpu_backward, native_cpu_forward, sources)
 
 
 @contextmanager

@@ -90,13 +90,14 @@ class CheckpointManager:
         return self._save('best.pt', self.best_state)
 
     def save_last(self, context):
-        payload = dict(format_version=2, model=copy_state_to_cpu(context.model.state_dict()),
+        payload = dict(format_version=3, model=copy_state_to_cpu(context.model.state_dict()),
             optimizer=copy_state_to_cpu(context.optimizer.state_dict()), scheduler=context.schedule.state_dict(),
             amp_scaler=context.amp_scaler.state_dict(), train_state=asdict(context.state),
             early_stopper=context.stopper.state_dict(), best_model=self.best_state, rng=rng_state(),
             loader_rng=context.bundle.generator.get_state() if context.bundle.generator is not None else None,
             model_name=context.config['model']['name'], model_params=context.config['model']['params'],
-            resume_settings=resume_settings(context.config),data_state=data_state(context.bundle))
+            resume_settings=resume_settings(context.config),data_state=data_state(context.bundle),
+            atomic_sources=context.atomic_sources)
         return self._save('last.pt', payload)
 
     def load_last(self, path, context, prepare=None):
@@ -106,12 +107,16 @@ class CheckpointManager:
                     'resume_settings','data_state'}
         if not isinstance(payload, dict) or not required <= payload.keys():
             raise ValueError('Resume requires a complete last.pt; best.pt contains inference weights only')
+        if payload.get('format_version')!=3 or 'atomic_sources' not in payload:
+            raise ValueError('Resume requires last.pt format 3 with source versions; use best.pt for evaluation or start a fresh run')
         if payload['model_name'] != context.config['model']['name'] or payload['model_params'] != context.config['model']['params']:
             raise ValueError('Resume model configuration does not match checkpoint')
         if payload['resume_settings'] != resume_settings(context.config):
             raise ValueError('Resume data/training configuration does not match checkpoint')
-        if payload.get('format_version')!=2 or payload.get('data_state')!=data_state(context.bundle):
+        if payload.get('data_state')!=data_state(context.bundle):
             raise ValueError('Resume dataset metadata/normalization state does not match checkpoint')
+        if payload['atomic_sources']!=context.atomic_sources:
+            raise ValueError('Resume atomic source files changed (names, sizes or modification times); start a fresh run for modified data')
         if prepare is not None:
             prepare(context,payload['train_state'])
         context.model.load_state_dict(payload['model'])

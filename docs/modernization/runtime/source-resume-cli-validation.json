@@ -1,0 +1,100 @@
+{
+  "passed": true,
+  "fixture_commands": 1,
+  "commands": [
+    {
+      "arguments": [
+        "D:\\LibCity 2.0\\LibCity-modernization\\tools\\make_runtime_fixture.py",
+        "--directory",
+        "D:\\LibCity 2.0\\.runtime-tests\\source-resume-cli-89nt4_u9\\case",
+        "--model",
+        "GRU"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0
+    },
+    {
+      "arguments": [
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "train",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\source-resume-cli-89nt4_u9\\case\\gru.json",
+        "--set",
+        "runtime.exp_id=train",
+        "--set",
+        "data.scaler.name=none"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0
+    },
+    {
+      "arguments": [
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "evaluate",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\source-resume-cli-89nt4_u9\\case\\gru.json",
+        "--checkpoint",
+        "D:\\LibCity 2.0\\.runtime-tests\\source-resume-cli-89nt4_u9\\case\\runs\\train\\checkpoints\\best.pt",
+        "--set",
+        "runtime.exp_id=evaluate",
+        "--set",
+        "data.scaler.name=none"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0
+    },
+    {
+      "arguments": [
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "train",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\source-resume-cli-89nt4_u9\\case\\gru.json",
+        "--resume",
+        "D:\\LibCity 2.0\\.runtime-tests\\source-resume-cli-89nt4_u9\\case\\runs\\train\\checkpoints\\last.pt",
+        "--set",
+        "runtime.exp_id=resumed",
+        "--set",
+        "training.epochs=3",
+        "--set",
+        "data.scaler.name=none"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0
+    },
+    {
+      "arguments": [
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "train",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\source-resume-cli-89nt4_u9\\case\\gru.json",
+        "--resume",
+        "D:\\LibCity 2.0\\.runtime-tests\\source-resume-cli-89nt4_u9\\case\\runs\\resumed\\checkpoints\\last.pt",
+        "--set",
+        "runtime.exp_id=rejected",
+        "--set",
+        "training.epochs=4",
+        "--set",
+        "data.scaler.name=none"
+      ],
+      "exit_code": 1,
+      "expected_exit_code": 1
+    }
+  ],
+  "format_version": 3,
+  "resume_epoch": 3,
+  "evaluated_metrics": {
+    "MAE@1": 9.71985262853128,
+    "RMSE@1": 9.761672147892954,
+    "MAE@2": 9.724814901749292,
+    "RMSE@2": 9.76177914157272,
+    "loss": 9.722333908081055
+  },
+  "modified_data_rejected": true,
+  "checkpoint_written_for_rejected_run": false,
+  "source_fields": [
+    "name",
+    "size",
+    "mtime_ns"
+  ],
+  "content_hashing": false
+}

@@ -1,5 +1,5 @@
 {
-  "scope": "Remaining-work commits 1-18; whole-library migration remains in progress",
+  "scope": "Remaining-work commits 1-19; whole-library migration remains in progress",
   "environment": {
     "python": "3.12.13",
     "torch": "2.15.0+cpu",
@@ -7,7 +7,7 @@
     "platform": "Windows-11-10.0.26200-SP0"
   },
   "full_tests": {
-    "tests": 324,
+    "tests": 331,
     "failures": 0,
     "errors": 0,
     "skipped": 0
@@ -262,6 +262,13 @@
     "test_sparse_road_metadata_and_model_do_not_expand_dense_adjacency[ChebConv]",
     "test_sparse_road_metadata_and_model_do_not_expand_dense_adjacency[GAT]",
     "test_automatic_device_selection_respects_model_capabilities",
+    "test_changed_values_or_graph_are_rejected_before_any_update[dyna]",
+    "test_changed_values_or_graph_are_rejected_before_any_update[rel]",
+    "test_mtime_change_is_conservative_even_when_file_size_is_unchanged",
+    "test_preserved_sources_can_move_and_cache_changes_do_not_break_exact_resume",
+    "test_nested_and_external_references_are_recorded_without_generated_outputs",
+    "test_old_full_format_is_rejected_and_pure_weights_still_evaluate",
+    "test_checkpoint_keeps_the_source_version_from_context_creation",
     "test_graph_time_convolution_against_independent_per_axis_formula[1]",
     "test_graph_time_convolution_against_independent_per_axis_formula[3]",
     "test_attention_keeps_batch_and_node_axes_against_independent_formula[time]",
@@ -498,6 +505,20 @@
         "migrated": 42,
         "pending": 58
       }
+    },
+    {
+      "scope": "commits 1-18, through 5244e90",
+      "full_tests": {
+        "tests": 324,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "inventory": {
+        "total": 100,
+        "migrated": 43,
+        "pending": 57
+      }
     }
   ],
   "current_cli": {
@@ -552,5 +573,13 @@
     "report": "stg2seq-cli-validation.json",
     "commands": 3,
     "fixture_commands": 1
+  },
+  "source_resume_cli": {
+    "report": "source-resume-cli-validation.json",
+    "commands": 4,
+    "fixture_commands": 1,
+    "format_version": 3,
+    "modified_data_rejected": true,
+    "content_hashing": false
   }
 }

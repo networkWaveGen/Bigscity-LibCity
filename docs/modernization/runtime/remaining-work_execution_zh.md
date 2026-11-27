@@ -23,6 +23,7 @@
 | commit15 | 42ffc31 | feat: migrate latent and graph-filtered recurrent forecasts |
 | commit16 | e81011f | feat: migrate STTN with immutable graph transforms |
 | commit17 | e2c728e | feat: migrate TimeMixer with explicit scales and temporal decomposition |
+| commit18 | 5244e90 | feat: migrate STG2Seq with explicit graph and attention axes |
 
 ## commit1：修复基础交通缓存（670b325）
 
@@ -175,6 +176,16 @@ TGCLSTM 保留逐步图过滤、门控细胞与滑动窗口重编码，所有静
 原 ConvST 的时窗 reshape 和卷积输出 reshape 会混排时间、节点、通道；两种 Attention 的 reshape 还混排 batch 与时间/通道。现在用明确轴排列和收缩公式，去除这些混排。独立逐轴公式用来验证正确数学运算，不把新预测与旧错误排列声称为数值等价。时窗限定为 1<=window<=input_window；可没有未来协变量，未知未来观测不会从标签补入。训练 MSE/有限零值目标与公共评估口径分别明确保留。
 
 验证：新增 **9 项通过**。独立逐时/逐节点/逐通道图卷积与注意力的数值和全部梯度对照，覆盖 1/3 阶；完整深度训练、独立评估与 teacher/BatchNorm 参数和计数精确恢复；三目标、多观测、单节点、batch=1/float64/无标签/输入不变、显式 teacher 与未来特征、CPU AMP。完整回归 **324 passed，0 failed，0 errors，0 skipped**。仓库外发布夹具及 3 条生命周期命令成功，独立评估一致且续训第三轮，见 [CLI 记录](stg2seq-cli-validation.json)。清单为 **43/100**，57 条 pending，本期实际模型仍有 **48 个**待迁移。
+
+## commit19：拒绝使用修改后的原始数据续训
+
+新问题：实际构造 GRU 一轮检查点后，将 .dyna 的 speed 全部增加 1000，旧入口仍可从该检查点继续第二轮，并保留原数据的 best_validation。此前只校验元信息/布局/归一化状态，未记录数据或图来源版本；使用 none 归一化时尤其容易漏检。
+
+修复：训练上下文建立时记录原子输入文件和元信息显式文件引用的名字、大小、纳秒修改时间；包含嵌套与外部引用，不读取内容做哈希。该快照随上下文保留，last.pt 保存快照而不是每轮重新读取文件版本。续训在载入模型/优化器和执行更新之前核对，拒绝数值、图或来源集合发生版本变化的情况。数据目录内使用相对名字，copy2 保留元信息后可移动数据目录，缓存/运行路径仍可改变。
+
+完整检查点格式升至 **3**；旧完整格式缺少来源信息，明确拒绝续训，纯 best.pt 评估保持有效。该检查是文件元信息版本检查，不是内容相等证明；单独修改 mtime 也会保守拒绝，刻意同时保持大小/mtime 的内容变化无法据此识别，未引入文件内容哈希。
+
+验证：新增 **7 项通过**，包括真实数值和 STGCN 静态图变化后在任何更新前拒绝、mtime 单独变化、保留文件版本后迁移目录并精确恢复下一轮、嵌套/外部引用和缓存文件排除、旧格式拒绝且纯权重评估有效、训练过程中源文件改变后检查点仍记录原上下文快照。与训练引擎/定制训练/STSSL 合计 37 项通过；完整回归 **331 passed，0 failed，0 errors，0 skipped**。仓库外实际发布夹具、训练/评估/续训及修改数据后拒绝续训共 5 条命令按预期完成，见 [来源检查 CLI 记录](source-resume-cli-validation.json)。迁移范围仍为 **43/100**，本期 **48 个**实际模型与最终全量验收继续实施。
 
 ## 持续完成的清单
 
