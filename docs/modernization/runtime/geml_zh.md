@@ -1,6 +1,6 @@
 # GEML 原生 OD 迁移
 
-GEML 已接入统一 `run_model.py train/evaluate`、Python API 和公共检查点生命周期；CSTN 仍待迁移。本批使用前一批交付的 [OD 数据组件](od-data_zh.md)，不恢复旧 GEMLExecutor。
+GEML 已接入统一 `run_model.py train/evaluate`、Python API 和公共检查点生命周期。本批使用前一批交付的 [OD 数据组件](od-data_zh.md)，不恢复旧 GEMLExecutor；CSTN 的后续交付见 [说明](cstn_zh.md)。
 
 ## 原问题与处理
 

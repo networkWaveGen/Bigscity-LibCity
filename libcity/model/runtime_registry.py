@@ -29,6 +29,8 @@ class ModelSpec:
 
 
 MODELS = {
+    'CSTN': ModelSpec('libcity.model.traffic_od_prediction.runtime_cstn:CSTN',protocol='od_window',
+        prepare_data='libcity.data.od_bundle:prepare_od'),
     'GEML': ModelSpec('libcity.model.traffic_od_prediction.runtime_geml:GEML',protocol='od_window',
         prepare_data='libcity.data.od_bundle:prepare_od',loss='libcity.executor.geml_step:GEMLLoss',
         step='libcity.executor.geml_step:auxiliary_step'),

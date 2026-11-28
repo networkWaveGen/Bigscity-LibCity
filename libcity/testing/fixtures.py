@@ -104,6 +104,10 @@ def geml_fixture(root):
     return od_fixture(root,features=1,outputs=1)
 
 
+def cstn_fixture(root):
+    return od_fixture(root,features=1,outputs=1,grid_shape=(2,2))
+
+
 def dmstgcn_fixture(root,name='Tiny'):
     return periodic_fixture(root,name=name,steps=60,nodes=4,features=2,outputs=1)
 

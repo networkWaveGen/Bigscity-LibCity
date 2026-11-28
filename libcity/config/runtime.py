@@ -101,6 +101,9 @@ def validate(config, preset):
     if model['name']=='GEML':
         for key in ('embed_dim','p_interval'):
             _positive(model['params'][key],'GEML '+key)
+    if model['name']=='CSTN':
+        for key in ('n_layers','c_lt'):
+            _positive(model['params'][key],'CSTN '+key)
     if spec.kind=='external':
         _validate_external(data,training,evaluation,runtime,model['name'])
         return
@@ -179,10 +182,12 @@ def validate(config, preset):
             raise ValueError('Unknown data.sampling.name')
         if (spec.protocol=='od_window') != (data['sampling']['name']=='od_window'):
             raise ValueError('od_window sampling requires a registered OD model and vice versa')
-        if spec.protocol=='od_window' and data['graph']['name'] not in ('weighted','binary'):
+        if spec.protocol=='od_window' and model['name']!='CSTN' and data['graph']['name'] not in ('weighted','binary'):
             raise ValueError('OD models require raw weighted or binary relations')
         if spec.protocol=='od_window':
             _known(data['graph'],('name','symmetric','self_loops'),'OD data.graph')
+        if model['name']=='CSTN' and (data['graph']['name']!='none' or data['graph'].get('symmetric',False) or data['graph'].get('self_loops',False)):
+            raise ValueError('CSTN uses grid positions, requiring graph.name=none without graph switches')
         if (spec.protocol=='grid_cpt') != (data['sampling']['name']=='grid_cpt'):
             raise ValueError('grid_cpt sampling requires a registered grid_cpt model and vice versa')
         if (spec.protocol in ('convgcn_windows','reslstm_windows')) != (data['sampling']['name']=='seasonal_windows'):
@@ -202,7 +207,7 @@ def validate(config, preset):
             for key in ('interval_period','interval_trend'):
                 _positive(data['sampling'].get(key,1),f'data.sampling.{key}')
         if data['graph'].get('name') not in ('binary', 'weighted', 'distance','inverse_distance','distance_bands')+(
-                ('svd_gaussian',) if model['name']=='CCRNN' else ('dynamic',) if model['name']=='DMSTGCN' else ()):
+                ('svd_gaussian',) if model['name']=='CCRNN' else ('dynamic',) if model['name']=='DMSTGCN' else ('none',) if model['name']=='CSTN' else ()):
             raise ValueError('Unknown data.graph.name')
         if (data['graph']['name']=='distance_bands' and model['name']!='MultiSTGCnet') or (
                 model['name']=='MultiSTGCnet' and data['graph']['name'] not in ('distance_bands','binary')):

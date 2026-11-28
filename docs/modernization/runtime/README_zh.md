@@ -6,9 +6,11 @@
 
 当前正在继续完成剩余模型迁移与主线缺口，最新提交、修复说明和验收范围见 [主线剩余问题执行记录](remaining-work_execution_zh.md)。历史阶段验收通过不等同于全模型迁移完成；当前支持范围以迁移 CSV 为准。
 
-OD 原始数据和多空间轴指标已补齐公共组件，支持起点/终点身份、原始正值掩码、训练区间归一化、历史与已知未来协变量分离、缓存及来源版本校验，见 [OD 数据说明](od-data_zh.md)。GEML 已接入，CSTN 仍待迁移。
+OD 原始数据和多空间轴指标已补齐公共组件，支持起点/终点身份、原始正值掩码、训练区间归一化、历史与已知未来协变量分离、缓存及来源版本校验，见 [OD 数据说明](od-data_zh.md)。GEML、CSTN 均已接入。
 
 GEML 可用 `--model GEML` 生成单流量 OD 示例，再对 geml.json 使用相同的训练、独立评估、续训命令。模型保留地理/语义图和周期记忆，纯 forward 无标签且不计算辅助头；训练 step 使用原尺度 OD 与行/列边际复合目标，验证只用主 OD MSE。p_interval、embed_dim 和 training.loss 的三项权重可显式设置；周期记忆及原辅助目标错误已修复。具体语义与能力见 [GEML 说明](geml_zh.md)。
+
+CSTN 可用 `--model CSTN` 生成网格 OD 示例，使用相同的生命周期命令。两条 OD 轴根据 .geo 网格位置转换/恢复；全局相关按区域逐列归一化，不混入其他样本。外部特征按真实宽度编码并广播，预测只推进已知未来列，未知天气使用最后观测。data.graph.name=none，无需 .rel。网络保留 LibCity 的 LSC/TEC/GCC 结构，修订及验收见 [CSTN 说明](cstn_zh.md)。
 
 道路表征的 ChebConv/GAT/GeomGCN 使用具名 `road_reconstruction` 协议，任务默认配置与模型预设分开加载；预设仍不能静默改写协议字段。协议名称及相对于默认边采样协议的差异会写入日志和 runtime_info.json。生成示例可用 `tools/make_runtime_fixture.py --directory <目录> --model ChebConv`、`--model GAT` 或 `--model GeomGCN`；它们重建静态节点属性并导出全节点嵌入，使用全图批次与互斥监督节点集合，不将此指标解释为下游分类精度。GeomGCN 的道路边/自环分区以 PyTorch 聚合实现，不需要 DGL；训练、独立评估与完整续训均使用公共入口。它保留 LibCity 的两分区重建变体，不包含原论文的几何邻域构建；合并维度与有意修复见模型说明。
 

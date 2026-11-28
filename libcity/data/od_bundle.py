@@ -42,8 +42,10 @@ class ODWindows(Dataset):
 def prepare_od(data,training,evaluation,seed,logger=None):
     if data['sampling']['name']!='od_window':
         raise ValueError('OD data require data.sampling.name=od_window')
-    if data['graph']['name'] not in ('weighted','binary'):
-        raise ValueError('OD graph must use raw weighted or binary relations')
+    if data['graph']['name'] not in ('weighted','binary','none'):
+        raise ValueError('OD graph must use raw weighted/binary relations or explicit none')
+    if data['graph']['name']=='none' and any(data['graph'].get(key,False) for key in ('symmetric','self_loops')):
+        raise ValueError('OD graph none cannot enable symmetric or self_loops')
     folder = Path(data['data_dir'])/data['dataset']
     raw = json.loads((folder/'config.json').read_text(encoding='utf-8'))
     raw = {**raw,**raw.get('info',{})}
@@ -99,7 +101,8 @@ def prepare_od(data,training,evaluation,seed,logger=None):
     calendar_names = (['time_of_day'] if options['time_in_day'] else [])+(
         [f'day_of_week_{index}' for index in range(7)] if options['day_in_week'] else [])
     known_indices = list(range(len(calendar_names)))+[len(calendar_names)+ext_names.index(name) for name in requested]
-    sources = [folder/'config.json',geo_path,*paths,rel_path]+([ext_path] if options['load_external'] else [])
+    sources = [folder/'config.json',geo_path,*paths]+([rel_path] if data['graph']['name']!='none' else [])+(
+        [ext_path] if options['load_external'] else [])
 
     def build():
         ext = None
@@ -158,7 +161,7 @@ def prepare_od(data,training,evaluation,seed,logger=None):
         if np.any(np.diff(clock)<=np.timedelta64(0,'s')):
             raise ValueError('OD data_files must be chronological without overlapping timestamps')
         graph = np.zeros((len(ids),len(ids)),dtype=np.float32)
-        if rel_path.is_file():
+        if data['graph']['name']!='none' and rel_path.is_file():
             relation = pd.read_csv(rel_path)
             weight = raw.get('weight_col') or next((name for name in relation if name not in ('rel_id','type','origin_id','destination_id')),None)
             if len(relation) and not isinstance(weight,str) and data['graph']['name']=='weighted':

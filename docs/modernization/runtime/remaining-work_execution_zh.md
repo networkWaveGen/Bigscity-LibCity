@@ -53,7 +53,8 @@
 | commit45 | 1b3737b | feat: migrate CCRNN with train-only SVD graphs and exact RMSE training |
 | commit46 | d6ca1f8 | feat: migrate DMSTGCN with real calendar and train-only stream scaling |
 | commit47 | 0ef3677 | feat: add OD data bundles and spatial-axis evaluation |
-| commit48 | 随本节交付的提交 | feat: migrate GEML with corrected periodic memory and raw OD objectives |
+| commit48 | 9cb1e60 | feat: migrate GEML with corrected periodic memory and raw OD objectives |
+| commit49 | 随本节交付的提交 | feat: migrate CSTN with causal grid OD contexts and independent correlations |
 
 ## commit1：修复基础交通缓存（670b325）
 
@@ -568,6 +569,18 @@ forward 由配置决定预测长度，每步重新编码当前窗口；预测回
 仓库外发布夹具、训练、独立评估和续训 **4 条命令成功**，预测 [9,2,3,3,1]、独立预测与指标完全一致，续训第三轮累计 9 次更新，缓存 miss/hit/hit，安全权重中仅保存一个 [3,3] 地理 buffer。独立评估未创建训练产物，主 OD MSE 与导出预测独立计算一致，见 [CLI 记录](geml-cli-validation.json)。修复旧记忆、原始正值图及边际目标后不声称旧错误流程或论文精度等价。
 
 清单为 **71/100** 已迁移，29 条 pending；排除七个延期 Common 与两个模板后，还有 **20 个实际模型**及全部迁移后的最终验收。CSTN 尚未接入，不因共享 OD 数据基础能力而提前算作完成。
+
+## commit49：完成 CSTN 的网格 OD、天气输入与原生生命周期
+
+原问题：GCC 对 [B,N,N] 沿 batch 维归一化，同一样本受同批其他样本影响，batch=1 时所有权重为 1。天气 MLP 固定 29 列，repeat 整个特征向量后 reshape 会错排空间位置。旧多步预测读取 y，并滑动包含未来实测天气的外部窗口。ConvLSTM 初始状态固定 float32；模型的网格身份和固定批次设置没有对接统一 OD 输入。
+
+处理：保留 LibCity 双视角卷积、单层 ConvLSTM、直接点积 GCC 和 ReLU/Tanh 输出；按论文列方向在区域内归一化，完全隔离样本。天气按真实历史宽度编码，每个特征向所有网格广播；状态由输入创建。两个 OD 轴分别按 .geo 的网格位置转换为行优先布局，再恢复原节点顺序。已知未来列按元信息名称映射推进，未知天气保持最后观测；前向不读取目标、不持有 scaler/logger/device，直接复用默认训练与公共评估。
+
+数据层显式 graph.name=none，既不解析 .rel，也不让无关关系文件阻塞原始缓存；完整续训仍保留全部原子文件版本的保守检查。配置和元信息启动校验、单格和无外部特征路径、网格 OD 夹具、发布示例及统一模型注册均已接入。与作者网络的其他差异及持续值策略在 [修复说明](cstn_zh.md) 中明确记录，不声称旧错误流程或论文精度等价。
+
+验证：新增 **27 项通过**，四组修正旧 GCC/天气广播/状态类型的网络前向及全部有效参数、流量、外部特征梯度，包含默认三层/75 通道。独立逐列相关公式/梯度、跨样本零梯度、双轴节点置换、实际天气输入逐步推进、未来目标及未知天气隔离、原始训练归一化、坏关系文件隔离/缓存、可选协变量、单格/单帧/float64、真实尾批 CPU AMP、两种 scaler 的实际训练/独立评估/Adam/metric 调度/最佳权重/RNG 精确恢复均通过。含既有 OD/GEML 合计 **83 passed**；完整回归 **1072 passed，0 failed，0 errors，0 skipped**，见 [汇总](remaining-validation.json)。
+
+仓库外夹具、训练、独立评估和续训 **4 条命令成功**，预测 [9,2,4,4,1]、独立预测和指标完全一致；续训第三轮 9 次参数更新，缓存 miss/hit/hit。安全纯权重保存显式网格和协变量映射，独立评估没有训练产物；原尺度 MSE 与导出预测独立计算一致，见 [CLI](cstn-cli-validation.json)。清单为 **72/100**，28 条 pending；排除延期 Common 与模板后，还有 **19 个实际模型**及最终全量验收。
 
 ## 持续完成的清单
 

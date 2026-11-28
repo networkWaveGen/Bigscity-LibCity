@@ -1,6 +1,6 @@
 # OD 数据与多空间轴评估
 
-本组件在 commit47 为 GEML、CSTN 的原生迁移补齐公共数据能力，当批未新增模型计数。随后 commit48 已完成 [GEML 原生接入](geml_zh.md)，CSTN 仍待迁移；当前支持范围以 [模型清单](model-migration.csv) 为准。
+本组件在 commit47 为 GEML、CSTN 的原生迁移补齐公共数据能力，当批未新增模型计数。随后 commit48 完成 [GEML 接入](geml_zh.md)，commit49 完成 [CSTN 接入](cstn_zh.md)；当前支持范围以 [模型清单](model-migration.csv) 为准。
 
 ## 原问题
 
@@ -11,14 +11,14 @@
 
 ## 实现
 
-新增 `libcity.data.od_bundle.prepare_od(data, training, evaluation, seed, logger=None)`，各参数沿用公共运行时的对应配置区块。组件要求 `data.sampling.name=od_window`，供原生 OD 模型的 `prepare_data` 接口调用。GEML 已提供模型注册与 CLI 预设，普通 GRU 不能选择此采样协议；CSTN 尚未注册。
+新增 `libcity.data.od_bundle.prepare_od(data, training, evaluation, seed, logger=None)`，各参数沿用公共运行时的对应配置区块。组件要求 `data.sampling.name=od_window`，供原生 OD 模型的 `prepare_data` 接口调用。GEML、CSTN 已提供模型注册与 CLI 预设，普通 GRU 不能选择此采样协议。
 
 数据文件支持 `.od`、`.gridod`，以及包含 OD 标识列的 `.dyna`，按这个顺序查找。数据列由元信息 `data_col` 指定，未声明时从非保留列推断；目标为前 `output_dim` 个观测列。
 
 - `.geo` 行序确定两个空间轴的节点顺序，实际 ID 可不连续。CSV 数据行可乱序。
 - 每个时间点、起点、终点必须恰好一行；零流量需显式编码，拒绝重复、缺行、未知节点及无穷值。
 - 网格坐标通过 `.geo` 的 `row_id/column_id` 映射到真实节点；要求完整矩形。统一输出仍保留起点、终点两轴，网格形状及逐节点位置保存在只读元信息中，供模型恢复网格布局。
-- `.rel` 使用真实节点 ID，保留有向原始权重或显式二值图；对称化、自环由配置决定。允许没有关系文件，拒绝重复关系、负权及非有限权重。
+- `.rel` 使用真实节点 ID，保留有向原始权重或显式二值图；对称化、自环由配置决定。允许没有关系文件，拒绝重复关系、负权及非有限权重。CSTN 显式使用 `graph.name=none`，不读取关系文件，也不把它纳入原始缓存来源。
 
 批次是标准 Tensor 字典：
 

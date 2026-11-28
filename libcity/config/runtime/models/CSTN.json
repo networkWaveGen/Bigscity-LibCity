@@ -1,0 +1,9 @@
+{
+  "model": {"params": {"n_layers": 3, "c_lt": 75}},
+  "data": {"scaler": {"name": "minmax01"}, "graph": {"name": "none"},
+    "features": {"load_external": true, "time_in_day": true}},
+  "training": {"epochs": 100, "batch_size": 16,
+    "optimizer": {"name": "adam", "lr": 0.001, "weight_decay": 0.000001},
+    "scheduler": {"name": "none", "interval": "epoch"},
+    "loss": {"name": "masked_mse", "mask_value": null}, "early_stopping": {"patience": 50}}
+}
