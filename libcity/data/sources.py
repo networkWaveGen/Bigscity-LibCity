@@ -24,8 +24,9 @@ def atomic_sources(data):
         for name in values:
             if isinstance(name,str):
                 suffix = FILE_FIELDS.get(key,'')
-                if (key=='data_files' and data.get('sampling',{}).get('name') in ('grid_cpt','grid_window','risk_cpt','stdn_grid')
-                        and (folder/(name+'.grid')).is_file()):
+                if (key=='data_files' and (folder/(name+'.grid')).is_file() and (
+                        data.get('sampling',{}).get('name') in ('grid_cpt','grid_window','risk_cpt','stdn_grid') or
+                        data.get('sampling',{}).get('name')=='window' and not (folder/(name+'.dyna')).is_file())):
                     suffix = '.grid'
                 if key=='data_files' and data.get('sampling',{}).get('name')=='od_window':
                     suffix = next((candidate for candidate in ('.od','.gridod','.dyna')

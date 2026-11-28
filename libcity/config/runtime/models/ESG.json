@@ -1,0 +1,9 @@
+{
+  "model": {"params": {"n_blocks": 1, "n_layers": 3, "dropout": 0.3, "residual_channels": 32,
+    "end_channels": 128, "st_embedding_dim": 40, "kernel_set": [2,6], "dilation_exp": 1,
+    "conv_channels": 32, "gcn_depth": 2, "dy_embedding_dim": 20, "skip_channels": 64,
+    "layer_norm_affline": false, "propalpha": 0.05, "dy_interval": [1,1,1]}},
+  "data": {"graph": {"name": "dynamic", "history_steps": 0, "history_channels": null}, "scaler": {"name": "standard"}},
+  "training": {"epochs": 300, "optimizer": {"name": "adam", "lr": 0.001, "eps": 0.00000001, "weight_decay": 0.0001},
+    "loss": {"name": "masked_mae", "mask_value": 0.0}, "clip_grad_norm": 5.0, "early_stopping": {"patience": 30}}
+}

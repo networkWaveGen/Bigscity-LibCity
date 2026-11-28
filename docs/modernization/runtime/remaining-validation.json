@@ -1,5 +1,5 @@
 {
-  "scope": "Remaining-work commits 1-54; whole-library migration remains in progress",
+  "scope": "Remaining-work commits 1-55; whole-library migration remains in progress",
   "environment": {
     "python": "3.12.13",
     "torch": "2.15.0+cpu",
@@ -9,7 +9,7 @@
     "scikit_learn": "1.9.1"
   },
   "full_tests": {
-    "tests": 1225,
+    "tests": 1263,
     "failures": 0,
     "errors": 0,
     "skipped": 0
@@ -411,6 +411,44 @@
     "test_dropout_and_shuffled_loader_rng_resume_exactly",
     "test_clip_is_applied_after_objective_normalization",
     "test_resume_rejects_changed_readonly_source_metadata",
+    "test_original_multiscale_network_predictions_all_live_gradients_and_batchnorm[multitarget]",
+    "test_original_multiscale_network_predictions_all_live_gradients_and_batchnorm[multiblock-dilation-affine]",
+    "test_original_multiscale_network_predictions_all_live_gradients_and_batchnorm[default-widths]",
+    "test_original_multiscale_network_predictions_all_live_gradients_and_batchnorm[zero-hop]",
+    "test_evolving_graph_matches_independent_gates_pair_scores_and_all_gradients",
+    "test_signed_graph_propagation_receiver_direction_matches_numpy[0.0]",
+    "test_signed_graph_propagation_receiver_direction_matches_numpy[0.25]",
+    "test_signed_graph_propagation_receiver_direction_matches_numpy[1.0]",
+    "test_graph_prior_is_original_training_prefix_independent_of_windows_and_future[False]",
+    "test_graph_prior_is_original_training_prefix_independent_of_windows_and_future[True]",
+    "test_graph_history_channel_limit_cache_hit_and_owned_buffer_dtype",
+    "test_real_dropout_batchnorm_raw_evaluation_and_all_state_exact_resume[False-standard]",
+    "test_real_dropout_batchnorm_raw_evaluation_and_all_state_exact_resume[False-minmax01]",
+    "test_real_dropout_batchnorm_raw_evaluation_and_all_state_exact_resume[True-standard]",
+    "test_real_dropout_batchnorm_raw_evaluation_and_all_state_exact_resume[True-minmax01]",
+    "test_missing_history_is_imputed_while_original_zero_and_nan_targets_survive[False]",
+    "test_missing_history_is_imputed_while_original_zero_and_nan_targets_survive[True]",
+    "test_physical_node_permutation_batch_independence_and_no_cross_sample_gradient",
+    "test_true_cpu_amp_tail_and_single_node_minimum_encoder_history[False]",
+    "test_true_cpu_amp_tail_and_single_node_minimum_encoder_history[True]",
+    "test_short_graph_history_is_valid_for_zero_hop_but_rejected_when_graph_encoder_used",
+    "test_graph_history_gap_rejects_or_can_select_contiguous_training_prefix",
+    "test_windows_spawn_worker_preserves_history_inputs",
+    "test_invalid_esg_configuration_rejected_before_sources[change0]",
+    "test_invalid_esg_configuration_rejected_before_sources[change1]",
+    "test_invalid_esg_configuration_rejected_before_sources[change2]",
+    "test_invalid_esg_configuration_rejected_before_sources[change3]",
+    "test_invalid_esg_configuration_rejected_before_sources[change4]",
+    "test_invalid_esg_configuration_rejected_before_sources[change5]",
+    "test_invalid_esg_configuration_rejected_before_sources[change6]",
+    "test_invalid_esg_configuration_rejected_before_sources[change7]",
+    "test_invalid_esg_configuration_rejected_before_sources[change8]",
+    "test_invalid_esg_configuration_rejected_before_sources[change9]",
+    "test_invalid_esg_configuration_rejected_before_sources[change10]",
+    "test_invalid_esg_configuration_rejected_before_sources[change11]",
+    "test_invalid_esg_configuration_rejected_before_sources[change12]",
+    "test_invalid_esg_configuration_rejected_before_sources[change13]",
+    "test_invalid_esg_configuration_rejected_before_sources[change14]",
     "test_scores_valid_nll_and_gradients_match_markov_factorization",
     "test_training_independent_ranking_and_exact_resume",
     "test_batch_one_padding_label_isolation_and_float64",
@@ -1244,8 +1282,8 @@
   ],
   "inventory": {
     "total": 100,
-    "migrated": 75,
-    "pending": 25
+    "migrated": 76,
+    "pending": 24
   },
   "history": [
     {
@@ -1890,6 +1928,20 @@
         "total": 100,
         "migrated": 74,
         "pending": 26
+      }
+    },
+    {
+      "scope": "commits 1-54, through 09077cf",
+      "full_tests": {
+        "tests": 1225,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "inventory": {
+        "total": 100,
+        "migrated": 75,
+        "pending": 25
       }
     }
   ],
@@ -2869,7 +2921,7 @@
       "Static arrays are read-only metadata; numeric contents are model buffers, while checkpoint metadata stores only shape/dtype"
     ]
   },
-  "results_file": "D:\\LibCity 2.0\\.runtime-tests\\remaining-suite-51-results.xml",
+  "results_file": "D:\\LibCity 2.0\\.runtime-tests\\remaining-suite-53-results.xml",
   "rgsl_cli": {
     "passed": true,
     "source": "D:\\LibCity 2.0\\LibCity-modernization",
@@ -5194,5 +5246,355 @@
     "tests": "tests/test_runtime_stdn.py",
     "documentation": "stdn_zh.md",
     "scope": "Native STDN reference, causally aligned volume/flow contexts, parallel all-horizon supervision, train/evaluate/exact resume, CPU AMP/spawn, source guard and published CLI; not paper accuracy"
+  },
+  "esg_cli": {
+    "passed": true,
+    "source": "D:\\LibCity 2.0\\LibCity-modernization",
+    "directory": "D:\\LibCity 2.0\\.runtime-tests\\esg-cli-4mjgnma7",
+    "commands": [
+      {
+        "command": [
+          "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+          "-B",
+          "D:\\LibCity 2.0\\LibCity-modernization\\tools\\make_runtime_fixture.py",
+          "--directory",
+          "D:\\LibCity 2.0\\.runtime-tests\\esg-cli-4mjgnma7\\example",
+          "--model",
+          "ESG"
+        ],
+        "cwd": "D:\\LibCity 2.0\\.runtime-tests\\esg-cli-4mjgnma7",
+        "exit_code": 0
+      },
+      {
+        "command": [
+          "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+          "-B",
+          "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+          "train",
+          "--config",
+          "D:\\LibCity 2.0\\.runtime-tests\\esg-cli-4mjgnma7\\example\\esg.json",
+          "--set",
+          "runtime.exp_id=train"
+        ],
+        "cwd": "D:\\LibCity 2.0\\.runtime-tests\\esg-cli-4mjgnma7",
+        "exit_code": 0
+      },
+      {
+        "command": [
+          "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+          "-B",
+          "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+          "evaluate",
+          "--config",
+          "D:\\LibCity 2.0\\.runtime-tests\\esg-cli-4mjgnma7\\example\\esg.json",
+          "--checkpoint",
+          "D:\\LibCity 2.0\\.runtime-tests\\esg-cli-4mjgnma7\\example\\runs\\train\\checkpoints\\best.pt",
+          "--set",
+          "runtime.exp_id=evaluated"
+        ],
+        "cwd": "D:\\LibCity 2.0\\.runtime-tests\\esg-cli-4mjgnma7",
+        "exit_code": 0
+      },
+      {
+        "command": [
+          "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+          "-B",
+          "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+          "train",
+          "--config",
+          "D:\\LibCity 2.0\\.runtime-tests\\esg-cli-4mjgnma7\\example\\esg.json",
+          "--resume",
+          "D:\\LibCity 2.0\\.runtime-tests\\esg-cli-4mjgnma7\\example\\runs\\train\\checkpoints\\last.pt",
+          "--set",
+          "training.epochs=3",
+          "--set",
+          "runtime.exp_id=resumed"
+        ],
+        "cwd": "D:\\LibCity 2.0\\.runtime-tests\\esg-cli-4mjgnma7",
+        "exit_code": 0
+      }
+    ],
+    "prediction_shape": [
+      11,
+      2,
+      6,
+      2
+    ],
+    "independent_predictions_equal": true,
+    "independent_metrics_equal": true,
+    "global_raw_masked_mae": 8.08816146850586,
+    "evaluation_loss": 8.088161145723783,
+    "resumed_epoch": 3,
+    "optimizer_steps": 12,
+    "cache_statuses": [
+      "miss",
+      "hit",
+      "hit"
+    ],
+    "graph_history_shape": [
+      72,
+      6
+    ],
+    "graph_history_end_exclusive": 36,
+    "input_specification_saved": true,
+    "weights_only_safe_load": true,
+    "evaluate_has_no_training_artifacts": true,
+    "runtime_info": {
+      "train": {
+        "python": "3.12.13",
+        "pytorch": "2.15.0+cpu",
+        "numpy": "2.5.5",
+        "platform": "Windows-11-10.0.26200-SP0",
+        "mode": "train",
+        "execution_kind": "neural",
+        "device": "cpu",
+        "seed": 17,
+        "benchmark_protocol": "task_default",
+        "split": {
+          "semantics": "target_time_v1",
+          "adapter": "esg",
+          "grid_shape": [
+            2,
+            3
+          ],
+          "input_window": 4,
+          "history_span_points": 4,
+          "requested_input_window": 4,
+          "offsets": [
+            -4,
+            -3,
+            -2,
+            -1
+          ],
+          "intervals": {
+            "train": {
+              "samples": 31,
+              "target_index_start": 4,
+              "target_index_end": 35
+            },
+            "val": {
+              "samples": 11,
+              "target_index_start": 36,
+              "target_index_end": 47
+            },
+            "test": {
+              "samples": 11,
+              "target_index_start": 48,
+              "target_index_end": 59
+            }
+          },
+          "train": 31,
+          "val": 11,
+          "test": 11,
+          "train_end": "2024-01-02T12:00:00.000000000",
+          "val_end": "2024-01-03T00:00:00.000000000",
+          "scaler_fit_end_exclusive": "2024-01-02T12:00:00.000000000",
+          "train_padded": false,
+          "cache": {
+            "status": "miss",
+            "path": "D:\\LibCity 2.0\\.runtime-tests\\esg-cli-4mjgnma7\\example\\cache\\traffic-raw-v1\\c1cd6c02ce8401c929de2997.npz"
+          },
+          "external_scaling": "none",
+          "input_missing_observations": "raw_zero_before_scaling",
+          "graph_history": {
+            "source": "original_training_prefix",
+            "start_index": 0,
+            "end_index_exclusive": 36,
+            "requested_history_steps": 0,
+            "channels": [
+              0,
+              1
+            ],
+            "rows": 72,
+            "first_timestamp": "2024-01-01T00:00:00.000000000",
+            "last_timestamp": "2024-01-02T11:00:00.000000000",
+            "scalar_order": "timestamp_then_selected_target_channel",
+            "normalization": "target_scaler",
+            "missing_observations": "raw_zero_before_scaling"
+          }
+        },
+        "protocol_changes": {
+          "data.input_window": 4
+        },
+        "capabilities": {
+          "requires_checkpoint": true,
+          "supports_resume": true,
+          "supports_validation": true
+        }
+      },
+      "evaluated": {
+        "python": "3.12.13",
+        "pytorch": "2.15.0+cpu",
+        "numpy": "2.5.5",
+        "platform": "Windows-11-10.0.26200-SP0",
+        "mode": "evaluate",
+        "execution_kind": "neural",
+        "device": "cpu",
+        "seed": 17,
+        "benchmark_protocol": "task_default",
+        "split": {
+          "semantics": "target_time_v1",
+          "adapter": "esg",
+          "grid_shape": [
+            2,
+            3
+          ],
+          "input_window": 4,
+          "history_span_points": 4,
+          "requested_input_window": 4,
+          "offsets": [
+            -4,
+            -3,
+            -2,
+            -1
+          ],
+          "intervals": {
+            "train": {
+              "samples": 31,
+              "target_index_start": 4,
+              "target_index_end": 35
+            },
+            "val": {
+              "samples": 11,
+              "target_index_start": 36,
+              "target_index_end": 47
+            },
+            "test": {
+              "samples": 11,
+              "target_index_start": 48,
+              "target_index_end": 59
+            }
+          },
+          "train": 31,
+          "val": 11,
+          "test": 11,
+          "train_end": "2024-01-02T12:00:00.000000000",
+          "val_end": "2024-01-03T00:00:00.000000000",
+          "scaler_fit_end_exclusive": "2024-01-02T12:00:00.000000000",
+          "train_padded": false,
+          "cache": {
+            "status": "hit",
+            "path": "D:\\LibCity 2.0\\.runtime-tests\\esg-cli-4mjgnma7\\example\\cache\\traffic-raw-v1\\c1cd6c02ce8401c929de2997.npz"
+          },
+          "external_scaling": "none",
+          "input_missing_observations": "raw_zero_before_scaling",
+          "graph_history": {
+            "source": "original_training_prefix",
+            "start_index": 0,
+            "end_index_exclusive": 36,
+            "requested_history_steps": 0,
+            "channels": [
+              0,
+              1
+            ],
+            "rows": 72,
+            "first_timestamp": "2024-01-01T00:00:00.000000000",
+            "last_timestamp": "2024-01-02T11:00:00.000000000",
+            "scalar_order": "timestamp_then_selected_target_channel",
+            "normalization": "target_scaler",
+            "missing_observations": "raw_zero_before_scaling"
+          }
+        },
+        "protocol_changes": {
+          "data.input_window": 4
+        },
+        "capabilities": {
+          "requires_checkpoint": true,
+          "supports_resume": true,
+          "supports_validation": true
+        }
+      },
+      "resumed": {
+        "python": "3.12.13",
+        "pytorch": "2.15.0+cpu",
+        "numpy": "2.5.5",
+        "platform": "Windows-11-10.0.26200-SP0",
+        "mode": "train",
+        "execution_kind": "neural",
+        "device": "cpu",
+        "seed": 17,
+        "benchmark_protocol": "task_default",
+        "split": {
+          "semantics": "target_time_v1",
+          "adapter": "esg",
+          "grid_shape": [
+            2,
+            3
+          ],
+          "input_window": 4,
+          "history_span_points": 4,
+          "requested_input_window": 4,
+          "offsets": [
+            -4,
+            -3,
+            -2,
+            -1
+          ],
+          "intervals": {
+            "train": {
+              "samples": 31,
+              "target_index_start": 4,
+              "target_index_end": 35
+            },
+            "val": {
+              "samples": 11,
+              "target_index_start": 36,
+              "target_index_end": 47
+            },
+            "test": {
+              "samples": 11,
+              "target_index_start": 48,
+              "target_index_end": 59
+            }
+          },
+          "train": 31,
+          "val": 11,
+          "test": 11,
+          "train_end": "2024-01-02T12:00:00.000000000",
+          "val_end": "2024-01-03T00:00:00.000000000",
+          "scaler_fit_end_exclusive": "2024-01-02T12:00:00.000000000",
+          "train_padded": false,
+          "cache": {
+            "status": "hit",
+            "path": "D:\\LibCity 2.0\\.runtime-tests\\esg-cli-4mjgnma7\\example\\cache\\traffic-raw-v1\\c1cd6c02ce8401c929de2997.npz"
+          },
+          "external_scaling": "none",
+          "input_missing_observations": "raw_zero_before_scaling",
+          "graph_history": {
+            "source": "original_training_prefix",
+            "start_index": 0,
+            "end_index_exclusive": 36,
+            "requested_history_steps": 0,
+            "channels": [
+              0,
+              1
+            ],
+            "rows": 72,
+            "first_timestamp": "2024-01-01T00:00:00.000000000",
+            "last_timestamp": "2024-01-02T11:00:00.000000000",
+            "scalar_order": "timestamp_then_selected_target_channel",
+            "normalization": "target_scaler",
+            "missing_observations": "raw_zero_before_scaling"
+          }
+        },
+        "protocol_changes": {
+          "data.input_window": 4
+        },
+        "capabilities": {
+          "requires_checkpoint": true,
+          "supports_resume": true,
+          "supports_validation": true
+        }
+      }
+    },
+    "scope": "Actual published ESG grid example with original-training graph history, shared dropout/BatchNorm exact continuation; CPU functionality, not paper accuracy"
+  },
+  "esg_validation": {
+    "passed": true,
+    "new_tests": 38,
+    "related_tests": 93,
+    "tests": "tests/test_runtime_esg.py",
+    "documentation": "esg_zh.md",
+    "scope": "Native ESG live reference, original-training graph history, factored signed pair relations, point/grid train/evaluate/exact resume, original NaN/zero targets, CPU AMP/spawn and published CLI; not paper accuracy"
   }
 }

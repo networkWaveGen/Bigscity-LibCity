@@ -107,6 +107,21 @@ def validate(config, preset):
     if model['name']=='STDN':
         for key in ('cnn_flat_size','lstm_out_size'):
             _positive(model['params'][key],'STDN '+key)
+    if model['name']=='ESG':
+        params=model['params']
+        for key in ('n_blocks','n_layers','residual_channels','end_channels','st_embedding_dim',
+                    'dilation_exp','conv_channels','dy_embedding_dim','skip_channels'):
+            _positive(params[key],'ESG '+key)
+        _positive(params['gcn_depth'],'ESG gcn_depth',zero=True)
+        kernels=params['kernel_set']
+        if (not isinstance(kernels,list) or not kernels or any(type(v) is not int or v<1 for v in kernels) or
+                any(b<=a for a,b in zip(kernels,kernels[1:])) or params['conv_channels']%len(kernels)):
+            raise ValueError('ESG requires increasing positive kernels and conv_channels divisible by their number')
+        intervals=params['dy_interval']
+        if not isinstance(intervals,list) or len(intervals)!=params['n_layers'] or any(type(v) is not int or v<1 for v in intervals):
+            raise ValueError('ESG dy_interval must contain one positive interval per layer')
+        if not 0<=params['dropout']<1 or not 0<=params['propalpha']<=1:
+            raise ValueError('ESG requires dropout in [0,1) and propalpha in [0,1]')
     if model['name']=='GSNet':
         for key in ('num_of_gru_layers','gru_hidden_size'):
             _positive(model['params'][key],'GSNet '+key)
@@ -175,8 +190,18 @@ def validate(config, preset):
         graph_keys = {'HGCN':('cluster_nodes','cluster_labels','cluster_epsilon'),
             'GTS':('history_channel','history_steps'),
             'CCRNN':('svd_rank','svd_channels','normalization'),
-            'GSNet':('road_column','risk_column','poi_column','use_poi')}.get(model['name'],())
+            'GSNet':('road_column','risk_column','poi_column','use_poi'),
+            'ESG':('history_steps','history_channels')}.get(model['name'],())
         _known(data['graph'], ('name', 'symmetric', 'self_loops', 'epsilon','reachability_column','distance_column')+graph_keys, 'data.graph')
+        if model['name']=='ESG':
+            _known(data['graph'],('name','symmetric','self_loops','history_steps','history_channels'),'ESG data.graph')
+            if data['graph']['name']!='dynamic' or data['graph'].get('symmetric',False) or data['graph'].get('self_loops',False):
+                raise ValueError('ESG requires dynamic graphs without static graph switches')
+            _positive(data['graph']['history_steps'],'ESG graph.history_steps',zero=True)
+            channels=data['graph']['history_channels']
+            if channels is not None and (not isinstance(channels,list) or not channels or
+                    any(type(value) is not int or value<0 for value in channels) or len(set(channels))!=len(channels)):
+                raise ValueError('ESG history_channels requires unique nonnegative target indices or null')
         if model['name']=='GSNet':
             _known(data['graph'],('name','symmetric','self_loops')+graph_keys,'GSNet data.graph')
             if data['graph']['name']!='risk_multigraph':
@@ -274,7 +299,7 @@ def validate(config, preset):
             for key in ('interval_period','interval_trend'):
                 _positive(data['sampling'].get(key,1),f'data.sampling.{key}')
         if data['graph'].get('name') not in ('binary', 'weighted', 'distance','inverse_distance','distance_bands')+(
-                ('svd_gaussian',) if model['name']=='CCRNN' else ('dynamic',) if model['name']=='DMSTGCN' else
+                ('svd_gaussian',) if model['name']=='CCRNN' else ('dynamic',) if model['name'] in ('DMSTGCN','ESG') else
                 ('risk_multigraph',) if model['name']=='GSNet' else ('none',) if model['name'] in ('CSTN','DSAN','STDN') else ()):
             raise ValueError('Unknown data.graph.name')
         if (data['graph']['name']=='distance_bands' and model['name']!='MultiSTGCnet') or (

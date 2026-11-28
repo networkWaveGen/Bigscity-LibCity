@@ -415,6 +415,14 @@ Every horizon uses the same causal forecast origin. Volume and flow scalers fit
 only the raw training interval and have separate reusable raw caches. The fixture
 shortens the default warmup and demonstrates a two-step, two-target forecast.
 
+Generate ESG with `--model ESG` and use esg.json with the same lifecycle.
+Its node-feature encoder uses a declared prefix of original training observations,
+independent of window count. history_steps/history_channels belong to data.graph;
+zero means the complete training prefix. Dense signed evolving graphs and temporal
+scales retain the original formulas; zero-hop mode skips unused graph parameters.
+The grid example exports a two-step, two-target forecast and stores the training
+history as a device-following buffer in the standalone inference weights.
+
 The complete supported-model inventory and migration details are in the
 [runtime guide](../docs/modernization/runtime/README_zh.md). Small examples prove
 execution and reproducibility, not real-city benchmark accuracy.

@@ -29,6 +29,8 @@ class ModelSpec:
 
 
 MODELS = {
+    'ESG': ModelSpec('libcity.model.traffic_flow_prediction.runtime_esg:ESG',
+        prepare_data='libcity.data.esg_bundle:prepare_esg'),
     'STDN': ModelSpec('libcity.model.traffic_flow_prediction.runtime_stdn:STDN',protocol='stdn_grid',
         prepare_data='libcity.data.stdn_bundle:prepare_stdn'),
     'GSNet': ModelSpec('libcity.model.traffic_accident_prediction.runtime_gsnet:GSNet',protocol='risk_cpt',

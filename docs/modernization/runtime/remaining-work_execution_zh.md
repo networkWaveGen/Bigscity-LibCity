@@ -59,7 +59,8 @@
 | commit51 | 956930e | feat: migrate DSAN with isolated grid attention and raw masks |
 | commit52 | 79a13e3 | feat: add risk-grid bundles and region-aware evaluation |
 | commit53 | 76535dc | feat: migrate GSNet with forecast-time attention and region objectives |
-| commit54 | 随本节交付的提交 | feat: migrate STDN with causal volume-flow sampling and shifted attention |
+| commit54 | 09077cf | feat: migrate STDN with causal volume-flow sampling and shifted attention |
+| commit55 | 随本节交付的提交 | feat: migrate ESG with train-only graph history and factored relations |
 
 ## commit1：修复基础交通缓存（670b325）
 
@@ -644,6 +645,18 @@ forward 由配置决定预测长度，每步重新编码当前窗口；预测回
 实际仓库外生成、训练、独立评估、续训 **4 条命令成功**，预测 [31,2,6,2]、独立预测和指标完全一致；第三轮累计 9 次更新，volume/flow 两份缓存均为 miss/hit/hit。全局原尺度 masked MSE 独立复算约 755.895874，与评估 loss 一致；best.pt 安全纯权重携带输入说明，独立评估没有训练产物，见 [CLI](stdn-cli-validation.json)。本批不声称旧错位流程、作者 Keras dropout 或论文精度等价，保留原始 dense OD 成本。
 
 清单为 **75/100**、25 条 pending；扣除延期 Common 与模板后，还有 **16 个实际模型**：DMVSTNet、GMAN、STAGGCN、STMGAT、D2STGNN、STGODE、ESG、SSTBAN、STTSNet、FOGS、DSTAGNN、HIEST、MultiSPANS、STWave、PDFormer、STGNCDE。它们及最终全量验收继续保留在主线范围内。
+
+## commit55：迁移 ESG，固定训练图历史并去掉无效图计算
+
+原问题：ESG 的 static_feat 来自展开训练窗口的第一帧，其时间范围受滑窗数量影响；模型持有 scaler/logger/device，历史 Tensor 没有注册 buffer，单节点 BatchNorm 不能训练。节点对先 repeat 再拼接，所有 extractor 都创建未使用的 residual_conv；零 hop 仍计算与输出无关的静态/动态图。新适配的补充原始掩码检查还发现，共享网格 history 同时供输入和目标使用，不能用补零数组整体替换。
+
+处理：从原始训练区间起点选择明确前缀及目标通道，只用训练 scaler，固定时间/通道交错顺序并登记起止。点/完整网格读取器和原始缓存共用，网格外部历史特征广播到标准 X；点路径只替换独立 history，网格保留原始数组并复用 GridWindows 的输入副本补零，保护 y_raw 的 NaN/0。图历史注册独立 buffer，静态编码复用单值 BN 回退。保留多尺度时间卷积、分段图状态、有符号接收方向混合传播及完整多步输出；节点对按线性权重两半分解投影，避免双倍宽度重复拼接。删除死残差卷积，零 hop 不创建无效静态/动态图模块；严格校验核顺序/宽度均分/interval 与层数。模型、配置、原生注册、公开示例和源文件身份检查均接入公共训练/评估/完整续训，见 [ESG 说明](esg_zh.md)。
+
+验证：新增 **38 项通过**，覆盖四组旧网络前向/全部有效参数和输入梯度/BN 状态（默认宽度、多 block、指数膨胀、affine、零 hop），独立图门/节点对得分和 NumPy 有符号传播方向；训练前缀/列/限制/缓存/未来隔离、点/网格历史特征、原始零/NaN、节点置换及跨样本零梯度、buffer/dtype/无标签无 RNG；点/网格两种 scaler 的 dropout/BN/Adam/metric 调度/早停/最佳模型/RNG/加载器精确续训；真实尾批/单节点最小历史 CPU AMP、Windows spawn、缺口与连续前缀、15 类配置拒绝。相关网格/配置合计 **93 passed**；完整回归 **1263 passed，0 failed，0 errors，0 skipped**，见 [汇总](remaining-validation.json)。
+
+仓库外实际生成、训练、独立评估、续训 **4 条命令成功**，预测 [11,2,6,2]、独立预测/指标完全一致；第三轮累计 12 次更新、缓存 miss/hit/hit。图历史从原始训练前 36 步准备为 [72,6] 并保存在纯权重 buffer；原尺度 masked MAE 独立复算约 8.088161，与评估 loss 一致。安全权重包含输入说明，独立评估没有训练产物，见 [CLI](esg-cli-validation.json)。本批不声称论文精度或全硬件认证，保留 dense 图和全训练前缀编码成本。
+
+清单更新为 **76/100**、24 条 pending；扣除延期 Common 与模板后，还有 **15 个实际模型**：DMVSTNet、GMAN、STAGGCN、STMGAT、D2STGNN、STGODE、SSTBAN、STTSNet、FOGS、DSTAGNN、HIEST、MultiSPANS、STWave、PDFormer、STGNCDE。它们及最终全量交付审计仍在主线范围内，本批不将整个方案标记为完成。
 
 ## 持续完成的清单
 
