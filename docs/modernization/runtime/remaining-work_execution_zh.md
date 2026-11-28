@@ -40,7 +40,8 @@
 | commit32 | 1ceae72 | feat: migrate GeomGCN with native partitioned reconstruction |
 | commit33 | c4cc695 | feat: migrate grid forecasts with causal CPT inputs |
 | commit34 | 85c8280 | feat: migrate periodic graph forecasts with explicit distance bands |
-| commit35 | 随本节交付的提交 | feat: migrate DKFN with sample-local variance and causal rollout |
+| commit35 | e538689 | feat: migrate DKFN with sample-local variance and causal rollout |
+| commit36 | 随本节交付的提交 | feat: migrate ResLSTM with independent batches and explicit periods |
 
 ## commit1：修复基础交通缓存（670b325）
 
@@ -377,6 +378,20 @@ MultiSTGCnet 使用 multi_stgc 协议和 frame_cpt：最近帧、同刻日/周�
 forward 由配置决定预测长度，每步重新编码当前窗口；预测回填目标通道，未知额外观测保持最后值，只有已声明的 future_features 通道更新，不读取未来真实观测或 y；末步不构造无用后续窗口。模型/优化器状态（包括变换前系数）、RNG、调度器等由公共完整检查点恢复，独立评估只加载纯权重。发布 dkfn.json、--model DKFN 夹具命令及使用说明。ResLSTM 仍为 pending，将在独立批次处理。
 
 验证：新增 **26 项通过**，包括 12 种阶数/钳制/输入输出维度的原递推与修正融合参考预测/全部参数梯度、作者融合公式/系数链式梯度、改变其他样本后的预测不变与跨样本梯度为零、图幂/钳制/元信息不变与 buffer 类型迁移、单节点/常量/孤立图/零方差/系数边界的有限预测及梯度、完整训练/独立评估/RMSprop/调度器/早停/RNG 精确续训、已知未来通道更新/无标签/输入及状态不变、CPU AMP 和非法参数。与清单检查合计 **27 项通过**，当前源码完整回归 **611 passed，0 failed，0 errors，0 skipped**，见 [汇总](remaining-validation.json)。仓库外实际夹具、训练、独立评估和续训共 **4 条成功命令**，独立指标/预测逐元素一致、续训第三轮且原始缓存复用，见 [CLI](dkfn-cli-validation.json)。迁移表更新为 **61/100**，39 条 pending；排除 7 个延期 Common 与 2 个模板后，本期仍有 **30 个交通模型**及最终全量验收待完成。
+
+## commit36：迁移 ResLSTM 并修复序列/池化/服务周期输入
+
+问题：旧 ResLSTM 把 [batch,node,feature] 送入默认按时间优先的 LSTM，预测会受 batch 内其他样本影响；周期和帧直接 reshape 混排，池化不对称且展平层写死 node*96，奇数节点/其他窗口尺寸无法正确运行。输出始终只有一个预测步和一个目标，未下采样单元仍创建无用投影，图每次前向重建。数据只按总特征数取外部输入还可能把缺失流量/额外原始观测与日历混淆。完整历史跨度连续检查会把有夜间停运的服务周期数据全部过滤。
+
+修改：标准 nn.Module 保留两流量残差 CNN、近期第一流量的图分支、可选历史外部网络、节点轴 LSTM 和线性乘性注意力。LSTM 明确 batch_first=True，周期/帧轴显式排列，flow_indices 选择两列原始流量；输出头涵盖配置的预测步和全部目标。SAME 池化在尾部补齐，展平尺寸按实际 ceil(nodes/2)*ceil(history/2) 推导；单元只在下采样时创建投影。图使用列度数两侧规范化，复制并注册 buffer，不使用 np.matrix、求逆或前向重建；隐藏计算不持有 scaler/logger/device。原 base_channels=32、recurrent_hidden=128、recurrent_layers=2 为默认，可显式缩小运行示例。
+
+新增 reslstm_windows 协议，默认每段 5 帧、period_steps=72/trend_steps=360 原始服务帧，复用 seasonal_windows 和点数据缓存。轻量适配从数据元信息/原子表头识别原始列，至少要求两列真实流量；历史外部列仅来自原始观测之后的日历/.ext，额外原始列不会误作共享外部输入，也不读取未来 external/y。外部 LSTM 保留 LibCity 的实际串联形态，不声称是作者 Keras 外部分支的精确移植。归一化仅拟合训练区间，原尺度标签与掩码、互斥目标切分及完整续训复用公共实现。
+
+服务周期采样针对 ResLSTM/CONVGCN 支持窗口间的停运间隙，同时要求各窗口内部及近期到完整目标跨度连续，仍不跨原子文件边界；普通/日历采样保留完整跨度检查。策略写入运行摘要，有间隙数据加入 seasonal_segments_v1 元信息标记，避免旧样本语义无声续训。单空间元素尾批 BN 的运行统计回退提取为独立 runtime_norm 公共模块，网格模型继续使用相同行为，ResLSTM 不依赖整套网格网络。
+
+验证：新增 **31 项通过**，包含四种默认/交换流量及有/无外部网络的修正旧周期轴/SAME 池化/batch 轴参考前向和全部梯度、八种节点/窗口奇偶组合的负无穷尾部补齐独立参考/梯度、完整训练/独立评估/BN/Adam/多步调度器/早停/RNG 精确续训、全部分支真实更新、无跨样本预测及梯度、多步/多目标/单节点/batch=1/float64/输入与 buffer 不变、原始与外部字段推断/未来隔离及历史外部梯度、训练统计/缓存/未来标签变化隔离、真实单样本尾批 BN/CPU AMP、无效结构与协议、两模型服务停运间隙。原先以默认 allclose 判断随机网络微小输出变化的检查改为双精度输入梯度证明，同时保留未使用/未来输入变化后预测严格相同的检查。提取 BN 后与既有网格/清单检查 **73 项通过**（此时尚未加入两项服务间隙用例），最终当前源码完整回归 **642 passed，0 failed，0 errors，0 skipped**，见 [汇总](remaining-validation.json)。
+
+仓库外实际夹具、训练、独立评估和续训共 **4 条成功命令**，预测/指标逐元素一致，续训第三轮共 24 次参数更新，原始缓存复用，见 [CLI](reslstm-cli-validation.json)。本批明确修正旧错误轴/池化，不声称旧错误路径或论文精度复现。发布配置与较长夹具、参数和输入说明；迁移表更新为 **62/100**，38 条 pending，排除 7 个延期 Common 与 2 个模板后，本期仍有 **29 个交通模型**及最终全量验收待完成。
 
 ## 持续完成的清单
 

@@ -1,0 +1,7 @@
+{
+  "data": {"dataset": "PeriodicTiny", "data_dir": "data", "cache_dir": "cache", "pad_training": false,
+    "features": {"time_in_day": true, "day_in_week": true}},
+  "model": {"name": "ResLSTM", "params": {"base_channels": 4, "recurrent_hidden": 8, "recurrent_layers": 2}},
+  "training": {"epochs": 2, "batch_size": 16, "optimizer": {"lr": 0.001}},
+  "runtime": {"device": "cpu", "seed": 17, "output_dir": "runs"}
+}

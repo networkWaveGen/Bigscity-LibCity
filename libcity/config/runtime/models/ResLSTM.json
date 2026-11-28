@@ -1,0 +1,6 @@
+{
+  "model": {"params": {"base_channels": 32, "recurrent_hidden": 128, "recurrent_layers": 2, "flow_indices": [0,1]}},
+  "data": {"scaler": {"name": "minmax01"}},
+  "training": {"optimizer": {"lr": 0.01},
+    "scheduler": {"name": "multistep", "interval": "epoch", "milestones": [5,30,100], "gamma": 0.1}}
+}

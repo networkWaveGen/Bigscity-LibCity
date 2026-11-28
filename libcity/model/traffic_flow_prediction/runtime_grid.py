@@ -8,16 +8,7 @@ from torch import nn
 from torch.nn import functional as F
 
 from libcity.model.traffic_flow_prediction.ACFM import ConvLSTM, ExtNN, ConcatConv, ResUnit
-
-
-class GridBatchNorm(nn.BatchNorm2d):
-    def forward(self, source):
-        if self.training and source.numel() // source.shape[1] == 1:
-            # A real singleton tail on a 1x1 grid has no sample variance. Use
-            # running statistics without inventing padding or updating counters.
-            return F.batch_norm(source,self.running_mean,self.running_var,self.weight,self.bias,
-                                training=False,momentum=self.momentum,eps=self.eps)
-        return super().forward(source)
+from libcity.model.runtime_norm import SingletonBatchNorm2d as GridBatchNorm
 
 
 def safe_batchnorm(module):

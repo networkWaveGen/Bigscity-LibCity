@@ -1,0 +1,163 @@
+{
+  "passed": true,
+  "source": "D:\\LibCity 2.0\\LibCity-modernization",
+  "directory": "D:\\LibCity 2.0\\.runtime-tests\\reslstm-cli-zjs3d_ng",
+  "commands": [
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\tools\\make_runtime_fixture.py",
+        "--directory",
+        "D:\\LibCity 2.0\\.runtime-tests\\reslstm-cli-zjs3d_ng\\example",
+        "--model",
+        "ResLSTM"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\reslstm-cli-zjs3d_ng",
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "train",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\reslstm-cli-zjs3d_ng\\example\\reslstm.json",
+        "--set",
+        "runtime.exp_id=train"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\reslstm-cli-zjs3d_ng",
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "evaluate",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\reslstm-cli-zjs3d_ng\\example\\reslstm.json",
+        "--checkpoint",
+        "D:\\LibCity 2.0\\.runtime-tests\\reslstm-cli-zjs3d_ng\\example\\runs\\train\\checkpoints\\best.pt",
+        "--set",
+        "runtime.exp_id=evaluated"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\reslstm-cli-zjs3d_ng",
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "train",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\reslstm-cli-zjs3d_ng\\example\\reslstm.json",
+        "--resume",
+        "D:\\LibCity 2.0\\.runtime-tests\\reslstm-cli-zjs3d_ng\\example\\runs\\train\\checkpoints\\last.pt",
+        "--set",
+        "training.epochs=3",
+        "--set",
+        "runtime.exp_id=resumed"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\reslstm-cli-zjs3d_ng",
+      "exit_code": 0
+    }
+  ],
+  "model": "ResLSTM",
+  "protocol": "reslstm_windows",
+  "metrics": {
+    "MAE@1": 18.670025948341937,
+    "RMSE@1": 20.118085952776173,
+    "loss": 18.67002601623535,
+    "best_validation": 18.737664031982423
+  },
+  "prediction_shape": [
+    160,
+    1,
+    4,
+    2
+  ],
+  "independent_metrics_identical": true,
+  "independent_predictions_identical": true,
+  "resumed_epoch": 3,
+  "optimizer_steps": 24,
+  "format_version": 3,
+  "cache_statuses": {
+    "train": "miss",
+    "evaluate": "hit",
+    "resume": "hit"
+  },
+  "split": {
+    "train": 115,
+    "val": 160,
+    "test": 160,
+    "train_padded": false,
+    "semantics": "target_time_v1",
+    "input_window": 15,
+    "requested_input_window": 5,
+    "adapter": "seasonal_windows",
+    "intervals": {
+      "train": {
+        "samples": 115,
+        "target_start": "2024-01-16T05:00:00.000000000",
+        "target_end": "2024-01-20T23:00:00.000000000",
+        "target_index_start": 365,
+        "target_index_end": 479
+      },
+      "val": {
+        "samples": 160,
+        "target_start": "2024-01-21T00:00:00.000000000",
+        "target_end": "2024-01-27T15:00:00.000000000",
+        "target_index_start": 480,
+        "target_index_end": 639
+      },
+      "test": {
+        "samples": 160,
+        "target_start": "2024-01-27T16:00:00.000000000",
+        "target_end": "2024-02-03T07:00:00.000000000",
+        "target_index_start": 640,
+        "target_index_end": 799
+      }
+    },
+    "train_end": "2024-01-21T00:00:00.000000000",
+    "val_end": "2024-01-27T16:00:00.000000000",
+    "scaler_fit_end_exclusive": "2024-01-21T00:00:00.000000000",
+    "discarded_boundary_windows": 0,
+    "history_span_points": 365,
+    "cache": {
+      "status": "miss",
+      "path": "D:\\LibCity 2.0\\.runtime-tests\\reslstm-cli-zjs3d_ng\\example\\cache\\traffic-raw-v1\\065956a522aeca6e4d2f0771.npz"
+    },
+    "sampling_gap_policy": "seasonal_segments_and_recent_target_contiguous",
+    "reslstm_inputs": {
+      "observation_columns": [
+        "value_0",
+        "value_1"
+      ],
+      "historical_global_external_indices": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "future_external_inputs": false
+    }
+  },
+  "recurrent_sequence_axis": "nodes_not_batch",
+  "period_channels": [
+    "trend",
+    "period",
+    "closeness"
+  ],
+  "pooling": "SAME_ceil_bottom_right",
+  "limitations": [
+    "LibCity residual/external architecture with explicit axis and pooling corrections, not an exact port of authors Keras external branch",
+    "synthetic lifecycle validation, not real-city accuracy certification"
+  ]
+}

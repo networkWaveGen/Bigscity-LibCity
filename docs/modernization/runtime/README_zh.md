@@ -14,6 +14,8 @@ CONVGCN/MultiSTGCnet 示例可用 `--model CONVGCN` / `--model MultiSTGCnet` 生
 
 DKFN 示例可用 `tools/make_runtime_fixture.py --directory <目录> --model DKFN` 生成，再对 dkfn.json 使用相同的 train/evaluate/resume 命令。它保留图/自身双循环流，方差按样本计算，避免其他 batch 样本改变预测；零方差使用有限回退。多步滚动只读取已声明的未来特征，未知观测沿用最后值，不读取 y。默认 RMSprop，hops/clamp_adjacency/threshold 位于 model.params；融合系数与有意数值变化见 [模型说明](models_zh.md)。
 
+ResLSTM 示例用 `--model ResLSTM` 生成，对 reslstm.json 执行相同训练/评估/续训命令。至少提供两列原始流量，flow_indices 可选择对应列；历史日历/.ext 单独作为全网外部信息，不读取未来真实值。reslstm_windows 默认每段 5 帧、服务偏移 72/360 帧，发布夹具有足够长的时间轴。季节窗口之间允许停运间隔，但每段及近期到目标须连续，策略写入摘要；LSTM 沿节点轴运行，batch 样本互相独立。详见 [模型说明](models_zh.md)。
+
 ## GRU 完整例子
 
 从源码根目录运行，数据、缓存和输出都可放在仓库外：

@@ -139,8 +139,8 @@ def validate(config, preset):
             raise ValueError('Unknown data.sampling.name')
         if (spec.protocol=='grid_cpt') != (data['sampling']['name']=='grid_cpt'):
             raise ValueError('grid_cpt sampling requires a registered grid_cpt model and vice versa')
-        if (model['name']=='CONVGCN') != (data['sampling']['name']=='seasonal_windows'):
-            raise ValueError('seasonal_windows sampling requires CONVGCN and vice versa')
+        if (spec.protocol in ('convgcn_windows','reslstm_windows')) != (data['sampling']['name']=='seasonal_windows'):
+            raise ValueError('seasonal_windows sampling requires CONVGCN/ResLSTM and vice versa')
         if (model['name']=='MultiSTGCnet') != (data['sampling']['name']=='frame_cpt'):
             raise ValueError('frame_cpt sampling requires MultiSTGCnet and vice versa')
         if data['sampling']['name']=='seasonal_windows':

@@ -124,6 +124,26 @@ the target channels, retain the last observed unknown covariates, and insert
 only declared known future channels. Forward never reads labels. Model settings
 are `hops`, `clamp_adjacency` and `threshold`; fitting defaults to RMSprop.
 
+`--model ResLSTM` creates a longer periodic point-flow example. Run
+`reslstm.json` through the common lifecycle. It needs at least two raw flow
+columns; `model.params.flow_indices` selects two (default 0/1). Historical
+calendar/.ext covariates are separate from raw observations, and future values
+or labels never enter the model. `reslstm_windows` defaults to five frames per
+window and service-frame shifts 72/360. Three periods are explicit convolution
+channels. Node-axis LSTMs keep each batch sample independent. SAME pooling and
+derived flattened widths support odd/even nodes and history lengths, including
+singletons, multiple forecast steps and target channels. Base/recurrent widths
+and layers are configurable; defaults preserve 32/128/two-layer LibCity blocks.
+
+For ResLSTM/CONVGCN service windows, overnight closures may occur **between**
+the three windows; every selected window and the recent-history-to-target span
+must still be contiguous. Atomic file boundaries are not crossed. Ordinary and
+calendar-period windows retain full-span continuity checks. The chosen policy
+is recorded; affected gap datasets carry a semantic marker for resume checks.
+The old mixed period axes, shifted pooling and batch-as-sequence behavior are
+explicitly corrected. The LibCity external recurrent branch is retained rather
+than claiming an exact port of the authors' different Keras external branch.
+
 `--model MegaCRN` creates a memory-augmented forecast example with explicit known
 future time features. Its auxiliary memory losses and curriculum targets are
 used only by the training step; ordinary forward/evaluation returns predictions

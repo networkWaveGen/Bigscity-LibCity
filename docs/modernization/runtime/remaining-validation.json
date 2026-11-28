@@ -1,5 +1,5 @@
 {
-  "scope": "Remaining-work commits 1-35; whole-library migration remains in progress",
+  "scope": "Remaining-work commits 1-36; whole-library migration remains in progress",
   "environment": {
     "python": "3.12.13",
     "torch": "2.15.0+cpu",
@@ -8,7 +8,7 @@
     "gensim": "4.4.0"
   },
   "full_tests": {
-    "tests": 611,
+    "tests": 642,
     "failures": 0,
     "errors": 0,
     "skipped": 0
@@ -446,6 +446,37 @@
     "test_periodic_protocol_and_model_must_match[GRU-frame_cpt]",
     "test_periodic_protocol_and_model_must_match[GRU-seasonal_windows]",
     "test_distance_column_switch_rebuilds_graph_and_source_changes_reject_resume",
+    "test_corrected_legacy_period_axes_same_pooling_batch_axes_and_all_gradients[False-flows0]",
+    "test_corrected_legacy_period_axes_same_pooling_batch_axes_and_all_gradients[False-flows1]",
+    "test_corrected_legacy_period_axes_same_pooling_batch_axes_and_all_gradients[True-flows2]",
+    "test_corrected_legacy_period_axes_same_pooling_batch_axes_and_all_gradients[True-flows3]",
+    "test_same_pooling_matches_explicit_negative_infinity_padding_and_gradients[1-1]",
+    "test_same_pooling_matches_explicit_negative_infinity_padding_and_gradients[1-2]",
+    "test_same_pooling_matches_explicit_negative_infinity_padding_and_gradients[2-1]",
+    "test_same_pooling_matches_explicit_negative_infinity_padding_and_gradients[2-2]",
+    "test_same_pooling_matches_explicit_negative_infinity_padding_and_gradients[3-5]",
+    "test_same_pooling_matches_explicit_negative_infinity_padding_and_gradients[3-6]",
+    "test_same_pooling_matches_explicit_negative_infinity_padding_and_gradients[4-5]",
+    "test_same_pooling_matches_explicit_negative_infinity_padding_and_gradients[4-6]",
+    "test_full_train_evaluate_bn_adam_schedule_rng_exact_resume",
+    "test_node_and_batch_axes_are_independent_in_evaluation_and_gradients",
+    "test_derived_shapes_multistep_multitarget_batch_one_float64_and_stateless_buffers[1-1-False]",
+    "test_derived_shapes_multistep_multitarget_batch_one_float64_and_stateless_buffers[1-2-True]",
+    "test_derived_shapes_multistep_multitarget_batch_one_float64_and_stateless_buffers[3-2-False]",
+    "test_derived_shapes_multistep_multitarget_batch_one_float64_and_stateless_buffers[4-5-True]",
+    "test_external_schema_uses_only_historical_global_features_and_not_extra_raw_observations",
+    "test_training_normalization_and_input_predictions_ignore_changed_future_targets",
+    "test_raw_column_inference_and_missing_flow_rejection",
+    "test_normalized_graph_matches_independent_column_degree_formula_and_owns_data",
+    "test_singleton_true_tail_bn_cpu_amp_training",
+    "test_invalid_dimensions_and_flow_indices_are_rejected[parameters0]",
+    "test_invalid_dimensions_and_flow_indices_are_rejected[parameters1]",
+    "test_invalid_dimensions_and_flow_indices_are_rejected[parameters2]",
+    "test_invalid_dimensions_and_flow_indices_are_rejected[parameters3]",
+    "test_invalid_dimensions_and_flow_indices_are_rejected[parameters4]",
+    "test_reslstm_rejects_a_contiguous_window_protocol",
+    "test_service_windows_allow_between_window_closures_but_keep_each_segment_and_targets_complete[ResLSTM]",
+    "test_service_windows_allow_between_window_closures_but_keep_each_segment_and_targets_complete[CONVGCN]",
     "test_retired_modules_and_executor_classes_are_absent",
     "test_tensor_collation_owns_values_and_padding_keeps_explicit_lengths",
     "test_tensor_loader_spawn_and_heterogeneous_tail_padding",
@@ -629,8 +660,8 @@
   ],
   "inventory": {
     "total": 100,
-    "migrated": 61,
-    "pending": 39
+    "migrated": 62,
+    "pending": 38
   },
   "history": [
     {
@@ -1010,6 +1041,20 @@
         "migrated": 60,
         "pending": 40
       }
+    },
+    {
+      "scope": "commits 1-35, through e538689",
+      "full_tests": {
+        "tests": 611,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "inventory": {
+        "total": 100,
+        "migrated": 61,
+        "pending": 39
+      }
     }
   ],
   "current_cli": {
@@ -1196,6 +1241,16 @@
     "format_version": 3,
     "variance": "per_sample",
     "coefficient": "positive_softplus",
+    "cache_reuse": true
+  },
+  "reslstm_cli": {
+    "report": "reslstm-cli-validation.json",
+    "commands": 3,
+    "fixture_commands": 1,
+    "format_version": 3,
+    "protocol": "reslstm_windows",
+    "recurrent_sequence_axis": "nodes",
+    "pooling": "SAME_ceil",
     "cache_reuse": true
   }
 }

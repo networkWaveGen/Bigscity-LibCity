@@ -59,6 +59,10 @@ def periodic_fixture(root,name='PeriodicTiny',steps=400,nodes=4,features=2,outpu
     return folder
 
 
+def reslstm_fixture(root,name='PeriodicTiny'):
+    return periodic_fixture(root,name=name,steps=800)
+
+
 def grid_fixture(root, name='GridTiny', steps=400, rows=2, columns=3, features=3, outputs=2):
     folder = Path(root)/name
     folder.mkdir(parents=True,exist_ok=True)

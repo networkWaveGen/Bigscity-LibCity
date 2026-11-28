@@ -1,0 +1,4 @@
+{
+  "data": {"input_window": 5, "output_window": 1,
+    "sampling": {"name": "seasonal_windows", "period_steps": 72, "trend_steps": 360}}
+}

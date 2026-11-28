@@ -145,7 +145,18 @@ def prepare_traffic(data, training, evaluation, seed, logger=None):
     # A gap in a file is a boundary too: no window may span unobserved timestamps.
     interval = np.timedelta64(metadata.get('time_intervals',300), 's')
     gaps = np.r_[False,np.diff(clock)!=interval].cumsum()
-    starts = starts[gaps[starts+horizon-1]==gaps[starts+offsets.min()]]
+    if sampling['name']=='seasonal_windows':
+        # Service-frame shifts may cross overnight closures between windows.
+        # Each actual segment and the recent-history/target span stay complete.
+        complete = gaps[starts-data['input_window']]==gaps[starts+horizon-1]
+        for segment in offsets.reshape(3,data['input_window']):
+            complete &= gaps[starts+segment[0]]==gaps[starts+segment[-1]]
+        starts = starts[complete]
+        if gaps[-1]:
+            # Affected old checkpoints must not silently resume with new samples.
+            layout['gap_policy'] = 'seasonal_segments_v1'
+    else:
+        starts = starts[gaps[starts+horizon-1]==gaps[starts+offsets.min()]]
     selections = partition_windows(starts, horizon, cuts, len(clock))
     meta = DatasetMetadata(data['dataset'], history.shape[1], history.shape[-1], output_dim,
                            graph, metadata, layout)
@@ -170,7 +181,8 @@ def prepare_traffic(data, training, evaluation, seed, logger=None):
         requested_input_window=data['input_window'],adapter=layout['kind'], intervals=split_info,
         train_end=str(clock[cuts[0]]),val_end=str(clock[cuts[1]]),scaler_fit_end_exclusive=str(clock[cuts[0]]),
         discarded_boundary_windows=len(starts)-sum(map(len,selections)),
-        history_span_points=int(-offsets.min()),cache=cache_info)
+        history_span_points=int(-offsets.min()),cache=cache_info,
+        sampling_gap_policy='seasonal_segments_and_recent_target_contiguous' if sampling['name']=='seasonal_windows' else 'full_input_span_contiguous')
     if logger:
         logger.info('Target-time split: %s', summary)
     return DataBundle(*loaders,meta,scaler,generator,summary)
