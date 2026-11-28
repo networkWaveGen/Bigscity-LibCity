@@ -1,5 +1,5 @@
 {
-  "scope": "Remaining-work commits 1-47; whole-library migration remains in progress",
+  "scope": "Remaining-work commits 1-48; whole-library migration remains in progress",
   "environment": {
     "python": "3.12.13",
     "torch": "2.15.0+cpu",
@@ -9,7 +9,7 @@
     "scikit_learn": "1.9.1"
   },
   "full_tests": {
-    "tests": 1009,
+    "tests": 1045,
     "failures": 0,
     "errors": 0,
     "skipped": 0
@@ -351,6 +351,42 @@
     "test_training_independent_ranking_and_exact_resume",
     "test_batch_one_padding_label_isolation_and_float64",
     "test_personalized_user_vocabulary_is_validated",
+    "test_corrected_original_full_forecast_auxiliary_heads_and_all_gradients[12-2-32-1]",
+    "test_corrected_original_full_forecast_auxiliary_heads_and_all_gradients[4-3-4-2]",
+    "test_corrected_original_full_forecast_auxiliary_heads_and_all_gradients[7-2-3-3]",
+    "test_corrected_original_full_forecast_auxiliary_heads_and_all_gradients[1-3-2-2]",
+    "test_geographic_squared_distance_formula_zero_rows_and_large_finite_distances",
+    "test_semantic_graph_matches_independent_degree_formula_and_raw_mask_not_normalized_sign",
+    "test_batch_independent_label_free_float64_rollout_keeps_only_static_buffer_and_does_not_call_aux_heads[3-4-2]",
+    "test_batch_independent_label_free_float64_rollout_keeps_only_static_buffer_and_does_not_call_aux_heads[1-1-3]",
+    "test_raw_marginal_objective_and_all_head_gradients_match_direct_cellwise_formula[None-False-none]",
+    "test_raw_marginal_objective_and_all_head_gradients_match_direct_cellwise_formula[None-False-standard]",
+    "test_raw_marginal_objective_and_all_head_gradients_match_direct_cellwise_formula[None-False-minmax01]",
+    "test_raw_marginal_objective_and_all_head_gradients_match_direct_cellwise_formula[None-True-none]",
+    "test_raw_marginal_objective_and_all_head_gradients_match_direct_cellwise_formula[None-True-standard]",
+    "test_raw_marginal_objective_and_all_head_gradients_match_direct_cellwise_formula[None-True-minmax01]",
+    "test_raw_marginal_objective_and_all_head_gradients_match_direct_cellwise_formula[0.0-False-none]",
+    "test_raw_marginal_objective_and_all_head_gradients_match_direct_cellwise_formula[0.0-False-standard]",
+    "test_raw_marginal_objective_and_all_head_gradients_match_direct_cellwise_formula[0.0-False-minmax01]",
+    "test_raw_marginal_objective_and_all_head_gradients_match_direct_cellwise_formula[0.0-True-none]",
+    "test_raw_marginal_objective_and_all_head_gradients_match_direct_cellwise_formula[0.0-True-standard]",
+    "test_raw_marginal_objective_and_all_head_gradients_match_direct_cellwise_formula[0.0-True-minmax01]",
+    "test_actual_od_train_independent_evaluation_auxiliary_updates_and_full_adam_schedule_rng_resume[minmax01]",
+    "test_actual_od_train_independent_evaluation_auxiliary_updates_and_full_adam_schedule_rng_resume[standard]",
+    "test_effective_batch_auxiliary_update_with_missing_cells_matches_full_batch",
+    "test_empty_od_targets_skip_all_auxiliary_terms_and_keep_finite_zero_gradient",
+    "test_actual_cpu_amp_with_real_tail_and_single_node_single_history[False]",
+    "test_actual_cpu_amp_with_real_tail_and_single_node_single_history[True]",
+    "test_spawn_worker_keeps_boolean_raw_masks",
+    "test_invalid_od_configuration_fails_before_data_loading[change0]",
+    "test_invalid_od_configuration_fails_before_data_loading[change1]",
+    "test_invalid_od_configuration_fails_before_data_loading[change2]",
+    "test_invalid_od_configuration_fails_before_data_loading[change3]",
+    "test_invalid_od_configuration_fails_before_data_loading[change4]",
+    "test_invalid_od_configuration_fails_before_data_loading[change5]",
+    "test_invalid_od_configuration_fails_before_data_loading[change6]",
+    "test_other_models_cannot_select_od_sampling",
+    "test_missing_flow_metadata_and_invalid_mask_fail_clearly",
     "test_corrected_original_dense_forecast_embedding_and_all_gradients[merges0]",
     "test_corrected_original_dense_forecast_embedding_and_all_gradients[merges1]",
     "test_corrected_original_dense_forecast_embedding_and_all_gradients[merges2]",
@@ -1028,8 +1064,8 @@
   ],
   "inventory": {
     "total": 100,
-    "migrated": 70,
-    "pending": 30
+    "migrated": 71,
+    "pending": 29
   },
   "history": [
     {
@@ -1568,6 +1604,20 @@
       "scope": "commits 1-46, through d6ca1f8",
       "full_tests": {
         "tests": 989,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "inventory": {
+        "total": 100,
+        "migrated": 70,
+        "pending": 30
+      }
+    },
+    {
+      "scope": "commits 1-47, through 0ef3677",
+      "full_tests": {
+        "tests": 1009,
         "failures": 0,
         "errors": 0,
         "skipped": 0
@@ -2555,7 +2605,7 @@
       "Static arrays are read-only metadata; numeric contents are model buffers, while checkpoint metadata stores only shape/dtype"
     ]
   },
-  "results_file": "D:\\LibCity 2.0\\.runtime-tests\\remaining-suite-44-results.xml",
+  "results_file": "D:\\LibCity 2.0\\.runtime-tests\\remaining-suite-45-results.xml",
   "rgsl_cli": {
     "passed": true,
     "source": "D:\\LibCity 2.0\\LibCity-modernization",
@@ -2974,7 +3024,7 @@
   "od_data_validation": {
     "passed": true,
     "tests": 20,
-    "scope": "Shared OD data/metrics prerequisite; GEML and CSTN remain pending",
+    "scope": "Shared OD data/metrics prerequisite from commit47; native GEML integrated in commit48, CSTN remains pending",
     "evidence": "tests/test_runtime_od_data.py",
     "documentation": "od-data_zh.md",
     "checks": [
@@ -2984,5 +3034,295 @@
       "Independent NumPy metrics over node, OD and grid OD spatial axes in both modes",
       "ODProbe actual train/evaluate/export, exact optimizer/RNG continuation and changed OD source rejection"
     ]
+  },
+  "geml_cli": {
+    "passed": true,
+    "source": "D:\\LibCity 2.0\\LibCity-modernization",
+    "directory": "D:\\LibCity 2.0\\.runtime-tests\\geml-cli-o770sqbc",
+    "commands": [
+      {
+        "command": [
+          "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+          "-B",
+          "D:\\LibCity 2.0\\LibCity-modernization\\tools\\make_runtime_fixture.py",
+          "--directory",
+          "D:\\LibCity 2.0\\.runtime-tests\\geml-cli-o770sqbc\\example",
+          "--model",
+          "GEML"
+        ],
+        "cwd": "D:\\LibCity 2.0\\.runtime-tests\\geml-cli-o770sqbc",
+        "exit_code": 0
+      },
+      {
+        "command": [
+          "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+          "-B",
+          "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+          "train",
+          "--config",
+          "D:\\LibCity 2.0\\.runtime-tests\\geml-cli-o770sqbc\\example\\geml.json",
+          "--set",
+          "runtime.exp_id=train"
+        ],
+        "cwd": "D:\\LibCity 2.0\\.runtime-tests\\geml-cli-o770sqbc",
+        "exit_code": 0
+      },
+      {
+        "command": [
+          "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+          "-B",
+          "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+          "evaluate",
+          "--config",
+          "D:\\LibCity 2.0\\.runtime-tests\\geml-cli-o770sqbc\\example\\geml.json",
+          "--checkpoint",
+          "D:\\LibCity 2.0\\.runtime-tests\\geml-cli-o770sqbc\\example\\runs\\train\\checkpoints\\best.pt",
+          "--set",
+          "runtime.exp_id=evaluated"
+        ],
+        "cwd": "D:\\LibCity 2.0\\.runtime-tests\\geml-cli-o770sqbc",
+        "exit_code": 0
+      },
+      {
+        "command": [
+          "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+          "-B",
+          "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+          "train",
+          "--config",
+          "D:\\LibCity 2.0\\.runtime-tests\\geml-cli-o770sqbc\\example\\geml.json",
+          "--resume",
+          "D:\\LibCity 2.0\\.runtime-tests\\geml-cli-o770sqbc\\example\\runs\\train\\checkpoints\\last.pt",
+          "--set",
+          "runtime.exp_id=resumed",
+          "--set",
+          "training.epochs=3"
+        ],
+        "cwd": "D:\\LibCity 2.0\\.runtime-tests\\geml-cli-o770sqbc",
+        "exit_code": 0
+      }
+    ],
+    "prediction_shape": [
+      9,
+      2,
+      3,
+      3,
+      1
+    ],
+    "independent_predictions_equal": true,
+    "independent_metrics_equal": true,
+    "global_raw_mse": 295.760498046875,
+    "evaluation_loss": 295.7605150010851,
+    "resumed_epoch": 3,
+    "optimizer_steps": 9,
+    "cache_statuses": [
+      "miss",
+      "hit",
+      "hit"
+    ],
+    "geographic_buffer_shape": [
+      3,
+      3
+    ],
+    "weights_only_safe_load": true,
+    "evaluate_has_no_training_artifacts": true,
+    "runtime_info": {
+      "train": {
+        "python": "3.12.13",
+        "pytorch": "2.15.0+cpu",
+        "numpy": "2.5.5",
+        "platform": "Windows-11-10.0.26200-SP0",
+        "mode": "train",
+        "execution_kind": "neural",
+        "device": "cpu",
+        "seed": 17,
+        "benchmark_protocol": "od_window",
+        "split": {
+          "semantics": "target_time_v1",
+          "adapter": "od_window",
+          "input_window": 4,
+          "requested_input_window": 4,
+          "spatial_shape": [
+            3,
+            3
+          ],
+          "grid_shape": null,
+          "intervals": {
+            "train": {
+              "samples": 23,
+              "target_index_start": 4,
+              "target_index_end": 27
+            },
+            "val": {
+              "samples": 9,
+              "target_index_start": 28,
+              "target_index_end": 37
+            },
+            "test": {
+              "samples": 9,
+              "target_index_start": 38,
+              "target_index_end": 47
+            }
+          },
+          "train": 23,
+          "val": 9,
+          "test": 9,
+          "train_padded": false,
+          "train_end": "2024-01-01T02:20:00.000000000",
+          "val_end": "2024-01-01T03:10:00.000000000",
+          "scaler_fit_end_exclusive": "2024-01-01T02:20:00.000000000",
+          "discarded_boundary_windows": 2,
+          "cache": {
+            "status": "miss",
+            "path": "D:\\LibCity 2.0\\.runtime-tests\\geml-cli-o770sqbc\\example\\cache\\traffic-raw-v1\\58748b459bf7c23223191c78.npz"
+          },
+          "sampling_gap_policy": "file_and_full_input_target_span_contiguous",
+          "input_missing_observations": "zero"
+        },
+        "protocol_changes": {
+          "data.input_window": 4,
+          "data.sampling": {
+            "name": "od_window"
+          },
+          "benchmark.protocol": "od_window"
+        },
+        "capabilities": {
+          "requires_checkpoint": true,
+          "supports_resume": true,
+          "supports_validation": true
+        }
+      },
+      "evaluated": {
+        "python": "3.12.13",
+        "pytorch": "2.15.0+cpu",
+        "numpy": "2.5.5",
+        "platform": "Windows-11-10.0.26200-SP0",
+        "mode": "evaluate",
+        "execution_kind": "neural",
+        "device": "cpu",
+        "seed": 17,
+        "benchmark_protocol": "od_window",
+        "split": {
+          "semantics": "target_time_v1",
+          "adapter": "od_window",
+          "input_window": 4,
+          "requested_input_window": 4,
+          "spatial_shape": [
+            3,
+            3
+          ],
+          "grid_shape": null,
+          "intervals": {
+            "train": {
+              "samples": 23,
+              "target_index_start": 4,
+              "target_index_end": 27
+            },
+            "val": {
+              "samples": 9,
+              "target_index_start": 28,
+              "target_index_end": 37
+            },
+            "test": {
+              "samples": 9,
+              "target_index_start": 38,
+              "target_index_end": 47
+            }
+          },
+          "train": 23,
+          "val": 9,
+          "test": 9,
+          "train_padded": false,
+          "train_end": "2024-01-01T02:20:00.000000000",
+          "val_end": "2024-01-01T03:10:00.000000000",
+          "scaler_fit_end_exclusive": "2024-01-01T02:20:00.000000000",
+          "discarded_boundary_windows": 2,
+          "cache": {
+            "status": "hit",
+            "path": "D:\\LibCity 2.0\\.runtime-tests\\geml-cli-o770sqbc\\example\\cache\\traffic-raw-v1\\58748b459bf7c23223191c78.npz"
+          },
+          "sampling_gap_policy": "file_and_full_input_target_span_contiguous",
+          "input_missing_observations": "zero"
+        },
+        "protocol_changes": {
+          "data.input_window": 4,
+          "data.sampling": {
+            "name": "od_window"
+          },
+          "benchmark.protocol": "od_window"
+        },
+        "capabilities": {
+          "requires_checkpoint": true,
+          "supports_resume": true,
+          "supports_validation": true
+        }
+      },
+      "resumed": {
+        "python": "3.12.13",
+        "pytorch": "2.15.0+cpu",
+        "numpy": "2.5.5",
+        "platform": "Windows-11-10.0.26200-SP0",
+        "mode": "train",
+        "execution_kind": "neural",
+        "device": "cpu",
+        "seed": 17,
+        "benchmark_protocol": "od_window",
+        "split": {
+          "semantics": "target_time_v1",
+          "adapter": "od_window",
+          "input_window": 4,
+          "requested_input_window": 4,
+          "spatial_shape": [
+            3,
+            3
+          ],
+          "grid_shape": null,
+          "intervals": {
+            "train": {
+              "samples": 23,
+              "target_index_start": 4,
+              "target_index_end": 27
+            },
+            "val": {
+              "samples": 9,
+              "target_index_start": 28,
+              "target_index_end": 37
+            },
+            "test": {
+              "samples": 9,
+              "target_index_start": 38,
+              "target_index_end": 47
+            }
+          },
+          "train": 23,
+          "val": 9,
+          "test": 9,
+          "train_padded": false,
+          "train_end": "2024-01-01T02:20:00.000000000",
+          "val_end": "2024-01-01T03:10:00.000000000",
+          "scaler_fit_end_exclusive": "2024-01-01T02:20:00.000000000",
+          "discarded_boundary_windows": 2,
+          "cache": {
+            "status": "hit",
+            "path": "D:\\LibCity 2.0\\.runtime-tests\\geml-cli-o770sqbc\\example\\cache\\traffic-raw-v1\\58748b459bf7c23223191c78.npz"
+          },
+          "sampling_gap_policy": "file_and_full_input_target_span_contiguous",
+          "input_missing_observations": "zero"
+        },
+        "protocol_changes": {
+          "data.input_window": 4,
+          "data.sampling": {
+            "name": "od_window"
+          },
+          "benchmark.protocol": "od_window"
+        },
+        "capabilities": {
+          "requires_checkpoint": true,
+          "supports_resume": true,
+          "supports_validation": true
+        }
+      }
+    },
+    "scope": "Actual published GEML OD example; CPU functionality, not paper accuracy"
   }
 }

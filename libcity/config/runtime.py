@@ -98,6 +98,9 @@ def validate(config, preset):
         if type(default) is float and (type(value) not in (int, float) or not math.isfinite(value)):
             raise TypeError(f'model.params.{key} must be a finite number')
     _validate_runtime(runtime)
+    if model['name']=='GEML':
+        for key in ('embed_dim','p_interval'):
+            _positive(model['params'][key],'GEML '+key)
     if spec.kind=='external':
         _validate_external(data,training,evaluation,runtime,model['name'])
         return
@@ -172,8 +175,14 @@ def validate(config, preset):
                 raise ValueError('data.graph.reachability_column is a TGCLSTM column name or null')
         _known(data['sampling'], ('name','closeness','period','trend','interval_period','interval_trend',
                                   'temporal_history','period_steps','trend_steps'), 'data.sampling')
-        if data['sampling'].get('name') not in ('window','cpt','crann','grid_cpt','frame_cpt','seasonal_windows'):
+        if data['sampling'].get('name') not in ('window','cpt','crann','grid_cpt','frame_cpt','seasonal_windows','od_window'):
             raise ValueError('Unknown data.sampling.name')
+        if (spec.protocol=='od_window') != (data['sampling']['name']=='od_window'):
+            raise ValueError('od_window sampling requires a registered OD model and vice versa')
+        if spec.protocol=='od_window' and data['graph']['name'] not in ('weighted','binary'):
+            raise ValueError('OD models require raw weighted or binary relations')
+        if spec.protocol=='od_window':
+            _known(data['graph'],('name','symmetric','self_loops'),'OD data.graph')
         if (spec.protocol=='grid_cpt') != (data['sampling']['name']=='grid_cpt'):
             raise ValueError('grid_cpt sampling requires a registered grid_cpt model and vice versa')
         if (spec.protocol in ('convgcn_windows','reslstm_windows')) != (data['sampling']['name']=='seasonal_windows'):
@@ -247,7 +256,7 @@ def validate(config, preset):
         'scheduler': ('name', 'interval', 'step_size', 'gamma', 'milestones', 'T_max', 'eta_min', 'patience',
                       'factor', 'monitor', 'mode', 'threshold', 'max_lr', 'total_steps', 'pct_start', 'warmup_steps',
                       'model_dim', 'lr_multiplier'),
-        'loss': ('name', 'mask_value','alpha','eps')+(('delta',) if training['loss'].get('name') in ('huber','masked_huber') else ())+(('negative_samples',) if spec.protocol in ('atst_ranking','stan_ranking') else
+        'loss': ('name', 'mask_value','alpha','eps')+(('od_weight','origin_weight','destination_weight') if model['name']=='GEML' else ())+(('delta',) if training['loss'].get('name') in ('huber','masked_huber') else ())+(('negative_samples',) if spec.protocol in ('atst_ranking','stan_ranking') else
             ('negative_samples','temperature','num_nearest','exclude_visited') if spec.protocol=='geosan_ranking' else ()),
         'early_stopping': ('patience', 'min_delta')}.items():
         _known(training[key], names, f'training.{key}')
@@ -298,6 +307,13 @@ def validate(config, preset):
         spec.task,('mae','mse','masked_mae','masked_mse','huber','masked_huber'))
     if model['name']=='CCRNN':
         losses += ('rmse','masked_rmse')
+    if model['name']=='GEML':
+        losses = ('mse','masked_mse')
+        weights = [training['loss'].get(key) for key in ('od_weight','origin_weight','destination_weight')]
+        for key,value in zip(('od_weight','origin_weight','destination_weight'),weights):
+            _number(value,'GEML training.loss.'+key)
+        if not sum(weights):
+            raise ValueError('GEML requires at least one positive loss weight')
     if training['loss'].get('name') not in losses:
         raise ValueError('Unknown training.loss.name')
     if training['loss']['name'] in ('huber','masked_huber'):

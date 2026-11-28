@@ -29,6 +29,9 @@ class ModelSpec:
 
 
 MODELS = {
+    'GEML': ModelSpec('libcity.model.traffic_od_prediction.runtime_geml:GEML',protocol='od_window',
+        prepare_data='libcity.data.od_bundle:prepare_od',loss='libcity.executor.geml_step:GEMLLoss',
+        step='libcity.executor.geml_step:auxiliary_step'),
     'DMSTGCN': ModelSpec('libcity.model.traffic_speed_prediction.runtime_dmstgcn:DMSTGCN',
         prepare_data='libcity.data.dmstgcn_bundle:prepare_dmstgcn'),
     'CCRNN': ModelSpec('libcity.model.traffic_demand_prediction.runtime_ccrnn:CCRNN',

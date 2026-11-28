@@ -1,0 +1,290 @@
+{
+  "passed": true,
+  "source": "D:\\LibCity 2.0\\LibCity-modernization",
+  "directory": "D:\\LibCity 2.0\\.runtime-tests\\geml-cli-o770sqbc",
+  "commands": [
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\tools\\make_runtime_fixture.py",
+        "--directory",
+        "D:\\LibCity 2.0\\.runtime-tests\\geml-cli-o770sqbc\\example",
+        "--model",
+        "GEML"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\geml-cli-o770sqbc",
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "train",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\geml-cli-o770sqbc\\example\\geml.json",
+        "--set",
+        "runtime.exp_id=train"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\geml-cli-o770sqbc",
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "evaluate",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\geml-cli-o770sqbc\\example\\geml.json",
+        "--checkpoint",
+        "D:\\LibCity 2.0\\.runtime-tests\\geml-cli-o770sqbc\\example\\runs\\train\\checkpoints\\best.pt",
+        "--set",
+        "runtime.exp_id=evaluated"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\geml-cli-o770sqbc",
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "train",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\geml-cli-o770sqbc\\example\\geml.json",
+        "--resume",
+        "D:\\LibCity 2.0\\.runtime-tests\\geml-cli-o770sqbc\\example\\runs\\train\\checkpoints\\last.pt",
+        "--set",
+        "runtime.exp_id=resumed",
+        "--set",
+        "training.epochs=3"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\geml-cli-o770sqbc",
+      "exit_code": 0
+    }
+  ],
+  "prediction_shape": [
+    9,
+    2,
+    3,
+    3,
+    1
+  ],
+  "independent_predictions_equal": true,
+  "independent_metrics_equal": true,
+  "global_raw_mse": 295.760498046875,
+  "evaluation_loss": 295.7605150010851,
+  "resumed_epoch": 3,
+  "optimizer_steps": 9,
+  "cache_statuses": [
+    "miss",
+    "hit",
+    "hit"
+  ],
+  "geographic_buffer_shape": [
+    3,
+    3
+  ],
+  "weights_only_safe_load": true,
+  "evaluate_has_no_training_artifacts": true,
+  "runtime_info": {
+    "train": {
+      "python": "3.12.13",
+      "pytorch": "2.15.0+cpu",
+      "numpy": "2.5.5",
+      "platform": "Windows-11-10.0.26200-SP0",
+      "mode": "train",
+      "execution_kind": "neural",
+      "device": "cpu",
+      "seed": 17,
+      "benchmark_protocol": "od_window",
+      "split": {
+        "semantics": "target_time_v1",
+        "adapter": "od_window",
+        "input_window": 4,
+        "requested_input_window": 4,
+        "spatial_shape": [
+          3,
+          3
+        ],
+        "grid_shape": null,
+        "intervals": {
+          "train": {
+            "samples": 23,
+            "target_index_start": 4,
+            "target_index_end": 27
+          },
+          "val": {
+            "samples": 9,
+            "target_index_start": 28,
+            "target_index_end": 37
+          },
+          "test": {
+            "samples": 9,
+            "target_index_start": 38,
+            "target_index_end": 47
+          }
+        },
+        "train": 23,
+        "val": 9,
+        "test": 9,
+        "train_padded": false,
+        "train_end": "2024-01-01T02:20:00.000000000",
+        "val_end": "2024-01-01T03:10:00.000000000",
+        "scaler_fit_end_exclusive": "2024-01-01T02:20:00.000000000",
+        "discarded_boundary_windows": 2,
+        "cache": {
+          "status": "miss",
+          "path": "D:\\LibCity 2.0\\.runtime-tests\\geml-cli-o770sqbc\\example\\cache\\traffic-raw-v1\\58748b459bf7c23223191c78.npz"
+        },
+        "sampling_gap_policy": "file_and_full_input_target_span_contiguous",
+        "input_missing_observations": "zero"
+      },
+      "protocol_changes": {
+        "data.input_window": 4,
+        "data.sampling": {
+          "name": "od_window"
+        },
+        "benchmark.protocol": "od_window"
+      },
+      "capabilities": {
+        "requires_checkpoint": true,
+        "supports_resume": true,
+        "supports_validation": true
+      }
+    },
+    "evaluated": {
+      "python": "3.12.13",
+      "pytorch": "2.15.0+cpu",
+      "numpy": "2.5.5",
+      "platform": "Windows-11-10.0.26200-SP0",
+      "mode": "evaluate",
+      "execution_kind": "neural",
+      "device": "cpu",
+      "seed": 17,
+      "benchmark_protocol": "od_window",
+      "split": {
+        "semantics": "target_time_v1",
+        "adapter": "od_window",
+        "input_window": 4,
+        "requested_input_window": 4,
+        "spatial_shape": [
+          3,
+          3
+        ],
+        "grid_shape": null,
+        "intervals": {
+          "train": {
+            "samples": 23,
+            "target_index_start": 4,
+            "target_index_end": 27
+          },
+          "val": {
+            "samples": 9,
+            "target_index_start": 28,
+            "target_index_end": 37
+          },
+          "test": {
+            "samples": 9,
+            "target_index_start": 38,
+            "target_index_end": 47
+          }
+        },
+        "train": 23,
+        "val": 9,
+        "test": 9,
+        "train_padded": false,
+        "train_end": "2024-01-01T02:20:00.000000000",
+        "val_end": "2024-01-01T03:10:00.000000000",
+        "scaler_fit_end_exclusive": "2024-01-01T02:20:00.000000000",
+        "discarded_boundary_windows": 2,
+        "cache": {
+          "status": "hit",
+          "path": "D:\\LibCity 2.0\\.runtime-tests\\geml-cli-o770sqbc\\example\\cache\\traffic-raw-v1\\58748b459bf7c23223191c78.npz"
+        },
+        "sampling_gap_policy": "file_and_full_input_target_span_contiguous",
+        "input_missing_observations": "zero"
+      },
+      "protocol_changes": {
+        "data.input_window": 4,
+        "data.sampling": {
+          "name": "od_window"
+        },
+        "benchmark.protocol": "od_window"
+      },
+      "capabilities": {
+        "requires_checkpoint": true,
+        "supports_resume": true,
+        "supports_validation": true
+      }
+    },
+    "resumed": {
+      "python": "3.12.13",
+      "pytorch": "2.15.0+cpu",
+      "numpy": "2.5.5",
+      "platform": "Windows-11-10.0.26200-SP0",
+      "mode": "train",
+      "execution_kind": "neural",
+      "device": "cpu",
+      "seed": 17,
+      "benchmark_protocol": "od_window",
+      "split": {
+        "semantics": "target_time_v1",
+        "adapter": "od_window",
+        "input_window": 4,
+        "requested_input_window": 4,
+        "spatial_shape": [
+          3,
+          3
+        ],
+        "grid_shape": null,
+        "intervals": {
+          "train": {
+            "samples": 23,
+            "target_index_start": 4,
+            "target_index_end": 27
+          },
+          "val": {
+            "samples": 9,
+            "target_index_start": 28,
+            "target_index_end": 37
+          },
+          "test": {
+            "samples": 9,
+            "target_index_start": 38,
+            "target_index_end": 47
+          }
+        },
+        "train": 23,
+        "val": 9,
+        "test": 9,
+        "train_padded": false,
+        "train_end": "2024-01-01T02:20:00.000000000",
+        "val_end": "2024-01-01T03:10:00.000000000",
+        "scaler_fit_end_exclusive": "2024-01-01T02:20:00.000000000",
+        "discarded_boundary_windows": 2,
+        "cache": {
+          "status": "hit",
+          "path": "D:\\LibCity 2.0\\.runtime-tests\\geml-cli-o770sqbc\\example\\cache\\traffic-raw-v1\\58748b459bf7c23223191c78.npz"
+        },
+        "sampling_gap_policy": "file_and_full_input_target_span_contiguous",
+        "input_missing_observations": "zero"
+      },
+      "protocol_changes": {
+        "data.input_window": 4,
+        "data.sampling": {
+          "name": "od_window"
+        },
+        "benchmark.protocol": "od_window"
+      },
+      "capabilities": {
+        "requires_checkpoint": true,
+        "supports_resume": true,
+        "supports_validation": true
+      }
+    }
+  },
+  "scope": "Actual published GEML OD example; CPU functionality, not paper accuracy"
+}

@@ -1,6 +1,6 @@
 # OD 数据与多空间轴评估
 
-本批为 GEML、CSTN 的原生迁移补齐公共数据能力，不将两个模型提前登记为已支持。当前模型迁移计数仍为 70/100；排除延期 Common 和模板后，还有 21 个实际模型待迁移。
+本组件在 commit47 为 GEML、CSTN 的原生迁移补齐公共数据能力，当批未新增模型计数。随后 commit48 已完成 [GEML 原生接入](geml_zh.md)，CSTN 仍待迁移；当前支持范围以 [模型清单](model-migration.csv) 为准。
 
 ## 原问题
 
@@ -11,7 +11,7 @@
 
 ## 实现
 
-新增 `libcity.data.od_bundle.prepare_od(data, training, evaluation, seed, logger=None)`，各参数沿用公共运行时的对应配置区块。组件要求 `data.sampling.name=od_window`，供后续模型的 `prepare_data` 接口调用。当前未增加 GEML/CSTN 的模型注册或可运行 CLI 预设，不能把普通 GRU 配置改名后当作 OD 模型运行。
+新增 `libcity.data.od_bundle.prepare_od(data, training, evaluation, seed, logger=None)`，各参数沿用公共运行时的对应配置区块。组件要求 `data.sampling.name=od_window`，供原生 OD 模型的 `prepare_data` 接口调用。GEML 已提供模型注册与 CLI 预设，普通 GRU 不能选择此采样协议；CSTN 尚未注册。
 
 数据文件支持 `.od`、`.gridod`，以及包含 OD 标识列的 `.dyna`，按这个顺序查找。数据列由元信息 `data_col` 指定，未声明时从非保留列推断；目标为前 `output_dim` 个观测列。
 

@@ -52,7 +52,8 @@
 | commit44 | 81a5c83 | feat: preserve RMSE reduction across accumulation and evaluation |
 | commit45 | 1b3737b | feat: migrate CCRNN with train-only SVD graphs and exact RMSE training |
 | commit46 | d6ca1f8 | feat: migrate DMSTGCN with real calendar and train-only stream scaling |
-| commit47 | 随本节交付的提交 | feat: add OD data bundles and spatial-axis evaluation |
+| commit47 | 0ef3677 | feat: add OD data bundles and spatial-axis evaluation |
+| commit48 | 随本节交付的提交 | feat: migrate GEML with corrected periodic memory and raw OD objectives |
 
 ## commit1：修复基础交通缓存（670b325）
 
@@ -553,6 +554,20 @@ forward 由配置决定预测长度，每步重新编码当前窗口；预测回
 验证：新增 **20 项通过**，覆盖三种格式、乱序/不连续 ID/网格、真实目标切分/训练统计/未来隔离、零与 NaN、缓存复用和三种损坏重建、多文件/时钟缺口及无效行、三种空间布局的六类指标独立 NumPy 对照。测试模型 ODProbe 实际训练、独立评估、导出 OD 预测，参数/优化器/调度器/AMP/计数/早停/最佳权重/RNG/加载器状态精确续训；只修改测试区间原始 OD 值时续训明确拒绝。完整回归 **1009 passed，0 failed，0 errors，0 skipped**，见 [报告](remaining-validation.json)。
 
 本批只交付数据和指标前置能力，未增加 GEML/CSTN 的模型注册或 CLI 支持，不将测试模型当作实际模型迁移。清单仍为 **70/100** 已迁移，30 条 pending；排除延期 Common 与模板后，仍有 **21 个实际模型**及最终全量验收。
+
+## commit48：完成 GEML 原生 OD 网络与辅助训练目标
+
+原问题：周期细胞状态从 [P,B*N,E] 被覆盖为 [B*N,E]，后续按周期索引实际读到样本行；原位隐藏更新破坏梯度。地理图固定重复为 batch×时间，孤立行产生 NaN；语义图使用归一化流量正负号并保存到模型对象。辅助目标先求归一化值的和再反归一化，漏恢复多次偏移。旧 forward 同时返回辅助结果，网络持有 scaler/device，无法直接接入公共生命周期。
+
+处理：新增标准 GEML，地理图为单个 buffer 并广播，保留平方距离按行归一化与对角 1，修复孤立/超大距离。两层图映射矢量化；周期隐藏/细胞按相位独立、非原位保存，保留原 softmax 门及 tanh 记忆约定。语义图来自原始历史正值掩码，保持初始历史图贯穿整个自回归预测窗，推理只返回 OD Tensor、不读标签、不采样、不计算辅助头。明确只支持一个流量观测/目标，拒绝不支持的布局。
+
+新增显式辅助 step，在原始目标上计算起点/终点边际和，各预测头由外部 scaler 反归一化。默认 0.5/0.25/0.25 三项 MSE；有限零值保留，未知行/列不伪造边际真值，按有效 OD 数统一加权以支持微批与真实尾批。验证和独立评估使用主 OD MSE，辅助头只用于训练，这是相对旧复合验证目标的明确调整。配置、模型注册、OD 协议、单流量夹具与发布示例均接入统一入口；详见 [修复说明](geml_zh.md)。
+
+验证：新增 **36 项通过**，四组修正记忆的原网络预测/辅助头/全部有效梯度，含默认 32 嵌入与不同周期/历史；独立地理/语义图、孤立/超大距离、批次独立/单节点/单帧/float64/推理无 RNG、三种 scaler 与缺失/零掩码的逐单元损失及全部头梯度。带缺失值的实际微批 SGD 更新与完整有效批次一致，全空目标有限零梯度；两种 scaler 均完成真实 OD 训练/独立评估及 Adam/metric 调度/最佳权重/RNG 精确续训。真实尾批 CPU AMP、Windows spawn 和配置拒绝通过。含 OD 与配置检查共 **68 passed**；完整回归 **1045 passed，0 failed，0 errors，0 skipped**，见 [汇总](remaining-validation.json)。
+
+仓库外发布夹具、训练、独立评估和续训 **4 条命令成功**，预测 [9,2,3,3,1]、独立预测与指标完全一致，续训第三轮累计 9 次更新，缓存 miss/hit/hit，安全权重中仅保存一个 [3,3] 地理 buffer。独立评估未创建训练产物，主 OD MSE 与导出预测独立计算一致，见 [CLI 记录](geml-cli-validation.json)。修复旧记忆、原始正值图及边际目标后不声称旧错误流程或论文精度等价。
+
+清单为 **71/100** 已迁移，29 条 pending；排除七个延期 Common 与两个模板后，还有 **20 个实际模型**及全部迁移后的最终验收。CSTN 尚未接入，不因共享 OD 数据基础能力而提前算作完成。
 
 ## 持续完成的清单
 

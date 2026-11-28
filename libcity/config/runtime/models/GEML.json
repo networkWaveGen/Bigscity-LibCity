@@ -1,0 +1,9 @@
+{
+  "model": {"params": {"embed_dim": 32, "p_interval": 1}},
+  "data": {"scaler": {"name": "minmax01"}, "graph": {"name": "weighted"}},
+  "training": {"epochs": 100, "optimizer": {"name": "adam", "lr": 0.001, "weight_decay": 0.000001},
+    "scheduler": {"name": "none", "interval": "epoch"},
+    "loss": {"name": "masked_mse", "mask_value": null,
+      "od_weight": 0.5, "origin_weight": 0.25, "destination_weight": 0.25},
+    "early_stopping": {"patience": 50}}
+}
