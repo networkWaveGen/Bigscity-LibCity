@@ -1,0 +1,285 @@
+{
+  "passed": true,
+  "source": "D:\\LibCity 2.0\\LibCity-modernization",
+  "directory": "D:\\LibCity 2.0\\.runtime-tests\\periodic-cli-2idacbmq",
+  "commands": [
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\tools\\make_runtime_fixture.py",
+        "--directory",
+        "D:\\LibCity 2.0\\.runtime-tests\\periodic-cli-2idacbmq\\CONVGCN",
+        "--model",
+        "CONVGCN"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\periodic-cli-2idacbmq",
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "train",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\periodic-cli-2idacbmq\\CONVGCN\\convgcn.json",
+        "--set",
+        "runtime.exp_id=train"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\periodic-cli-2idacbmq",
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "evaluate",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\periodic-cli-2idacbmq\\CONVGCN\\convgcn.json",
+        "--checkpoint",
+        "D:\\LibCity 2.0\\.runtime-tests\\periodic-cli-2idacbmq\\CONVGCN\\runs\\train\\checkpoints\\best.pt",
+        "--set",
+        "runtime.exp_id=evaluated"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\periodic-cli-2idacbmq",
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "train",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\periodic-cli-2idacbmq\\CONVGCN\\convgcn.json",
+        "--resume",
+        "D:\\LibCity 2.0\\.runtime-tests\\periodic-cli-2idacbmq\\CONVGCN\\runs\\train\\checkpoints\\last.pt",
+        "--set",
+        "training.epochs=3",
+        "--set",
+        "runtime.exp_id=resumed"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\periodic-cli-2idacbmq",
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\tools\\make_runtime_fixture.py",
+        "--directory",
+        "D:\\LibCity 2.0\\.runtime-tests\\periodic-cli-2idacbmq\\MultiSTGCnet",
+        "--model",
+        "MultiSTGCnet"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\periodic-cli-2idacbmq",
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "train",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\periodic-cli-2idacbmq\\MultiSTGCnet\\multistgcnet.json",
+        "--set",
+        "runtime.exp_id=train"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\periodic-cli-2idacbmq",
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "evaluate",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\periodic-cli-2idacbmq\\MultiSTGCnet\\multistgcnet.json",
+        "--checkpoint",
+        "D:\\LibCity 2.0\\.runtime-tests\\periodic-cli-2idacbmq\\MultiSTGCnet\\runs\\train\\checkpoints\\best.pt",
+        "--set",
+        "runtime.exp_id=evaluated"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\periodic-cli-2idacbmq",
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "train",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\periodic-cli-2idacbmq\\MultiSTGCnet\\multistgcnet.json",
+        "--resume",
+        "D:\\LibCity 2.0\\.runtime-tests\\periodic-cli-2idacbmq\\MultiSTGCnet\\runs\\train\\checkpoints\\last.pt",
+        "--set",
+        "training.epochs=3",
+        "--set",
+        "runtime.exp_id=resumed"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\periodic-cli-2idacbmq",
+      "exit_code": 0
+    }
+  ],
+  "models": {
+    "CONVGCN": {
+      "passed": true,
+      "metrics": {
+        "MAE@1": 17.307649917900562,
+        "RMSE@1": 18.88636428581418,
+        "loss": 356.6947387695312,
+        "best_validation": 354.0912353515625
+      },
+      "protocol": "convgcn_windows",
+      "prediction_shape": [
+        80,
+        1,
+        4,
+        2
+      ],
+      "distinct_target_channels": true,
+      "independent_metrics_identical": true,
+      "independent_predictions_identical": true,
+      "resumed_epoch": 3,
+      "optimizer_steps": 12,
+      "cache_statuses": {
+        "train": "miss",
+        "evaluate": "hit",
+        "resume": "hit"
+      },
+      "split": {
+        "train": 50,
+        "val": 80,
+        "test": 80,
+        "train_padded": false,
+        "semantics": "target_time_v1",
+        "input_window": 30,
+        "requested_input_window": 10,
+        "adapter": "seasonal_windows",
+        "intervals": {
+          "train": {
+            "samples": 50,
+            "target_start": "2024-01-08T22:00:00.000000000",
+            "target_end": "2024-01-10T23:00:00.000000000",
+            "target_index_start": 190,
+            "target_index_end": 239
+          },
+          "val": {
+            "samples": 80,
+            "target_start": "2024-01-11T00:00:00.000000000",
+            "target_end": "2024-01-14T07:00:00.000000000",
+            "target_index_start": 240,
+            "target_index_end": 319
+          },
+          "test": {
+            "samples": 80,
+            "target_start": "2024-01-14T08:00:00.000000000",
+            "target_end": "2024-01-17T15:00:00.000000000",
+            "target_index_start": 320,
+            "target_index_end": 399
+          }
+        },
+        "train_end": "2024-01-11T00:00:00.000000000",
+        "val_end": "2024-01-14T08:00:00.000000000",
+        "scaler_fit_end_exclusive": "2024-01-11T00:00:00.000000000",
+        "discarded_boundary_windows": 0,
+        "history_span_points": 190,
+        "cache": {
+          "status": "miss",
+          "path": "D:\\LibCity 2.0\\.runtime-tests\\periodic-cli-2idacbmq\\CONVGCN\\cache\\traffic-raw-v1\\9a7dc59f42f0dc67d7bc3fb2.npz"
+        }
+      }
+    },
+    "MultiSTGCnet": {
+      "passed": true,
+      "metrics": {
+        "MAE@1": 19.57336610337443,
+        "RMSE@1": 21.25106564224387,
+        "loss": 19.57336540222168,
+        "best_validation": 19.522586822509766
+      },
+      "protocol": "multi_stgc",
+      "prediction_shape": [
+        80,
+        1,
+        4,
+        2
+      ],
+      "distinct_target_channels": true,
+      "independent_metrics_identical": true,
+      "independent_predictions_identical": true,
+      "resumed_epoch": 3,
+      "optimizer_steps": 15,
+      "cache_statuses": {
+        "train": "miss",
+        "evaluate": "hit",
+        "resume": "hit"
+      },
+      "split": {
+        "train": 72,
+        "val": 80,
+        "test": 80,
+        "train_padded": false,
+        "semantics": "target_time_v1",
+        "input_window": 5,
+        "requested_input_window": 12,
+        "adapter": "frame_cpt",
+        "intervals": {
+          "train": {
+            "samples": 72,
+            "target_start": "2024-01-08T00:00:00.000000000",
+            "target_end": "2024-01-10T23:00:00.000000000",
+            "target_index_start": 168,
+            "target_index_end": 239
+          },
+          "val": {
+            "samples": 80,
+            "target_start": "2024-01-11T00:00:00.000000000",
+            "target_end": "2024-01-14T07:00:00.000000000",
+            "target_index_start": 240,
+            "target_index_end": 319
+          },
+          "test": {
+            "samples": 80,
+            "target_start": "2024-01-14T08:00:00.000000000",
+            "target_end": "2024-01-17T15:00:00.000000000",
+            "target_index_start": 320,
+            "target_index_end": 399
+          }
+        },
+        "train_end": "2024-01-11T00:00:00.000000000",
+        "val_end": "2024-01-14T08:00:00.000000000",
+        "scaler_fit_end_exclusive": "2024-01-11T00:00:00.000000000",
+        "discarded_boundary_windows": 0,
+        "history_span_points": 168,
+        "cache": {
+          "status": "miss",
+          "path": "D:\\LibCity 2.0\\.runtime-tests\\periodic-cli-2idacbmq\\MultiSTGCnet\\cache\\traffic-raw-v1\\340f799ed858a3e68526d204.npz"
+        },
+        "distance_bands": {
+          "column": "distance",
+          "semantics": "listed_edges_rowwise_equal_distance_ranges",
+          "constant_row_band": "near",
+          "counts": {
+            "near": 4,
+            "middle": 4,
+            "distant": 4
+          },
+          "symmetric_distance": false,
+          "include_upper_bound": true,
+          "missing_edges": "excluded"
+        }
+      }
+    }
+  },
+  "limitations": [
+    "synthetic periodic graph lifecycle, not real-city accuracy certification",
+    "Common variants remain deferred",
+    "Dense node-channel Conv3d and global node-feature LSTMs retain the original scaling costs"
+  ]
+}

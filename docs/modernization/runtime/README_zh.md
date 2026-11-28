@@ -10,6 +10,8 @@
 
 STResNet/ACFM 的原子网格示例可用 `tools/make_runtime_fixture.py --directory <目录> --model STResNet` 或 `--model ACFM` 创建，再对生成的 stresnet.json/acfm.json 执行相同的 train/evaluate/resume 命令。`grid_cpt` 协议默认单步、最近 3 个时间片和前一天同刻；data.sampling 可显式配置周周期，output_window 可显式增大。`.geo` 需包含完整矩形的 row_id/column_id；`.grid` 行按时间/行列对齐，输出沿原 geo_id 顺序排列。历史外部观测与未来已知特征分开，只有日历及 known_future_columns 会进入预测时刻输入；不能把实际未来天气或观测当已知。默认缓存可复用，.grid 修改会使缓存失效并拒绝旧状态续训。详见 [模型说明](models_zh.md)。
 
+CONVGCN/MultiSTGCnet 示例可用 `--model CONVGCN` / `--model MultiSTGCnet` 生成，使用 convgcn.json/multistgcnet.json 执行同样的训练、评估和续训命令。它们是点图模型，输入为 .geo/.rel/.dyna。CONVGCN 的 seasonal_windows 参数 period_steps/trend_steps 按原始时间片计数；MultiSTGCnet 的 frame_cpt 按最近帧/日/周采样，默认从 .rel 距离构建三组支持，不用高斯相似度代替距离。协议名、实际窗口数/跨度与距离边界都会进入运行摘要。详细参数与有意修复见 [模型说明](models_zh.md)。
+
 ## GRU 完整例子
 
 从源码根目录运行，数据、缓存和输出都可放在仓库外：

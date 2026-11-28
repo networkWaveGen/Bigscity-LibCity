@@ -1,0 +1,5 @@
+{
+  "model": {"params": {"conv_depth": 5, "conv_height": 3, "hidden_size": 16}},
+  "data": {"scaler": {"name": "minmax01"}},
+  "training": {"optimizer": {"lr": 0.0003}}
+}

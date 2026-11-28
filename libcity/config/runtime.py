@@ -124,28 +124,42 @@ def validate(config, preset):
                 raise TypeError(f'data.split.{key} must be an ISO timestamp')
         _known(data['features'], ('load_external', 'time_in_day', 'day_in_week', 'known_future_columns'), 'data.features')
         _known(data['scaler'], ('name',), 'data.scaler')
-        _known(data['graph'], ('name', 'symmetric', 'self_loops', 'epsilon','reachability_column'), 'data.graph')
+        _known(data['graph'], ('name', 'symmetric', 'self_loops', 'epsilon','reachability_column','distance_column'), 'data.graph')
+        if 'distance_column' in data['graph']:
+            column = data['graph']['distance_column']
+            if model['name']!='MultiSTGCnet' or (column is not None and (not isinstance(column,str) or not column)):
+                raise ValueError('data.graph.distance_column is a MultiSTGCnet column name or null')
         if 'reachability_column' in data['graph']:
             column = data['graph']['reachability_column']
             if model['name']!='TGCLSTM' or (column is not None and (not isinstance(column,str) or not column)):
                 raise ValueError('data.graph.reachability_column is a TGCLSTM column name or null')
         _known(data['sampling'], ('name','closeness','period','trend','interval_period','interval_trend',
-                                  'temporal_history'), 'data.sampling')
-        if data['sampling'].get('name') not in ('window','cpt','crann','grid_cpt'):
+                                  'temporal_history','period_steps','trend_steps'), 'data.sampling')
+        if data['sampling'].get('name') not in ('window','cpt','crann','grid_cpt','frame_cpt','seasonal_windows'):
             raise ValueError('Unknown data.sampling.name')
         if (spec.protocol=='grid_cpt') != (data['sampling']['name']=='grid_cpt'):
             raise ValueError('grid_cpt sampling requires a registered grid_cpt model and vice versa')
+        if (model['name']=='CONVGCN') != (data['sampling']['name']=='seasonal_windows'):
+            raise ValueError('seasonal_windows sampling requires CONVGCN and vice versa')
+        if (model['name']=='MultiSTGCnet') != (data['sampling']['name']=='frame_cpt'):
+            raise ValueError('frame_cpt sampling requires MultiSTGCnet and vice versa')
+        if data['sampling']['name']=='seasonal_windows':
+            for key in ('period_steps','trend_steps'):
+                _positive(data['sampling'].get(key),f'data.sampling.{key}')
         if data['sampling']['name']=='crann':
             _positive(data['sampling'].get('temporal_history'), 'data.sampling.temporal_history')
-        if data['sampling']['name'] in ('cpt','grid_cpt'):
+        if data['sampling']['name'] in ('cpt','grid_cpt','frame_cpt'):
             for key in ('closeness','period','trend'):
                 _positive(data['sampling'].get(key,0),f'data.sampling.{key}',zero=True)
             if not sum(data['sampling'].get(key,0) for key in ('closeness','period','trend')):
                 raise ValueError('CPT sampling requires at least one history segment')
             for key in ('interval_period','interval_trend'):
                 _positive(data['sampling'].get(key,1),f'data.sampling.{key}')
-        if data['graph'].get('name') not in ('binary', 'weighted', 'distance'):
+        if data['graph'].get('name') not in ('binary', 'weighted', 'distance','distance_bands'):
             raise ValueError('Unknown data.graph.name')
+        if (data['graph']['name']=='distance_bands' and model['name']!='MultiSTGCnet') or (
+                model['name']=='MultiSTGCnet' and data['graph']['name'] not in ('distance_bands','binary')):
+            raise ValueError('MultiSTGCnet requires raw distance_bands or explicit unit-distance binary graph')
         for key in ('symmetric', 'self_loops'):
             if type(data['graph'].get(key, False)) is not bool:
                 raise TypeError(f'data.graph.{key} must be boolean')

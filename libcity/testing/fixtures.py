@@ -42,6 +42,23 @@ def multiscale_fixture(root, name='Tiny'):
     return atomic_fixture(root,name=name,steps=400,interval_minutes=60)
 
 
+def periodic_fixture(root,name='PeriodicTiny',steps=400,nodes=4,features=2,outputs=2,interval_minutes=60):
+    folder = atomic_fixture(root,name=name,steps=steps,nodes=nodes,interval_minutes=interval_minutes)
+    frame = pd.read_csv(folder/f'{name}.dyna').rename(columns={'speed':'value_0'})
+    for index in range(1,features):
+        frame[f'value_{index}'] = 20+index*7+frame['entity_id']*.5+2*np.cos((frame['dyna_id']%steps)/(index+3))
+    frame.to_csv(folder/f'{name}.dyna',index=False)
+    records = [(origin,destination,1+3*((destination-origin)%nodes-1))
+        for origin in range(nodes) for destination in range(nodes) if origin!=destination]
+    pd.DataFrame(dict(rel_id=range(len(records)),type='geo',origin_id=[row[0] for row in records],
+        destination_id=[row[1] for row in records],distance=[row[2] for row in records])).to_csv(folder/f'{name}.rel',index=False)
+    path = folder/'config.json'
+    metadata = json.loads(path.read_text(encoding='utf-8'))
+    metadata.update(data_col=[f'value_{index}' for index in range(features)],output_dim=outputs,weight_col='distance')
+    path.write_text(json.dumps(metadata),encoding='utf-8')
+    return folder
+
+
 def grid_fixture(root, name='GridTiny', steps=400, rows=2, columns=3, features=3, outputs=2):
     folder = Path(root)/name
     folder.mkdir(parents=True,exist_ok=True)

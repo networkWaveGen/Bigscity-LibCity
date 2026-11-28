@@ -49,7 +49,7 @@ class CONVGCNDataset(TrafficStatePointDataset):
                     Xout[index - self.TG_in_one_week, i, k] = temp2[k]
                 # Xout[index - self.TG_in_one_week].append(temp2)
             Yin.append(data[index + self.time_lag - 1: index + self.time_lag - 1 + self.output_window, :, 0])  # input
-            Yout.append(data[index + self.time_lag - 1: index + self.time_lag - 1 + self.output_window, :, 0])  # output
+            Yout.append(data[index + self.time_lag - 1: index + self.time_lag - 1 + self.output_window, :, 1])  # output
 
         X = np.concatenate((Xin[:, :, :, np.newaxis], Xout[:, :, :, np.newaxis]), axis=3)
         Yin = np.array(Yin)

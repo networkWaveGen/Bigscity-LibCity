@@ -1,0 +1,6 @@
+{
+  "data": {"dataset": "PeriodicTiny", "data_dir": "data", "cache_dir": "cache", "pad_training": false},
+  "model": {"name": "CONVGCN", "params": {"conv_depth": 3, "conv_height": 2, "hidden_size": 4}},
+  "training": {"epochs": 2, "batch_size": 16},
+  "runtime": {"device": "cpu", "seed": 17, "output_dir": "runs"}
+}

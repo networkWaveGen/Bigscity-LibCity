@@ -1,0 +1,6 @@
+{
+  "model": {"params": {}},
+  "data": {"scaler": {"name": "minmax01"}},
+  "training": {"optimizer": {"lr": 0.001, "weight_decay": 0.001},
+    "scheduler": {"name": "step", "interval": "epoch", "step_size": 20, "gamma": 0.3}}
+}

@@ -38,7 +38,8 @@
 | commit30 | cf56fa4 | feat: migrate TTPNet with departure-known traffic and cumulative ETA training |
 | commit31 | a87159c | feat: migrate Node2Vec and DeepWalk with explicit external training |
 | commit32 | 1ceae72 | feat: migrate GeomGCN with native partitioned reconstruction |
-| commit33 | 随本节交付的提交 | feat: migrate grid forecasts with causal CPT inputs |
+| commit33 | c4cc695 | feat: migrate grid forecasts with causal CPT inputs |
+| commit34 | 随本节交付的提交 | feat: migrate periodic graph forecasts with explicit distance bands |
 
 ## commit1：修复基础交通缓存（670b325）
 
@@ -349,6 +350,20 @@ GeomGCN 复用 road_reconstruction 具名协议、公共数据适配/损失/评�
 验证：新增网格 **43 项通过**，包括修正轴顺序后的旧 STResNet BN/外部分支与 ACFM 五种有效残差模式的预测/全部梯度对照、全流程训练/独立评估/BN/dropout/优化器/调度器/早停/RNG 精确续训、多变量/多步/单分支/batch=1/float64、原子 ID/行顺序/CPT 时间、目标区间互斥/训练统计、真实未来目标及未声明外部观测变化后的输入与预测隔离、原始缓存跨预测窗复用及缺失/损坏形状重建、时间缺口/文件边界、.grid 修改后续训拒绝、单节点尾批 BN/CPU AMP、无效模式与协议校验、双精度原尺度损失。当前源码完整回归 **551 passed，0 failed，0 errors，0 skipped**，见 [汇总](remaining-validation.json)。仓库外两个夹具、两次训练、两次独立评估及两次续训共 **8 条成功命令**，评估指标/预测逐元素一致，续训第三轮且缓存复用，见 [CLI](grid-cli-validation.json)。
 
 迁移表更新为 **58/100**，42 条 pending；排除 7 个延期 Common 和 2 个模板后，本期仍有 **33 个交通预测模型**及最终全量验收待完成。
+
+## commit34：迁移 CONVGCN/MultiSTGCnet 与明确周期/距离语义
+
+问题：CONVGCN 的旧数据代码将两个目标都取为通道 0，末尾完整窗口被丢弃；模型将图卷积投影时间与节点轴直接 reshape，混排 Conv3d 通道，历史长度还分别依赖数据 time_lag 与未正确装配的模型默认值。MultiSTGCnet 的最近与日周期都调用 daily_block，interval_block 未参与训练；距离分组会原地替换无穷值、把缺失边当零距离，并漏掉最大距离与常量行。静态矩阵没有统一作为 buffer，未启用的周期网络和未使用超参数仍被创建/登记。
+
+修改：两模型均使用标准 nn.Module 和公共 train_loop、损失、评估、检查点及点数据原始缓存。CONVGCN 保留两层时间投影图卷积、节点通道 Conv3d 与全连接输出，显式排列投影/节点轴；邻接矩阵先复制后加单位自环并注册 buffer，图卷积偏置始终注册 Parameter。新增 convgcn_windows 协议，seasonal_windows 按 trend/period/closeness 拼接三个正序连续窗口，input_window=10 替代旧 time_lag=11 的隐式历史长度；服务周期 36/180 均是可配置原始时间片数，不冒充日历日/周。修复参考数据代码的第二目标通道，新适配直接读取所有声明目标并保留末尾完整窗口，任意特征/目标数及显式多步均可运行。
+
+MultiSTGCnet 使用 multi_stgc 协议和 frame_cpt：最近帧、同刻日/周观测依次拼接，各段由近到远。最近、日、周分别调用 interval/daily/weekly 网络，只构建活动分支；没有最近段时省略空间分支，仍可用日/周预测。保留原三空间图分支、图乘法方向、两层 LSTM、融合及真实节点数×输入维度的循环宽度，未使用的 hidden_size/num_layers 不作为新参数。输出回归头/融合宽度显式涵盖全部预测步。
+
+距离适配从真实 .geo ID 与 .rel 列构建有限列出边，distance_column/元信息 weight_col 选择原始距离，不将高斯相似度当距离。三个组按每行有限距离的等距值域划分，缺失边排除、显式零距离保留、最大距离包含、常量行归近组、孤立行全零；不修改输入矩阵。重复关系最后一条生效，对称化取两个方向已知最小距离，自环取零；可显式选择 binary 将列出边视为单位距离。矩阵/ID/列名进入只读元信息，矩阵作为 buffer，边数和边界语义写入摘要。距离列变化会重新准备缓存，源文件变更拒绝续训；不做文件内容哈希。点数据的完整时间跨度检查改用缺口前缀计数，保持原窗口判定并避免每个窗口重复扫描历史跨度。
+
+验证：新增 **34 项通过**，包括原图投影/修正节点 Conv3d 轴后的前向及全部梯度、原循环数学/明确修复最近分支与距离支持后的前向及全部梯度、独立第二目标/服务周期窗口/末尾完整目标、距离最大值/常量/零距离/孤立图/无原地修改、活动周期与多步/多目标/batch=1/float64、完整训练/独立评估/优化器/调度器/早停/RNG 精确续训、静态矩阵/输入不变、距离列切换及来源续训保护、方向/对称化/二值单位距离、非法配置及 CPU AMP。暂停时剩余的测试数据类型错误通过显式将测试距离列转为 float 修复，没有降低检查标准。当前源码完整回归 **585 passed，0 failed，0 errors，0 skipped**，见 [汇总](remaining-validation.json)。仓库外两个夹具、两次训练、两次独立评估及两次续训共 **8 条成功命令**，独立指标/预测逐元素一致、目标通道不同、续训第三轮且原始缓存复用，见 [CLI](periodic-cli-validation.json)。
+
+范围：数值参考明确修正原错误轴顺序/分支/距离边界，不宣称与旧错误完整流程或论文精度等价。CONVGCN 的节点通道稠密卷积和 MultiSTGCnet 的全局节点特征 LSTM 仍保留原规模成本，未替换为另一个轻量网络；本轮不做大城市性能认证，Common 变体继续延期。迁移表更新为 **60/100**，40 条 pending；排除 7 个延期 Common 与 2 个模板后，本期仍有 **31 个交通模型**及最终全量验收待完成。
 
 ## 持续完成的清单
 

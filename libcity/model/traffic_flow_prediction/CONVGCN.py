@@ -19,7 +19,7 @@ class GraphConvolution(Module):
         self.out_features = out_features
         self.weight = Parameter(torch.FloatTensor(in_features, out_features).to(device))  # FloatTensor建立tensor
         if bias:
-            self.bias = Parameter(torch.FloatTensor(1, out_features, 1, 1)).to(device)
+            self.bias = Parameter(torch.empty(1, out_features, 1, 1, device=device))
         else:
             self.register_parameter('bias', None)
         self.reset_parameters()

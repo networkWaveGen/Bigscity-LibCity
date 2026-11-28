@@ -1,0 +1,5 @@
+{
+  "data": {"output_window": 1, "sampling": {"name": "frame_cpt", "closeness": 3, "period": 1, "trend": 1,
+    "interval_period": 1, "interval_trend": 1}, "graph": {"name": "distance_bands", "distance_column": null}},
+  "training": {"loss": {"name": "masked_mae"}}
+}

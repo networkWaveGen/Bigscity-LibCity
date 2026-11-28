@@ -52,9 +52,11 @@ def _read_atomic(data, metadata, logger=None):
     graph_config, options = data['graph'], data['features']
     legacy = dict(metadata, dataset=data['dataset'], data_dir=data['data_dir'], cache_dir=data['cache_dir'],
         cache_dataset=False, init_weight_inf_or_zero='inf' if graph_config['name']=='distance' else 'zero',
-        set_weight_link_or_dist='link' if graph_config['name']=='binary' else 'dist',
+        set_weight_link_or_dist='link' if graph_config['name'] in ('binary','distance_bands') else 'dist',
         calculate_weight_adj=graph_config['name']=='distance', weight_adj_epsilon=graph_config.get('epsilon', .1),
         add_time_in_day=options['time_in_day'], add_day_in_week=options['day_in_week'])
+    if graph_config['name']=='distance_bands' and graph_config.get('distance_column'):
+        legacy['weight_col'] = graph_config['distance_column']
     reader = TrafficStatePointDataset(legacy, logger=logger)
     filenames = metadata.get('data_files', data['dataset'])
     filenames = [filenames] if isinstance(filenames, str) else filenames
@@ -130,6 +132,9 @@ def prepare_traffic(data, training, evaluation, seed, logger=None):
         maximum = int(-offsets.min())
         layout = dict(kind='cpt', length=len(offsets), max_position=maximum,
                       temporal_indices=(offsets+maximum).tolist(), sampling=dict(sampling))
+    if sampling['name'] in ('frame_cpt','seasonal_windows'):
+        from libcity.data.periodic_offsets import periodic_offsets
+        offsets,layout = periodic_offsets(sampling,metadata.get('time_intervals',300),data['input_window'])
     layout.update(future_feature_indices=known_indices,
                   calendar=dict(time_in_day=known_indices[0] if data['features']['time_in_day'] else None,
                     day_of_week=known_indices[int(data['features']['time_in_day']):int(data['features']['time_in_day'])+7]
@@ -139,7 +144,8 @@ def prepare_traffic(data, training, evaluation, seed, logger=None):
     starts = np.concatenate([np.arange(left-offsets.min(), right-horizon+1) for left,right in intervals])
     # A gap in a file is a boundary too: no window may span unobserved timestamps.
     interval = np.timedelta64(metadata.get('time_intervals',300), 's')
-    starts = np.array([start for start in starts if np.all(np.diff(clock[start+offsets.min():start+horizon])==interval)], dtype=np.int64)
+    gaps = np.r_[False,np.diff(clock)!=interval].cumsum()
+    starts = starts[gaps[starts+horizon-1]==gaps[starts+offsets.min()]]
     selections = partition_windows(starts, horizon, cuts, len(clock))
     meta = DatasetMetadata(data['dataset'], history.shape[1], history.shape[-1], output_dim,
                            graph, metadata, layout)

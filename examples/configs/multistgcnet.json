@@ -1,0 +1,6 @@
+{
+  "data": {"dataset": "PeriodicTiny", "data_dir": "data", "cache_dir": "cache", "pad_training": false},
+  "model": {"name": "MultiSTGCnet"},
+  "training": {"epochs": 2, "batch_size": 16},
+  "runtime": {"device": "cpu", "seed": 17, "output_dir": "runs"}
+}

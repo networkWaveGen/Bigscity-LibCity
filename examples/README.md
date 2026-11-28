@@ -88,6 +88,31 @@ ACFM supports `split`, `split-chans`, `concat`, `cpt` and compatible
 width to equal two. The unused legacy `merge_mode` option is removed. Common
 variants remain deferred. Tiny runs validate execution rather than city accuracy.
 
+`--model CONVGCN` and `--model MultiSTGCnet` generate periodic **point graph**
+examples. Use `convgcn.json` / `multistgcnet.json` with the common
+train/evaluate/resume commands. These models consume atomic `.geo`/`.rel`/`.dyna`;
+they do not require a rectangular grid. CONVGCN's named `convgcn_windows` protocol
+defaults to ten observations per window and service shifts of 36/180 raw frames.
+The `seasonal_windows` input lists trend/period/recent windows, chronological
+within each window. `period_steps`/`trend_steps` are explicit frame counts, not
+automatically calendar day/week spacings. Target channels remain distinct and the
+final complete forecast window is retained. Node-channel Conv3d uses explicit
+axis conversion rather than the old mixed reshape.
+
+MultiSTGCnet's `multi_stgc` protocol uses `frame_cpt`: recent raw frames, matching
+daily and weekly frames, ordered closeness/period/trend and nearest first inside
+each segment. `interval_period` and `interval_trend` multiply day/week spacing.
+Distance supports come from finite listed `.rel` distances with
+`data.graph.name=distance_bands`; select `distance_column` explicitly when needed.
+Unlisted edges are excluded, maximum distances enter the far band, and equal
+distances enter the near band. Explicit zero distances are valid. Symmetrizing
+takes the minimum observed directional distance; self loops have zero distance.
+An explicit binary graph instead assigns unit distance to listed edges. The
+recent/daily/weekly recurrent blocks have separate parameters; absent branches
+are omitted. Both models support explicit multistep and multiple target outputs.
+The original dense node-channel/global-LSTM scaling costs remain; the examples
+certify small lifecycles rather than large-city performance or paper accuracy.
+
 `--model MegaCRN` creates a memory-augmented forecast example with explicit known
 future time features. Its auxiliary memory losses and curriculum targets are
 used only by the training step; ordinary forward/evaluation returns predictions

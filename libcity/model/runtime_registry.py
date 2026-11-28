@@ -29,6 +29,9 @@ class ModelSpec:
 
 
 MODELS = {
+    'CONVGCN': ModelSpec('libcity.model.traffic_flow_prediction.runtime_periodic:CONVGCN',protocol='convgcn_windows'),
+    'MultiSTGCnet': ModelSpec('libcity.model.traffic_flow_prediction.runtime_periodic:MultiSTGCnet',protocol='multi_stgc',
+        prepare_data='libcity.data.distance_bands:prepare_distance_bands'),
     'STResNet': ModelSpec('libcity.model.traffic_flow_prediction.runtime_grid:STResNet',protocol='grid_cpt',
         prepare_data='libcity.data.grid_traffic:prepare_grid'),
     'ACFM': ModelSpec('libcity.model.traffic_flow_prediction.runtime_grid:ACFM',protocol='grid_cpt',

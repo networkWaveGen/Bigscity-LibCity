@@ -1,5 +1,5 @@
 {
-  "scope": "Remaining-work commits 1-33; whole-library migration remains in progress",
+  "scope": "Remaining-work commits 1-34; whole-library migration remains in progress",
   "environment": {
     "python": "3.12.13",
     "torch": "2.15.0+cpu",
@@ -8,7 +8,7 @@
     "gensim": "4.4.0"
   },
   "full_tests": {
-    "tests": 551,
+    "tests": 585,
     "failures": 0,
     "errors": 0,
     "skipped": 0
@@ -386,6 +386,40 @@
     "test_unequal_filters_multiple_targets_batch_one_float64_and_no_labels[MSTGCN]",
     "test_cpu_amp_and_single_node_zero_laplacian[ASTGCN]",
     "test_cpu_amp_and_single_node_zero_laplacian[MSTGCN]",
+    "test_convgcn_original_graph_projection_corrected_conv_channel_axes_and_all_gradients[1-1]",
+    "test_convgcn_original_graph_projection_corrected_conv_channel_axes_and_all_gradients[2-1]",
+    "test_convgcn_original_graph_projection_corrected_conv_channel_axes_and_all_gradients[1-2]",
+    "test_convgcn_original_graph_projection_corrected_conv_channel_axes_and_all_gradients[2-2]",
+    "test_multistgcnet_corrected_recent_daily_branch_and_finite_band_reference_gradients[1]",
+    "test_multistgcnet_corrected_recent_daily_branch_and_finite_band_reference_gradients[2]",
+    "test_distance_bands_cover_every_listed_edge_without_mutating_graph[distances0]",
+    "test_distance_bands_cover_every_listed_edge_without_mutating_graph[distances1]",
+    "test_distance_bands_cover_every_listed_edge_without_mutating_graph[distances2]",
+    "test_distance_bands_cover_every_listed_edge_without_mutating_graph[distances3]",
+    "test_distance_bands_cover_every_listed_edge_without_mutating_graph[distances4]",
+    "test_full_train_evaluate_and_exact_optimizer_schedule_rng_resume[CONVGCN]",
+    "test_full_train_evaluate_and_exact_optimizer_schedule_rng_resume[MultiSTGCnet]",
+    "test_seasonal_windows_preserve_old_inputs_fix_second_target_and_keep_last_valid_target",
+    "test_multistgcnet_active_branches_multiple_horizons_and_target_dimensions[counts0]",
+    "test_multistgcnet_active_branches_multiple_horizons_and_target_dimensions[counts1]",
+    "test_multistgcnet_active_branches_multiple_horizons_and_target_dimensions[counts2]",
+    "test_multistgcnet_active_branches_multiple_horizons_and_target_dimensions[counts3]",
+    "test_no_label_inputs_float64_batch_one_and_stateless_graphs[1-CONVGCN]",
+    "test_no_label_inputs_float64_batch_one_and_stateless_graphs[1-MultiSTGCnet]",
+    "test_no_label_inputs_float64_batch_one_and_stateless_graphs[4-CONVGCN]",
+    "test_no_label_inputs_float64_batch_one_and_stateless_graphs[4-MultiSTGCnet]",
+    "test_actual_cpu_amp_training[CONVGCN]",
+    "test_actual_cpu_amp_training[MultiSTGCnet]",
+    "test_distance_graph_direction_symmetry_and_original_source_ownership[distance_bands]",
+    "test_distance_graph_direction_symmetry_and_original_source_ownership[binary]",
+    "test_invalid_distance_relations_are_rejected[negative]",
+    "test_invalid_distance_relations_are_rejected[missing-column]",
+    "test_invalid_distance_relations_are_rejected[unknown-node]",
+    "test_periodic_protocol_and_model_must_match[CONVGCN-window]",
+    "test_periodic_protocol_and_model_must_match[MultiSTGCnet-cpt]",
+    "test_periodic_protocol_and_model_must_match[GRU-frame_cpt]",
+    "test_periodic_protocol_and_model_must_match[GRU-seasonal_windows]",
+    "test_distance_column_switch_rebuilds_graph_and_source_changes_reject_resume",
     "test_retired_modules_and_executor_classes_are_absent",
     "test_tensor_collation_owns_values_and_padding_keeps_explicit_lengths",
     "test_tensor_loader_spawn_and_heterogeneous_tail_padding",
@@ -569,8 +603,8 @@
   ],
   "inventory": {
     "total": 100,
-    "migrated": 58,
-    "pending": 42
+    "migrated": 60,
+    "pending": 40
   },
   "history": [
     {
@@ -922,6 +956,20 @@
         "migrated": 56,
         "pending": 44
       }
+    },
+    {
+      "scope": "commits 1-33, through c4cc695",
+      "full_tests": {
+        "tests": 551,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "inventory": {
+        "total": 100,
+        "migrated": 58,
+        "pending": 42
+      }
     }
   ],
   "current_cli": {
@@ -1084,5 +1132,21 @@
     "atomic_format": "grid_or_dyna",
     "protocol": "grid_cpt",
     "cache_reuse": true
+  },
+  "periodic_cli": {
+    "report": "periodic-cli-validation.json",
+    "commands": 6,
+    "fixture_commands": 2,
+    "format_version": 3,
+    "models": [
+      "CONVGCN",
+      "MultiSTGCnet"
+    ],
+    "protocols": [
+      "convgcn_windows",
+      "multi_stgc"
+    ],
+    "cache_reuse": true,
+    "distinct_target_channels": true
   }
 }
