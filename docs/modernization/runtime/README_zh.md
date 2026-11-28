@@ -8,6 +8,8 @@
 
 OD 原始数据和多空间轴指标已补齐公共组件，支持起点/终点身份、原始正值掩码、训练区间归一化、历史与已知未来协变量分离、缓存及来源版本校验，见 [OD 数据说明](od-data_zh.md)。GEML、CSTN 均已接入。
 
+STDN 已接入局部流量门控和周期偏移注意力，用 `--model STDN` 生成 stdn.json，使用相同的 train/evaluate/resume 生命周期。`.grid` volume 与两列 `.gridod` 流量按实际节点和时间对齐，局部块及历史向量按需切片，全部输入在预测起点之前；多步头从同一预测起点并行输出。两个 scaler 仅拟合原始训练区间，原始缓存分别复用。配置、时间错位修复及验收见 [STDN 说明](stdn_zh.md)。
+
 GEML 可用 `--model GEML` 生成单流量 OD 示例，再对 geml.json 使用相同的训练、独立评估、续训命令。模型保留地理/语义图和周期记忆，纯 forward 无标签且不计算辅助头；训练 step 使用原尺度 OD 与行/列边际复合目标，验证只用主 OD MSE。p_interval、embed_dim 和 training.loss 的三项权重可显式设置；周期记忆及原辅助目标错误已修复。具体语义与能力见 [GEML 说明](geml_zh.md)。
 
 CSTN 可用 `--model CSTN` 生成网格 OD 示例，使用相同的生命周期命令。两条 OD 轴根据 .geo 网格位置转换/恢复；全局相关按区域逐列归一化，不混入其他样本。外部特征按真实宽度编码并广播，预测只推进已知未来列，未知天气使用最后观测。data.graph.name=none，无需 .rel。网络保留 LibCity 的 LSC/TEC/GCC 结构，修订及验收见 [CSTN 说明](cstn_zh.md)。

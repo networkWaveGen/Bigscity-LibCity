@@ -1,0 +1,7 @@
+{
+  "model": {"params": {"cnn_flat_size": 128, "lstm_out_size": 128}},
+  "data": {"graph": {"name": "none"}, "scaler": {"name": "normal"},
+    "features": {"flow_scaler": {"name": "normal"}}},
+  "training": {"epochs": 100, "batch_size": 1, "optimizer": {"name": "adam", "lr": 0.001},
+    "early_stopping": {"patience": 5}}
+}

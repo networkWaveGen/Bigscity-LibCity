@@ -104,6 +104,9 @@ def validate(config, preset):
     if model['name']=='CSTN':
         for key in ('n_layers','c_lt'):
             _positive(model['params'][key],'CSTN '+key)
+    if model['name']=='STDN':
+        for key in ('cnn_flat_size','lstm_out_size'):
+            _positive(model['params'][key],'STDN '+key)
     if model['name']=='GSNet':
         for key in ('num_of_gru_layers','gru_hidden_size'):
             _positive(model['params'][key],'GSNet '+key)
@@ -144,7 +147,14 @@ def validate(config, preset):
                 raise TypeError(f'data.split.{key} must be an ISO timestamp')
         stream_keys = ('primary_index','auxiliary_index') if model['name']=='DMSTGCN' else ()
         risk_keys = ('graph_columns','external_scaler') if model['name']=='GSNet' else ()
-        _known(data['features'], ('load_external', 'time_in_day', 'day_in_week', 'known_future_columns')+stream_keys+risk_keys, 'data.features')
+        if model['name']=='STDN':
+            _known(data['features'],('load_external','time_in_day','day_in_week','known_future_columns','flow_scaler'),'STDN data.features')
+            if any(data['features'][key] for key in ('load_external','time_in_day','day_in_week','known_future_columns')):
+                raise ValueError('STDN uses volume/flow context without external or known-future switches')
+            _known(data['features']['flow_scaler'],('name',),'STDN features.flow_scaler')
+            if data['features']['flow_scaler'].get('name') not in ('none','normal','standard','minmax01','minmax11','log'):
+                raise ValueError('Unknown STDN flow_scaler.name')
+        _known(data['features'], ('load_external', 'time_in_day', 'day_in_week', 'known_future_columns')+stream_keys+risk_keys+(('flow_scaler',) if model['name']=='STDN' else ()), 'data.features')
         if risk_keys:
             columns = data['features']['graph_columns']
             if columns is not None and (not isinstance(columns,list) or not columns or
@@ -210,10 +220,22 @@ def validate(config, preset):
             column = data['graph']['reachability_column']
             if model['name']!='TGCLSTM' or (column is not None and (not isinstance(column,str) or not column)):
                 raise ValueError('data.graph.reachability_column is a TGCLSTM column name or null')
+        stdn_keys=('att_lstm_num','att_lstm_seq_len','hist_feature_daynum','last_feature_num','cnn_nbhd_size','nbhd_size') if model['name']=='STDN' else ()
         _known(data['sampling'], ('name','closeness','period','trend','interval_period','interval_trend',
-                                  'temporal_history','period_steps','trend_steps'), 'data.sampling')
-        if data['sampling'].get('name') not in ('window','cpt','crann','grid_cpt','frame_cpt','seasonal_windows','od_window','grid_window','risk_cpt'):
+                                  'temporal_history','period_steps','trend_steps')+stdn_keys, 'data.sampling')
+        if data['sampling'].get('name') not in ('window','cpt','crann','grid_cpt','frame_cpt','seasonal_windows','od_window','grid_window','risk_cpt','stdn_grid'):
             raise ValueError('Unknown data.sampling.name')
+        if (spec.protocol=='stdn_grid') != (data['sampling']['name']=='stdn_grid'):
+            raise ValueError('stdn_grid sampling requires STDN and vice versa')
+        if model['name']=='STDN':
+            _known(data['sampling'],('name',)+stdn_keys,'STDN data.sampling')
+            for key in stdn_keys:
+                _positive(data['sampling'][key],'STDN sampling.'+key,zero=key not in ('att_lstm_num','att_lstm_seq_len'))
+            if data['sampling']['att_lstm_seq_len']%2!=1:
+                raise ValueError('STDN periodic attention sequence length must be odd')
+            _known(data['graph'],('name','symmetric','self_loops'),'STDN data.graph')
+            if data['graph']['name']!='none' or data['graph'].get('symmetric',False) or data['graph'].get('self_loops',False):
+                raise ValueError('STDN uses observed OD flows, requiring graph.name=none without graph switches')
         if (spec.protocol=='risk_cpt') != (data['sampling']['name']=='risk_cpt'):
             raise ValueError('risk_cpt sampling requires a registered risk_cpt model and vice versa')
         if spec.protocol=='risk_cpt':
@@ -253,7 +275,7 @@ def validate(config, preset):
                 _positive(data['sampling'].get(key,1),f'data.sampling.{key}')
         if data['graph'].get('name') not in ('binary', 'weighted', 'distance','inverse_distance','distance_bands')+(
                 ('svd_gaussian',) if model['name']=='CCRNN' else ('dynamic',) if model['name']=='DMSTGCN' else
-                ('risk_multigraph',) if model['name']=='GSNet' else ('none',) if model['name'] in ('CSTN','DSAN') else ()):
+                ('risk_multigraph',) if model['name']=='GSNet' else ('none',) if model['name'] in ('CSTN','DSAN','STDN') else ()):
             raise ValueError('Unknown data.graph.name')
         if (data['graph']['name']=='distance_bands' and model['name']!='MultiSTGCnet') or (
                 model['name']=='MultiSTGCnet' and data['graph']['name'] not in ('distance_bands','binary')):

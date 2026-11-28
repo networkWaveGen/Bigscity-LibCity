@@ -1,0 +1,6 @@
+{
+  "data": {"input_window": 7, "output_window": 1,
+    "sampling": {"name": "stdn_grid", "att_lstm_num": 3, "att_lstm_seq_len": 3,
+      "hist_feature_daynum": 7, "last_feature_num": 48, "cnn_nbhd_size": 3, "nbhd_size": 2}},
+  "training": {"loss": {"name": "masked_mse", "mask_value": 0.0}}
+}

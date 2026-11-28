@@ -29,6 +29,8 @@ class ModelSpec:
 
 
 MODELS = {
+    'STDN': ModelSpec('libcity.model.traffic_flow_prediction.runtime_stdn:STDN',protocol='stdn_grid',
+        prepare_data='libcity.data.stdn_bundle:prepare_stdn'),
     'GSNet': ModelSpec('libcity.model.traffic_accident_prediction.runtime_gsnet:GSNet',protocol='risk_cpt',
         prepare_data='libcity.data.gsnet_bundle:prepare_gsnet',loss='libcity.executor.risk_loss:RiskLoss',
         evaluate_loader='libcity.executor.risk_evaluation:evaluate_risk'),

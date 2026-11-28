@@ -1,0 +1,357 @@
+{
+  "passed": true,
+  "source": "D:\\LibCity 2.0\\LibCity-modernization",
+  "directory": "D:\\LibCity 2.0\\.runtime-tests\\stdn-cli-h51jtmw1",
+  "commands": [
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\tools\\make_runtime_fixture.py",
+        "--directory",
+        "D:\\LibCity 2.0\\.runtime-tests\\stdn-cli-h51jtmw1\\example",
+        "--model",
+        "STDN"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\stdn-cli-h51jtmw1",
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "train",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\stdn-cli-h51jtmw1\\example\\stdn.json",
+        "--set",
+        "runtime.exp_id=train"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\stdn-cli-h51jtmw1",
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "evaluate",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\stdn-cli-h51jtmw1\\example\\stdn.json",
+        "--checkpoint",
+        "D:\\LibCity 2.0\\.runtime-tests\\stdn-cli-h51jtmw1\\example\\runs\\train\\checkpoints\\best.pt",
+        "--set",
+        "runtime.exp_id=evaluated"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\stdn-cli-h51jtmw1",
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "train",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\stdn-cli-h51jtmw1\\example\\stdn.json",
+        "--resume",
+        "D:\\LibCity 2.0\\.runtime-tests\\stdn-cli-h51jtmw1\\example\\runs\\train\\checkpoints\\last.pt",
+        "--set",
+        "training.epochs=3",
+        "--set",
+        "runtime.exp_id=resumed"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\stdn-cli-h51jtmw1",
+      "exit_code": 0
+    }
+  ],
+  "prediction_shape": [
+    31,
+    2,
+    6,
+    2
+  ],
+  "independent_predictions_equal": true,
+  "independent_metrics_equal": true,
+  "global_raw_masked_mse": 755.8958740234375,
+  "evaluation_loss": 755.8958810915415,
+  "resumed_epoch": 3,
+  "optimizer_steps": 9,
+  "cache_statuses": [
+    "miss",
+    "hit",
+    "hit"
+  ],
+  "flow_cache_statuses": [
+    "miss",
+    "hit",
+    "hit"
+  ],
+  "input_specification_saved": true,
+  "weights_only_safe_load": true,
+  "evaluate_has_no_training_artifacts": true,
+  "runtime_info": {
+    "train": {
+      "python": "3.12.13",
+      "pytorch": "2.15.0+cpu",
+      "numpy": "2.5.5",
+      "platform": "Windows-11-10.0.26200-SP0",
+      "mode": "train",
+      "execution_kind": "neural",
+      "device": "cpu",
+      "seed": 17,
+      "benchmark_protocol": "stdn_grid",
+      "split": {
+        "semantics": "target_time_v1",
+        "adapter": "stdn_grid",
+        "input_window": 3,
+        "history_span_points": 73,
+        "requested_input_window": 3,
+        "sampled_history_steps": 9,
+        "offsets": [
+          -3,
+          -2,
+          -1,
+          -49,
+          -48,
+          -47,
+          -25,
+          -24,
+          -23
+        ],
+        "grid_shape": [
+          2,
+          3
+        ],
+        "intervals": {
+          "train": {
+            "samples": 22,
+            "target_index_start": 73,
+            "target_index_end": 95
+          },
+          "val": {
+            "samples": 31,
+            "target_index_start": 96,
+            "target_index_end": 127
+          },
+          "test": {
+            "samples": 31,
+            "target_index_start": 128,
+            "target_index_end": 159
+          }
+        },
+        "train": 22,
+        "val": 31,
+        "test": 31,
+        "train_end": "2024-01-05T00:00:00.000000000",
+        "val_end": "2024-01-06T08:00:00.000000000",
+        "scaler_fit_end_exclusive": "2024-01-05T00:00:00.000000000",
+        "flow_scaler_fit_end_exclusive": "2024-01-05T00:00:00.000000000",
+        "train_padded": false,
+        "cache": {
+          "status": "miss",
+          "path": "D:\\LibCity 2.0\\.runtime-tests\\stdn-cli-h51jtmw1\\example\\cache\\traffic-raw-v1\\730d19fb44c9bfd516055e14.npz"
+        },
+        "flow_cache": {
+          "status": "miss",
+          "path": "D:\\LibCity 2.0\\.runtime-tests\\stdn-cli-h51jtmw1\\example\\cache\\traffic-raw-v1\\8a0aed067eb34f64a0945e72.npz"
+        },
+        "sampling_gap_policy": "whole_volume_flow_context_and_target_span_contiguous",
+        "input_missing_observations": "zero_before_scaling"
+      },
+      "protocol_changes": {
+        "data.input_window": 3,
+        "data.sampling": {
+          "name": "stdn_grid",
+          "att_lstm_num": 2,
+          "att_lstm_seq_len": 3,
+          "hist_feature_daynum": 1,
+          "last_feature_num": 3,
+          "cnn_nbhd_size": 1,
+          "nbhd_size": 1
+        },
+        "benchmark.protocol": "stdn_grid"
+      },
+      "capabilities": {
+        "requires_checkpoint": true,
+        "supports_resume": true,
+        "supports_validation": true
+      }
+    },
+    "evaluated": {
+      "python": "3.12.13",
+      "pytorch": "2.15.0+cpu",
+      "numpy": "2.5.5",
+      "platform": "Windows-11-10.0.26200-SP0",
+      "mode": "evaluate",
+      "execution_kind": "neural",
+      "device": "cpu",
+      "seed": 17,
+      "benchmark_protocol": "stdn_grid",
+      "split": {
+        "semantics": "target_time_v1",
+        "adapter": "stdn_grid",
+        "input_window": 3,
+        "history_span_points": 73,
+        "requested_input_window": 3,
+        "sampled_history_steps": 9,
+        "offsets": [
+          -3,
+          -2,
+          -1,
+          -49,
+          -48,
+          -47,
+          -25,
+          -24,
+          -23
+        ],
+        "grid_shape": [
+          2,
+          3
+        ],
+        "intervals": {
+          "train": {
+            "samples": 22,
+            "target_index_start": 73,
+            "target_index_end": 95
+          },
+          "val": {
+            "samples": 31,
+            "target_index_start": 96,
+            "target_index_end": 127
+          },
+          "test": {
+            "samples": 31,
+            "target_index_start": 128,
+            "target_index_end": 159
+          }
+        },
+        "train": 22,
+        "val": 31,
+        "test": 31,
+        "train_end": "2024-01-05T00:00:00.000000000",
+        "val_end": "2024-01-06T08:00:00.000000000",
+        "scaler_fit_end_exclusive": "2024-01-05T00:00:00.000000000",
+        "flow_scaler_fit_end_exclusive": "2024-01-05T00:00:00.000000000",
+        "train_padded": false,
+        "cache": {
+          "status": "hit",
+          "path": "D:\\LibCity 2.0\\.runtime-tests\\stdn-cli-h51jtmw1\\example\\cache\\traffic-raw-v1\\730d19fb44c9bfd516055e14.npz"
+        },
+        "flow_cache": {
+          "status": "hit",
+          "path": "D:\\LibCity 2.0\\.runtime-tests\\stdn-cli-h51jtmw1\\example\\cache\\traffic-raw-v1\\8a0aed067eb34f64a0945e72.npz"
+        },
+        "sampling_gap_policy": "whole_volume_flow_context_and_target_span_contiguous",
+        "input_missing_observations": "zero_before_scaling"
+      },
+      "protocol_changes": {
+        "data.input_window": 3,
+        "data.sampling": {
+          "name": "stdn_grid",
+          "att_lstm_num": 2,
+          "att_lstm_seq_len": 3,
+          "hist_feature_daynum": 1,
+          "last_feature_num": 3,
+          "cnn_nbhd_size": 1,
+          "nbhd_size": 1
+        },
+        "benchmark.protocol": "stdn_grid"
+      },
+      "capabilities": {
+        "requires_checkpoint": true,
+        "supports_resume": true,
+        "supports_validation": true
+      }
+    },
+    "resumed": {
+      "python": "3.12.13",
+      "pytorch": "2.15.0+cpu",
+      "numpy": "2.5.5",
+      "platform": "Windows-11-10.0.26200-SP0",
+      "mode": "train",
+      "execution_kind": "neural",
+      "device": "cpu",
+      "seed": 17,
+      "benchmark_protocol": "stdn_grid",
+      "split": {
+        "semantics": "target_time_v1",
+        "adapter": "stdn_grid",
+        "input_window": 3,
+        "history_span_points": 73,
+        "requested_input_window": 3,
+        "sampled_history_steps": 9,
+        "offsets": [
+          -3,
+          -2,
+          -1,
+          -49,
+          -48,
+          -47,
+          -25,
+          -24,
+          -23
+        ],
+        "grid_shape": [
+          2,
+          3
+        ],
+        "intervals": {
+          "train": {
+            "samples": 22,
+            "target_index_start": 73,
+            "target_index_end": 95
+          },
+          "val": {
+            "samples": 31,
+            "target_index_start": 96,
+            "target_index_end": 127
+          },
+          "test": {
+            "samples": 31,
+            "target_index_start": 128,
+            "target_index_end": 159
+          }
+        },
+        "train": 22,
+        "val": 31,
+        "test": 31,
+        "train_end": "2024-01-05T00:00:00.000000000",
+        "val_end": "2024-01-06T08:00:00.000000000",
+        "scaler_fit_end_exclusive": "2024-01-05T00:00:00.000000000",
+        "flow_scaler_fit_end_exclusive": "2024-01-05T00:00:00.000000000",
+        "train_padded": false,
+        "cache": {
+          "status": "hit",
+          "path": "D:\\LibCity 2.0\\.runtime-tests\\stdn-cli-h51jtmw1\\example\\cache\\traffic-raw-v1\\730d19fb44c9bfd516055e14.npz"
+        },
+        "flow_cache": {
+          "status": "hit",
+          "path": "D:\\LibCity 2.0\\.runtime-tests\\stdn-cli-h51jtmw1\\example\\cache\\traffic-raw-v1\\8a0aed067eb34f64a0945e72.npz"
+        },
+        "sampling_gap_policy": "whole_volume_flow_context_and_target_span_contiguous",
+        "input_missing_observations": "zero_before_scaling"
+      },
+      "protocol_changes": {
+        "data.input_window": 3,
+        "data.sampling": {
+          "name": "stdn_grid",
+          "att_lstm_num": 2,
+          "att_lstm_seq_len": 3,
+          "hist_feature_daynum": 1,
+          "last_feature_num": 3,
+          "cnn_nbhd_size": 1,
+          "nbhd_size": 1
+        },
+        "benchmark.protocol": "stdn_grid"
+      },
+      "capabilities": {
+        "requires_checkpoint": true,
+        "supports_resume": true,
+        "supports_validation": true
+      }
+    }
+  },
+  "scope": "Actual published STDN volume/flow example, corrected causal data and parallel multi-horizon head; CPU functionality, not paper accuracy or Keras dropout parity"
+}

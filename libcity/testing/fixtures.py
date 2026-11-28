@@ -112,6 +112,25 @@ def dsan_fixture(root):
     return grid_fixture(root,steps=60)
 
 
+def stdn_fixture(root,name='STDNTiny',steps=160,rows=2,columns=3,features=2,outputs=2):
+    folder=grid_fixture(root,name,steps,rows,columns,features,outputs)
+    clock=pd.date_range('2024-01-01',periods=steps,freq='h',tz='UTC')
+    records=[]
+    for step in range(steps):
+        for origin in range(rows*columns):
+            for destination in range(rows*columns):
+                records.append(dict(dyna_id=len(records),type='state',time=clock[step].strftime('%Y-%m-%dT%H:%M:%SZ'),
+                    origin_row_id=origin//columns,origin_column_id=origin%columns,
+                    destination_row_id=destination//columns,destination_column_id=destination%columns,
+                    same_slot=0. if (step,origin,destination)==(50,1,2) else 1+step*.1+origin*3+destination*.7,
+                    next_slot=2+step*.2+origin*.3+destination*2))
+    pd.DataFrame(records).sample(frac=1,random_state=23).to_csv(folder/f'{name}.gridod',index=False)
+    path=folder/'config.json';raw=json.loads(path.read_text(encoding='utf-8'))
+    raw.update(flow_files=name,flow_col=['same_slot','next_slot'])
+    path.write_text(json.dumps(raw),encoding='utf-8')
+    return folder
+
+
 def risk_fixture(root,name='RiskTiny',steps=96,poi=True):
     folder = grid_fixture(root,name=name,steps=steps,rows=2,columns=3,features=3,outputs=1)
     ids = [71,3,108]

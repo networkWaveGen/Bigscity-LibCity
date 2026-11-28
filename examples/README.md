@@ -408,6 +408,13 @@ receive the raw-scale region-squared, risk-bin-weighted objective. Region
 metrics include zero-risk targets; predictions export unmodified truth plus
 a regions mask. The example explicitly shortens the default four-week history.
 
+Generate STDN with `--model STDN` and use stdn.json for the same lifecycle.
+The example creates volume grids plus two OD flow channels; local patches,
+four flow directions and daily/recent/local volume vectors are sliced on demand.
+Every horizon uses the same causal forecast origin. Volume and flow scalers fit
+only the raw training interval and have separate reusable raw caches. The fixture
+shortens the default warmup and demonstrates a two-step, two-target forecast.
+
 The complete supported-model inventory and migration details are in the
 [runtime guide](../docs/modernization/runtime/README_zh.md). Small examples prove
 execution and reproducibility, not real-city benchmark accuracy.

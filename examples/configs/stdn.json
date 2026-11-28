@@ -1,0 +1,10 @@
+{
+  "model": {"name": "STDN", "params": {"cnn_flat_size": 8, "lstm_out_size": 8}},
+  "data": {"dataset": "STDNTiny", "data_dir": "data", "cache_dir": "cache", "input_window": 3,
+    "output_window": 2, "pad_training": false,
+    "sampling": {"att_lstm_num": 2, "att_lstm_seq_len": 3, "hist_feature_daynum": 1,
+      "last_feature_num": 3, "cnn_nbhd_size": 1, "nbhd_size": 1}},
+  "training": {"epochs": 2, "batch_size": 5, "accumulation_steps": 2},
+  "evaluation": {"batch_size": 4},
+  "runtime": {"device": "cpu", "seed": 17, "output_dir": "runs", "exp_id": "stdn-demo"}
+}

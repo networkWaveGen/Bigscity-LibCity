@@ -5,7 +5,7 @@ from pathlib import Path
 
 SUFFIXES = {'.geo','.rel','.dyna','.grid','.od','.gridod','.ext','.usr'}
 FILE_FIELDS = {'geo_file':'.geo','rel_file':'.rel','data_files':'.dyna','dyna_file':'.dyna',
-               'ext_file':'.ext','usr_file':'.usr','truth_file':'.dyna'}
+               'ext_file':'.ext','usr_file':'.usr','truth_file':'.dyna','flow_files':'.gridod'}
 
 
 def atomic_sources(data):
@@ -24,7 +24,7 @@ def atomic_sources(data):
         for name in values:
             if isinstance(name,str):
                 suffix = FILE_FIELDS.get(key,'')
-                if (key=='data_files' and data.get('sampling',{}).get('name') in ('grid_cpt','grid_window','risk_cpt')
+                if (key=='data_files' and data.get('sampling',{}).get('name') in ('grid_cpt','grid_window','risk_cpt','stdn_grid')
                         and (folder/(name+'.grid')).is_file()):
                     suffix = '.grid'
                 if key=='data_files' and data.get('sampling',{}).get('name')=='od_window':

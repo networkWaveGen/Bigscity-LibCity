@@ -58,7 +58,8 @@
 | commit50 | aafc857 | fix: validate neural inference inputs before loading weights |
 | commit51 | 956930e | feat: migrate DSAN with isolated grid attention and raw masks |
 | commit52 | 79a13e3 | feat: add risk-grid bundles and region-aware evaluation |
-| commit53 | 随本节交付的提交 | feat: migrate GSNet with forecast-time attention and region objectives |
+| commit53 | 76535dc | feat: migrate GSNet with forecast-time attention and region objectives |
+| commit54 | 随本节交付的提交 | feat: migrate STDN with causal volume-flow sampling and shifted attention |
 
 ## commit1：修复基础交通缓存（670b325）
 
@@ -631,6 +632,18 @@ forward 由配置决定预测长度，每步重新编码当前窗口；预测回
 仓库外实际生成、训练、独立评估、续训 **4 条命令成功**，完整网格 6 格与图 3 节点，预测 [19,2,6,1]，独立预测和指标完全一致；第三轮累计 12 次更新、缓存 miss/hit/hit。原尺度区域平方分档 MSE 独立复算约 320.252096，与评估 loss 的浮点精度一致；安全纯权重包含输入说明，独立评估没有训练产物，见 [CLI](gsnet-cli-validation.json)。原融合头仍仅用第一预测时刻条件一次性输出 H 步；阈值按原尺度解释、数值外部列按训练区间独立归一化、排名并列和零事故处理均为明确修订，不宣称论文精度或作者归一化目标等价。
 
 清单更新为 **74/100**、26 条 pending；扣除延期 Common 与模板后还有 **17 个实际模型**：DMVSTNet、GMAN、STDN、STAGGCN、STMGAT、D2STGNN、STGODE、ESG、SSTBAN、STTSNet、FOGS、DSTAGNN、HIEST、MultiSPANS、STWave、PDFormer、STGNCDE。它们及最终全量交付验收仍在主线范围内，本批不将整个方案标为完成。
+
+## commit54：迁移 STDN，修复 volume/flow 历史与目标时间错位
+
+原问题：旧数据先从长预热期之后展开局部特征，再用未加预热偏移的原始 volume 索引生成标签，历史/目标时钟错位并可能读取标签之后的观测；多步把目标轴折入 batch、按目标时刻构造特征。流量读取依赖 CSV 排序，日周期用小时整除近似；窗口全部展开存缓存，归一化按展开窗口拟合，网络持有 scaler/logger/device。
+
+处理：以同一预测起点构造近期、周期偏移、每日/最近/局部向量和四类历史出入流。按真实 ID/网格坐标及时间对齐 .grid 与 .gridod；完整依赖不跨文件/缺口，目标互斥、两份 scaler 仅拟合原始训练区间。未展开 volume/flow 分别缓存，局部块按需切片，来源变化校验覆盖 .gridod，不哈希文件内容。标准 STDN 保留独立位置的三层 64 通道门控、近期/周期 LSTM 与内容/高层注意力；近期 raw-flow 门和周期级联 flow 门保持原义。统一 [B,H,N,O]，H>1 用同一预测起点并行多步头，不读未来目标。stdn_grid 命名协议、分层配置校验、原生注册和公开示例全部接入；细节及原作者 dropout 差异见 [STDN 说明](stdn_zh.md)。
+
+验证：新增 **42 项通过**，四组旧有效网络完整前向/全部参数与输入梯度（含默认 7 近期/3 周期/每周期 3 帧/7×7/160 向量/128 宽度）；独立嵌套循环的局部块/四流向/每日最近局部向量，真实 ID/节点空间置换、未来 volume/flow 隔离、目标互斥及最后窗口、原始 NaN/零掩码；缓存无完整行重读与三类损坏、七类无效来源、文件/时钟缺口边界；两种 scaler 的实际训练/独立原尺度评估/所有预测步梯度、参数/优化器/metric 调度/最佳模型/RNG/加载器精确续训；两类真实尾批 CPU AMP、单格/单帧/零额外历史、Windows spawn 与流量来源变更恢复拒绝；14 类配置拒绝及默认协议。首批 40 专项与相关网格/配置/来源合计 **102 passed**，最终新增 2 项原始掩码/空间置换一起进入完整回归：**1225 passed，0 failed，0 errors，0 skipped**，见 [汇总](remaining-validation.json)。
+
+实际仓库外生成、训练、独立评估、续训 **4 条命令成功**，预测 [31,2,6,2]、独立预测和指标完全一致；第三轮累计 9 次更新，volume/flow 两份缓存均为 miss/hit/hit。全局原尺度 masked MSE 独立复算约 755.895874，与评估 loss 一致；best.pt 安全纯权重携带输入说明，独立评估没有训练产物，见 [CLI](stdn-cli-validation.json)。本批不声称旧错位流程、作者 Keras dropout 或论文精度等价，保留原始 dense OD 成本。
+
+清单为 **75/100**、25 条 pending；扣除延期 Common 与模板后，还有 **16 个实际模型**：DMVSTNet、GMAN、STAGGCN、STMGAT、D2STGNN、STGODE、ESG、SSTBAN、STTSNet、FOGS、DSTAGNN、HIEST、MultiSPANS、STWave、PDFormer、STGNCDE。它们及最终全量验收继续保留在主线范围内。
 
 ## 持续完成的清单
 
