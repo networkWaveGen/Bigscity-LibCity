@@ -122,7 +122,16 @@ def validate(config, preset):
         for key in ('train_end','val_end'):
             if key in data['split'] and not isinstance(data['split'][key],str):
                 raise TypeError(f'data.split.{key} must be an ISO timestamp')
-        _known(data['features'], ('load_external', 'time_in_day', 'day_in_week', 'known_future_columns'), 'data.features')
+        stream_keys = ('primary_index','auxiliary_index') if model['name']=='DMSTGCN' else ()
+        _known(data['features'], ('load_external', 'time_in_day', 'day_in_week', 'known_future_columns')+stream_keys, 'data.features')
+        if stream_keys:
+            for key in stream_keys:
+                _positive(data['features'][key],'features.'+key,zero=True)
+            if data['features']['primary_index']==data['features']['auxiliary_index']:
+                raise ValueError('DMSTGCN primary_index and auxiliary_index must be distinct')
+            _known(data['graph'],('name','symmetric','self_loops'),'data.graph')
+            if data['graph']['name']!='dynamic' or data['graph'].get('symmetric',False) or data['graph'].get('self_loops',False):
+                raise ValueError('DMSTGCN requires its dynamic graph without static graph switches')
         _known(data['scaler'], ('name',), 'data.scaler')
         graph_keys = {'HGCN':('cluster_nodes','cluster_labels','cluster_epsilon'),
             'GTS':('history_channel','history_steps'),
@@ -183,7 +192,8 @@ def validate(config, preset):
                 raise ValueError('CPT sampling requires at least one history segment')
             for key in ('interval_period','interval_trend'):
                 _positive(data['sampling'].get(key,1),f'data.sampling.{key}')
-        if data['graph'].get('name') not in ('binary', 'weighted', 'distance','inverse_distance','distance_bands')+ (('svd_gaussian',) if model['name']=='CCRNN' else ()):
+        if data['graph'].get('name') not in ('binary', 'weighted', 'distance','inverse_distance','distance_bands')+(
+                ('svd_gaussian',) if model['name']=='CCRNN' else ('dynamic',) if model['name']=='DMSTGCN' else ()):
             raise ValueError('Unknown data.graph.name')
         if (data['graph']['name']=='distance_bands' and model['name']!='MultiSTGCnet') or (
                 model['name']=='MultiSTGCnet' and data['graph']['name'] not in ('distance_bands','binary')):
@@ -208,7 +218,7 @@ def validate(config, preset):
             if name=='known_future_columns':
                 if not isinstance(value,list) or any(not isinstance(item,str) for item in value) or len(set(value))!=len(value):
                     raise TypeError('known_future_columns must be a list of unique column names')
-            else:
+            elif name in ('load_external','time_in_day','day_in_week'):
                 boolean_values.append((value,'data.features.'+name))
     for value,name in boolean_values:
         if type(value) is not bool:

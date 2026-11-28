@@ -1,9 +1,10 @@
 # 新运行时模型迁移范围
 
-当前共 67 个运行时入口，对应原清单中的 69 个任务—模型条目（轨迹 RNN/LSTM/GRU 共用一个入口）。完整 [100 项 CSV](model-migration.csv) 逐项记录实际能力、依赖、验证与后续动作；其余 31 项仍为 pending，不会自动回退到旧运行时。轨迹预测全部 13 个非模板条目、两个 ETA 模型、三个地图匹配算法和六个道路表征模型均已接入。排除七个延期 Common 变体和两个模板后，本期仍有 22 个交通预测模型待迁移。37 个特殊交通数据集的深度整理仍延后。交通数据统一使用目标时间互斥切分。
+当前共 68 个运行时入口，对应原清单中的 70 个任务—模型条目（轨迹 RNN/LSTM/GRU 共用一个入口）。完整 [100 项 CSV](model-migration.csv) 逐项记录实际能力、依赖、验证与后续动作；其余 30 项仍为 pending，不会自动回退到旧运行时。轨迹预测全部 13 个非模板条目、两个 ETA 模型、三个地图匹配算法和六个道路表征模型均已接入。排除七个延期 Common 变体和两个模板后，本期仍有 21 个交通预测模型待迁移。37 个特殊交通数据集的深度整理仍延后。交通数据统一使用目标时间互斥切分。
 
 | 名称 | 任务/数据 | 训练接入 | 检查点/续训能力 | 实际验证级别 |
 | --- | --- | --- | --- | --- |
+| DMSTGCN | traffic_state_pred / 两种观测与实际日历的三张动态图 | 默认 train_loop | 需要权重；dropout/BN/Adam/metric 调度完整续训 | 四组修正旧 Conv2d/形状后的完整预测/全部有效梯度/训练 BN（默认 32/512/40 宽度）、独立图张量收缩/有向幂、动态 skip/LayerNorm/传递宽度、真实 UTC 历史时段/训练区间辅助归一化/缓存/未来隔离、删除死层、单层/零阶/多目标头顺序/batch=1/float64、两类归一化精确续训、单节点/时间尾批 CPU AMP、spawn 与实际 CLI |
 | CCRNN | traffic_state_pred / 原始训练 SVD Gaussian 图与逐层耦合 | 公共 train_loop + Python 课程 step + 整组 RMSE | 需要权重；Python 课程/Adam/metric 调度完整续训 | 默认 25 隐藏/50 图维的四组旧预测/teacher/全部有效梯度、独立扩散多项式、经济型 SVD/原 Gaussian/两种归一化/常量及单节点、原始训练区间/缓存/未来隔离/无关 rel、零奇异方向可学习/任意图层数/零 hop/多目标/batch=1/float64、无标签/无 RNG/无图属性、两种图完整训练/独立评估/精确续训、全局 RMSE、真实尾批 CPU AMP 与实际 CLI |
 | RGSL | traffic_state_pred / 显式静态图与隐式学习图混合循环网络 | 公共 train_loop + 显式采图训练 step | 需要权重；随机图/Adam/调度完整续训 | 默认双层 64 单元及四组受控采样旧前向/全部梯度对照、作者线性直通梯度、修正高阶静态矩阵递推、零图/空采图/零嵌入/单节点有限梯度、低宽度/多目标/batch=1/float64、图基底及节点参数单次准备、确定性无标签/无 RNG/无跨批影响、每次评估一张新图、完整训练/独立评估/精确续训、真实尾批 CPU AMP 与实际 CLI |
 | GTS | traffic_state_pred / 训练区间图特征与扩散 GRU | 公共 train_loop + 独立图训练 step/评估适配 | 需要权重；随机采图/课程学习/BN 完整续训 | 默认宽度及四组受控 Gumbel 旧完整预测/原图 BCE/全部梯度/BN 对照、三组扩散梯度、配对线性分解、原始训练特征/无未来目标/缓存/窗口及 batch 独立、大数组只读与检查点描述、确定图无标签评估/每次评估一次图计算、显式 teacher/图正则截止、完整训练/评估/跨截止轮次精确续训、单节点/单特征步/真实尾批 CPU AMP 与实际 CLI |
@@ -246,5 +247,19 @@ data.graph.name 固定为 svd_gaussian，svd_rank 默认 25，表示 SVD 保留�
 forward 只读取 X，始终返回预测 Tensor；训练模式直接调用它也不读取 y 或抽取课程随机数。训练 step 显式传入归一化目标与逐步 teacher_mask，保留 Python random 每预测步一次的抽样（包含最后一次未使用的抽样），按 state.batches_seen 和 cl_decay_steps 计算逆 sigmoid 阈值；超长训练使用有限零概率回退。training.strategy.use_curriculum_learning 默认 true，cl_decay_steps 默认 300；关闭时不传入目标、不采样。阈值工具提取到公共 curriculum，GTS 保持其原 NumPy 抽样及数值规则。
 
 默认训练为原尺度 masked_rmse、mask_value=null，保留原始零目标；通过 RootMeanSquaredLoss 在有效累积组和整次评估后统一开方，验证/早停不平均逐批 RMSE。可显式选择公共 MAE/MSE/Huber 或非掩码 RMSE。保留 Adam 0.001、metric plateau（factor=0.2、patience=5、threshold=0.001）、梯度裁剪 5、早停 50 与最多 100 轮；预设不改公共切分或预测窗。新增 plateau threshold 的启动校验。47 项专项覆盖四组旧计算/全部有效梯度（含默认 50 节点、25/50 宽度）、原 Gaussian/归一化、仅训练 SVD/缓存、两种归一化完整训练/评估/课程 RNG 精确续训、实际全局 RMSE 和三种单样本尾批 CPU AMP。原始时间边界、拉普拉斯、退化情况及无标签推理是明确修订，不声称旧错误数据流程或论文精度等价；仍有 dense SVD/节点图与全节点注意力成本。具体命令见 [CCRNN CLI](ccrnn-cli-validation.json)。
+
+DMSTGCN 保留主/辅助两支时间卷积、主图/辅助图/辅助到主图三张动态图、门控、图传播、残差与跳连。默认 num_blocks=4、num_layers=2、kernel_size=2、residual_channels=dilation_channels=32、end_channels=512、embedding_dims=40、order=2、dropout=0.3、skip_channels=8。动态图仍由时间、两端节点和三阶核心张量收缩，经 ReLU 与逐行 softmax 得到；图传播保持原有向索引与普通图幂，order=0 只含自身项，不替换为 Chebyshev 递推或额外静态图。
+
+修复接收四维输入却使用 Conv1d 的门/跳连卷积，统一为对应 Conv2d；辅助到主图的投影输入宽度按前一个图卷积的 residual_channels 构造，支持与 dilation_channels 不同。感受野为 1+num_blocks*(kernel_size-1)*(2^num_layers-1)，短历史只在左侧补零；每层有效长度按真实输入/核/膨胀推导，LayerNorm 与跳连输出头不再写死 13 帧或 416 通道。各层跳连先收集、最后按原逆层序一次拼接；多目标输出头显式按 horizon/target/node 排列，保持单目标旧输出含义。
+
+旧网络的最终跳连在最终图传播之前取值，因此最后图卷积、最后辅助卷积和部分末端归一化不参与输出；原 residual_convs 两组从未使用。新模型删除这些无效参数与运算，单个时间块时只保留有效主干，单块或 order=0 时不创建无效动态图嵌入。删除死层不会改变同权重下的有效预测，但会省去原来无用的 dropout 抽样和 BN 更新，不能据此声称整个旧随机训练序列逐步一致。新运行时的连续/中断训练则已完整精确对照。
+
+输入需要两个不同的真实历史观测，data.features.primary_index 默认 0、auxiliary_index 默认 1，索引必须属于 observed_feature_indices，不能把日历或已知未来列当辅助观测。两个索引位于目标通道范围内时使用公共目标归一化器，范围外的选中观测单独按原始训练区间拟合 data.scaler，再只转换历史 X；均不使用验证/测试值或 padding 样本拟合。其状态、训练边界和索引进入只读布局/续训校验。非选中观测、真实未来 y 和 future_features 不参与前向。
+
+时间索引改为第一个实际历史观测的 UTC time_slot，使用独立 int64 history_features，不再按训练/验证样本序号轮转。这个选择保留常规午夜起始、完整连续旧窗口的起点含义，同时修复非午夜起点、切分丢弃窗口或时间间隔造成的错位。采样间隔须整除一天；时段表大小自动为 86400/time_intervals。日历适配提取为公共 calendar_bundle，STPGCN 原导入名称保留，数值和布局不变。data.graph.name=dynamic，只计算学习图，跳过无关 .rel；特征索引/额外归一化和窗口改变可复用原始缓存，完整续训仍保留全目录来源版本保护。
+
+模型为普通 nn.Module，静态结构与动态图参数跟随标准设备/dtype，不持有 scaler/logger/device。forward 总是返回预测 Tensor，eval 模式不采图或消耗 dropout RNG；训练的 dropout/BN 按标准模块模式执行。normalization 可选 batch/layer，单样本单节点/时间的 BN 使用公共有限回退。默认训练是原尺度 masked_mae、mask_value=null（保留零目标），Adam 0.001/weight_decay=0.0001、metric plateau factor=0.3/patience=10/threshold=0.001、裁剪 5、早停 20、最多 200 轮；预设不改公共切分或预测窗。
+
+33 项专项包含四组旧有效网络的修正后前向/全部有效梯度/训练 BN 对照、默认宽度和层数、独立图收缩与幂传播、真实非午夜 UTC 时间、仅训练辅助统计、缺失/坏 .rel 隔离、缓存/未来目标隔离、未选中输入与标签隔离、可变历史/核/通道/多目标及头顺序、单块/零阶、两种归一化的完整训练/独立评估/dropout/BN/Adam/metric 调度/RNG 精确续训、两类真实尾批 CPU AMP 与 Windows spawn。基本安装即可运行；仍保留三阶核心和批量稠密节点图成本，不声称论文精度或全部硬件认证。实际命令见 [DMSTGCN CLI](dmstgcn-cli-validation.json)。
 
 阶段三、四有意调整见 [新增记录](phases34_execution_zh.md)。旧依赖处理步骤及已完成结果见 [登记](optional_dependencies_zh.md)。

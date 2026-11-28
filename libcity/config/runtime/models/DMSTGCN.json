@@ -1,0 +1,12 @@
+{
+  "model": {"params": {"num_layers": 2, "num_blocks": 4, "residual_channels": 32,
+    "dilation_channels": 32, "end_channels": 512, "kernel_size": 2, "embedding_dims": 40,
+    "order": 2, "dropout": 0.3, "normalization": "batch", "skip_channels": 8}},
+  "data": {"scaler": {"name": "standard"}, "graph": {"name": "dynamic"},
+    "features": {"primary_index": 0, "auxiliary_index": 1}},
+  "training": {"epochs": 200, "optimizer": {"name": "adam", "lr": 0.001, "weight_decay": 0.0001},
+    "scheduler": {"name": "plateau", "interval": "metric", "monitor": "val_loss",
+      "factor": 0.3, "patience": 10, "threshold": 0.001},
+    "clip_grad_norm": 5.0, "early_stopping": {"patience": 20},
+    "loss": {"name": "masked_mae", "mask_value": null}}
+}

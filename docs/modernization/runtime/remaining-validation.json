@@ -1,5 +1,5 @@
 {
-  "scope": "Remaining-work commits 1-45; whole-library migration remains in progress",
+  "scope": "Remaining-work commits 1-46; whole-library migration remains in progress",
   "environment": {
     "python": "3.12.13",
     "torch": "2.15.0+cpu",
@@ -9,7 +9,7 @@
     "scikit_learn": "1.9.1"
   },
   "full_tests": {
-    "tests": 956,
+    "tests": 989,
     "failures": 0,
     "errors": 0,
     "skipped": 0
@@ -294,6 +294,39 @@
     "test_invalid_model_parameters_are_rejected[params1]",
     "test_invalid_model_parameters_are_rejected[params2]",
     "test_invalid_model_parameters_are_rejected[params3]",
+    "test_repaired_original_full_network_forecast_all_effective_gradients_and_bn[32-32-512-40-4-2-2-12-12-batch-False-0.3]",
+    "test_repaired_original_full_network_forecast_all_effective_gradients_and_bn[4-6-16-4-2-2-2-9-3-batch-True-0.2]",
+    "test_repaired_original_full_network_forecast_all_effective_gradients_and_bn[32-32-512-40-4-2-2-12-12-layer-False-0.3]",
+    "test_repaired_original_full_network_forecast_all_effective_gradients_and_bn[3-5-12-3-1-3-3-4-2-layer-True-0.1]",
+    "test_dynamic_graph_tensor_contraction_and_all_embedding_gradients_match_direct_formula",
+    "test_graph_convolution_uses_original_directed_powers_and_channel_order[0]",
+    "test_graph_convolution_uses_original_directed_powers_and_channel_order[1]",
+    "test_graph_convolution_uses_original_directed_powers_and_channel_order[2]",
+    "test_graph_convolution_uses_original_directed_powers_and_channel_order[3]",
+    "test_actual_calendar_train_only_auxiliary_scaling_cache_and_future_isolation",
+    "test_model_is_label_free_ignores_unselected_features_and_is_batch_independent[batch]",
+    "test_model_is_label_free_ignores_unselected_features_and_is_batch_independent[layer]",
+    "test_single_layer_zero_order_and_long_history_have_only_effective_parameters[1-1-2-1]",
+    "test_single_layer_zero_order_and_long_history_have_only_effective_parameters[1-2-0-1]",
+    "test_single_layer_zero_order_and_long_history_have_only_effective_parameters[2-2-3-19]",
+    "test_forecast_head_keeps_horizon_and_target_channels_in_the_declared_order",
+    "test_full_dual_stream_dropout_bn_adam_metric_schedule_and_rng_resume_exactly[batch]",
+    "test_full_dual_stream_dropout_bn_adam_metric_schedule_and_rng_resume_exactly[layer]",
+    "test_actual_cpu_amp_single_node_true_tail_batch[False]",
+    "test_actual_cpu_amp_single_node_true_tail_batch[True]",
+    "test_spawn_worker_can_collate_scaled_streams_and_calendar",
+    "test_invalid_stream_configuration_is_rejected[features0]",
+    "test_invalid_stream_configuration_is_rejected[features1]",
+    "test_invalid_stream_configuration_is_rejected[features2]",
+    "test_invalid_model_structure_is_rejected[params0]",
+    "test_invalid_model_structure_is_rejected[params1]",
+    "test_invalid_model_structure_is_rejected[params2]",
+    "test_invalid_model_structure_is_rejected[params3]",
+    "test_invalid_model_structure_is_rejected[params4]",
+    "test_invalid_model_structure_is_rejected[params5]",
+    "test_invalid_model_structure_is_rejected[params6]",
+    "test_invalid_model_structure_is_rejected[params7]",
+    "test_invalid_metadata_inputs_and_single_observation_dataset_fail_clearly",
     "test_epoch_schedule_waits_for_real_updates_and_resumes_after_empty_epochs",
     "test_gru_cli_python_train_evaluate_and_resume",
     "test_complete_resume_matches_next_updates_lr_counters_and_best[scheduler0]",
@@ -975,8 +1008,8 @@
   ],
   "inventory": {
     "total": 100,
-    "migrated": 69,
-    "pending": 31
+    "migrated": 70,
+    "pending": 30
   },
   "history": [
     {
@@ -1495,6 +1528,20 @@
         "total": 100,
         "migrated": 68,
         "pending": 32
+      }
+    },
+    {
+      "scope": "commits 1-45, through 1b3737b",
+      "full_tests": {
+        "tests": 956,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "inventory": {
+        "total": 100,
+        "migrated": 69,
+        "pending": 31
       }
     }
   ],
@@ -2474,7 +2521,7 @@
       "Static arrays are read-only metadata; numeric contents are model buffers, while checkpoint metadata stores only shape/dtype"
     ]
   },
-  "results_file": "D:\\LibCity 2.0\\.runtime-tests\\remaining-suite-42-results.xml",
+  "results_file": "D:\\LibCity 2.0\\.runtime-tests\\remaining-suite-43-results.xml",
   "rgsl_cli": {
     "passed": true,
     "source": "D:\\LibCity 2.0\\LibCity-modernization",
@@ -2751,5 +2798,143 @@
       "Graph factors and layer coupling are parameters; initialization support stays in read-only data metadata"
     ],
     "graph_initialization_description_equal_across_processes": true
+  },
+  "dmstgcn_cli": {
+    "passed": true,
+    "source": "D:\\LibCity 2.0\\LibCity-modernization",
+    "directory": "D:\\LibCity 2.0\\.runtime-tests\\dmstgcn-cli-pmxrodvd",
+    "commands": [
+      {
+        "command": [
+          "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+          "-B",
+          "D:\\LibCity 2.0\\LibCity-modernization\\tools\\make_runtime_fixture.py",
+          "--directory",
+          "D:\\LibCity 2.0\\.runtime-tests\\dmstgcn-cli-pmxrodvd\\example",
+          "--model",
+          "DMSTGCN"
+        ],
+        "cwd": "D:\\LibCity 2.0\\.runtime-tests\\dmstgcn-cli-pmxrodvd",
+        "exit_code": 0
+      },
+      {
+        "command": [
+          "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+          "-B",
+          "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+          "train",
+          "--config",
+          "D:\\LibCity 2.0\\.runtime-tests\\dmstgcn-cli-pmxrodvd\\example\\dmstgcn.json",
+          "--set",
+          "runtime.exp_id=train"
+        ],
+        "cwd": "D:\\LibCity 2.0\\.runtime-tests\\dmstgcn-cli-pmxrodvd",
+        "exit_code": 0
+      },
+      {
+        "command": [
+          "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+          "-B",
+          "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+          "evaluate",
+          "--config",
+          "D:\\LibCity 2.0\\.runtime-tests\\dmstgcn-cli-pmxrodvd\\example\\dmstgcn.json",
+          "--checkpoint",
+          "D:\\LibCity 2.0\\.runtime-tests\\dmstgcn-cli-pmxrodvd\\example\\runs\\train\\checkpoints\\best.pt",
+          "--set",
+          "runtime.exp_id=evaluated"
+        ],
+        "cwd": "D:\\LibCity 2.0\\.runtime-tests\\dmstgcn-cli-pmxrodvd",
+        "exit_code": 0
+      },
+      {
+        "command": [
+          "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+          "-B",
+          "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+          "train",
+          "--config",
+          "D:\\LibCity 2.0\\.runtime-tests\\dmstgcn-cli-pmxrodvd\\example\\dmstgcn.json",
+          "--resume",
+          "D:\\LibCity 2.0\\.runtime-tests\\dmstgcn-cli-pmxrodvd\\example\\runs\\train\\checkpoints\\last.pt",
+          "--set",
+          "training.epochs=3",
+          "--set",
+          "runtime.exp_id=resumed"
+        ],
+        "cwd": "D:\\LibCity 2.0\\.runtime-tests\\dmstgcn-cli-pmxrodvd",
+        "exit_code": 0
+      }
+    ],
+    "model": "DMSTGCN",
+    "metrics": {
+      "MAE@1": 1.0311361226168545,
+      "RMSE@1": 1.2251665002362806,
+      "MAE@2": 1.0510253689505837,
+      "RMSE@2": 1.2505846552353828,
+      "loss": 1.0410807837139477
+    },
+    "prediction_shape": [
+      11,
+      2,
+      4,
+      1
+    ],
+    "independent_metrics_exact": true,
+    "independent_predictions_exact": true,
+    "checkpoint_format": 3,
+    "resumed_state": {
+      "stage": "train",
+      "epoch": 3,
+      "batches_seen": 21,
+      "optimizer_steps": 12,
+      "best_metric": 1.1058934656056492,
+      "task_state": {}
+    },
+    "cache_statuses": [
+      "miss",
+      "hit",
+      "hit"
+    ],
+    "stream_preprocessing": {
+      "primary_index": 0,
+      "auxiliary_index": 1,
+      "extra_scalers": {
+        "1": {
+          "name": "StandardScaler",
+          "state": {
+            "mean": 27.89419135073668,
+            "std": 1.489780909078903,
+            "scale": 1.489780909078903
+          }
+        }
+      },
+      "scaler_fit_end_exclusive": "2024-01-02T12:00:00.000000000",
+      "graph_time": "first_observed_history_timestamp"
+    },
+    "stream_descriptions_equal_across_processes": true,
+    "history_calendar": {
+      "kind": "calendar_positions",
+      "columns": [
+        "weekday",
+        "time_slot"
+      ],
+      "steps_per_day": 24,
+      "time_basis": "UTC",
+      "weekday_origin": "Monday"
+    },
+    "evaluation_training_artifacts_created": false,
+    "python": "3.12.13",
+    "torch": "2.15.0+cpu",
+    "numpy": "2.5.5",
+    "notes": [
+      "Executed four CLI commands outside the source directory with two actual observed features",
+      "Dynamic graph index is the UTC slot of the first observed input timestamp, not sample ordinal",
+      "Independent auxiliary scaler fits the raw training interval only; target scaler remains shared",
+      "Conv2d, forecast horizon/target packing, skip width, LayerNorm and transfer dimensions are derived from actual shapes",
+      "Unused residual convolutions and final graph/auxiliary computations are omitted",
+      "Continuous/resumed dropout, BatchNorm, Adam, metric scheduler and RNG states match exactly in tests",
+      "Both batch and layer normalization, singleton CPU AMP and spawned calendar/scaler workers are covered"
+    ]
   }
 }

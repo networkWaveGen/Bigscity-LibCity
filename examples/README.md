@@ -388,6 +388,17 @@ Default raw-scale masked RMSE includes zero targets and is reduced over complete
 effective update groups and evaluation sets. Adam, metric plateau, clipping,
 safe checkpoints and exact continuation use the shared runtime.
 
+Generate DMSTGCN with `--model DMSTGCN`; the resulting dmstgcn.json uses two
+actual historical observations. data.features.primary_index/auxiliary_index
+select distinct observed columns. Selected columns outside target channels use
+independent scalers fitted on the raw training interval. Graphs use the actual
+UTC slot of the first history timestamp through integer history_features;
+the sampling interval must divide a day. data.graph.name=dynamic needs no rel
+file. Conv2d, skip width, LayerNorm and the multi-target head follow actual
+history/kernel/channel dimensions. Unused final graph/auxiliary layers are
+removed. Both batch/layer normalization and full dropout/BN continuation use
+the shared train/evaluate/resume lifecycle.
+
 The complete supported-model inventory and migration details are in the
 [runtime guide](../docs/modernization/runtime/README_zh.md). Small examples prove
 execution and reproducibility, not real-city benchmark accuracy.

@@ -29,6 +29,8 @@ class ModelSpec:
 
 
 MODELS = {
+    'DMSTGCN': ModelSpec('libcity.model.traffic_speed_prediction.runtime_dmstgcn:DMSTGCN',
+        prepare_data='libcity.data.dmstgcn_bundle:prepare_dmstgcn'),
     'CCRNN': ModelSpec('libcity.model.traffic_demand_prediction.runtime_ccrnn:CCRNN',
         prepare_data='libcity.data.ccrnn_bundle:prepare_ccrnn',train='libcity.executor.ccrnn_train:train',
         loss='libcity.executor.ccrnn_train:build_loss'),

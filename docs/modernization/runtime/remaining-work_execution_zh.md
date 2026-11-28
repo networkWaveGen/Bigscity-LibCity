@@ -50,7 +50,8 @@
 | commit42 | 1020ca6 | feat: migrate GTS with train-only graph features and explicit graph training |
 | commit43 | 8df7954 | feat: migrate RGSL with stable mixed graphs and explicit sampling |
 | commit44 | 81a5c83 | feat: preserve RMSE reduction across accumulation and evaluation |
-| commit45 | 随本节交付的提交 | feat: migrate CCRNN with train-only SVD graphs and exact RMSE training |
+| commit45 | 1b3737b | feat: migrate CCRNN with train-only SVD graphs and exact RMSE training |
+| commit46 | 随本节交付的提交 | feat: migrate DMSTGCN with real calendar and train-only stream scaling |
 
 ## commit1：修复基础交通缓存（670b325）
 
@@ -527,6 +528,18 @@ forward 由配置决定预测长度，每步重新编码当前窗口；预测回
 仓库外夹具、训练、独立评估及续训 **4 条命令成功**，预测 [9,2,3,1]，独立预测/指标完全相等，续训第三轮共 9 次更新，缓存 miss/hit/hit；训练图描述为前 28 帧、[28,3,1]、实际保留 3 个分量，三个进程的描述一致，实际模型图维为 3。导出预测独立计算的全局 RMSE 约 1.327726，与评估 loss 一致，见 [CLI 记录](ccrnn-cli-validation.json)。修订包括目标时间边界、正确拉普拉斯、退化情况及推理隔离，不声称旧错误数据流程或论文精度等价。迁移清单为 **69/100**，31 条 pending；排除延期 Common 与模板后还有 **22 个交通模型**及最终全量验收。
 
 本批完整回归 **956 passed，0 failed，0 errors，0 skipped**，见 [汇总报告](remaining-validation.json)；既有 GTS、根损失及其余已交付运行时均在本次回归范围内。
+
+## commit46：迁移 DMSTGCN，修复双流输入与动态图时间轴
+
+原问题：门控/跳连使用接收四维输入的 Conv1d，LayerNorm/输出头硬编码 13 帧和 416 通道；辅助到主图投影把 residual 宽度误当 dilation 宽度。时间 idx 按样本序号轮转，非午夜起点或切分丢弃窗口时与真实时段错位。辅助观测归一化混在旧 Dataset 的展开样本中。两组 residual_convs 从未使用；最终 skip 后的图/辅助计算和部分末端 BN 不影响输出，却增加参数、RNG 与更新状态。
+
+处理：新增原生双流/三图网络，保持原图张量收缩、逐行 softmax、有向图幂、时间门控、残差与跳连顺序。卷积修正为 Conv2d，跨流输入宽度、感受野、各层时间长度、LayerNorm 与 head 自动推导；skip 最后一次拼接，多目标按 horizon/target 显式排布。删除无效末层/残差参数，单块和零阶退化不保留无效动态图嵌入；不同 residual/dilation 宽度、短/长历史与其他核尺寸均可运行。删除原无用 dropout/BN 运算会改变旧随机序列，数值对照只声明同权重下的有效网络一致。
+
+数据层声明两个不同历史观测索引，排除日历/已知未来列；目标通道沿用公共目标 scaler，其余选中观测按原始训练区间单独拟合，再变换历史 X。真实时钟提取首个历史时段，作为 int64 history_features 传入；独立公共 calendar_bundle 同时供 STPGCN 使用，原 STPGCN 导入名及布局保留。data.graph.name=dynamic 跳过 .rel，输入适配设置不污染原始缓存身份；元信息保存索引/额外 scaler/边界，继续完整来源版本校验。配置校验按字段区分布尔开关和整数索引。提供真实双观测夹具、配置和生成入口。
+
+验证：新增 **33 项通过**，四组修正旧网络的完整预测、全部有效梯度与训练 BN 对照，包含默认 32/512/40 宽度、八个时间层及 batch/layer；独立图收缩/各嵌入梯度和四种有向幂、真实非午夜时段、仅训练辅助归一化、坏 .rel 隔离/缓存、未来目标修改不影响首个验证输入或统计、未选中/标签/未来输入隔离、动态形状/多目标头顺序、单块/零阶/单节点/batch=1/float64、两种归一化的 dropout/BN/Adam/metric 调度/RNG 精确续训。真实单样本/节点/时间尾批 CPU AMP 与 Windows spawn 通过；既有 STPGCN 日历检查同步通过。完整回归 **989 passed，0 failed，0 errors，0 skipped**，见 [报告](remaining-validation.json)。
+
+仓库外夹具、训练、独立评估、续训 **4 条命令成功**，预测形状 [11,2,4,1]，独立预测/指标完全一致；续训到第三轮共 12 次更新，缓存 miss/hit/hit，三个进程的主/辅助索引和训练区间额外 scaler 描述一致，实际时段数 24。独立评估不创建训练产物，见 [CLI 记录](dmstgcn-cli-validation.json)。清单为 **70/100** 已迁移，30 条 pending；排除延期 Common 与模板后，还有 **21 个交通模型**及最终全量验收。
 
 ## 持续完成的清单
 

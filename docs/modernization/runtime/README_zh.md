@@ -30,6 +30,8 @@ RGSL 示例用 `--model RGSL` 生成，对 rgsl.json 使用同样的生命周期
 
 CCRNN 示例用 `--model CCRNN` 生成，再对 ccrnn.json 使用同样的训练/独立评估/续训命令。data.graph 使用 svd_gaussian，svd_rank 控制保留分量，svd_channels 可选择原始历史观测，normalization 可选 randomwalk/laplacian；图只从原始训练区间生成，.rel 无需提供。n_dim 自动限制到节点数，n_gconv_layers 可变；课程开关和衰减放在 training.strategy。默认 masked_rmse 包含零目标，按整组累积和完整验证集计算 RMSE，未使用未来目标作推理输入。两种归一化均完成精确续训；配置及有意修订见 [模型说明](models_zh.md)。
 
+DMSTGCN 示例用 `--model DMSTGCN` 生成，对 dmstgcn.json 使用同样的生命周期命令。夹具包含两个真实观测列；data.features.primary_index/auxiliary_index 选择主/辅助历史观测，目标外的选中列单独用训练区间拟合归一化器。data.graph.name=dynamic，.rel 可省略。日历通过独立 int64 history_features 传入，按首个真实历史时间取时段，采样间隔需整除一天。模型自动推导感受野、skip 头和归一化尺寸，支持多目标及 batch/layer 归一化；原无效末层计算已清理。详细参数及修订见 [模型说明](models_zh.md)。
+
 ## GRU 完整例子
 
 从源码根目录运行，数据、缓存和输出都可放在仓库外：

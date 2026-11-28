@@ -63,6 +63,10 @@ def periodic_fixture(root,name='PeriodicTiny',steps=400,nodes=4,features=2,outpu
     return folder
 
 
+def dmstgcn_fixture(root,name='Tiny'):
+    return periodic_fixture(root,name=name,steps=60,nodes=4,features=2,outputs=1)
+
+
 def reslstm_fixture(root,name='PeriodicTiny'):
     return periodic_fixture(root,name=name,steps=800)
 
