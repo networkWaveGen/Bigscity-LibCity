@@ -29,6 +29,8 @@ class ModelSpec:
 
 
 MODELS = {
+    'D2STGNN': ModelSpec('libcity.model.traffic_speed_prediction.runtime_d2stgnn:D2STGNN',
+        prepare_data='libcity.data.traffic_bundle:prepare_finite_traffic',train='libcity.executor.d2stgnn_step:train'),
     'STMGAT': ModelSpec('libcity.model.traffic_speed_prediction.runtime_stmgat:STMGAT',
         prepare_data='libcity.data.stmgat_bundle:prepare_stmgat'),
     'HIEST': ModelSpec('libcity.model.traffic_speed_prediction.runtime_hiest:HIEST',

@@ -1,5 +1,5 @@
 {
-  "scope": "Remaining-work commits 1-58; whole-library migration remains in progress",
+  "scope": "Remaining-work commits 1-59; whole-library migration remains in progress",
   "environment": {
     "python": "3.12.13",
     "torch": "2.15.0+cpu",
@@ -9,7 +9,7 @@
     "scikit_learn": "1.9.1"
   },
   "full_tests": {
-    "tests": 1356,
+    "tests": 1392,
     "failures": 0,
     "errors": 0,
     "skipped": 0
@@ -250,6 +250,42 @@
     "test_mtg_curriculum_subgraphs_and_step_schedule_resume_exactly",
     "test_mtg_independent_trainer_uses_pipeline_and_prediction_switch",
     "test_mtg_static_graph_keeps_self_support_for_single_node_subgraphs",
+    "test_original_full_predictions_all_live_gradients_and_batchnorm_state[all-graphs-nondivisible]",
+    "test_original_full_predictions_all_live_gradients_and_batchnorm_state[static]",
+    "test_original_full_predictions_all_live_gradients_and_batchnorm_state[predefined-short-horizon]",
+    "test_original_full_predictions_all_live_gradients_and_batchnorm_state[self-only]",
+    "test_original_full_predictions_all_live_gradients_and_batchnorm_state[time-only]",
+    "test_original_full_predictions_all_live_gradients_and_batchnorm_state[week-only]",
+    "test_original_full_predictions_all_live_gradients_and_batchnorm_state[defaults]",
+    "test_unexpanded_localized_graph_matches_original_tiled_matmul_and_all_gradients[1]",
+    "test_unexpanded_localized_graph_matches_original_tiled_matmul_and_all_gradients[2]",
+    "test_unexpanded_localized_graph_matches_original_tiled_matmul_and_all_gradients[3]",
+    "test_transition_orientation_graph_orders_and_diagonal_removal_only_after_powers",
+    "test_actual_curriculum_dropout_bn_train_evaluate_and_exact_full_resume[standard]",
+    "test_actual_curriculum_dropout_bn_train_evaluate_and_exact_full_resume[minmax01]",
+    "test_curriculum_is_epoch_based_counts_raw_valid_targets_and_ignores_unsupervised_horizons",
+    "test_eval_identity_batch_independence_static_ownership_and_calendar_numeric_columns",
+    "test_calendar_in_middle_keeps_following_external_numeric_columns",
+    "test_raw_history_nan_zero_cache_and_future_statistics_isolation",
+    "test_cpu_amp_real_tail_odd_hidden_single_node_and_all_graphs_disabled[False]",
+    "test_cpu_amp_real_tail_odd_hidden_single_node_and_all_graphs_disabled[True]",
+    "test_windows_spawn_and_changed_curriculum_resume_is_rejected",
+    "test_invalid_d2stgnn_configuration_rejected_before_data[change0]",
+    "test_invalid_d2stgnn_configuration_rejected_before_data[change1]",
+    "test_invalid_d2stgnn_configuration_rejected_before_data[change2]",
+    "test_invalid_d2stgnn_configuration_rejected_before_data[change3]",
+    "test_invalid_d2stgnn_configuration_rejected_before_data[change4]",
+    "test_invalid_d2stgnn_configuration_rejected_before_data[change5]",
+    "test_invalid_d2stgnn_configuration_rejected_before_data[change6]",
+    "test_invalid_d2stgnn_configuration_rejected_before_data[change7]",
+    "test_invalid_d2stgnn_configuration_rejected_before_data[change8]",
+    "test_invalid_d2stgnn_configuration_rejected_before_data[change9]",
+    "test_invalid_d2stgnn_configuration_rejected_before_data[change10]",
+    "test_invalid_d2stgnn_configuration_rejected_before_data[change11]",
+    "test_invalid_d2stgnn_configuration_rejected_before_data[change12]",
+    "test_invalid_d2stgnn_configuration_rejected_before_data[change13]",
+    "test_invalid_d2stgnn_configuration_rejected_before_data[change14]",
+    "test_invalid_d2stgnn_configuration_rejected_before_data[change15]",
     "test_original_nonpadded_recurrent_attention_and_gradients[dot-GRU]",
     "test_original_nonpadded_recurrent_attention_and_gradients[dot-LSTM]",
     "test_original_nonpadded_recurrent_attention_and_gradients[general-GRU]",
@@ -1375,8 +1411,8 @@
   ],
   "inventory": {
     "total": 100,
-    "migrated": 78,
-    "pending": 22
+    "migrated": 79,
+    "pending": 21
   },
   "history": [
     {
@@ -2077,6 +2113,20 @@
         "total": 100,
         "migrated": 77,
         "pending": 23
+      }
+    },
+    {
+      "scope": "commits 1-58, through 075cf42",
+      "full_tests": {
+        "tests": 1356,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "inventory": {
+        "total": 100,
+        "migrated": 78,
+        "pending": 22
       }
     }
   ],
@@ -3056,7 +3106,7 @@
       "Static arrays are read-only metadata; numeric contents are model buffers, while checkpoint metadata stores only shape/dtype"
     ]
   },
-  "results_file": "D:\\LibCity 2.0\\.runtime-tests\\remaining-suite-56-results.xml",
+  "results_file": "D:\\LibCity 2.0\\.runtime-tests\\remaining-suite-57-results.xml",
   "rgsl_cli": {
     "passed": true,
     "source": "D:\\LibCity 2.0\\LibCity-modernization",
@@ -6712,5 +6762,303 @@
     "tests": "tests/test_runtime_stmgat.py",
     "documentation": "stmgat_zh.md",
     "scope": "Native directed incoming attention, old temporal network with independent GAT formula, exact live gradients and BN, long history/multi-output/no-graph dimensions, raw MSE and targets, no DGL CPU AMP/singleton tail/spawn, train/evaluate/exact resume and published CLI; not paper accuracy"
+  },
+  "d2stgnn_cli": {
+    "passed": true,
+    "source": "D:\\LibCity 2.0\\LibCity-modernization",
+    "directory": "D:\\LibCity 2.0\\.runtime-tests\\d2stgnn-cli-ihkggcj1",
+    "commands": [
+      {
+        "command": [
+          "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+          "-B",
+          "D:\\LibCity 2.0\\LibCity-modernization\\tools\\make_runtime_fixture.py",
+          "--directory",
+          "D:\\LibCity 2.0\\.runtime-tests\\d2stgnn-cli-ihkggcj1\\example",
+          "--model",
+          "D2STGNN"
+        ],
+        "cwd": "D:\\LibCity 2.0\\.runtime-tests\\d2stgnn-cli-ihkggcj1",
+        "exit_code": 0
+      },
+      {
+        "command": [
+          "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+          "-B",
+          "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+          "train",
+          "--config",
+          "D:\\LibCity 2.0\\.runtime-tests\\d2stgnn-cli-ihkggcj1\\example\\d2stgnn.json",
+          "--set",
+          "runtime.exp_id=train"
+        ],
+        "cwd": "D:\\LibCity 2.0\\.runtime-tests\\d2stgnn-cli-ihkggcj1",
+        "exit_code": 0
+      },
+      {
+        "command": [
+          "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+          "-B",
+          "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+          "evaluate",
+          "--config",
+          "D:\\LibCity 2.0\\.runtime-tests\\d2stgnn-cli-ihkggcj1\\example\\d2stgnn.json",
+          "--checkpoint",
+          "D:\\LibCity 2.0\\.runtime-tests\\d2stgnn-cli-ihkggcj1\\example\\runs\\train\\checkpoints\\best.pt",
+          "--set",
+          "runtime.exp_id=evaluated"
+        ],
+        "cwd": "D:\\LibCity 2.0\\.runtime-tests\\d2stgnn-cli-ihkggcj1",
+        "exit_code": 0
+      },
+      {
+        "command": [
+          "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+          "-B",
+          "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+          "train",
+          "--config",
+          "D:\\LibCity 2.0\\.runtime-tests\\d2stgnn-cli-ihkggcj1\\example\\d2stgnn.json",
+          "--resume",
+          "D:\\LibCity 2.0\\.runtime-tests\\d2stgnn-cli-ihkggcj1\\example\\runs\\train\\checkpoints\\last.pt",
+          "--set",
+          "training.epochs=3",
+          "--set",
+          "runtime.exp_id=resumed"
+        ],
+        "cwd": "D:\\LibCity 2.0\\.runtime-tests\\d2stgnn-cli-ihkggcj1",
+        "exit_code": 0
+      }
+    ],
+    "prediction_shape": [
+      10,
+      3,
+      4,
+      2
+    ],
+    "independent_predictions_equal": true,
+    "independent_metrics_equal": true,
+    "global_raw_masked_mae": 8.709683418273926,
+    "evaluation_loss": 8.709683227539063,
+    "resumed_epoch": 3,
+    "optimizer_steps": 9,
+    "curriculum_horizon": 3,
+    "time_slots": 24,
+    "cache_statuses": [
+      "miss",
+      "hit",
+      "hit"
+    ],
+    "road_supports_shape": [
+      2,
+      4,
+      4
+    ],
+    "input_specification_saved": true,
+    "weights_only_safe_load": true,
+    "evaluate_has_no_training_artifacts": true,
+    "runtime_info": {
+      "train": {
+        "python": "3.12.13",
+        "pytorch": "2.15.0+cpu",
+        "numpy": "2.5.5",
+        "platform": "Windows-11-10.0.26200-SP0",
+        "mode": "train",
+        "execution_kind": "neural",
+        "device": "cpu",
+        "seed": 17,
+        "benchmark_protocol": "task_default",
+        "split": {
+          "train": 28,
+          "val": 10,
+          "test": 10,
+          "train_padded": false,
+          "semantics": "target_time_v1",
+          "input_window": 6,
+          "requested_input_window": 6,
+          "adapter": "window",
+          "intervals": {
+            "train": {
+              "samples": 28,
+              "target_start": "2024-01-01T06:00:00.000000000",
+              "target_end": "2024-01-02T11:00:00.000000000",
+              "target_index_start": 6,
+              "target_index_end": 35
+            },
+            "val": {
+              "samples": 10,
+              "target_start": "2024-01-02T12:00:00.000000000",
+              "target_end": "2024-01-02T23:00:00.000000000",
+              "target_index_start": 36,
+              "target_index_end": 47
+            },
+            "test": {
+              "samples": 10,
+              "target_start": "2024-01-03T00:00:00.000000000",
+              "target_end": "2024-01-03T11:00:00.000000000",
+              "target_index_start": 48,
+              "target_index_end": 59
+            }
+          },
+          "train_end": "2024-01-02T12:00:00.000000000",
+          "val_end": "2024-01-03T00:00:00.000000000",
+          "scaler_fit_end_exclusive": "2024-01-02T12:00:00.000000000",
+          "discarded_boundary_windows": 4,
+          "history_span_points": 6,
+          "cache": {
+            "status": "miss",
+            "path": "D:\\LibCity 2.0\\.runtime-tests\\d2stgnn-cli-ihkggcj1\\example\\cache\\traffic-raw-v1\\116dd3a4fa5f0bb255932034.npz"
+          },
+          "sampling_gap_policy": "full_input_span_contiguous",
+          "input_missing_observations": "raw_zero_before_scaling"
+        },
+        "protocol_changes": {
+          "data.input_window": 6,
+          "data.output_window": 3
+        },
+        "capabilities": {
+          "requires_checkpoint": true,
+          "supports_resume": true,
+          "supports_validation": true
+        }
+      },
+      "evaluated": {
+        "python": "3.12.13",
+        "pytorch": "2.15.0+cpu",
+        "numpy": "2.5.5",
+        "platform": "Windows-11-10.0.26200-SP0",
+        "mode": "evaluate",
+        "execution_kind": "neural",
+        "device": "cpu",
+        "seed": 17,
+        "benchmark_protocol": "task_default",
+        "split": {
+          "train": 28,
+          "val": 10,
+          "test": 10,
+          "train_padded": false,
+          "semantics": "target_time_v1",
+          "input_window": 6,
+          "requested_input_window": 6,
+          "adapter": "window",
+          "intervals": {
+            "train": {
+              "samples": 28,
+              "target_start": "2024-01-01T06:00:00.000000000",
+              "target_end": "2024-01-02T11:00:00.000000000",
+              "target_index_start": 6,
+              "target_index_end": 35
+            },
+            "val": {
+              "samples": 10,
+              "target_start": "2024-01-02T12:00:00.000000000",
+              "target_end": "2024-01-02T23:00:00.000000000",
+              "target_index_start": 36,
+              "target_index_end": 47
+            },
+            "test": {
+              "samples": 10,
+              "target_start": "2024-01-03T00:00:00.000000000",
+              "target_end": "2024-01-03T11:00:00.000000000",
+              "target_index_start": 48,
+              "target_index_end": 59
+            }
+          },
+          "train_end": "2024-01-02T12:00:00.000000000",
+          "val_end": "2024-01-03T00:00:00.000000000",
+          "scaler_fit_end_exclusive": "2024-01-02T12:00:00.000000000",
+          "discarded_boundary_windows": 4,
+          "history_span_points": 6,
+          "cache": {
+            "status": "hit",
+            "path": "D:\\LibCity 2.0\\.runtime-tests\\d2stgnn-cli-ihkggcj1\\example\\cache\\traffic-raw-v1\\116dd3a4fa5f0bb255932034.npz"
+          },
+          "sampling_gap_policy": "full_input_span_contiguous",
+          "input_missing_observations": "raw_zero_before_scaling"
+        },
+        "protocol_changes": {
+          "data.input_window": 6,
+          "data.output_window": 3
+        },
+        "capabilities": {
+          "requires_checkpoint": true,
+          "supports_resume": true,
+          "supports_validation": true
+        }
+      },
+      "resumed": {
+        "python": "3.12.13",
+        "pytorch": "2.15.0+cpu",
+        "numpy": "2.5.5",
+        "platform": "Windows-11-10.0.26200-SP0",
+        "mode": "train",
+        "execution_kind": "neural",
+        "device": "cpu",
+        "seed": 17,
+        "benchmark_protocol": "task_default",
+        "split": {
+          "train": 28,
+          "val": 10,
+          "test": 10,
+          "train_padded": false,
+          "semantics": "target_time_v1",
+          "input_window": 6,
+          "requested_input_window": 6,
+          "adapter": "window",
+          "intervals": {
+            "train": {
+              "samples": 28,
+              "target_start": "2024-01-01T06:00:00.000000000",
+              "target_end": "2024-01-02T11:00:00.000000000",
+              "target_index_start": 6,
+              "target_index_end": 35
+            },
+            "val": {
+              "samples": 10,
+              "target_start": "2024-01-02T12:00:00.000000000",
+              "target_end": "2024-01-02T23:00:00.000000000",
+              "target_index_start": 36,
+              "target_index_end": 47
+            },
+            "test": {
+              "samples": 10,
+              "target_start": "2024-01-03T00:00:00.000000000",
+              "target_end": "2024-01-03T11:00:00.000000000",
+              "target_index_start": 48,
+              "target_index_end": 59
+            }
+          },
+          "train_end": "2024-01-02T12:00:00.000000000",
+          "val_end": "2024-01-03T00:00:00.000000000",
+          "scaler_fit_end_exclusive": "2024-01-02T12:00:00.000000000",
+          "discarded_boundary_windows": 4,
+          "history_span_points": 6,
+          "cache": {
+            "status": "hit",
+            "path": "D:\\LibCity 2.0\\.runtime-tests\\d2stgnn-cli-ihkggcj1\\example\\cache\\traffic-raw-v1\\116dd3a4fa5f0bb255932034.npz"
+          },
+          "sampling_gap_policy": "full_input_span_contiguous",
+          "input_missing_observations": "raw_zero_before_scaling"
+        },
+        "protocol_changes": {
+          "data.input_window": 6,
+          "data.output_window": 3
+        },
+        "capabilities": {
+          "requires_checkpoint": true,
+          "supports_resume": true,
+          "supports_validation": true
+        }
+      }
+    },
+    "scope": "Actual published D2STGNN point example, hourly calendar, non-divisible horizon/gap and explicit epoch curriculum; CPU functionality, not paper accuracy"
+  },
+  "d2stgnn_validation": {
+    "passed": true,
+    "new_tests": 36,
+    "related_tests": 123,
+    "tests": "tests/test_runtime_d2stgnn.py",
+    "documentation": "d2stgnn_zh.md",
+    "scope": "Native decoupled graph forecast, seven original live references and all gradients, unexpanded local support algebra, actual calendar and external-column identity, complete/non-divisible/short horizons, explicit epoch curriculum and exact resume, shared finite history, CPU AMP/singleton/spawn and published CLI; not paper accuracy"
   }
 }

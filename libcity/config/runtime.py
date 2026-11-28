@@ -107,6 +107,17 @@ def validate(config, preset):
     if model['name']=='STDN':
         for key in ('cnn_flat_size','lstm_out_size'):
             _positive(model['params'][key],'STDN '+key)
+    if model['name']=='D2STGNN':
+        params=model['params']
+        for key in ('num_hidden','node_dim','forecast_dim','output_hidden','k_s','k_t','num_layers','time_emb_dim','gap','attention_heads'):
+            _positive(params[key],'D2STGNN '+key)
+        for key in ('steps_per_day','dynamic_channel'): _positive(params[key],'D2STGNN '+key,zero=True)
+        _number(params['dropout'],'D2STGNN dropout')
+        if params['dropout']>=1 or params['num_hidden']%params['attention_heads'] or data['input_window']<1+params['num_layers']*(params['k_t']-1):
+            raise ValueError('D2STGNN requires valid dropout, divisible heads and enough history for all layers')
+        if data['sampling']['name']!='window': raise ValueError('D2STGNN requires continuous windows')
+        if params['use_time_of_day'] and not data['features']['time_in_day'] or params['use_day_of_week'] and not data['features']['day_in_week']:
+            raise ValueError('D2STGNN calendar embeddings require matching data features')
     if model['name']=='STMGAT':
         params=model['params']
         for key in ('blocks','layers','kernel_size','residual_channels','dilation_channels','skip_channels','end_channels','heads'):
@@ -333,7 +344,7 @@ def validate(config, preset):
                 _positive(data['sampling'].get(key,1),f'data.sampling.{key}')
         if data['graph'].get('name') not in ('binary', 'weighted', 'distance','inverse_distance','distance_bands')+(
                 ('svd_gaussian',) if model['name']=='CCRNN' else ('dynamic',) if model['name'] in ('DMSTGCN','ESG') else
-                ('risk_multigraph',) if model['name']=='GSNet' else ('none',) if model['name'] in ('CSTN','DSAN','STDN','STMGAT') else ()):
+                ('risk_multigraph',) if model['name']=='GSNet' else ('none',) if model['name'] in ('CSTN','DSAN','STDN','STMGAT','D2STGNN') else ()):
             raise ValueError('Unknown data.graph.name')
         if (data['graph']['name']=='distance_bands' and model['name']!='MultiSTGCnet') or (
                 model['name']=='MultiSTGCnet' and data['graph']['name'] not in ('distance_bands','binary')):
@@ -487,6 +498,11 @@ def validate(config, preset):
         if value is not None and (type(value) not in (int, float) or not math.isfinite(value)):
             raise ValueError('mask_value must be a finite number or null')
     _object(training['strategy'], 'training.strategy')
+    if model['name']=='D2STGNN':
+        _known(training['strategy'],('use_curriculum_learning','cl_decay_epochs'),'training.strategy')
+        if type(training['strategy'].get('use_curriculum_learning')) is not bool:
+            raise ValueError('D2STGNN strategy.use_curriculum_learning must be boolean')
+        _positive(training['strategy'].get('cl_decay_epochs'),'D2STGNN strategy.cl_decay_epochs')
     if model['name']=='GTS':
         strategy = training['strategy']
         _known(strategy,('use_curriculum_learning','cl_decay_steps','temperature','graph_regularization_epochs',

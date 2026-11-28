@@ -1,0 +1,11 @@
+{
+  "model": {"params": {"num_hidden": 32, "node_dim": 10, "forecast_dim": 256, "output_hidden": 512,
+    "k_s": 2, "k_t": 3, "num_layers": 5, "time_emb_dim": 10, "gap": 3,
+    "use_pre": false, "dy_graph": true, "sta_graph": true, "use_time_of_day": true,
+    "use_day_of_week": true, "attention_heads": 4, "dropout": 0.1, "steps_per_day": 0, "dynamic_channel": 0}},
+  "data": {"features": {"time_in_day": true, "day_in_week": true}},
+  "training": {"epochs": 100, "batch_size": 32, "optimizer": {"name": "adam", "lr": 0.002, "weight_decay": 0.00001, "eps": 1e-8},
+    "scheduler": {"name": "multistep", "interval": "epoch", "milestones": [1,30,38,46,54,62,70,80], "gamma": 0.5},
+    "loss": {"name": "masked_mae", "mask_value": 0.0}, "clip_grad_norm": 5.0, "early_stopping": {"patience": 30},
+    "strategy": {"use_curriculum_learning": true, "cl_decay_epochs": 3}}
+}

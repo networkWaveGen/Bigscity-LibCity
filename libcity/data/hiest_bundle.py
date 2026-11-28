@@ -7,7 +7,7 @@ import networkx as nx
 import numpy as np
 import pandas as pd
 
-from libcity.data.traffic_bundle import prepare_traffic
+from libcity.data.traffic_bundle import prepare_traffic,impute_history
 
 
 OPTIONS={'region_threshold','region_groups','reconstruction'}
@@ -69,11 +69,7 @@ def prepare_hiest(data,training,evaluation,seed,logger=None):
         input_layout={**bundle.metadata.input_layout,'hierarchy':description,'input_missing_observations':'raw_zero_before_scaling'},
         static_data={**bundle.metadata.static_data,'region_membership':mapping.astype(np.float32),
             'original_reconstruction':target.astype(np.float32),'regional_reconstruction':region_target.astype(np.float32)})
-    # Point windows keep raw targets separately, so only historical inputs are imputed.
-    history=bundle.train.dataset.history
-    if np.isinf(history).any(): raise ValueError('HIEST historical observations must not contain infinities')
-    cleaned=np.nan_to_num(history,nan=0.)
-    for loader in (bundle.train,bundle.val,bundle.test): loader.dataset.history=cleaned
-    bundle.split_summary.update(hierarchy=description,input_missing_observations='raw_zero_before_scaling')
+    impute_history(bundle)
+    bundle.split_summary['hierarchy']=description
     if logger: logger.info('HIEST static overlapping hierarchy: %s',description)
     return bundle

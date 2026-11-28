@@ -440,3 +440,10 @@ example has four real-ID nodes, a directed ring, an isolated node and two
 forecast targets. Both feature and attention dropout are supported; long
 histories and multi-output heads use explicit dimensions. See
 [STMGAT semantics](../docs/modernization/runtime/stmgat_zh.md).
+
+D2STGNN examples use `--model D2STGNN` and `d2stgnn.json`. The decoupled
+diffusion/inherent module shares unexpanded graph powers across all layers.
+Its epoch-based curriculum is saved with training state; evaluation always
+uses the complete horizon. Time embeddings follow atomic sampling intervals,
+and non-divisible horizon/gap combinations are supported. See
+[D2STGNN semantics](../docs/modernization/runtime/d2stgnn_zh.md).

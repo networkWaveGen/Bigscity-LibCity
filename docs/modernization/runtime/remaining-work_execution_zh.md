@@ -63,7 +63,8 @@
 | commit55 | 4ae8e8c | feat: migrate ESG with train-only graph history and factored relations |
 | commit56 | 87c269f | fix: align point observations by real node IDs and UTC time |
 | commit57 | bbb088a | feat: migrate HIEST with sample-isolated hierarchy and auxiliary training |
-| commit58 | 随本节交付的提交 | feat: migrate STMGAT with native directed attention and explicit temporal widths |
+| commit58 | 075cf42 | feat: migrate STMGAT with native directed attention and explicit temporal widths |
+| commit59 | 随本节交付的提交 | feat: migrate D2STGNN with explicit curriculum and shared graph propagation |
 
 ## commit1：修复基础交通缓存（670b325）
 
@@ -694,6 +695,18 @@ forward 由配置决定预测长度，每步重新编码当前窗口；预测回
 仓库外实际生成、训练、独立评估、续训 **4 条命令成功**，环境未安装 DGL；4 个真实 ID 节点、有向三节点环/孤立节点、3 个历史通道/2 个目标，预测 [11,2,4,2]，独立预测/指标完全一致。第三轮累计 12 次更新、缓存 miss/hit/hit，原尺度 MSE 复算约 57.420934 与评估一致，7 条边随纯权重安全保存，独立评估没有训练产物，见 [CLI](stmgat-cli-validation.json)。本批不声称直接跑通原不可运行 DGL 源码或复现论文精度；每头完整时间宽度与平方参数成本保留，CUDA/MPS 专项另行记录。
 
 清单更新为 **78/100**、22 条 pending；扣除延期 Common 和模板后还剩 **13 个实际模型**：DMVSTNet、GMAN、STAGGCN、D2STGNN、STGODE、SSTBAN、STTSNet、FOGS、DSTAGNN、MultiSPANS、STWave、PDFormer、STGNCDE。它们及最终完整交付验收仍在主线范围内，继续分批实施。
+
+## commit59：迁移 D2STGNN 显式课程学习与共享图传播
+
+原问题：模型内部持有 scaler/device 与可变 task_level/num_batches；课程阶段无法随模型权重可靠恢复。node_dim/node_hidden、time_emd_dim/time_emb_dim 键不一致，固定 288 槽时间表和尾部日历位置假设不适配真实采样/外部特征。预测使用 floor(H/gap)，短预测和非整除会出现长度错误；每层保存未注册图，每次时空卷积及递推都重复准备/沿时间展开图。未使用的时间投影、局部卷积 BN 与最终固有 backcast 仍创建参数。
+
+处理：实现标准 nn.Module，保留原估计门、扩散/固有模块、动态图 Q/K/路图掩码、学习静态图、矩阵幂后去对角、GRU/多头注意力及作者递推位置编码顺序。课程以共享 TrainState.epoch 推导、task_state 记录，训练函数调用公共 train_loop；验证/评估始终使用全预测窗。节点/时间维度统一，日历列按元数据、槽数按真实采样间隔定位，保留日历后面的数值历史；显式 ceil 分组与末尾裁剪，短预测缩短实际 gap，检查时间层所需最小历史与头整除。路图/幂/位置注册 buffer、支持图一次准备全层共享，使用 A@sum_t(X_t) 替代沿时间重复的图；删死参数，不请求未使用注意力权重，低精度图计算使用 float32。历史补零提取公共助手供 HIEST/STMGAT/D2STGNN 复用，原始目标不修改，详见 [D2STGNN 说明](d2stgnn_zh.md)。
+
+验证：新增 **36 项通过**，七组旧网络预测/全部有效参数和输入梯度/BN（默认五层、三类图/多日历/纯 self、多目标、非整除与短预测），三种时间核原始展开图公式与全部梯度、独立路图方向/矩阵幂/对角，显式 epoch 课程/有效数量/未监督步零梯度，两种 scaler 的课程变化/dropout/BN/Adam/metric 调度/早停/最佳模型/RNG/加载器精确恢复，样本独立/静态所有权/float64/无标签无 RNG，真实小时槽/中间日历后外部数值、原始 NaN/0/缓存/未来隔离，真实单样本尾批 CPU AMP/奇数隐藏宽度/单节点、Windows spawn、课程变更拒绝和 16 类配置错误。HIEST/STMGAT/配置相关合计 **123 passed**，迁移表专项通过；完整回归 **1392 passed，0 failed，0 errors，0 skipped**，见 [汇总](remaining-validation.json)。
+
+仓库外实际生成、训练、独立评估、续训 **4 条命令成功**，4 个真实 ID 节点、3 个数值历史通道、双日历/实际 24 槽、2 个目标，6 步历史预测 3 步且 gap=2；预测 [10,3,4,2]，独立预测/指标完全一致。第三轮累计 9 次更新、课程监督达到第 3 步，缓存 miss/hit/hit；原尺度 masked MAE 独立复算约 8.709683，与评估一致。纯权重包含输入说明、路图/时间表，独立评估无训练产物，见 [CLI](d2stgnn-cli-validation.json)。本批保留作者固有递推位置编码顺序，不宣称论文精度；稠密图/注意力成本与 CUDA/MPS 专项认证另行记录。
+
+清单更新为 **79/100**、21 条 pending；扣除延期 Common 与模板后还剩 **12 个实际模型**：DMVSTNet、GMAN、STAGGCN、STGODE、SSTBAN、STTSNet、FOGS、DSTAGNN、MultiSPANS、STWave、PDFormer、STGNCDE。它们及最终完整交付验收仍是主线范围，继续分批实施。
 
 ## 持续完成的清单
 

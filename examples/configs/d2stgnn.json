@@ -1,0 +1,10 @@
+{
+  "model": {"name": "D2STGNN", "params": {"num_hidden": 4, "node_dim": 3, "forecast_dim": 6,
+    "output_hidden": 8, "k_t": 2, "num_layers": 2, "time_emb_dim": 3, "attention_heads": 2, "gap": 2, "dropout": 0.2}},
+  "data": {"dataset": "DecoupleTiny", "data_dir": "data", "cache_dir": "cache",
+    "input_window": 6, "output_window": 3, "pad_training": false},
+  "training": {"epochs": 2, "batch_size": 5, "accumulation_steps": 2,
+    "strategy": {"cl_decay_epochs": 1}},
+  "evaluation": {"batch_size": 4},
+  "runtime": {"device": "cpu", "seed": 17, "output_dir": "runs", "exp_id": "d2stgnn-demo"}
+}

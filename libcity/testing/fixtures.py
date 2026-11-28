@@ -112,6 +112,10 @@ def dsan_fixture(root):
     return grid_fixture(root,steps=60)
 
 
+def d2stgnn_fixture(root,name='DecoupleTiny',steps=60):
+    return stmgat_fixture(root,name,steps)
+
+
 def stmgat_fixture(root,name='GATTiny',steps=60):
     folder=periodic_fixture(root,name,steps,nodes=4,features=3,outputs=2)
     ids=np.array([71,3,108,400]);path=folder/f'{name}.geo';geo=pd.read_csv(path);geo['geo_id']=ids

@@ -1,5 +1,6 @@
 """Atomic traffic bridge with explicit forecast inputs and target-time splitting."""
 import json
+from dataclasses import replace
 from pathlib import Path
 import numpy as np
 import pandas as pd
@@ -110,6 +111,23 @@ def _read_atomic(data, metadata, logger=None):
         raise ValueError('Graph preprocessing produced non-finite adjacency weights')
     return dict(history=history, target=target, known=known, clock=clock,
                 intervals=np.asarray(intervals), graph=graph, known_indices=np.asarray(known_indices, dtype=np.int64))
+
+
+def impute_history(bundle):
+    """Impute inputs without modifying raw targets, shared by point adapters."""
+    history=bundle.train.dataset.history
+    if np.isinf(history).any(): raise ValueError('Historical observations must not contain infinities')
+    cleaned=np.nan_to_num(history,nan=0.)
+    for loader in (bundle.train,bundle.val,bundle.test): loader.dataset.history=cleaned
+    bundle.metadata=replace(bundle.metadata,input_layout={**bundle.metadata.input_layout,
+        'input_missing_observations':'raw_zero_before_scaling'})
+    bundle.split_summary['input_missing_observations']='raw_zero_before_scaling'
+    return bundle
+
+
+def prepare_finite_traffic(data,training,evaluation,seed,logger=None):
+    if data['sampling']['name']!='window': raise ValueError('Finite point adapter requires continuous windows')
+    return impute_history(prepare_traffic(data,training,evaluation,seed,logger))
 
 
 def prepare_traffic(data, training, evaluation, seed, logger=None):
