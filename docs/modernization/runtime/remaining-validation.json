@@ -1,5 +1,5 @@
 {
-  "scope": "Remaining-work commits 1-44; whole-library migration remains in progress",
+  "scope": "Remaining-work commits 1-45; whole-library migration remains in progress",
   "environment": {
     "python": "3.12.13",
     "torch": "2.15.0+cpu",
@@ -9,12 +9,12 @@
     "scikit_learn": "1.9.1"
   },
   "full_tests": {
-    "tests": 909,
+    "tests": 956,
     "failures": 0,
     "errors": 0,
     "skipped": 0
   },
-  "command": "python -m pytest -q --tb=short --basetemp <workspace-test-dir> --junitxml <workspace-results.xml>",
+  "command": "python -m pytest -q --tb=short --disable-warnings --basetemp <workspace-test-dir> --junitxml <workspace-results.xml>",
   "cases": [
     "test_cache_separates_selected_columns_and_source_files[selection0-109.0]",
     "test_cache_separates_selected_columns_and_source_files[selection1-209.0]",
@@ -124,6 +124,53 @@
     "test_geometry_uses_longitude_latitude_radians_fractional_kilometres",
     "test_protocol_rejects_cross_entropy_in_place_of_bpr",
     "test_actual_cpu_amp_training",
+    "test_original_coupled_graph_forecast_teacher_and_all_effective_gradients[50-25-50-1-3-3-2-2-12-12-False]",
+    "test_original_coupled_graph_forecast_teacher_and_all_effective_gradients[4-4-3-2-3-2-3-2-4-3-True]",
+    "test_original_coupled_graph_forecast_teacher_and_all_effective_gradients[4-3-2-1-2-1-2-1-3-2-False]",
+    "test_original_coupled_graph_forecast_teacher_and_all_effective_gradients[4-3-2-2-1-3-2-2-2-3-True]",
+    "test_diffusion_convolution_matches_independent_matrix_polynomials_and_gradients[0]",
+    "test_diffusion_convolution_matches_independent_matrix_polynomials_and_gradients[1]",
+    "test_diffusion_convolution_matches_independent_matrix_polynomials_and_gradients[2]",
+    "test_diffusion_convolution_matches_independent_matrix_polynomials_and_gradients[3]",
+    "test_training_svd_gaussian_matches_original_distances_and_correct_normalization[randomwalk]",
+    "test_training_svd_gaussian_matches_original_distances_and_correct_normalization[laplacian]",
+    "test_constant_observations_and_single_node_have_defined_initial_support[1-randomwalk]",
+    "test_constant_observations_and_single_node_have_defined_initial_support[1-laplacian]",
+    "test_constant_observations_and_single_node_have_defined_initial_support[4-randomwalk]",
+    "test_constant_observations_and_single_node_have_defined_initial_support[4-laplacian]",
+    "test_data_uses_raw_training_interval_and_cache_ignores_unused_rel_windows_padding_and_rank[True]",
+    "test_data_uses_raw_training_interval_and_cache_ignores_unused_rel_windows_padding_and_rank[False]",
+    "test_calendar_graph_channels_are_rejected",
+    "test_arbitrary_layers_zero_hop_small_graph_rank_and_dtype[1-0-1]",
+    "test_arbitrary_layers_zero_hop_small_graph_rank_and_dtype[1-3-3]",
+    "test_arbitrary_layers_zero_hop_small_graph_rank_and_dtype[3-1-5]",
+    "test_arbitrary_layers_zero_hop_small_graph_rank_and_dtype[4-3-1]",
+    "test_zero_support_keeps_zero_product_with_trainable_singular_direction",
+    "test_forward_is_label_free_rng_free_sample_independent_and_has_no_graph_attributes",
+    "test_explicit_teacher_changes_later_steps_and_python_draws_follow_progress",
+    "test_real_svd_root_loss_train_evaluate_python_teacher_adam_metric_rng_exact_resume[randomwalk]",
+    "test_real_svd_root_loss_train_evaluate_python_teacher_adam_metric_rng_exact_resume[laplacian]",
+    "test_real_cpu_amp_and_true_single_sample_tail[1-0]",
+    "test_real_cpu_amp_and_true_single_sample_tail[1-3]",
+    "test_real_cpu_amp_and_true_single_sample_tail[3-3]",
+    "test_invalid_graph_policy_is_rejected[change0]",
+    "test_invalid_graph_policy_is_rejected[change1]",
+    "test_invalid_graph_policy_is_rejected[change2]",
+    "test_invalid_graph_policy_is_rejected[change3]",
+    "test_invalid_graph_policy_is_rejected[change4]",
+    "test_invalid_graph_policy_is_rejected[change5]",
+    "test_invalid_teacher_policy_is_rejected[change0]",
+    "test_invalid_teacher_policy_is_rejected[change1]",
+    "test_invalid_teacher_policy_is_rejected[change2]",
+    "test_invalid_structure_is_rejected[params0]",
+    "test_invalid_structure_is_rejected[params1]",
+    "test_invalid_structure_is_rejected[params2]",
+    "test_invalid_structure_is_rejected[params3]",
+    "test_invalid_structure_is_rejected[params4]",
+    "test_plateau_threshold_is_validated_at_entry[-1]",
+    "test_plateau_threshold_is_validated_at_entry[nan]",
+    "test_plateau_threshold_is_validated_at_entry[True]",
+    "test_loss_factory_keeps_explicit_alternatives_and_rejects_shape_errors",
     "test_config_layers_paths_and_component_replacement",
     "test_invalid_config_fails_at_entry[changes0-model.name]",
     "test_invalid_config_fails_at_entry[changes1-not migrated]",
@@ -928,8 +975,8 @@
   ],
   "inventory": {
     "total": 100,
-    "migrated": 68,
-    "pending": 32
+    "migrated": 69,
+    "pending": 31
   },
   "history": [
     {
@@ -1426,6 +1473,20 @@
       "scope": "commits 1-43, through 8df7954",
       "full_tests": {
         "tests": 893,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "inventory": {
+        "total": 100,
+        "migrated": 68,
+        "pending": 32
+      }
+    },
+    {
+      "scope": "commits 1-44, through 81a5c83",
+      "full_tests": {
+        "tests": 909,
         "failures": 0,
         "errors": 0,
         "skipped": 0
@@ -2413,7 +2474,7 @@
       "Static arrays are read-only metadata; numeric contents are model buffers, while checkpoint metadata stores only shape/dtype"
     ]
   },
-  "results_file": "D:\\LibCity 2.0\\.runtime-tests\\remaining-suite-41-results.xml",
+  "results_file": "D:\\LibCity 2.0\\.runtime-tests\\remaining-suite-42-results.xml",
   "rgsl_cli": {
     "passed": true,
     "source": "D:\\LibCity 2.0\\LibCity-modernization",
@@ -2548,5 +2609,147 @@
       "Dropout, shuffle, Adam, metric schedule and RNG continuation match exactly",
       "Exact-fit finite zero subgradient, empty-group update skipping, actual CPU AMP"
     ]
+  },
+  "ccrnn_cli": {
+    "passed": true,
+    "source": "D:\\LibCity 2.0\\LibCity-modernization",
+    "directory": "D:\\LibCity 2.0\\.runtime-tests\\ccrnn-cli-kuegr4h7",
+    "commands": [
+      {
+        "command": [
+          "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+          "-B",
+          "D:\\LibCity 2.0\\LibCity-modernization\\tools\\make_runtime_fixture.py",
+          "--directory",
+          "D:\\LibCity 2.0\\.runtime-tests\\ccrnn-cli-kuegr4h7\\example",
+          "--model",
+          "CCRNN"
+        ],
+        "cwd": "D:\\LibCity 2.0\\.runtime-tests\\ccrnn-cli-kuegr4h7",
+        "exit_code": 0
+      },
+      {
+        "command": [
+          "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+          "-B",
+          "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+          "train",
+          "--config",
+          "D:\\LibCity 2.0\\.runtime-tests\\ccrnn-cli-kuegr4h7\\example\\ccrnn.json",
+          "--set",
+          "runtime.exp_id=train"
+        ],
+        "cwd": "D:\\LibCity 2.0\\.runtime-tests\\ccrnn-cli-kuegr4h7",
+        "exit_code": 0
+      },
+      {
+        "command": [
+          "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+          "-B",
+          "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+          "evaluate",
+          "--config",
+          "D:\\LibCity 2.0\\.runtime-tests\\ccrnn-cli-kuegr4h7\\example\\ccrnn.json",
+          "--checkpoint",
+          "D:\\LibCity 2.0\\.runtime-tests\\ccrnn-cli-kuegr4h7\\example\\runs\\train\\checkpoints\\best.pt",
+          "--set",
+          "runtime.exp_id=evaluated"
+        ],
+        "cwd": "D:\\LibCity 2.0\\.runtime-tests\\ccrnn-cli-kuegr4h7",
+        "exit_code": 0
+      },
+      {
+        "command": [
+          "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+          "-B",
+          "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+          "train",
+          "--config",
+          "D:\\LibCity 2.0\\.runtime-tests\\ccrnn-cli-kuegr4h7\\example\\ccrnn.json",
+          "--resume",
+          "D:\\LibCity 2.0\\.runtime-tests\\ccrnn-cli-kuegr4h7\\example\\runs\\train\\checkpoints\\last.pt",
+          "--set",
+          "training.epochs=3",
+          "--set",
+          "runtime.exp_id=resumed"
+        ],
+        "cwd": "D:\\LibCity 2.0\\.runtime-tests\\ccrnn-cli-kuegr4h7",
+        "exit_code": 0
+      }
+    ],
+    "model": "CCRNN",
+    "metrics": {
+      "MAE@1": 1.0872283158478913,
+      "RMSE@1": 1.3284035738300897,
+      "MAE@2": 1.075519950301559,
+      "RMSE@2": 1.3270483062303275,
+      "loss": 1.3277261272175618
+    },
+    "prediction_shape": [
+      9,
+      2,
+      3,
+      1
+    ],
+    "independent_metrics_exact": true,
+    "independent_predictions_exact": true,
+    "global_rmse_from_export": 1.3277261129527684,
+    "global_rmse_matches": true,
+    "checkpoint_format": 3,
+    "resumed_state": {
+      "stage": "train",
+      "epoch": 3,
+      "batches_seen": 15,
+      "optimizer_steps": 9,
+      "best_metric": 1.0098126890526988,
+      "task_state": {
+        "curriculum_batches_seen": 14
+      }
+    },
+    "cache_statuses": [
+      "miss",
+      "hit",
+      "hit"
+    ],
+    "graph_initialization": {
+      "source": "raw_training_interval",
+      "start_index": 0,
+      "end_index_exclusive": 28,
+      "first_timestamp": "2024-01-01T00:00:00.000000000",
+      "last_timestamp": "2024-01-01T02:15:00.000000000",
+      "channels": [
+        0
+      ],
+      "observations_shape": [
+        28,
+        3,
+        1
+      ],
+      "normalization": "randomwalk",
+      "similarity": "exp(-euclidean/std(distance)^2)",
+      "requested_rank": 25,
+      "actual_rank": 3,
+      "constant_distance": false
+    },
+    "effective_graph_dimension": 3,
+    "evaluation_training_artifacts_created": false,
+    "python": "3.12.13",
+    "torch": "2.15.0+cpu",
+    "numpy": "2.5.5",
+    "author_sources": [
+      "https://github.com/Essaim/CGCDemandPrediction/blob/main/models/evonn2.py",
+      "https://github.com/Essaim/CGCDemandPrediction/blob/main/utils/preprocess.py"
+    ],
+    "notes": [
+      "Executed four CLI commands outside the source directory",
+      "Gaussian SVD graph is derived only from raw training observations, independently of windows, padding and batch size",
+      "Economy SVD avoids the unused full time-by-time U matrix; raw cache skips irrelevant relation parsing",
+      "Graph normalization, constant distances and small graph factor dimensions have explicit finite rules",
+      "Python curriculum sampling is explicit in the training step; prediction ignores labels and does not draw RNG",
+      "Default RMSE is reduced once over effective accumulation groups and complete validation/evaluation sets",
+      "Both randomwalk and corrected normalized-laplacian lifecycle/RNG resumes checked exactly by tests",
+      "Graph factors and layer coupling are parameters; initialization support stays in read-only data metadata"
+    ],
+    "graph_initialization_description_equal_across_processes": true
   }
 }

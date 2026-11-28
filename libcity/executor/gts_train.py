@@ -1,18 +1,12 @@
 """Gumbel/teacher sampling and graph-prior schedule over the shared train loop."""
-import math
-
 import numpy as np
 import torch
 from torch import nn
 from torch.nn import functional as F
 
 from libcity.executor.evaluate import StepResult,evaluate_loop
+from libcity.executor.curriculum import teacher_probability
 from libcity.executor.train import train_loop
-
-
-def teacher_probability(batches_seen, decay):
-    exponent = batches_seen/decay-math.log(decay)
-    return 1/(1+math.exp(exponent)) if exponent<700 else 0.
 
 
 def graph_step(loss_fn, strategy):

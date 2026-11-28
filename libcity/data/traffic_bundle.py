@@ -59,7 +59,13 @@ def _read_atomic(data, metadata, logger=None):
         add_time_in_day=options['time_in_day'], add_day_in_week=options['day_in_week'])
     if graph_config['name']=='distance_bands' and graph_config.get('distance_column'):
         legacy['weight_col'] = graph_config['distance_column']
-    reader = TrafficStatePointDataset(legacy, logger=logger)
+    if graph_config['name']=='none':
+        class ObservationReader(TrafficStatePointDataset):
+            def _load_rel(self):
+                self.adj_mx = np.zeros((self.num_nodes,self.num_nodes),dtype=np.float32)
+        reader = ObservationReader(legacy,logger=logger)
+    else:
+        reader = TrafficStatePointDataset(legacy, logger=logger)
     filenames = metadata.get('data_files', data['dataset'])
     filenames = [filenames] if isinstance(filenames, str) else filenames
     histories, targets, knowns, clocks, intervals = [], [], [], [], []

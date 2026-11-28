@@ -29,6 +29,9 @@ class ModelSpec:
 
 
 MODELS = {
+    'CCRNN': ModelSpec('libcity.model.traffic_demand_prediction.runtime_ccrnn:CCRNN',
+        prepare_data='libcity.data.ccrnn_bundle:prepare_ccrnn',train='libcity.executor.ccrnn_train:train',
+        loss='libcity.executor.ccrnn_train:build_loss'),
     'RGSL': ModelSpec('libcity.model.traffic_flow_prediction.runtime_rgsl:RGSL',
         train='libcity.executor.rgsl_step:train',evaluate_loader='libcity.executor.rgsl_step:evaluate_rgsl'),
     'GTS': ModelSpec('libcity.model.traffic_speed_prediction.runtime_gts:GTS',

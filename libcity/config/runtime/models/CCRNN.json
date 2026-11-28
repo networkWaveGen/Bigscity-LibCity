@@ -1,0 +1,11 @@
+{
+  "model": {"params": {"hidden_size": 25, "n_dim": 50, "k_hop": 3, "n_rnn_layers": 1, "n_gconv_layers": 3}},
+  "data": {"features": {"time_in_day": true}, "scaler": {"name": "standard"},
+    "graph": {"name": "svd_gaussian", "svd_rank": 25, "svd_channels": null, "normalization": "randomwalk"}},
+  "training": {"epochs": 100, "optimizer": {"name": "adam", "lr": 0.001},
+    "scheduler": {"name": "plateau", "interval": "metric", "monitor": "val_loss", "factor": 0.2,
+      "patience": 5, "threshold": 0.001},
+    "clip_grad_norm": 5.0, "early_stopping": {"patience": 50},
+    "loss": {"name": "masked_rmse", "mask_value": null},
+    "strategy": {"use_curriculum_learning": true, "cl_decay_steps": 300}}
+}

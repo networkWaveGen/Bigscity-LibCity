@@ -49,7 +49,8 @@
 | commit41 | f17311e | feat: migrate HGCN with complete region aggregation and static graph state |
 | commit42 | 1020ca6 | feat: migrate GTS with train-only graph features and explicit graph training |
 | commit43 | 8df7954 | feat: migrate RGSL with stable mixed graphs and explicit sampling |
-| commit44 | 随本节交付的提交 | feat: preserve RMSE reduction across accumulation and evaluation |
+| commit44 | 81a5c83 | feat: preserve RMSE reduction across accumulation and evaluation |
+| commit45 | 随本节交付的提交 | feat: migrate CCRNN with train-only SVD graphs and exact RMSE training |
 
 ## commit1：修复基础交通缓存（670b325）
 
@@ -510,6 +511,22 @@ forward 由配置决定预测长度，每步重新编码当前窗口；预测回
 验证：新增 **16 项通过**，原尺度双精度/四组掩码与独立 RMSE 梯度、精确拟合/全空统计、四种评估批次划分、带/不带裁剪的 SGD 动量/权重衰减/step 调度与直接整批 RMSE 更新对照、真实累积尾组、双层 dropout/shuffle/Adam/metric 调度/RNG 精确续训和实际 CPU AMP。完整回归 **909 passed，0 failed，0 errors，0 skipped**。详见 [修复说明](root-loss_zh.md) 与 [完整报告](remaining-validation.json)。
 
 本批不新增模型迁移计数，清单仍为 **68/100**；排除延期 Common 和模板后，还有 **23 个模型**及最终全量验收。CCRNN 的原始训练区间 SVD、图预处理和原生训练/评估接入继续实施。
+
+## commit45：完成 CCRNN 的训练区间图与原生 RMSE 生命周期
+
+原问题：旧图生成按训练窗口数量截取原始时间点，初始化会随输入/预测窗变化；完整 SVD 生成不用的时间方阵 U，常量距离会除零。旧标准化拉普拉斯误用数组 shape 替代逆度数，默认 n_dim=50 无法直接处理小图，图固定三层；forward 读取 y、把可微图挂在对象上，课程随机数与推理耦合。n_supports/graph_category 有无效设置，small 矩形路径先做错误的方阵减法，再把 Tensor 当多层图列表，实际不可运行。原目标为 masked_rmse，需承接 commit44 的整组累积与全局评估开方能力。
+
+处理：新增数据适配，从明确原始训练区间选历史观测，保留原 SVD 节点表示、Euclidean 距离及 exp(-distance/std(distance)^2) 核，使用经济型 SVD，常量图和单节点有有限回退。data.graph 中明确 svd_rank/svd_channels/normalization；默认按 data_col 的全部原始列，缺少声明时按全部历史观测列，拒绝已知日历/未来通道。randomwalk 保留行归一化，laplacian 修正为实际逆度归一化。原始缓存跳过无关 .rel 解析，窗口、padding、秩和通道变化可复用原始数组；元信息记录训练边界和派生图设置，续训仍保留全目录来源版本检查。
+
+原生模型保留 [作者的耦合图编码解码](https://github.com/Essaim/CGCDemandPrediction/blob/main/models/evonn2.py)，输入/输出取真实维度，n_dim 上限自动取节点数，图层数可设任意正数，映射与偏置按层注册。仅初始化使用的 support 留在只读数据元信息中，模型保留可学习因子；每次前向生成临时图，不持有 scaler/logger/device 或 graph0/1/2。零奇异方向保持初始零乘积并允许继续学习，单图层删去恒定注意力、零 hop 删去无效图参数；图卷积一次堆叠特征递推，不缓存稠密图幂。移除无效/不可用配置路径，不把它们宣称为已支持模式。
+
+课程学习显式放到训练 step，保留 Python random 每预测步的抽样和 batches_seen 阈值，包含最终未使用的抽样；纯 forward 只返回预测、不读 y、不采样。公共稳定阈值提取到 curriculum，GTS 保持原 NumPy 规则。CCRNN 默认使用整组 masked_rmse（mask_value=null），其他公共损失可显式选择；保留 Adam 0.001、plateau metric 调度/阈值、裁剪与早停，新增 threshold 启动校验。训练、独立评估及安全完整续训均通过统一入口。
+
+验证：新增 **47 项通过**，默认 50 节点、25 隐藏/50 图维和三组不同层数/teacher/多目标的旧前向/全部有效梯度对照；独立扩散多项式/梯度、原 SVD Gaussian 数值与两种正确归一化、经济 SVD 形状、常量/单节点、默认/缺省 data_col、缓存复用/坏 .rel 隔离、未来目标改变不影响图及首个验证输入、只读元信息、五层图演化/零 hop/batch=1/float64/无标签/无 RNG、零奇异方向学习、显式 Python 课程抽样等。randomwalk 与 laplacian 均完成训练/独立评估/Adam/metric 调度/Python RNG 精确续训，全局 RMSE 与导出预测独立计算一致；三种真实尾批 CPU AMP 通过。相关 GTS/根损失/清单合计 **95 passed**。
+
+仓库外夹具、训练、独立评估及续训 **4 条命令成功**，预测 [9,2,3,1]，独立预测/指标完全相等，续训第三轮共 9 次更新，缓存 miss/hit/hit；训练图描述为前 28 帧、[28,3,1]、实际保留 3 个分量，三个进程的描述一致，实际模型图维为 3。导出预测独立计算的全局 RMSE 约 1.327726，与评估 loss 一致，见 [CLI 记录](ccrnn-cli-validation.json)。修订包括目标时间边界、正确拉普拉斯、退化情况及推理隔离，不声称旧错误数据流程或论文精度等价。迁移清单为 **69/100**，31 条 pending；排除延期 Common 与模板后还有 **22 个交通模型**及最终全量验收。
+
+本批完整回归 **956 passed，0 failed，0 errors，0 skipped**，见 [汇总报告](remaining-validation.json)；既有 GTS、根损失及其余已交付运行时均在本次回归范围内。
 
 ## 持续完成的清单
 

@@ -376,6 +376,18 @@ Chebyshev recurrence corrects the old high-order static elementwise products;
 zero graphs, zero embeddings and narrow channel gates have finite handling.
 Default training uses raw-scale masked MAE excluding zero targets and Adam 0.003.
 
+Generate CCRNN with `--model CCRNN`, then use ccrnn.json with the same lifecycle
+commands. data.graph.name=svd_gaussian derives the initializer from the raw
+training interval with economy SVD. svd_rank selects components, svd_channels
+selects historical observation columns, and normalization accepts randomwalk
+or laplacian. The relation file is unused; window, padding, batch and SVD-option
+changes can reuse raw observations. n_dim is capped at the node count and graph
+layer count is configurable. training.strategy controls explicit Python-RNG
+curriculum sampling. Inference reads no targets and draws no curriculum RNG.
+Default raw-scale masked RMSE includes zero targets and is reduced over complete
+effective update groups and evaluation sets. Adam, metric plateau, clipping,
+safe checkpoints and exact continuation use the shared runtime.
+
 The complete supported-model inventory and migration details are in the
 [runtime guide](../docs/modernization/runtime/README_zh.md). Small examples prove
 execution and reproducibility, not real-city benchmark accuracy.

@@ -27,7 +27,7 @@ def root_loss(name='masked_rmse',mask=0,scaler=None):
 
 def root_context(config):
     context = make_context(config)
-    # Exercise the public custom-loss injection before CCRNN is registered.
+    # Exercise public custom-loss injection independently of a model preset.
     config = dict(name='masked_rmse',mask_value=0)
     context.config['training']['loss'] = config
     context.loss_fn = RootMeanSquaredLoss(context.bundle,config)

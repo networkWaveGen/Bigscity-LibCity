@@ -1,0 +1,142 @@
+{
+  "passed": true,
+  "source": "D:\\LibCity 2.0\\LibCity-modernization",
+  "directory": "D:\\LibCity 2.0\\.runtime-tests\\ccrnn-cli-kuegr4h7",
+  "commands": [
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\tools\\make_runtime_fixture.py",
+        "--directory",
+        "D:\\LibCity 2.0\\.runtime-tests\\ccrnn-cli-kuegr4h7\\example",
+        "--model",
+        "CCRNN"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\ccrnn-cli-kuegr4h7",
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "train",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\ccrnn-cli-kuegr4h7\\example\\ccrnn.json",
+        "--set",
+        "runtime.exp_id=train"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\ccrnn-cli-kuegr4h7",
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "evaluate",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\ccrnn-cli-kuegr4h7\\example\\ccrnn.json",
+        "--checkpoint",
+        "D:\\LibCity 2.0\\.runtime-tests\\ccrnn-cli-kuegr4h7\\example\\runs\\train\\checkpoints\\best.pt",
+        "--set",
+        "runtime.exp_id=evaluated"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\ccrnn-cli-kuegr4h7",
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "train",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\ccrnn-cli-kuegr4h7\\example\\ccrnn.json",
+        "--resume",
+        "D:\\LibCity 2.0\\.runtime-tests\\ccrnn-cli-kuegr4h7\\example\\runs\\train\\checkpoints\\last.pt",
+        "--set",
+        "training.epochs=3",
+        "--set",
+        "runtime.exp_id=resumed"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\ccrnn-cli-kuegr4h7",
+      "exit_code": 0
+    }
+  ],
+  "model": "CCRNN",
+  "metrics": {
+    "MAE@1": 1.0872283158478913,
+    "RMSE@1": 1.3284035738300897,
+    "MAE@2": 1.075519950301559,
+    "RMSE@2": 1.3270483062303275,
+    "loss": 1.3277261272175618
+  },
+  "prediction_shape": [
+    9,
+    2,
+    3,
+    1
+  ],
+  "independent_metrics_exact": true,
+  "independent_predictions_exact": true,
+  "global_rmse_from_export": 1.3277261129527684,
+  "global_rmse_matches": true,
+  "checkpoint_format": 3,
+  "resumed_state": {
+    "stage": "train",
+    "epoch": 3,
+    "batches_seen": 15,
+    "optimizer_steps": 9,
+    "best_metric": 1.0098126890526988,
+    "task_state": {
+      "curriculum_batches_seen": 14
+    }
+  },
+  "cache_statuses": [
+    "miss",
+    "hit",
+    "hit"
+  ],
+  "graph_initialization": {
+    "source": "raw_training_interval",
+    "start_index": 0,
+    "end_index_exclusive": 28,
+    "first_timestamp": "2024-01-01T00:00:00.000000000",
+    "last_timestamp": "2024-01-01T02:15:00.000000000",
+    "channels": [
+      0
+    ],
+    "observations_shape": [
+      28,
+      3,
+      1
+    ],
+    "normalization": "randomwalk",
+    "similarity": "exp(-euclidean/std(distance)^2)",
+    "requested_rank": 25,
+    "actual_rank": 3,
+    "constant_distance": false
+  },
+  "effective_graph_dimension": 3,
+  "evaluation_training_artifacts_created": false,
+  "python": "3.12.13",
+  "torch": "2.15.0+cpu",
+  "numpy": "2.5.5",
+  "author_sources": [
+    "https://github.com/Essaim/CGCDemandPrediction/blob/main/models/evonn2.py",
+    "https://github.com/Essaim/CGCDemandPrediction/blob/main/utils/preprocess.py"
+  ],
+  "notes": [
+    "Executed four CLI commands outside the source directory",
+    "Gaussian SVD graph is derived only from raw training observations, independently of windows, padding and batch size",
+    "Economy SVD avoids the unused full time-by-time U matrix; raw cache skips irrelevant relation parsing",
+    "Graph normalization, constant distances and small graph factor dimensions have explicit finite rules",
+    "Python curriculum sampling is explicit in the training step; prediction ignores labels and does not draw RNG",
+    "Default RMSE is reduced once over effective accumulation groups and complete validation/evaluation sets",
+    "Both randomwalk and corrected normalized-laplacian lifecycle/RNG resumes checked exactly by tests",
+    "Graph factors and layer coupling are parameters; initialization support stays in read-only data metadata"
+  ],
+  "graph_initialization_description_equal_across_processes": true
+}

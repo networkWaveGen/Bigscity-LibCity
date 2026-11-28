@@ -1,6 +1,6 @@
 # RMSE 的累积更新与评估聚合
 
-本批是 CCRNN 迁移所需的公共训练能力，不代表 CCRNN 已完成接入。当前通过 Python 的自定义 loss_fn 组合使用；模型的命令行配置将在其迁移批次单独开放。本批不改变已接入模型的默认损失，也不把 MSE 改称为 RMSE。
+该组件由 commit44 加入，并已由 CCRNN 原生运行时接入。CCRNN 的命令行配置可选择 rmse/masked_rmse；Python 自定义训练同样可传入 loss_fn 组合使用。各模型的默认损失和能力范围仍以模型预设及迁移清单为准。
 
 ## 问题与目标
 
@@ -29,4 +29,4 @@ RootMeanSquaredLoss 仅接受显式的 rmse/masked_rmse 名称。rmse 保留所�
 - 双层 GRU dropout、shuffle、Adam、metric 调度及完整随机状态的连续/中断恢复完全一致。
 - 全空累积组不更新参数和 step 调度，真实 CPU AMP 与短累积尾组可运行。
 
-完整回归与逐项结果见 [汇总报告](remaining-validation.json)。本批保持模型清单 68/100；CCRNN 的训练区间 SVD 图适配、原生模型与 CLI 生命周期仍在后续迁移中。
+完整回归与逐项结果见 [汇总报告](remaining-validation.json)。CCRNN 的训练区间 SVD、两种图归一化及原生生命周期另有专项验证；实际命令和从导出预测独立计算全局 RMSE 的结果见 [CCRNN CLI](ccrnn-cli-validation.json)。

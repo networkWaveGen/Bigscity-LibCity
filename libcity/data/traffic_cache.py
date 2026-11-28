@@ -16,6 +16,8 @@ def source_files(data, metadata):
     folder = Path(data['data_dir']) / data['dataset']
     files = [folder / 'config.json']
     for key, suffix in (('geo_file', '.geo'), ('rel_file', '.rel'), ('data_files', '.dyna')):
+        if key=='rel_file' and data['graph']['name']=='none':
+            continue
         names = metadata.get(key, data['dataset'])
         names = [names] if isinstance(names, str) else names
         files.extend(folder / (name + suffix) for name in names)

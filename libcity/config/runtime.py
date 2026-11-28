@@ -125,7 +125,8 @@ def validate(config, preset):
         _known(data['features'], ('load_external', 'time_in_day', 'day_in_week', 'known_future_columns'), 'data.features')
         _known(data['scaler'], ('name',), 'data.scaler')
         graph_keys = {'HGCN':('cluster_nodes','cluster_labels','cluster_epsilon'),
-            'GTS':('history_channel','history_steps')}.get(model['name'],())
+            'GTS':('history_channel','history_steps'),
+            'CCRNN':('svd_rank','svd_channels','normalization')}.get(model['name'],())
         _known(data['graph'], ('name', 'symmetric', 'self_loops', 'epsilon','reachability_column','distance_column')+graph_keys, 'data.graph')
         if model['name']=='HGCN':
             for key,value in dict(cluster_nodes=0,cluster_labels=None,cluster_epsilon=.1).items():
@@ -141,6 +142,17 @@ def validate(config, preset):
             for key in ('history_channel','history_steps'):
                 data['graph'].setdefault(key,0)
                 _positive(data['graph'][key],'graph.'+key,zero=True)
+        if model['name']=='CCRNN':
+            _known(data['graph'],('name','svd_rank','svd_channels','normalization','symmetric','self_loops'),'data.graph')
+            if data['graph']['name']!='svd_gaussian' or data['graph'].get('symmetric',False) or data['graph'].get('self_loops',False):
+                raise ValueError('CCRNN requires svd_gaussian initialization without extra symmetric/self_loops switches')
+            _positive(data['graph']['svd_rank'],'graph.svd_rank')
+            channels = data['graph']['svd_channels']
+            if channels is not None and (not isinstance(channels,list) or not channels or
+                    any(type(value) is not int or value<0 for value in channels) or len(set(channels))!=len(channels)):
+                raise ValueError('CCRNN svd_channels must be null or unique nonnegative observation indices')
+            if data['graph']['normalization'] not in ('randomwalk','laplacian'):
+                raise ValueError('CCRNN normalization must be randomwalk or laplacian')
         if 'distance_column' in data['graph']:
             column = data['graph']['distance_column']
             if model['name']!='MultiSTGCnet' or (column is not None and (not isinstance(column,str) or not column)):
@@ -171,7 +183,7 @@ def validate(config, preset):
                 raise ValueError('CPT sampling requires at least one history segment')
             for key in ('interval_period','interval_trend'):
                 _positive(data['sampling'].get(key,1),f'data.sampling.{key}')
-        if data['graph'].get('name') not in ('binary', 'weighted', 'distance','inverse_distance','distance_bands'):
+        if data['graph'].get('name') not in ('binary', 'weighted', 'distance','inverse_distance','distance_bands')+ (('svd_gaussian',) if model['name']=='CCRNN' else ()):
             raise ValueError('Unknown data.graph.name')
         if (data['graph']['name']=='distance_bands' and model['name']!='MultiSTGCnet') or (
                 model['name']=='MultiSTGCnet' and data['graph']['name'] not in ('distance_bands','binary')):
@@ -223,7 +235,7 @@ def validate(config, preset):
     for key, names in {
         'optimizer': ('name', 'lr', 'weight_decay', 'betas', 'eps', 'momentum', 'alpha', 'groups'),
         'scheduler': ('name', 'interval', 'step_size', 'gamma', 'milestones', 'T_max', 'eta_min', 'patience',
-                      'factor', 'monitor', 'mode', 'max_lr', 'total_steps', 'pct_start', 'warmup_steps',
+                      'factor', 'monitor', 'mode', 'threshold', 'max_lr', 'total_steps', 'pct_start', 'warmup_steps',
                       'model_dim', 'lr_multiplier'),
         'loss': ('name', 'mask_value','alpha','eps')+(('delta',) if training['loss'].get('name') in ('huber','masked_huber') else ())+(('negative_samples',) if spec.protocol in ('atst_ranking','stan_ranking') else
             ('negative_samples','temperature','num_nearest','exclude_visited') if spec.protocol=='geosan_ranking' else ()),
@@ -258,6 +270,10 @@ def validate(config, preset):
         raise ValueError('scheduler.interval must be explicitly declared')
     if scheduler['name'] == 'plateau' and interval != 'metric':
         raise ValueError('plateau scheduler requires interval=metric')
+    if 'threshold' in scheduler:
+        if scheduler['name']!='plateau':
+            raise ValueError('scheduler.threshold is only valid for plateau')
+        _number(scheduler['threshold'],'scheduler.threshold')
     if scheduler['name'] in ('onecycle', 'warmup_cosine', 'inverse_sqrt_cosine') and interval != 'step':
         raise ValueError('onecycle/warmup_cosine/inverse_sqrt_cosine scheduler requires interval=step')
     if scheduler['name']=='inverse_sqrt_cosine':
@@ -270,6 +286,8 @@ def validate(config, preset):
     eta_losses = ('cumulative_relative_rmse',) if spec.protocol=='ttpnet_eta' else ('mae','mse')
     losses={'traj_loc_pred':trajectory_losses,'road_representation':road_losses,'eta':eta_losses}.get(
         spec.task,('mae','mse','masked_mae','masked_mse','huber','masked_huber'))
+    if model['name']=='CCRNN':
+        losses += ('rmse','masked_rmse')
     if training['loss'].get('name') not in losses:
         raise ValueError('Unknown training.loss.name')
     if training['loss']['name'] in ('huber','masked_huber'):
@@ -298,6 +316,11 @@ def validate(config, preset):
     if model['name']=='RGSL':
         _known(training['strategy'],('temperature',),'training.strategy')
         _number(training['strategy'].get('temperature'),'RGSL strategy.temperature',strict=True)
+    if model['name']=='CCRNN':
+        _known(training['strategy'],('use_curriculum_learning','cl_decay_steps'),'training.strategy')
+        if type(training['strategy'].get('use_curriculum_learning')) is not bool:
+            raise ValueError('CCRNN use_curriculum_learning must be boolean')
+        _positive(training['strategy']['cl_decay_steps'],'strategy.cl_decay_steps')
     if spec.task=='traj_loc_pred':
         _number(data['session_gap_hours'],'session_gap_hours',strict=True)
         _positive(data['min_session_length'],'min_session_length')
