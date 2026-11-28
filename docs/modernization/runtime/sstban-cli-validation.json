@@ -1,0 +1,348 @@
+{
+  "passed": true,
+  "source": "D:\\LibCity 2.0\\LibCity-modernization",
+  "directory": "D:\\LibCity 2.0\\.runtime-tests\\sstban-cli-wvf7emq9",
+  "commands": [
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\tools\\make_runtime_fixture.py",
+        "--directory",
+        "D:\\LibCity 2.0\\.runtime-tests\\sstban-cli-wvf7emq9\\example",
+        "--model",
+        "SSTBAN"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\sstban-cli-wvf7emq9",
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "train",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\sstban-cli-wvf7emq9\\example\\sstban.json",
+        "--set",
+        "runtime.exp_id=train"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\sstban-cli-wvf7emq9",
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "evaluate",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\sstban-cli-wvf7emq9\\example\\sstban.json",
+        "--checkpoint",
+        "D:\\LibCity 2.0\\.runtime-tests\\sstban-cli-wvf7emq9\\example\\runs\\train\\checkpoints\\best.pt",
+        "--set",
+        "runtime.exp_id=evaluated"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\sstban-cli-wvf7emq9",
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "train",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\sstban-cli-wvf7emq9\\example\\sstban.json",
+        "--resume",
+        "D:\\LibCity 2.0\\.runtime-tests\\sstban-cli-wvf7emq9\\example\\runs\\train\\checkpoints\\last.pt",
+        "--set",
+        "training.epochs=3",
+        "--set",
+        "runtime.exp_id=resumed"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\sstban-cli-wvf7emq9",
+      "exit_code": 0
+    }
+  ],
+  "prediction_shape": [
+    10,
+    3,
+    4,
+    2
+  ],
+  "independent_predictions_equal": true,
+  "independent_metrics_equal": true,
+  "global_raw_masked_mae": 7.410292625427246,
+  "evaluation_loss": 7.410293102264404,
+  "resumed_epoch": 3,
+  "optimizer_steps": 9,
+  "cache_statuses": [
+    "miss",
+    "hit",
+    "hit"
+  ],
+  "time_slots": 24,
+  "spatial_embedding_shape": [
+    4,
+    6
+  ],
+  "input_specification_saved": true,
+  "weights_only_safe_load": true,
+  "evaluate_has_no_training_artifacts": true,
+  "runtime_info": {
+    "train": {
+      "python": "3.12.13",
+      "pytorch": "2.15.0+cpu",
+      "numpy": "2.5.5",
+      "platform": "Windows-11-10.0.26200-SP0",
+      "mode": "train",
+      "execution_kind": "neural",
+      "device": "cpu",
+      "seed": 17,
+      "benchmark_protocol": "task_default",
+      "split": {
+        "train": 29,
+        "val": 10,
+        "test": 10,
+        "train_padded": false,
+        "semantics": "target_time_v1",
+        "input_window": 5,
+        "requested_input_window": 5,
+        "adapter": "window",
+        "intervals": {
+          "train": {
+            "samples": 29,
+            "target_start": "2024-01-01T05:00:00.000000000",
+            "target_end": "2024-01-02T11:00:00.000000000",
+            "target_index_start": 5,
+            "target_index_end": 35
+          },
+          "val": {
+            "samples": 10,
+            "target_start": "2024-01-02T12:00:00.000000000",
+            "target_end": "2024-01-02T23:00:00.000000000",
+            "target_index_start": 36,
+            "target_index_end": 47
+          },
+          "test": {
+            "samples": 10,
+            "target_start": "2024-01-03T00:00:00.000000000",
+            "target_end": "2024-01-03T11:00:00.000000000",
+            "target_index_start": 48,
+            "target_index_end": 59
+          }
+        },
+        "train_end": "2024-01-02T12:00:00.000000000",
+        "val_end": "2024-01-03T00:00:00.000000000",
+        "scaler_fit_end_exclusive": "2024-01-02T12:00:00.000000000",
+        "discarded_boundary_windows": 4,
+        "history_span_points": 5,
+        "cache": {
+          "status": "miss",
+          "path": "D:\\LibCity 2.0\\.runtime-tests\\sstban-cli-wvf7emq9\\example\\cache\\traffic-raw-v1\\15a37dac3fa31ee0ae948c7a.npz"
+        },
+        "sampling_gap_policy": "full_input_span_contiguous",
+        "input_missing_observations": "raw_zero_before_scaling",
+        "history_calendar": {
+          "kind": "calendar_positions",
+          "columns": [
+            "weekday",
+            "time_slot"
+          ],
+          "steps_per_day": 24,
+          "time_basis": "UTC",
+          "weekday_origin": "Monday"
+        },
+        "future_calendar": {
+          "kind": "calendar_positions",
+          "columns": [
+            "weekday",
+            "time_slot"
+          ],
+          "steps_per_day": 24,
+          "time_basis": "UTC",
+          "weekday_origin": "Monday"
+        }
+      },
+      "protocol_changes": {
+        "data.input_window": 5,
+        "data.output_window": 3
+      },
+      "capabilities": {
+        "requires_checkpoint": true,
+        "supports_resume": true,
+        "supports_validation": true
+      }
+    },
+    "evaluated": {
+      "python": "3.12.13",
+      "pytorch": "2.15.0+cpu",
+      "numpy": "2.5.5",
+      "platform": "Windows-11-10.0.26200-SP0",
+      "mode": "evaluate",
+      "execution_kind": "neural",
+      "device": "cpu",
+      "seed": 17,
+      "benchmark_protocol": "task_default",
+      "split": {
+        "train": 29,
+        "val": 10,
+        "test": 10,
+        "train_padded": false,
+        "semantics": "target_time_v1",
+        "input_window": 5,
+        "requested_input_window": 5,
+        "adapter": "window",
+        "intervals": {
+          "train": {
+            "samples": 29,
+            "target_start": "2024-01-01T05:00:00.000000000",
+            "target_end": "2024-01-02T11:00:00.000000000",
+            "target_index_start": 5,
+            "target_index_end": 35
+          },
+          "val": {
+            "samples": 10,
+            "target_start": "2024-01-02T12:00:00.000000000",
+            "target_end": "2024-01-02T23:00:00.000000000",
+            "target_index_start": 36,
+            "target_index_end": 47
+          },
+          "test": {
+            "samples": 10,
+            "target_start": "2024-01-03T00:00:00.000000000",
+            "target_end": "2024-01-03T11:00:00.000000000",
+            "target_index_start": 48,
+            "target_index_end": 59
+          }
+        },
+        "train_end": "2024-01-02T12:00:00.000000000",
+        "val_end": "2024-01-03T00:00:00.000000000",
+        "scaler_fit_end_exclusive": "2024-01-02T12:00:00.000000000",
+        "discarded_boundary_windows": 4,
+        "history_span_points": 5,
+        "cache": {
+          "status": "hit",
+          "path": "D:\\LibCity 2.0\\.runtime-tests\\sstban-cli-wvf7emq9\\example\\cache\\traffic-raw-v1\\15a37dac3fa31ee0ae948c7a.npz"
+        },
+        "sampling_gap_policy": "full_input_span_contiguous",
+        "input_missing_observations": "raw_zero_before_scaling",
+        "history_calendar": {
+          "kind": "calendar_positions",
+          "columns": [
+            "weekday",
+            "time_slot"
+          ],
+          "steps_per_day": 24,
+          "time_basis": "UTC",
+          "weekday_origin": "Monday"
+        },
+        "future_calendar": {
+          "kind": "calendar_positions",
+          "columns": [
+            "weekday",
+            "time_slot"
+          ],
+          "steps_per_day": 24,
+          "time_basis": "UTC",
+          "weekday_origin": "Monday"
+        }
+      },
+      "protocol_changes": {
+        "data.input_window": 5,
+        "data.output_window": 3
+      },
+      "capabilities": {
+        "requires_checkpoint": true,
+        "supports_resume": true,
+        "supports_validation": true
+      }
+    },
+    "resumed": {
+      "python": "3.12.13",
+      "pytorch": "2.15.0+cpu",
+      "numpy": "2.5.5",
+      "platform": "Windows-11-10.0.26200-SP0",
+      "mode": "train",
+      "execution_kind": "neural",
+      "device": "cpu",
+      "seed": 17,
+      "benchmark_protocol": "task_default",
+      "split": {
+        "train": 29,
+        "val": 10,
+        "test": 10,
+        "train_padded": false,
+        "semantics": "target_time_v1",
+        "input_window": 5,
+        "requested_input_window": 5,
+        "adapter": "window",
+        "intervals": {
+          "train": {
+            "samples": 29,
+            "target_start": "2024-01-01T05:00:00.000000000",
+            "target_end": "2024-01-02T11:00:00.000000000",
+            "target_index_start": 5,
+            "target_index_end": 35
+          },
+          "val": {
+            "samples": 10,
+            "target_start": "2024-01-02T12:00:00.000000000",
+            "target_end": "2024-01-02T23:00:00.000000000",
+            "target_index_start": 36,
+            "target_index_end": 47
+          },
+          "test": {
+            "samples": 10,
+            "target_start": "2024-01-03T00:00:00.000000000",
+            "target_end": "2024-01-03T11:00:00.000000000",
+            "target_index_start": 48,
+            "target_index_end": 59
+          }
+        },
+        "train_end": "2024-01-02T12:00:00.000000000",
+        "val_end": "2024-01-03T00:00:00.000000000",
+        "scaler_fit_end_exclusive": "2024-01-02T12:00:00.000000000",
+        "discarded_boundary_windows": 4,
+        "history_span_points": 5,
+        "cache": {
+          "status": "hit",
+          "path": "D:\\LibCity 2.0\\.runtime-tests\\sstban-cli-wvf7emq9\\example\\cache\\traffic-raw-v1\\15a37dac3fa31ee0ae948c7a.npz"
+        },
+        "sampling_gap_policy": "full_input_span_contiguous",
+        "input_missing_observations": "raw_zero_before_scaling",
+        "history_calendar": {
+          "kind": "calendar_positions",
+          "columns": [
+            "weekday",
+            "time_slot"
+          ],
+          "steps_per_day": 24,
+          "time_basis": "UTC",
+          "weekday_origin": "Monday"
+        },
+        "future_calendar": {
+          "kind": "calendar_positions",
+          "columns": [
+            "weekday",
+            "time_slot"
+          ],
+          "steps_per_day": 24,
+          "time_basis": "UTC",
+          "weekday_origin": "Monday"
+        }
+      },
+      "protocol_changes": {
+        "data.input_window": 5,
+        "data.output_window": 3
+      },
+      "capabilities": {
+        "requires_checkpoint": true,
+        "supports_resume": true,
+        "supports_validation": true
+      }
+    }
+  },
+  "scope": "Actual SSTBAN published example with typed UTC history/future calendars, unequal head width and partial final mask block; CPU functionality, not paper accuracy"
+}

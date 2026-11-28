@@ -8,6 +8,8 @@
 
 公共点数据现按真实 geo_id 和 UTC 时间对齐，支持节点分块、时间优先和完全乱序的 .dyna，拒绝重复/缺失/未知节点记录。点原始缓存切换到新命名空间，元数据记录 node_ids 与 point_alignment；缺少新身份说明的旧点检查点需重新训练，不自动补声明，详见 [节点身份修复](point-identity_zh.md)。
 
+SSTBAN 已接入时空瓶颈注意力、整数历史/未来日历和显式自监督训练；用 `--model SSTBAN` 生成 sstban.json。普通 forward 不采样掩码或执行辅助块，验证只用完整预测主损失；训练策略分别在 loss.self_weight 和 strategy.block_length/keep_probability 配置。修复 K/d 分头、掩码角色、全遮蔽和非整除块，图为 none 且无需 .rel，详见 [SSTBAN 说明](sstban_zh.md)。
+
 D2STGNN 已接入信号解耦、动态图/静态图和显式 epoch 课程训练；用 `--model D2STGNN` 生成 d2stgnn.json 后使用统一生命周期。时间槽随采样间隔、日历位置随元数据，gap 非整除和短预测均可运行；局部图不再沿时间重复展开，图幂一次准备供全层复用。课程随完整状态恢复，验证/评估始终使用全部预测步；配置、修订与验收见 [D2STGNN 说明](d2stgnn_zh.md)。
 
 STMGAT 已用原生 PyTorch 有向边注意力接入统一生命周期，无需 DGL；用 `--model STMGAT` 生成 stmgat.json。保留两层多头注意力和时间门控，修复四维 Conv1d、长历史图宽度、多目标输出及死参数。自动补一个自环，空图/孤立节点可运行；run_gconv=false 配合 graph.name=none 可只运行时间分支。配置、默认原尺度 MSE 与验收见 [STMGAT 说明](stmgat_zh.md)。

@@ -64,7 +64,8 @@
 | commit56 | 87c269f | fix: align point observations by real node IDs and UTC time |
 | commit57 | bbb088a | feat: migrate HIEST with sample-isolated hierarchy and auxiliary training |
 | commit58 | 075cf42 | feat: migrate STMGAT with native directed attention and explicit temporal widths |
-| commit59 | 随本节交付的提交 | feat: migrate D2STGNN with explicit curriculum and shared graph propagation |
+| commit59 | c7c90a9 | feat: migrate D2STGNN with explicit curriculum and shared graph propagation |
+| commit60 | 随本节交付的提交 | feat: migrate SSTBAN with explicit masks and typed calendar forecasting |
 
 ## commit1：修复基础交通缓存（670b325）
 
@@ -707,6 +708,18 @@ forward 由配置决定预测长度，每步重新编码当前窗口；预测回
 仓库外实际生成、训练、独立评估、续训 **4 条命令成功**，4 个真实 ID 节点、3 个数值历史通道、双日历/实际 24 槽、2 个目标，6 步历史预测 3 步且 gap=2；预测 [10,3,4,2]，独立预测/指标完全一致。第三轮累计 9 次更新、课程监督达到第 3 步，缓存 miss/hit/hit；原尺度 masked MAE 独立复算约 8.709683，与评估一致。纯权重包含输入说明、路图/时间表，独立评估无训练产物，见 [CLI](d2stgnn-cli-validation.json)。本批保留作者固有递推位置编码顺序，不宣称论文精度；稠密图/注意力成本与 CUDA/MPS 专项认证另行记录。
 
 清单更新为 **79/100**、21 条 pending；扣除延期 Common 与模板后还剩 **12 个实际模型**：DMVSTNet、GMAN、STAGGCN、STGODE、SSTBAN、STTSNet、FOGS、DSTAGNN、MultiSPANS、STWave、PDFormer、STGNCDE。它们及最终完整交付验收仍是主线范围，继续分批实施。
+
+## commit60：迁移 SSTBAN 显式块掩码与整数未来日历
+
+原问题：SSTBAN 在模型内生成 NumPy 随机掩码并以 mode/暂存表示连接损失；K/d 分头宽度与缩放不一致，掩码通过 query/key 形状猜测，当参考数等于实体长度时歧义。全遮蔽产生均匀注意力，低精度 -1e9 也不安全；floor 历史块使短/非整除序列错位。特殊 Dataset 只取最后一个文件/第一个观测目标，按集合内部重新滑窗且无统一原始目标接口。
+
+处理：新增标准 nn.Module、显式辅助前向与训练 step，普通 forward 只返回全预测窗 Tensor。按 K 个 d 维头计算，明确瓶颈第一步约束 key、第二步约束 query，布尔 SDPA 的空邻域加权为零；诱导点 expand 避免复制。Torch 设备 RNG 按 ceil 块采样/重复/裁剪，keep_probability 明确表示保留潜在通道的概率；保持原共享编码与自监督块前 token 替换次序。辅助 MSE 保留两边梯度及受损表示精确非零规则，按样本有效预测目标数聚合后与主目标混合；self_weight=0 跳过所有辅助工作，评估始终为原尺度主损失。公共日历组件增加可选未来整数 token，旧历史路径保持，复用真实 ID/UTC、原始缓存、互斥目标时间、训练 scaler 与历史补零/原始 NaN/0。多文件/多变量和实际日时间槽进入统一接口，无需 .rel，详见 [SSTBAN 说明](sstban_zh.md)。
+
+验证：新增 **35 项通过**，四组修正旧参考的完整预测/辅助表示/全部参数及输入梯度/BN（含默认 L3/K16/d8、歧义参考数、多变量、单节点），独立逐头注意力和梯度/明确掩码角色/空邻域零加权，保留概率 0/0.4/1、非整除与短块，两种 scaler 的随机掩码/BN/Adam/metric 调度/早停/最佳模型/RNG/加载器精确恢复，辅助 MSE 与 257/259 个有效目标微批梯度，真实历史/未来日历、原尺度 NaN/0/缓存/未来隔离、无标签无 RNG/推理不执行辅助/零权重跳过、全遮蔽 CPU AMP/真实单样本尾批、Windows spawn 和 15 类配置拒绝。DMSTGCN/配置相关合计 **80 passed**，迁移表专项通过；完整回归 **1427 passed，0 failed，0 errors，0 skipped**，见 [汇总](remaining-validation.json)。
+
+仓库外实际生成、训练、独立评估、续训 **4 条命令通过**，实际 24 槽日历，4 个真实 ID 节点、3 个历史通道/2 个目标，无 .rel；5 步历史/3 步预测、3 步掩码块覆盖不足一块的尾部，预测 [10,3,4,2]，独立预测/指标完全一致。第三轮累计 9 次更新、缓存 miss/hit/hit；原尺度 masked MAE 复算约 7.410293，与评估一致。安全纯权重与独立评估无训练产物均验收，见 [CLI](sstban-cli-validation.json)。本批明确修订分头/掩码/辅助聚合，不声称旧错误实现逐值等价或论文精度；默认无调度保持旧 lr_decay=false 实际行为，CUDA/MPS 专项另行记录。
+
+清单更新为 **80/100**、20 条 pending；扣除延期 Common 与模板后还剩 **11 个实际模型**：DMVSTNet、GMAN、STAGGCN、STGODE、STTSNet、FOGS、DSTAGNN、MultiSPANS、STWave、PDFormer、STGNCDE。它们及最终完整交付验收仍是主线范围，继续分批实施。
 
 ## 持续完成的清单
 

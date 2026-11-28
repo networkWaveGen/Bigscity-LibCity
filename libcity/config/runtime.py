@@ -107,6 +107,15 @@ def validate(config, preset):
     if model['name']=='STDN':
         for key in ('cnn_flat_size','lstm_out_size'):
             _positive(model['params'][key],'STDN '+key)
+    if model['name']=='SSTBAN':
+        params=model['params']
+        for key in ('L','K','d','reference'): _positive(params[key],'SSTBAN '+key)
+        _number(params['bn_decay'],'SSTBAN bn_decay',strict=True)
+        if params['bn_decay']>1: raise ValueError('SSTBAN bn_decay must not exceed one')
+        if data['sampling']['name']!='window' or data['graph']['name']!='none' or data['graph'].get('symmetric',False) or data['graph'].get('self_loops',False):
+            raise ValueError('SSTBAN requires continuous windows and graph.name=none without graph switches')
+        if data['features']['time_in_day'] or data['features']['day_in_week'] or data['features']['known_future_columns']:
+            raise ValueError('SSTBAN uses dedicated integer calendar tokens; disable packed calendar/known_future_columns')
     if model['name']=='D2STGNN':
         params=model['params']
         for key in ('num_hidden','node_dim','forecast_dim','output_hidden','k_s','k_t','num_layers','time_emb_dim','gap','attention_heads'):
@@ -344,7 +353,7 @@ def validate(config, preset):
                 _positive(data['sampling'].get(key,1),f'data.sampling.{key}')
         if data['graph'].get('name') not in ('binary', 'weighted', 'distance','inverse_distance','distance_bands')+(
                 ('svd_gaussian',) if model['name']=='CCRNN' else ('dynamic',) if model['name'] in ('DMSTGCN','ESG') else
-                ('risk_multigraph',) if model['name']=='GSNet' else ('none',) if model['name'] in ('CSTN','DSAN','STDN','STMGAT','D2STGNN') else ()):
+                ('risk_multigraph',) if model['name']=='GSNet' else ('none',) if model['name'] in ('CSTN','DSAN','STDN','STMGAT','D2STGNN','SSTBAN') else ()):
             raise ValueError('Unknown data.graph.name')
         if (data['graph']['name']=='distance_bands' and model['name']!='MultiSTGCnet') or (
                 model['name']=='MultiSTGCnet' and data['graph']['name'] not in ('distance_bands','binary')):
@@ -406,7 +415,7 @@ def validate(config, preset):
         'scheduler': ('name', 'interval', 'step_size', 'gamma', 'milestones', 'T_max', 'eta_min', 'patience',
                       'factor', 'monitor', 'mode', 'threshold', 'max_lr', 'total_steps', 'pct_start', 'warmup_steps',
                       'model_dim', 'lr_multiplier'),
-        'loss': ('name', 'mask_value','alpha','eps')+(('original_weight','regional_weight','orthogonal_weight') if model['name']=='HIEST' else ())+(('thresholds','weights') if model['name']=='GSNet' else ())+(('od_weight','origin_weight','destination_weight') if model['name']=='GEML' else ())+(('delta',) if training['loss'].get('name') in ('huber','masked_huber') else ())+(('negative_samples',) if spec.protocol in ('atst_ranking','stan_ranking') else
+        'loss': ('name', 'mask_value','alpha','eps')+(('self_weight',) if model['name']=='SSTBAN' else ())+(('original_weight','regional_weight','orthogonal_weight') if model['name']=='HIEST' else ())+(('thresholds','weights') if model['name']=='GSNet' else ())+(('od_weight','origin_weight','destination_weight') if model['name']=='GEML' else ())+(('delta',) if training['loss'].get('name') in ('huber','masked_huber') else ())+(('negative_samples',) if spec.protocol in ('atst_ranking','stan_ranking') else
             ('negative_samples','temperature','num_nearest','exclude_visited') if spec.protocol=='geosan_ranking' else ()),
         'early_stopping': ('patience', 'min_delta')}.items():
         _known(training[key], names, f'training.{key}')
@@ -498,6 +507,14 @@ def validate(config, preset):
         if value is not None and (type(value) not in (int, float) or not math.isfinite(value)):
             raise ValueError('mask_value must be a finite number or null')
     _object(training['strategy'], 'training.strategy')
+    if model['name']=='SSTBAN':
+        _known(training['strategy'],('block_length','keep_probability'),'training.strategy')
+        _positive(training['strategy'].get('block_length'),'SSTBAN block_length')
+        _number(training['strategy'].get('keep_probability'),'SSTBAN keep_probability')
+        training['loss'].setdefault('self_weight',.8)
+        _number(training['loss']['self_weight'],'SSTBAN self_weight')
+        if training['strategy']['keep_probability']>1 or training['loss']['self_weight']>1:
+            raise ValueError('SSTBAN keep_probability and self_weight must be in [0,1]')
     if model['name']=='D2STGNN':
         _known(training['strategy'],('use_curriculum_learning','cl_decay_epochs'),'training.strategy')
         if type(training['strategy'].get('use_curriculum_learning')) is not bool:

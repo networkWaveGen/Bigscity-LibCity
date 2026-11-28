@@ -29,6 +29,9 @@ class ModelSpec:
 
 
 MODELS = {
+    'SSTBAN': ModelSpec('libcity.model.traffic_flow_prediction.runtime_sstban:SSTBAN',
+        prepare_data='libcity.data.calendar_bundle:prepare_calendar_forecast',
+        train='libcity.executor.sstban_step:train',loss='libcity.executor.sstban_step:SSTBANLoss'),
     'D2STGNN': ModelSpec('libcity.model.traffic_speed_prediction.runtime_d2stgnn:D2STGNN',
         prepare_data='libcity.data.traffic_bundle:prepare_finite_traffic',train='libcity.executor.d2stgnn_step:train'),
     'STMGAT': ModelSpec('libcity.model.traffic_speed_prediction.runtime_stmgat:STMGAT',

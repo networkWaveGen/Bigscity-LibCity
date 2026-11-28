@@ -447,3 +447,10 @@ Its epoch-based curriculum is saved with training state; evaluation always
 uses the complete horizon. Time embeddings follow atomic sampling intervals,
 and non-divisible horizon/gap combinations are supported. See
 [D2STGNN semantics](../docs/modernization/runtime/d2stgnn_zh.md).
+
+SSTBAN uses `--model SSTBAN` and `sstban.json` with integer UTC history/future
+calendar tokens and no `.rel` graph. An explicit training step generates block
+keep masks and computes the auxiliary consistency loss; inference returns only
+forecasts. `training.strategy.keep_probability` means probability of retaining
+a latent channel, and partial final blocks are supported. See
+[SSTBAN semantics](../docs/modernization/runtime/sstban_zh.md).

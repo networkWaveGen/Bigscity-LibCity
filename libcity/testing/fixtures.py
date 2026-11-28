@@ -112,6 +112,12 @@ def dsan_fixture(root):
     return grid_fixture(root,steps=60)
 
 
+def sstban_fixture(root,name='BottleneckTiny',steps=60):
+    folder=stmgat_fixture(root,name,steps)
+    (folder/f'{name}.rel').unlink()
+    return folder
+
+
 def d2stgnn_fixture(root,name='DecoupleTiny',steps=60):
     return stmgat_fixture(root,name,steps)
 

@@ -1,0 +1,9 @@
+{
+  "model": {"name": "SSTBAN", "params": {"L": 1, "K": 2, "d": 3, "reference": 2}},
+  "data": {"dataset": "BottleneckTiny", "data_dir": "data", "cache_dir": "cache",
+    "input_window": 5, "output_window": 3, "pad_training": false},
+  "training": {"epochs": 2, "batch_size": 5, "accumulation_steps": 2,
+    "loss": {"self_weight": 0.4}, "strategy": {"block_length": 3, "keep_probability": 0.6}},
+  "evaluation": {"batch_size": 4},
+  "runtime": {"device": "cpu", "seed": 17, "output_dir": "runs", "exp_id": "sstban-demo"}
+}
