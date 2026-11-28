@@ -1,9 +1,10 @@
 # 新运行时模型迁移范围
 
-当前共 64 个运行时入口，对应原清单中的 66 个任务—模型条目（轨迹 RNN/LSTM/GRU 共用一个入口）。完整 [100 项 CSV](model-migration.csv) 逐项记录实际能力、依赖、验证与后续动作；其余 34 项仍为 pending，不会自动回退到旧运行时。轨迹预测全部 13 个非模板条目、两个 ETA 模型、三个地图匹配算法和六个道路表征模型均已接入。排除七个延期 Common 变体和两个模板后，本期仍有 25 个交通预测模型待迁移。37 个特殊交通数据集的深度整理仍延后。交通数据统一使用目标时间互斥切分。
+当前共 65 个运行时入口，对应原清单中的 67 个任务—模型条目（轨迹 RNN/LSTM/GRU 共用一个入口）。完整 [100 项 CSV](model-migration.csv) 逐项记录实际能力、依赖、验证与后续动作；其余 33 项仍为 pending，不会自动回退到旧运行时。轨迹预测全部 13 个非模板条目、两个 ETA 模型、三个地图匹配算法和六个道路表征模型均已接入。排除七个延期 Common 变体和两个模板后，本期仍有 24 个交通预测模型待迁移。37 个特殊交通数据集的深度整理仍延后。交通数据统一使用目标时间互斥切分。
 
 | 名称 | 任务/数据 | 训练接入 | 检查点/续训能力 | 实际验证级别 |
 | --- | --- | --- | --- | --- |
+| GTS | traffic_state_pred / 训练区间图特征与扩散 GRU | 公共 train_loop + 独立图训练 step/评估适配 | 需要权重；随机采图/课程学习/BN 完整续训 | 默认宽度及四组受控 Gumbel 旧完整预测/原图 BCE/全部梯度/BN 对照、三组扩散梯度、配对线性分解、原始训练特征/无未来目标/缓存/窗口及 batch 独立、大数组只读与检查点描述、确定图无标签评估/每次评估一次图计算、显式 teacher/图正则截止、完整训练/评估/跨截止轮次精确续训、单节点/单特征步/真实尾批 CPU AMP 与实际 CLI |
 | HGCN | traffic_state_pred / 静态路网分区与节点/区域双层网络 | 默认 train_loop | 需要权重；分区/dropout/BN 完整续训 | 修正成员汇总后的八组旧层级网络前向/全部有效梯度/训练 BN、默认 32/256/512 宽度、六种静态图公式、真实谱聚类/私有 RNG/显式分区/零图、零度自适应图回退、全成员梯度、历史/核/图阶数/多目标/batch=1/float64、分区设置复用原始缓存/未来目标隔离、训练/独立评估/dropout/BN/Adam/指数调度/RNG 精确续训、单节点/区域/时间尾批 CPU AMP 与跨进程 CLI |
 | DGCN | traffic_state_pred / 显式 CPT 与两层动态图卷积 | 默认 train_loop；具名 dgcn_cpt 协议 | 需要权重；dropout/BN 完整续训 | 默认 60 帧、4/8/64 通道修正旧轴后的前向/全部有效梯度与训练 BN 对照、三种 Chebyshev 阶数/奇数卷积核、粗粒度周期轴、任意激活周期/预测窗/特征/头数、batch=1/float64/单节点、拉普拉斯/消除行归一化奇点、实际默认 12 步数据、缓存/训练统计/标签隔离、完整训练/独立评估/dropout/BN/Adam/指数调度/RNG 精确续训、两类单样本 CPU AMP 尾批与实际 CLI |
 | STPGCN | traffic_state_pred / 实际日历与位置感知高斯图关系 | 默认 train_loop | 需要权重；全部关系/卷积/选择层完整续训 | 修正注册/真实跳数后的六种旧完整关系计算与全部梯度、默认 64/3/8 网络、关系因子分解、SciPy 独立最短路、真实星期/时段整数历史、因果 padding/样本独立/无标签、多步/多目标/batch=1/float64、互斥切分/训练统计/缓存/标签隔离、全部层实际更新与 Adam/调度器/RNG 精确续训、单节点尾批 CPU AMP、spawn 与实际 CLI |
@@ -209,5 +210,15 @@ HGCN 保留节点、区域两级网络、两组图池化块、三次学习式跨
 adjtype 支持 doubletransition、transition、symnadj、normlap、scalap、identity，保留旧有向方向/转置和 scalap 的 lambda_max=2 定义。节点/区域静态支持、成员矩阵及单位回退图均为 buffer。自适应图保留 ReLU 内积与行归一化；零度行使用本节点单位行，避免 0*inf，未改成 softmax。每次前向重新生成可微图，不缓存计算图；所有成员、图与输入均不被前向原地修改。旧 h/h_cluster 和 gate 内部卷积未参与前向，已删除，不用无效参数充当模型能力。
 
 时间注意力提取到独立公共 runtime_attention，DGCN/HGCN 共享显式维度及单样本 BN 行为；DGCN 状态键和计算保持原样。模型仅读取历史 X，归一化与原尺度 masked_mae 置于公共运行时。默认训练为 Adam 0.001、epoch 指数衰减 gamma=0.92、早停 patience=50。CPU 实测覆盖谱分区跨进程一致、完整训练/独立评估/dropout/BN/优化器/调度器/RNG 精确续训，以及单节点、单区域、单时间步尾批 AMP。保持原层级计算和区域图约定，不声称论文精度、所有实数据或全部硬件认证。
+
+GTS 保留两层时序 CNN、节点嵌入、二分类边学习器及扩散 GRU 编码/解码网络；默认 rnn_units=64、num_rnn_layers=1、max_diffusion_step=3、kernel_size=10、embedding_dim=100。kernel_size 修正旧 kernal_size 拼写，卷积后历史至少剩一帧，因此图特征长度至少为 2*kernel_size-1。所有输入/输出宽度从元信息推导，不再把多目标输出默认为一维。旧 filter_type 参数实际未参与图传播，旧隐藏 dropout 也未启用，均不保留为无效开关；传播保持对学习图加自环、行归一化后转置的单个随机游走支持及原 Chebyshev 特征顺序。
+
+图特征来自未滑窗的原始训练时间区间，而非旧代码每个训练窗口的第一帧，因此不再受 input_window、output_window、padding 和 batch_size 改变影响。data.graph.history_channel 默认选第 0 个历史观测列，只允许 observed_feature_indices 中的列；目标列使用训练集归一化器，其余原始观测列保持原值，日历和已知未来通道不可用作图学习序列。history_steps=0 使用完整训练区间，正数显式限制到最近若干训练时间点。所选时间段必须连续且数值有限，存在停运间隔时需明确选择足够长的连续尾段。通道、起止时间、形状和归一化方式写入摘要；改变图特征选择可复用原始缓存，验证/测试真实观测不进入图学习。
+
+大数组通过 DatasetMetadata.static_data 的只读 NumPy 快照传入，避免把完整时序展开为元信息中的 Python 数值列表；模型将 node_features、graph_prior、单位阵和非对角掩码注册为 buffer。完整检查点的 data_state 只附加这些静态数组的 shape/dtype 描述，数值随模型状态保存，来源版本、配置和输入布局仍参与续训检查；没有 static_data 的既有模型不增加该字段，保持已有检查点元信息一致。节点对线性层在激活前按 sender/receiver 两半精确分解，保持原参数及梯度，去除两张 N²×N 独热配对矩阵和每条边重复的宽矩阵投影；后续仍有稠密 N² 边与扩散计算。完整训练区间越长，CNN 展平后的 fc 参数越多，仍须按数据规模选择 history_steps，不宣称消除了所有规模成本。
+
+forward 只接受历史 X 并返回预测 Tensor，不读取 y、不采样图。独立评估与验证对二分类边 logits 取 argmax，再去掉自边；每次完整评估仅生成一次图，临时适配器不跨训练更新、检查点载入或设备变化缓存图。训练专用 forward_with_aux 保留直通 hard Gumbel 图采样及原 class-0 logits，温度与课程学习均在 training.strategy 显式配置。teacher 目标仅从训练 step 传入，NumPy 每预测步一个抽样、按 batches_seen 的原阈值以及 Torch 采图 RNG 均可完整恢复。半精度采样提升为 float32，随机数端点夹紧，避免双对数与温度计算溢出。
+
+training.strategy 默认 use_curriculum_learning=true、cl_decay_steps=2000、temperature=0.5、graph_regularization_epochs=200、graph_regularization_weight=1。图正则沿用 sigmoid(raw class-0 logit) 对静态先验的独立 BCE，使用 BCEWithLogits 稳定计算，不改为两类 softmax 的概率 BCE；按显式已完成 epoch 数判定是否启用，不再用批次数反推轮次。无有效预测目标但正则启用时仍可做图先验更新。默认预测目标是原尺度 masked_mae、mask_value=null，保留原始零目标；Adam 0.01、epoch 多步衰减 [20,30,40]/gamma=0.1、梯度裁剪 5 与 patience=100。评估从随机图改为确定图、图特征从窗口首帧改为原始训练区间属于明确的语义修订；受控采样的旧计算对照不等于复现旧错误实验流程或论文精度。CPU 生命周期、精确续训与尾批 AMP 已验证，见 [实际 CLI](gts-cli-validation.json)。
 
 阶段三、四有意调整见 [新增记录](phases34_execution_zh.md)。旧依赖处理步骤及已完成结果见 [登记](optional_dependencies_zh.md)。

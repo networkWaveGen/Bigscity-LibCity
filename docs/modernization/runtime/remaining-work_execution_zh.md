@@ -46,7 +46,8 @@
 | commit38 | 5972104 | feat: migrate STPGCN with registered layers and factored relations |
 | commit39 | 3fbe3d7 | feat: migrate DGCN with explicit CPT axes and dynamic graphs |
 | commit40 | ed4daee | fix: compute CPT histories from exact active physical periods |
-| commit41 | 随本节交付的提交 | feat: migrate HGCN with complete region aggregation and static graph state |
+| commit41 | f17311e | feat: migrate HGCN with complete region aggregation and static graph state |
+| commit42 | 随本节交付的提交 | feat: migrate GTS with train-only graph features and explicit graph training |
 
 ## commit1：修复基础交通缓存（670b325）
 
@@ -467,6 +468,22 @@ forward 由配置决定预测长度，每步重新编码当前窗口；预测回
 验证：新增 **47 项通过**，含六种图及默认宽度/训练态共八组修正旧聚合后的完整预测/全部有效梯度/BN 对照、独立旧静态图公式、全成员和梯度守恒、谱分区/私有 RNG/显式标签、常量区域图与零度行、六组历史/核/图阶数/特征/目标/batch=1/float64、输入/图/样本独立、分区设置复用缓存/未来目标变化不影响分区或输入、真实谱分区完整训练/独立评估/dropout/BN/Adam/调度器/RNG 精确续训，以及单节点/单区域/单时间步真实尾批 CPU AMP。与 DGCN 及清单检查合计 79 项；完整回归 **834 passed，0 failed，0 errors，0 skipped**，见 [汇总](remaining-validation.json)。
 
 仓库外实际夹具、训练、独立评估和续训共 **4 条命令成功**，跨进程分区均为 [0,1,0]，预测/指标完全一致；续训第三轮共 6 次参数更新，缓存 miss/hit/hit，见 [CLI](hgcn-cli-validation.json)。对照明确修复旧成员聚合、单轴及静态 dtype，不声称旧错误训练流程或论文精度复现。迁移表为 **66/100**，34 条 pending；排除延期 Common 与模板后仍有 **25 个交通预测模型**及最终全量验收待完成。
+
+## commit42：迁移 GTS，分离图学习训练与确定性评估
+
+原问题：旧 GTS 的 forward 直接读取 y 并返回预测/辅助输出元组，评估仍随机采图；图学习输入取每个训练窗口第一帧，使模型维度随窗口、padding 和 batch 改变。节点配对依赖两张 N²×N 独热矩阵，并对重复节点投影；大图历史若写入通用元信息还会变成庞大的 Python 数值列表。课程学习、图先验 BCE 和前 200 轮截止逻辑混在模型/旧执行器中，输出默认一维，旧 filter_type 和隐藏 dropout 设置没有实际效果。
+
+处理：新增原生 GTS，保留两层时序 CNN、节点/边嵌入、单随机游走扩散 GRU 编码/解码及原特征顺序。forward 只返回预测 Tensor，不读取标签、不消耗图采样 RNG；验证/独立评估使用 argmax 确定图，并由临时适配器在每次完整评估开始时只生成一次，避免逐 batch 重算或跨训练更新保留旧图。训练辅助前向保留 hard Gumbel 直通梯度；训练 step 显式传入 teacher 目标、按 batches_seen 的 NumPy 课程抽样和稳定图 BCE。正则按显式 epoch 截止，原 class-0 raw logit 的 sigmoid BCE 改用数学等价的 BCEWithLogits，不混成 softmax 类概率。无预测有效值但正则开启时仍支持先验更新。
+
+数据适配只从原始训练区间取连续观测，history_channel 默认 0，history_steps 默认 0（全训练区间），可显式取连续尾段；目标列按训练归一化器转换，其余观测不缩放，拒绝日历/已知未来通道。所选历史需有限、连续且至少 2*kernel_size-1 帧，窗口/预测长度/padding/batch 改变不会改变图特征，验证/测试数值不进入图学习。图选择设置与原始缓存身份分离，起止时间/形状/归一化方式进入运行摘要及续训检查。
+
+新增只读 DatasetMetadata.static_data 承载数值静态数组；模型将图历史、先验与掩码注册为 buffer，检查点元信息仅保存 shape/dtype，避免完整时序额外展开为 Python 列表。既有无静态数组模型不增加字段，原续训检查保持兼容。边线性层在激活前按 sender/receiver 精确分解，保留参数与全部梯度，删除立方规模独热配对矩阵和重复宽投影；仍保留稠密 N² 图与随历史增长的 CNN 展平 fc，规模限制和显式 history_steps 已写入文档。
+
+默认保留 64 单元、1 层 GRU、3 阶扩散、10 点卷积核、100 维嵌入，修正 kernal_size 为 kernel_size，多目标宽度由元信息决定。训练策略移入 training.strategy，保留温度 0.5、课程衰减 2000、前 200 轮图正则；删除无效 filter_type/隐藏 dropout 开关。默认 Adam 0.01、多步 epoch 调度与原尺度 masked_mae（不屏蔽零目标）；单节点/单特征步使用公共单观测 BN 回退。评估确定图与原始训练区间图输入属于明确的有意修订，不声称旧随机评估/窗口特征流程或论文精度等价。
+
+验证：新增 **31 项通过**，四组受控 Gumbel 的旧完整预测/图 logits/BCE/全部梯度/BN 对照包含默认 64/100/3 网络及训练模式，另有三组扩散单元与图梯度、配对分解、解析直通梯度、无标签/RNG/样本独立、仅训练序列/缓存/通道/连续性/未来隔离、只读大数组/检查点元信息、显式课程/稳定 BCE/正则截止及空目标、每次评估只算一张新图。真实原子数据完整训练/独立评估/中断续训跨正则截止后，模型、BN、Adam、调度器、Torch/NumPy RNG 和任务状态逐项完全相等；单节点及单特征步真实尾批 CPU AMP 通过。定向合计 **39 passed**，完整回归 **865 passed，0 failed，0 errors，0 skipped**，见 [汇总](remaining-validation.json)。
+
+仓库外实际夹具生成、训练、独立评估和续训共 **4 条命令成功**，预测形状 [9,2,3,1]，独立评估预测/指标完全一致；续训第三轮共 9 次参数更新，缓存 miss/hit/hit。三个进程的图特征均为训练前 28 帧、形状 [28,3]；完整权重保存对应 buffer，元信息仅 shape/dtype，独立评估不创建训练产物。见 [GTS CLI](gts-cli-validation.json)。迁移表为 **67/100**，33 条 pending；排除延期 Common 与模板后仍有 **24 个交通预测模型**及最终全量验收待完成。
 
 ## 持续完成的清单
 

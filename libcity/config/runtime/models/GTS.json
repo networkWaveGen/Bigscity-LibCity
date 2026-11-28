@@ -1,0 +1,12 @@
+{
+  "model": {"params": {"rnn_units": 64, "num_rnn_layers": 1, "max_diffusion_step": 3,
+    "kernel_size": 10, "embedding_dim": 100}},
+  "data": {"scaler": {"name": "standard"}, "features": {"time_in_day": true},
+    "graph": {"name": "binary", "symmetric": false, "self_loops": false, "history_channel": 0, "history_steps": 0}},
+  "training": {"optimizer": {"name": "adam", "lr": 0.01},
+    "scheduler": {"name": "multistep", "interval": "epoch", "milestones": [20,30,40], "gamma": 0.1},
+    "loss": {"name": "masked_mae", "mask_value": null}, "clip_grad_norm": 5.0,
+    "early_stopping": {"patience": 100}, "strategy": {"use_curriculum_learning": true,
+      "cl_decay_steps": 2000, "temperature": 0.5, "graph_regularization_epochs": 200,
+      "graph_regularization_weight": 1.0}}
+}

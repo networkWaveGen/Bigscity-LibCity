@@ -30,11 +30,16 @@ class DatasetMetadata:
     adjacency: np.ndarray | None = field(default=None, repr=False, compare=False)
     info: object = field(default_factory=dict)
     input_layout: object = field(default_factory=dict)
+    static_data: object = field(default_factory=dict, repr=False, compare=False)
 
     def __post_init__(self):
         object.__setattr__(self, 'adjacency', readonly(self.adjacency))
         object.__setattr__(self, 'info', readonly(dict(self.info)))
         object.__setattr__(self, 'input_layout', readonly(dict(self.input_layout)))
+        arrays = dict(self.static_data)
+        if any(not isinstance(key,str) or not isinstance(value,np.ndarray) for key,value in arrays.items()):
+            raise TypeError('DatasetMetadata.static_data requires named NumPy arrays')
+        object.__setattr__(self, 'static_data', readonly(arrays))
 
 
 @dataclass

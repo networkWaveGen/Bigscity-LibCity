@@ -29,6 +29,9 @@ class ModelSpec:
 
 
 MODELS = {
+    'GTS': ModelSpec('libcity.model.traffic_speed_prediction.runtime_gts:GTS',
+        prepare_data='libcity.data.gts_bundle:prepare_gts',train='libcity.executor.gts_train:train',
+        evaluate_loader='libcity.executor.gts_train:evaluate_gts'),
     'HGCN': ModelSpec('libcity.model.traffic_speed_prediction.runtime_hgcn:HGCN',
         prepare_data='libcity.data.hgcn_bundle:prepare_hgcn'),
     'DGCN': ModelSpec('libcity.model.traffic_flow_prediction.runtime_dgcn:DGCN',protocol='dgcn_cpt'),

@@ -124,8 +124,9 @@ def validate(config, preset):
                 raise TypeError(f'data.split.{key} must be an ISO timestamp')
         _known(data['features'], ('load_external', 'time_in_day', 'day_in_week', 'known_future_columns'), 'data.features')
         _known(data['scaler'], ('name',), 'data.scaler')
-        hierarchy_keys = ('cluster_nodes','cluster_labels','cluster_epsilon') if model['name']=='HGCN' else ()
-        _known(data['graph'], ('name', 'symmetric', 'self_loops', 'epsilon','reachability_column','distance_column')+hierarchy_keys, 'data.graph')
+        graph_keys = {'HGCN':('cluster_nodes','cluster_labels','cluster_epsilon'),
+            'GTS':('history_channel','history_steps')}.get(model['name'],())
+        _known(data['graph'], ('name', 'symmetric', 'self_loops', 'epsilon','reachability_column','distance_column')+graph_keys, 'data.graph')
         if model['name']=='HGCN':
             for key,value in dict(cluster_nodes=0,cluster_labels=None,cluster_epsilon=.1).items():
                 data['graph'].setdefault(key,value)
@@ -136,6 +137,10 @@ def validate(config, preset):
             labels = data['graph']['cluster_labels']
             if labels is not None and (not isinstance(labels,list) or not labels or any(type(value) is not int or value<0 for value in labels)):
                 raise ValueError('graph.cluster_labels must be a nonempty list of nonnegative integers or null')
+        if model['name']=='GTS':
+            for key in ('history_channel','history_steps'):
+                data['graph'].setdefault(key,0)
+                _positive(data['graph'][key],'graph.'+key,zero=True)
         if 'distance_column' in data['graph']:
             column = data['graph']['distance_column']
             if model['name']!='MultiSTGCnet' or (column is not None and (not isinstance(column,str) or not column)):
@@ -280,6 +285,16 @@ def validate(config, preset):
         if value is not None and (type(value) not in (int, float) or not math.isfinite(value)):
             raise ValueError('mask_value must be a finite number or null')
     _object(training['strategy'], 'training.strategy')
+    if model['name']=='GTS':
+        strategy = training['strategy']
+        _known(strategy,('use_curriculum_learning','cl_decay_steps','temperature','graph_regularization_epochs',
+            'graph_regularization_weight'),'training.strategy')
+        if type(strategy.get('use_curriculum_learning')) is not bool:
+            raise ValueError('GTS strategy.use_curriculum_learning must be boolean')
+        _positive(strategy.get('cl_decay_steps'),'strategy.cl_decay_steps')
+        _positive(strategy.get('graph_regularization_epochs'),'strategy.graph_regularization_epochs',zero=True)
+        _number(strategy.get('temperature'),'strategy.temperature',strict=True)
+        _number(strategy.get('graph_regularization_weight'),'strategy.graph_regularization_weight')
     if spec.task=='traj_loc_pred':
         _number(data['session_gap_hours'],'session_gap_hours',strict=True)
         _positive(data['min_session_length'],'min_session_length')

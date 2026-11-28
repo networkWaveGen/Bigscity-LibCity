@@ -41,9 +41,15 @@ def plain(value):
 
 def data_state(bundle):
     metadata=bundle.metadata
-    return dict(name=metadata.name,num_nodes=metadata.num_nodes,feature_dim=metadata.feature_dim,
+    result = dict(name=metadata.name,num_nodes=metadata.num_nodes,feature_dim=metadata.feature_dim,
         output_dim=metadata.output_dim,info=plain(metadata.info),input_layout=plain(metadata.input_layout),
         scaler=dict(name=type(bundle.scaler).__name__,state=plain(vars(bundle.scaler))))
+    if getattr(metadata,'static_data',None):
+        # Values live in model buffers and are guarded by atomic sources,
+        # transform configuration and input_layout, like the static adjacency.
+        result['static_data'] = {name:dict(shape=list(value.shape),dtype=str(value.dtype))
+            for name,value in metadata.static_data.items()}
+    return result
 
 
 def rng_state():

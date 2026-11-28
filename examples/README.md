@@ -350,6 +350,20 @@ model retains both hierarchy levels, three transfers and the original output
 head. Region adjacency keeps the legacy Gaussian of summed weights, with a
 finite zero-graph fallback for an undefined constant scale.
 
+Generate GTS with `--model GTS`, then use gts.json with the same lifecycle
+commands. Graph features use the raw training interval, independently of windows,
+padding and batch size. data.graph.history_channel selects an observed column;
+history_steps=0 uses all training points, while a positive value selects the
+recent training tail. The selected series must be contiguous and contain at
+least 2*kernel_size-1 points. Calendar and known-future channels cannot become
+graph-learning observations. Training policy lives in training.strategy:
+use_curriculum_learning, cl_decay_steps, temperature, graph_regularization_epochs
+and graph_regularization_weight. The example crosses the graph-prior cutoff
+after its first epoch. Training retains hard Gumbel graph sampling; evaluation
+uses one deterministic graph per call. Both paths predict without implicit y
+access. Dense edge computation and the history-length-dependent projection
+remain scale costs; select history_steps explicitly for large training series.
+
 The complete supported-model inventory and migration details are in the
 [runtime guide](../docs/modernization/runtime/README_zh.md). Small examples prove
 execution and reproducibility, not real-city benchmark accuracy.

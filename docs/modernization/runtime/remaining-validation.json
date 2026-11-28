@@ -1,5 +1,5 @@
 {
-  "scope": "Remaining-work commits 1-41; whole-library migration remains in progress",
+  "scope": "Remaining-work commits 1-42; whole-library migration remains in progress",
   "environment": {
     "python": "3.12.13",
     "torch": "2.15.0+cpu",
@@ -9,7 +9,7 @@
     "scikit_learn": "1.9.1"
   },
   "full_tests": {
-    "tests": 834,
+    "tests": 865,
     "failures": 0,
     "errors": 0,
     "skipped": 0
@@ -379,6 +379,37 @@
     "test_incompatible_residual_modes_fail_with_specific_error[params2]",
     "test_grid_sampling_and_model_must_be_selected_together[STResNet-window]",
     "test_grid_sampling_and_model_must_be_selected_together[GRU-grid_cpt]",
+    "test_original_full_gumbel_forecast_logits_auxiliary_and_all_gradients_with_controlled_noise[64-1-3-10-100-1-1-12-12-False]",
+    "test_original_full_gumbel_forecast_logits_auxiliary_and_all_gradients_with_controlled_noise[4-2-2-3-6-3-2-4-3-True]",
+    "test_original_full_gumbel_forecast_logits_auxiliary_and_all_gradients_with_controlled_noise[3-1-0-1-4-2-2-1-1-False]",
+    "test_original_full_gumbel_forecast_logits_auxiliary_and_all_gradients_with_controlled_noise[4-1-1-2-5-2-1-5-2-False]",
+    "test_dynamic_diffusion_cell_original_recurrence_and_graph_gradients[0]",
+    "test_dynamic_diffusion_cell_original_recurrence_and_graph_gradients[1]",
+    "test_dynamic_diffusion_cell_original_recurrence_and_graph_gradients[3]",
+    "test_factored_pair_logits_and_all_cnn_classifier_gradients_match_explicit_pairs",
+    "test_straight_through_gumbel_has_hard_values_and_analytic_soft_gradient",
+    "test_inference_is_deterministic_label_free_batch_independent_and_does_not_consume_rng",
+    "test_teacher_targets_only_affect_explicit_subsequent_decoder_steps",
+    "test_graph_history_uses_full_raw_train_prefix_and_is_independent_of_windows_padding_and_batch_size",
+    "test_graph_history_rejects_calendar_channels_and_gaps_but_supports_explicit_contiguous_tail",
+    "test_static_arrays_are_readonly_and_empty_schema_keeps_existing_checkpoints_compatible",
+    "test_graph_prior_objective_cutoff_curriculum_draws_and_prior_only_batches",
+    "test_evaluation_prepares_one_graph_per_call_and_never_keeps_a_stale_graph",
+    "test_full_gumbel_curriculum_regularization_cutoff_bn_adam_schedule_rng_exact_resume",
+    "test_actual_cpu_amp_single_node_feature_bn_and_true_tail_batches[False]",
+    "test_actual_cpu_amp_single_node_feature_bn_and_true_tail_batches[True]",
+    "test_invalid_training_policy_fails_before_data[strategy0]",
+    "test_invalid_training_policy_fails_before_data[strategy1]",
+    "test_invalid_training_policy_fails_before_data[strategy2]",
+    "test_invalid_training_policy_fails_before_data[strategy3]",
+    "test_invalid_training_policy_fails_before_data[strategy4]",
+    "test_invalid_training_policy_fails_before_data[strategy5]",
+    "test_invalid_model_structure_fails_clearly[params0]",
+    "test_invalid_model_structure_fails_clearly[params1]",
+    "test_invalid_model_structure_fails_clearly[params2]",
+    "test_invalid_model_structure_fails_clearly[params3]",
+    "test_invalid_model_structure_fails_clearly[params4]",
+    "test_invalid_static_history_prior_configuration_and_prediction_shape",
     "test_original_hierarchy_prediction_all_effective_gradients_and_bn_with_correct_member_sum[doubletransition-4-8-8-False]",
     "test_original_hierarchy_prediction_all_effective_gradients_and_bn_with_correct_member_sum[transition-4-8-8-False]",
     "test_original_hierarchy_prediction_all_effective_gradients_and_bn_with_correct_member_sum[symnadj-4-8-8-False]",
@@ -853,8 +884,8 @@
   ],
   "inventory": {
     "total": 100,
-    "migrated": 66,
-    "pending": 34
+    "migrated": 67,
+    "pending": 33
   },
   "history": [
     {
@@ -1317,6 +1348,20 @@
         "total": 100,
         "migrated": 65,
         "pending": 35
+      }
+    },
+    {
+      "scope": "commits 1-41, through f17311e",
+      "full_tests": {
+        "tests": 834,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "inventory": {
+        "total": 100,
+        "migrated": 66,
+        "pending": 34
       }
     }
   ],
@@ -2153,5 +2198,148 @@
       "Legacy Gaussian of summed cluster weights retained; undefined constant scale uses zero graph"
     ],
     "scikit_learn": "1.9.1"
-  }
+  },
+  "gts_cli": {
+    "passed": true,
+    "source": "D:\\LibCity 2.0\\LibCity-modernization",
+    "directory": "D:\\LibCity 2.0\\.runtime-tests\\gts-cli-vv4r8rj3",
+    "commands": [
+      {
+        "command": [
+          "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+          "-B",
+          "D:\\LibCity 2.0\\LibCity-modernization\\tools\\make_runtime_fixture.py",
+          "--directory",
+          "D:\\LibCity 2.0\\.runtime-tests\\gts-cli-vv4r8rj3\\example",
+          "--model",
+          "GTS"
+        ],
+        "cwd": "D:\\LibCity 2.0\\.runtime-tests\\gts-cli-vv4r8rj3",
+        "exit_code": 0
+      },
+      {
+        "command": [
+          "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+          "-B",
+          "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+          "train",
+          "--config",
+          "D:\\LibCity 2.0\\.runtime-tests\\gts-cli-vv4r8rj3\\example\\gts.json",
+          "--set",
+          "runtime.exp_id=train"
+        ],
+        "cwd": "D:\\LibCity 2.0\\.runtime-tests\\gts-cli-vv4r8rj3",
+        "exit_code": 0
+      },
+      {
+        "command": [
+          "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+          "-B",
+          "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+          "evaluate",
+          "--config",
+          "D:\\LibCity 2.0\\.runtime-tests\\gts-cli-vv4r8rj3\\example\\gts.json",
+          "--checkpoint",
+          "D:\\LibCity 2.0\\.runtime-tests\\gts-cli-vv4r8rj3\\example\\runs\\train\\checkpoints\\best.pt",
+          "--set",
+          "runtime.exp_id=evaluated"
+        ],
+        "cwd": "D:\\LibCity 2.0\\.runtime-tests\\gts-cli-vv4r8rj3",
+        "exit_code": 0
+      },
+      {
+        "command": [
+          "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+          "-B",
+          "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+          "train",
+          "--config",
+          "D:\\LibCity 2.0\\.runtime-tests\\gts-cli-vv4r8rj3\\example\\gts.json",
+          "--resume",
+          "D:\\LibCity 2.0\\.runtime-tests\\gts-cli-vv4r8rj3\\example\\runs\\train\\checkpoints\\last.pt",
+          "--set",
+          "training.epochs=3",
+          "--set",
+          "runtime.exp_id=resumed"
+        ],
+        "cwd": "D:\\LibCity 2.0\\.runtime-tests\\gts-cli-vv4r8rj3",
+        "exit_code": 0
+      }
+    ],
+    "model": "GTS",
+    "metrics": {
+      "MAE@1": 0.7615205976698134,
+      "RMSE@1": 1.00695209317024,
+      "MAE@2": 0.8110471301608615,
+      "RMSE@2": 1.046908052714443,
+      "loss": 0.7862839235199822
+    },
+    "prediction_shape": [
+      9,
+      2,
+      3,
+      1
+    ],
+    "independent_metrics_exact": true,
+    "independent_predictions_exact": true,
+    "checkpoint_format": 3,
+    "resumed_state": {
+      "stage": "train",
+      "epoch": 3,
+      "batches_seen": 15,
+      "optimizer_steps": 9,
+      "best_metric": 1.1136303080452814,
+      "task_state": {
+        "curriculum_batches_seen": 14,
+        "graph_regularization_epoch": 2,
+        "graph_regularization_active": false
+      }
+    },
+    "cache_statuses": [
+      "miss",
+      "hit",
+      "hit"
+    ],
+    "graph_history": {
+      "source": "raw_training_interval",
+      "channel": 0,
+      "start_index": 0,
+      "end_index_exclusive": 28,
+      "first_timestamp": "2024-01-01T00:00:00.000000000",
+      "last_timestamp": "2024-01-01T02:15:00.000000000",
+      "shape": [
+        28,
+        3
+      ],
+      "normalization": "target_scaler"
+    },
+    "graph_history_equal_across_processes": true,
+    "checkpoint_static_schema": {
+      "graph_history": {
+        "shape": [
+          28,
+          3
+        ],
+        "dtype": "float32"
+      }
+    },
+    "checkpoint_graph_buffer_shape": [
+      28,
+      3
+    ],
+    "evaluation_training_artifacts_created": false,
+    "python": "3.12.13",
+    "torch": "2.15.0+cpu",
+    "numpy": "2.5.5",
+    "notes": [
+      "Executed four CLI commands outside the source directory",
+      "Graph features use only the raw training interval, independently of windows, padding and batch size",
+      "Inference uses one deterministic argmax graph per evaluation call; training retains straight-through Gumbel sampling",
+      "Raw class-zero logits retain the original independent sigmoid graph-prior BCE objective",
+      "Regularization cutoff is explicit in training.strategy and was crossed before resume",
+      "Exact continuous-versus-resumed model, optimizer, schedule, BatchNorm, Torch/NumPy RNG and task state checked by tests",
+      "Static arrays are read-only metadata; numeric contents are model buffers, while checkpoint metadata stores only shape/dtype"
+    ]
+  },
+  "results_file": "D:\\LibCity 2.0\\.runtime-tests\\remaining-suite-39-results.xml"
 }

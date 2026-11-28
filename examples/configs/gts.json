@@ -1,0 +1,9 @@
+{
+  "data": {"dataset": "Tiny", "data_dir": "data", "cache_dir": "cache",
+    "input_window": 4, "output_window": 2, "pad_training": false},
+  "model": {"name": "GTS", "params": {"rnn_units": 4, "kernel_size": 3, "embedding_dim": 8}},
+  "training": {"epochs": 2, "batch_size": 5, "accumulation_steps": 2,
+    "strategy": {"graph_regularization_epochs": 1}},
+  "evaluation": {"batch_size": 5},
+  "runtime": {"device": "cpu", "seed": 17, "output_dir": "runs", "exp_id": "gts"}
+}

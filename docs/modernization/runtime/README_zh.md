@@ -24,6 +24,8 @@ DGCN 示例用 `--model DGCN` 生成，按 dgcn.json 执行相同 train/evaluate
 
 HGCN 示例用 `--model HGCN` 生成，对 hgcn.json 使用相同生命周期命令。data.graph.cluster_nodes=0 自动选 min(10,N) 个区域；示例设为 2 并实际运行固定种子的静态路网谱聚类，也可用 cluster_labels 按 .geo 顺序给出分区。区域输入使用所有组员之和，图与分区是只读元信息，改变分区设置可复用原始缓存。temporal_kernels 默认 [3,2]，要求历史至少 10 帧；缩短核可运行更短历史。默认保留双层图与多步/多目标输出，全部训练/评估/续训使用公共入口。区域图的原高斯规则、退化处理和参数说明见 [模型说明](models_zh.md)。
 
+GTS 示例用 `--model GTS` 生成，对 gts.json 使用同样的 train/evaluate/resume 命令。data.graph.history_channel 选择历史观测列，history_steps=0 使用完整原始训练区间，正数取最近若干训练时间点；所选序列须连续且至少有 2*kernel_size-1 帧。图特征不依赖窗口展开、padding 或 batch_size，不读取验证/测试值。模型结构位于 model.params，温度、课程学习与图正则截止位于 training.strategy；示例只在第一轮加图正则。训练保留 Gumbel 随机采图，评估使用确定图且每次完整评估只计算一次，forward 不读取 y。参数、原实现语义修订及规模限制见 [模型说明](models_zh.md)。
+
 ## GRU 完整例子
 
 从源码根目录运行，数据、缓存和输出都可放在仓库外：
