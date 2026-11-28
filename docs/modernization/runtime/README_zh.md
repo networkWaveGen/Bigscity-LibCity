@@ -12,6 +12,8 @@ STResNet/ACFM 的原子网格示例可用 `tools/make_runtime_fixture.py --direc
 
 CONVGCN/MultiSTGCnet 示例可用 `--model CONVGCN` / `--model MultiSTGCnet` 生成，使用 convgcn.json/multistgcnet.json 执行同样的训练、评估和续训命令。它们是点图模型，输入为 .geo/.rel/.dyna。CONVGCN 的 seasonal_windows 参数 period_steps/trend_steps 按原始时间片计数；MultiSTGCnet 的 frame_cpt 按最近帧/日/周采样，默认从 .rel 距离构建三组支持，不用高斯相似度代替距离。协议名、实际窗口数/跨度与距离边界都会进入运行摘要。详细参数与有意修复见 [模型说明](models_zh.md)。
 
+DKFN 示例可用 `tools/make_runtime_fixture.py --directory <目录> --model DKFN` 生成，再对 dkfn.json 使用相同的 train/evaluate/resume 命令。它保留图/自身双循环流，方差按样本计算，避免其他 batch 样本改变预测；零方差使用有限回退。多步滚动只读取已声明的未来特征，未知观测沿用最后值，不读取 y。默认 RMSprop，hops/clamp_adjacency/threshold 位于 model.params；融合系数与有意数值变化见 [模型说明](models_zh.md)。
+
 ## GRU 完整例子
 
 从源码根目录运行，数据、缓存和输出都可放在仓库外：

@@ -39,7 +39,8 @@
 | commit31 | a87159c | feat: migrate Node2Vec and DeepWalk with explicit external training |
 | commit32 | 1ceae72 | feat: migrate GeomGCN with native partitioned reconstruction |
 | commit33 | c4cc695 | feat: migrate grid forecasts with causal CPT inputs |
-| commit34 | 随本节交付的提交 | feat: migrate periodic graph forecasts with explicit distance bands |
+| commit34 | 85c8280 | feat: migrate periodic graph forecasts with explicit distance bands |
+| commit35 | 随本节交付的提交 | feat: migrate DKFN with sample-local variance and causal rollout |
 
 ## commit1：修复基础交通缓存（670b325）
 
@@ -364,6 +365,18 @@ MultiSTGCnet 使用 multi_stgc 协议和 frame_cpt：最近帧、同刻日/周�
 验证：新增 **34 项通过**，包括原图投影/修正节点 Conv3d 轴后的前向及全部梯度、原循环数学/明确修复最近分支与距离支持后的前向及全部梯度、独立第二目标/服务周期窗口/末尾完整目标、距离最大值/常量/零距离/孤立图/无原地修改、活动周期与多步/多目标/batch=1/float64、完整训练/独立评估/优化器/调度器/早停/RNG 精确续训、静态矩阵/输入不变、距离列切换及来源续训保护、方向/对称化/二值单位距离、非法配置及 CPU AMP。暂停时剩余的测试数据类型错误通过显式将测试距离列转为 float 修复，没有降低检查标准。当前源码完整回归 **585 passed，0 failed，0 errors，0 skipped**，见 [汇总](remaining-validation.json)。仓库外两个夹具、两次训练、两次独立评估及两次续训共 **8 条成功命令**，独立指标/预测逐元素一致、目标通道不同、续训第三轮且原始缓存复用，见 [CLI](periodic-cli-validation.json)。
 
 范围：数值参考明确修正原错误轴顺序/分支/距离边界，不宣称与旧错误完整流程或论文精度等价。CONVGCN 的节点通道稠密卷积和 MultiSTGCnet 的全局节点特征 LSTM 仍保留原规模成本，未替换为另一个轻量网络；本轮不做大城市性能认证，Common 变体继续延期。迁移表更新为 **60/100**，40 条 pending；排除 7 个延期 Common 与 2 个模板后，本期仍有 **31 个交通模型**及最终全量验收待完成。
+
+## commit35：迁移 DKFN 并修复跨样本方差与无标签滚动
+
+问题：旧 DKFN 在融合中对整个 batch 计算 torch.var，同一样本会受其他样本影响并产生跨样本梯度；单元素/零方差会产生 NaN 或除零，未约束的系数也可能使分母失效。predict 读取 y 决定输出长度并从真实未来目标复制额外通道，纯推理不可用。图与过滤矩阵保存在普通列表/Variable 中，设备/类型迁移不完整，squeeze 还可能丢失标量/单批维度。
+
+修改：标准 nn.Module 保留图过滤 LSTM、自身 LSTM、邻居细胞权重及[作者](https://github.com/Fanglanc/DKFN/blob/master/DKFN.py)的原系数融合式。图复制后二值化，保留原列度数左乘归一化、K 阶图幂及可选钳制，矩阵注册 buffer；隐藏状态随输入创建，不持有设备/scaler/logger，不使用 Variable。默认 hops=3、clamp_adjacency=false、threshold=1e-4，使用原 RMSprop 学习率 1e-4，直接复用公共 train_loop/损失/评估。
+
+融合方差改为每个样本展平的观测/图特征流内计算，移除跨 batch 耦合；非退化流保留样本方差，单元素定义为零方差。物理系数 softplus(c) 初值 1，保存的 c 为无约束坐标；正性避免负系数导致异常分母，数值参考明确验证变换的链式梯度。两方差按共同尺度归一化，代数上保留作者非对称融合式而不另改成凸组合；半精度方差提升到 float32、float64 保留，两流方差均为零时回退为两个隐藏预测的均值。这些是有意修复，未将旧全 batch 方差错误路径当成等价目标。
+
+forward 由配置决定预测长度，每步重新编码当前窗口；预测回填目标通道，未知额外观测保持最后值，只有已声明的 future_features 通道更新，不读取未来真实观测或 y；末步不构造无用后续窗口。模型/优化器状态（包括变换前系数）、RNG、调度器等由公共完整检查点恢复，独立评估只加载纯权重。发布 dkfn.json、--model DKFN 夹具命令及使用说明。ResLSTM 仍为 pending，将在独立批次处理。
+
+验证：新增 **26 项通过**，包括 12 种阶数/钳制/输入输出维度的原递推与修正融合参考预测/全部参数梯度、作者融合公式/系数链式梯度、改变其他样本后的预测不变与跨样本梯度为零、图幂/钳制/元信息不变与 buffer 类型迁移、单节点/常量/孤立图/零方差/系数边界的有限预测及梯度、完整训练/独立评估/RMSprop/调度器/早停/RNG 精确续训、已知未来通道更新/无标签/输入及状态不变、CPU AMP 和非法参数。与清单检查合计 **27 项通过**，当前源码完整回归 **611 passed，0 failed，0 errors，0 skipped**，见 [汇总](remaining-validation.json)。仓库外实际夹具、训练、独立评估和续训共 **4 条成功命令**，独立指标/预测逐元素一致、续训第三轮且原始缓存复用，见 [CLI](dkfn-cli-validation.json)。迁移表更新为 **61/100**，39 条 pending；排除 7 个延期 Common 与 2 个模板后，本期仍有 **30 个交通模型**及最终全量验收待完成。
 
 ## 持续完成的清单
 

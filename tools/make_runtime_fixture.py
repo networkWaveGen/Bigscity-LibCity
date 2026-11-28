@@ -17,7 +17,7 @@ def main(argv=None):
     parser=argparse.ArgumentParser()
     parser.add_argument('--directory',required=True,type=Path)
     parser.add_argument('--task',choices=EXAMPLES)
-    parser.add_argument('--model',choices=('GRU','CRANN','ChebConv','GAT','GeomGCN','STResNet','ACFM','CONVGCN','MultiSTGCnet','ASTGCN','MSTGCN','MegaCRN','TESTAM','ToGCN','SimST','STNN','TGCLSTM','STTN','TimeMixer','STG2Seq','DeepMove','STRNN','HSTLSTM','ATSTLSTM','SERM','STAN','CARA','LSTPM','GeoSAN','TTPNet','Node2Vec','DeepWalk'),help='Optional named model example')
+    parser.add_argument('--model',choices=('GRU','DKFN','CRANN','ChebConv','GAT','GeomGCN','STResNet','ACFM','CONVGCN','MultiSTGCnet','ASTGCN','MSTGCN','MegaCRN','TESTAM','ToGCN','SimST','STNN','TGCLSTM','STTN','TimeMixer','STG2Seq','DeepMove','STRNN','HSTLSTM','ATSTLSTM','SERM','STAN','CARA','LSTPM','GeoSAN','TTPNet','Node2Vec','DeepWalk'),help='Optional named model example')
     args=parser.parse_args(argv)
     selected_task = model_spec(args.model).task if args.model else args.task or 'traffic_state_pred'
     if args.model and args.task and args.task!=selected_task:

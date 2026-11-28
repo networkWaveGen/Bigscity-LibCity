@@ -29,6 +29,7 @@ class ModelSpec:
 
 
 MODELS = {
+    'DKFN': ModelSpec('libcity.model.traffic_speed_prediction.runtime_dkfn:DKFN'),
     'CONVGCN': ModelSpec('libcity.model.traffic_flow_prediction.runtime_periodic:CONVGCN',protocol='convgcn_windows'),
     'MultiSTGCnet': ModelSpec('libcity.model.traffic_flow_prediction.runtime_periodic:MultiSTGCnet',protocol='multi_stgc',
         prepare_data='libcity.data.distance_bands:prepare_distance_bands'),

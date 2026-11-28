@@ -1,0 +1,4 @@
+{
+  "model": {"params": {"hops": 3, "clamp_adjacency": false, "threshold": 0.0001}},
+  "training": {"optimizer": {"name": "rmsprop", "lr": 0.0001}, "loss": {"name": "masked_mse"}}
+}

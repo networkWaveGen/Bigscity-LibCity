@@ -113,6 +113,17 @@ are omitted. Both models support explicit multistep and multiple target outputs.
 The original dense node-channel/global-LSTM scaling costs remain; the examples
 certify small lifecycles rather than large-city performance or paper accuracy.
 
+`--model DKFN` creates a contiguous-window example with dual graph/self recurrent
+streams. Use `dkfn.json` with the common train/evaluate/resume commands. Graph
+powers and filters are registered buffers. Variances are computed per sample,
+not over other batch members. The authors' asymmetric coefficient formula is
+retained; `softplus(c)` is the positive physical coefficient initialized to one.
+The stored `c` parameter is its unconstrained coordinate. Scalar/zero-variance
+streams use finite fallbacks. Multistep forecasts roll their predictions into
+the target channels, retain the last observed unknown covariates, and insert
+only declared known future channels. Forward never reads labels. Model settings
+are `hops`, `clamp_adjacency` and `threshold`; fitting defaults to RMSprop.
+
 `--model MegaCRN` creates a memory-augmented forecast example with explicit known
 future time features. Its auxiliary memory losses and curriculum targets are
 used only by the training step; ordinary forward/evaluation returns predictions

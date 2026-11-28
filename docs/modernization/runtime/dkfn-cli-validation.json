@@ -1,0 +1,99 @@
+{
+  "passed": true,
+  "source": "D:\\LibCity 2.0\\LibCity-modernization",
+  "directory": "D:\\LibCity 2.0\\.runtime-tests\\dkfn-cli-f3xzomy4",
+  "commands": [
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\tools\\make_runtime_fixture.py",
+        "--directory",
+        "D:\\LibCity 2.0\\.runtime-tests\\dkfn-cli-f3xzomy4\\example",
+        "--model",
+        "DKFN"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\dkfn-cli-f3xzomy4",
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "train",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\dkfn-cli-f3xzomy4\\example\\dkfn.json",
+        "--set",
+        "runtime.exp_id=train"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\dkfn-cli-f3xzomy4",
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "evaluate",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\dkfn-cli-f3xzomy4\\example\\dkfn.json",
+        "--checkpoint",
+        "D:\\LibCity 2.0\\.runtime-tests\\dkfn-cli-f3xzomy4\\example\\runs\\train\\checkpoints\\best.pt",
+        "--set",
+        "runtime.exp_id=evaluated"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\dkfn-cli-f3xzomy4",
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "train",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\dkfn-cli-f3xzomy4\\example\\dkfn.json",
+        "--resume",
+        "D:\\LibCity 2.0\\.runtime-tests\\dkfn-cli-f3xzomy4\\example\\runs\\train\\checkpoints\\last.pt",
+        "--set",
+        "training.epochs=3",
+        "--set",
+        "runtime.exp_id=resumed"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\dkfn-cli-f3xzomy4",
+      "exit_code": 0
+    }
+  ],
+  "model": "DKFN",
+  "metrics": {
+    "MAE@1": 0.8299979810361509,
+    "RMSE@1": 1.028874659388991,
+    "MAE@2": 0.8370147634435583,
+    "RMSE@2": 1.0607822455118658,
+    "loss": 1.0919209718704224,
+    "best_validation": 1.377288818359375
+  },
+  "prediction_shape": [
+    9,
+    2,
+    3,
+    1
+  ],
+  "independent_metrics_identical": true,
+  "independent_predictions_identical": true,
+  "resumed_epoch": 3,
+  "optimizer_steps": 9,
+  "format_version": 3,
+  "cache_statuses": {
+    "train": "miss",
+    "evaluate": "hit",
+    "resume": "hit"
+  },
+  "variance_scope": "per_sample_feature_stream",
+  "coefficient": "positive_softplus_initialized_to_one",
+  "fusion": "authors_asymmetric_coefficient_formula_with_zero_variance_mean_fallback",
+  "limitations": [
+    "synthetic lifecycle validation, not real-city accuracy or original paper benchmark reproduction"
+  ]
+}

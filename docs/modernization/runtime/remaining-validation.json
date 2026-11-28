@@ -1,5 +1,5 @@
 {
-  "scope": "Remaining-work commits 1-34; whole-library migration remains in progress",
+  "scope": "Remaining-work commits 1-35; whole-library migration remains in progress",
   "environment": {
     "python": "3.12.13",
     "torch": "2.15.0+cpu",
@@ -8,7 +8,7 @@
     "gensim": "4.4.0"
   },
   "full_tests": {
-    "tests": 585,
+    "tests": 611,
     "failures": 0,
     "errors": 0,
     "skipped": 0
@@ -165,6 +165,32 @@
     "test_actual_cpu_amp_training[RNN]",
     "test_actual_cpu_amp_training[GRU]",
     "test_actual_cpu_amp_training[LSTM]",
+    "test_original_recurrent_equations_with_explicit_local_variances_and_positive_coefficient_gradients[1-False-dimensions0]",
+    "test_original_recurrent_equations_with_explicit_local_variances_and_positive_coefficient_gradients[1-False-dimensions1]",
+    "test_original_recurrent_equations_with_explicit_local_variances_and_positive_coefficient_gradients[1-False-dimensions2]",
+    "test_original_recurrent_equations_with_explicit_local_variances_and_positive_coefficient_gradients[1-True-dimensions3]",
+    "test_original_recurrent_equations_with_explicit_local_variances_and_positive_coefficient_gradients[1-True-dimensions4]",
+    "test_original_recurrent_equations_with_explicit_local_variances_and_positive_coefficient_gradients[1-True-dimensions5]",
+    "test_original_recurrent_equations_with_explicit_local_variances_and_positive_coefficient_gradients[3-False-dimensions6]",
+    "test_original_recurrent_equations_with_explicit_local_variances_and_positive_coefficient_gradients[3-False-dimensions7]",
+    "test_original_recurrent_equations_with_explicit_local_variances_and_positive_coefficient_gradients[3-False-dimensions8]",
+    "test_original_recurrent_equations_with_explicit_local_variances_and_positive_coefficient_gradients[3-True-dimensions9]",
+    "test_original_recurrent_equations_with_explicit_local_variances_and_positive_coefficient_gradients[3-True-dimensions10]",
+    "test_original_recurrent_equations_with_explicit_local_variances_and_positive_coefficient_gradients[3-True-dimensions11]",
+    "test_variance_fusion_matches_author_formula_and_has_neutral_zero_variance_fallback",
+    "test_batch_neighbors_do_not_change_prediction_or_receive_cross_sample_gradients",
+    "test_graph_powers_clamping_and_static_buffer_dtype_do_not_mutate_metadata",
+    "test_scalar_constant_isolated_graphs_and_coefficient_extremes_have_finite_gradients[1-1-0.0]",
+    "test_scalar_constant_isolated_graphs_and_coefficient_extremes_have_finite_gradients[1-3-2.0]",
+    "test_scalar_constant_isolated_graphs_and_coefficient_extremes_have_finite_gradients[4-1-0.0]",
+    "test_scalar_constant_isolated_graphs_and_coefficient_extremes_have_finite_gradients[4-3-2.0]",
+    "test_full_train_evaluate_and_exact_rmsprop_schedule_rng_resume",
+    "test_multistep_uses_only_declared_known_future_features_and_retains_unknown_observations",
+    "test_actual_cpu_amp_training",
+    "test_invalid_model_parameters_are_rejected[params0]",
+    "test_invalid_model_parameters_are_rejected[params1]",
+    "test_invalid_model_parameters_are_rejected[params2]",
+    "test_invalid_model_parameters_are_rejected[params3]",
     "test_epoch_schedule_waits_for_real_updates_and_resumes_after_empty_epochs",
     "test_gru_cli_python_train_evaluate_and_resume",
     "test_complete_resume_matches_next_updates_lr_counters_and_best[scheduler0]",
@@ -603,8 +629,8 @@
   ],
   "inventory": {
     "total": 100,
-    "migrated": 60,
-    "pending": 40
+    "migrated": 61,
+    "pending": 39
   },
   "history": [
     {
@@ -970,6 +996,20 @@
         "migrated": 58,
         "pending": 42
       }
+    },
+    {
+      "scope": "commits 1-34, through 85c8280",
+      "full_tests": {
+        "tests": 585,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "inventory": {
+        "total": 100,
+        "migrated": 60,
+        "pending": 40
+      }
     }
   ],
   "current_cli": {
@@ -1148,5 +1188,14 @@
     ],
     "cache_reuse": true,
     "distinct_target_channels": true
+  },
+  "dkfn_cli": {
+    "report": "dkfn-cli-validation.json",
+    "commands": 3,
+    "fixture_commands": 1,
+    "format_version": 3,
+    "variance": "per_sample",
+    "coefficient": "positive_softplus",
+    "cache_reuse": true
   }
 }
