@@ -1,0 +1,279 @@
+{
+  "passed": true,
+  "source": "D:\\LibCity 2.0\\LibCity-modernization",
+  "directory": "D:\\LibCity 2.0\\.runtime-tests\\point-identity-cli-astwneho",
+  "commands": [
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\tools\\make_runtime_fixture.py",
+        "--directory",
+        "D:\\LibCity 2.0\\.runtime-tests\\point-identity-cli-astwneho\\example"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\point-identity-cli-astwneho",
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "train",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\point-identity-cli-astwneho\\example\\gru.json",
+        "--set",
+        "runtime.exp_id=train"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\point-identity-cli-astwneho",
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "evaluate",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\point-identity-cli-astwneho\\example\\gru.json",
+        "--checkpoint",
+        "D:\\LibCity 2.0\\.runtime-tests\\point-identity-cli-astwneho\\example\\runs\\train\\checkpoints\\best.pt",
+        "--set",
+        "runtime.exp_id=evaluated"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\point-identity-cli-astwneho",
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "train",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\point-identity-cli-astwneho\\example\\gru.json",
+        "--resume",
+        "D:\\LibCity 2.0\\.runtime-tests\\point-identity-cli-astwneho\\example\\runs\\train\\checkpoints\\last.pt",
+        "--set",
+        "training.epochs=3",
+        "--set",
+        "runtime.exp_id=resumed"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\point-identity-cli-astwneho",
+      "exit_code": 0
+    }
+  ],
+  "node_ids": [
+    108,
+    71,
+    3
+  ],
+  "csv_order": "fully_shuffled",
+  "prediction_shape": [
+    9,
+    2,
+    3,
+    1
+  ],
+  "raw_truth_matches_time_and_real_node_ids": true,
+  "independent_predictions_equal": true,
+  "independent_metrics_equal": true,
+  "resumed_epoch": 3,
+  "optimizer_steps": 9,
+  "cache_statuses": [
+    "disabled",
+    "disabled",
+    "disabled"
+  ],
+  "input_alignment_saved": true,
+  "evaluate_has_no_training_artifacts": true,
+  "runtime_info": {
+    "train": {
+      "python": "3.12.13",
+      "pytorch": "2.15.0+cpu",
+      "numpy": "2.5.5",
+      "platform": "Windows-11-10.0.26200-SP0",
+      "mode": "train",
+      "execution_kind": "neural",
+      "device": "cpu",
+      "seed": 17,
+      "benchmark_protocol": "task_default",
+      "split": {
+        "train": 23,
+        "val": 9,
+        "test": 9,
+        "train_padded": false,
+        "semantics": "target_time_v1",
+        "input_window": 4,
+        "requested_input_window": 4,
+        "adapter": "window",
+        "intervals": {
+          "train": {
+            "samples": 23,
+            "target_start": "2024-01-01T00:20:00.000000000",
+            "target_end": "2024-01-01T02:15:00.000000000",
+            "target_index_start": 4,
+            "target_index_end": 27
+          },
+          "val": {
+            "samples": 9,
+            "target_start": "2024-01-01T02:20:00.000000000",
+            "target_end": "2024-01-01T03:05:00.000000000",
+            "target_index_start": 28,
+            "target_index_end": 37
+          },
+          "test": {
+            "samples": 9,
+            "target_start": "2024-01-01T03:10:00.000000000",
+            "target_end": "2024-01-01T03:55:00.000000000",
+            "target_index_start": 38,
+            "target_index_end": 47
+          }
+        },
+        "train_end": "2024-01-01T02:20:00.000000000",
+        "val_end": "2024-01-01T03:10:00.000000000",
+        "scaler_fit_end_exclusive": "2024-01-01T02:20:00.000000000",
+        "discarded_boundary_windows": 2,
+        "history_span_points": 4,
+        "cache": {
+          "status": "disabled",
+          "path": null
+        },
+        "sampling_gap_policy": "full_input_span_contiguous"
+      },
+      "protocol_changes": {
+        "data.input_window": 4
+      },
+      "capabilities": {
+        "requires_checkpoint": true,
+        "supports_resume": true,
+        "supports_validation": true
+      }
+    },
+    "evaluated": {
+      "python": "3.12.13",
+      "pytorch": "2.15.0+cpu",
+      "numpy": "2.5.5",
+      "platform": "Windows-11-10.0.26200-SP0",
+      "mode": "evaluate",
+      "execution_kind": "neural",
+      "device": "cpu",
+      "seed": 17,
+      "benchmark_protocol": "task_default",
+      "split": {
+        "train": 23,
+        "val": 9,
+        "test": 9,
+        "train_padded": false,
+        "semantics": "target_time_v1",
+        "input_window": 4,
+        "requested_input_window": 4,
+        "adapter": "window",
+        "intervals": {
+          "train": {
+            "samples": 23,
+            "target_start": "2024-01-01T00:20:00.000000000",
+            "target_end": "2024-01-01T02:15:00.000000000",
+            "target_index_start": 4,
+            "target_index_end": 27
+          },
+          "val": {
+            "samples": 9,
+            "target_start": "2024-01-01T02:20:00.000000000",
+            "target_end": "2024-01-01T03:05:00.000000000",
+            "target_index_start": 28,
+            "target_index_end": 37
+          },
+          "test": {
+            "samples": 9,
+            "target_start": "2024-01-01T03:10:00.000000000",
+            "target_end": "2024-01-01T03:55:00.000000000",
+            "target_index_start": 38,
+            "target_index_end": 47
+          }
+        },
+        "train_end": "2024-01-01T02:20:00.000000000",
+        "val_end": "2024-01-01T03:10:00.000000000",
+        "scaler_fit_end_exclusive": "2024-01-01T02:20:00.000000000",
+        "discarded_boundary_windows": 2,
+        "history_span_points": 4,
+        "cache": {
+          "status": "disabled",
+          "path": null
+        },
+        "sampling_gap_policy": "full_input_span_contiguous"
+      },
+      "protocol_changes": {
+        "data.input_window": 4
+      },
+      "capabilities": {
+        "requires_checkpoint": true,
+        "supports_resume": true,
+        "supports_validation": true
+      }
+    },
+    "resumed": {
+      "python": "3.12.13",
+      "pytorch": "2.15.0+cpu",
+      "numpy": "2.5.5",
+      "platform": "Windows-11-10.0.26200-SP0",
+      "mode": "train",
+      "execution_kind": "neural",
+      "device": "cpu",
+      "seed": 17,
+      "benchmark_protocol": "task_default",
+      "split": {
+        "train": 23,
+        "val": 9,
+        "test": 9,
+        "train_padded": false,
+        "semantics": "target_time_v1",
+        "input_window": 4,
+        "requested_input_window": 4,
+        "adapter": "window",
+        "intervals": {
+          "train": {
+            "samples": 23,
+            "target_start": "2024-01-01T00:20:00.000000000",
+            "target_end": "2024-01-01T02:15:00.000000000",
+            "target_index_start": 4,
+            "target_index_end": 27
+          },
+          "val": {
+            "samples": 9,
+            "target_start": "2024-01-01T02:20:00.000000000",
+            "target_end": "2024-01-01T03:05:00.000000000",
+            "target_index_start": 28,
+            "target_index_end": 37
+          },
+          "test": {
+            "samples": 9,
+            "target_start": "2024-01-01T03:10:00.000000000",
+            "target_end": "2024-01-01T03:55:00.000000000",
+            "target_index_start": 38,
+            "target_index_end": 47
+          }
+        },
+        "train_end": "2024-01-01T02:20:00.000000000",
+        "val_end": "2024-01-01T03:10:00.000000000",
+        "scaler_fit_end_exclusive": "2024-01-01T02:20:00.000000000",
+        "discarded_boundary_windows": 2,
+        "history_span_points": 4,
+        "cache": {
+          "status": "disabled",
+          "path": null
+        },
+        "sampling_gap_policy": "full_input_span_contiguous"
+      },
+      "protocol_changes": {
+        "data.input_window": 4
+      },
+      "capabilities": {
+        "requires_checkpoint": true,
+        "supports_resume": true,
+        "supports_validation": true
+      }
+    }
+  },
+  "scope": "Actual GRU CLI with noncontiguous physical IDs, geo order independent of shuffled observation rows; model count unchanged"
+}

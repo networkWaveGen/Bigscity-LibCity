@@ -2,6 +2,7 @@
 import json
 from pathlib import Path
 import numpy as np
+import pandas as pd
 import torch
 from torch.utils.data import DataLoader, Dataset
 
@@ -117,7 +118,9 @@ def prepare_traffic(data, training, evaluation, seed, logger=None):
     raw = json.loads((folder/'config.json').read_text(encoding='utf-8'))
     raw = {**raw, **raw.get('info', {})}
     metadata = {key: value for key, value in raw.items() if key in METADATA_FIELDS}
-    arrays, cache_info = prepare_arrays(data, metadata, lambda: _read_atomic(data, metadata, logger), logger)
+    arrays, cache_info = prepare_arrays(data, metadata, lambda: _read_atomic(data, metadata, logger), logger,
+        namespace='point-time-entity-v2')
+    node_ids=pd.read_csv(folder/(metadata.get('geo_file',data['dataset'])+'.geo'))['geo_id'].tolist()
     history, target, known, clock, intervals, graph, known_indices = (arrays[name] for name in
         ('history', 'target', 'known', 'clock', 'intervals', 'graph', 'known_indices'))
     known_indices = known_indices.tolist()
@@ -145,7 +148,7 @@ def prepare_traffic(data, training, evaluation, seed, logger=None):
                     day_of_week=known_indices[int(data['features']['time_in_day']):int(data['features']['time_in_day'])+7]
                     if data['features']['day_in_week'] else []),
                   observed_feature_indices=[i for i in range(history.shape[-1]) if i not in known_indices],
-                  target_semantics='raw_and_scaled', split_semantics='target_time_v1')
+                  target_semantics='raw_and_scaled', split_semantics='target_time_v1',point_alignment='timestamp_entity_id_v2')
     starts = np.concatenate([np.arange(left-offsets.min(), right-horizon+1) for left,right in intervals])
     # A gap in a file is a boundary too: no window may span unobserved timestamps.
     interval = np.timedelta64(metadata.get('time_intervals',300), 's')
@@ -164,7 +167,7 @@ def prepare_traffic(data, training, evaluation, seed, logger=None):
         starts = starts[gaps[starts+horizon-1]==gaps[starts+offsets.min()]]
     selections = partition_windows(starts, horizon, cuts, len(clock))
     meta = DatasetMetadata(data['dataset'], history.shape[1], history.shape[-1], output_dim,
-                           graph, metadata, layout)
+                           graph, {**metadata,'node_ids':node_ids}, layout)
     generator = torch.Generator().manual_seed(seed)
     loaders, split_info = [], {}
     for index, (name, selected) in enumerate(zip(('train','val','test'), selections)):

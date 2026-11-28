@@ -60,7 +60,8 @@
 | commit52 | 79a13e3 | feat: add risk-grid bundles and region-aware evaluation |
 | commit53 | 76535dc | feat: migrate GSNet with forecast-time attention and region objectives |
 | commit54 | 09077cf | feat: migrate STDN with causal volume-flow sampling and shifted attention |
-| commit55 | 随本节交付的提交 | feat: migrate ESG with train-only graph history and factored relations |
+| commit55 | 4ae8e8c | feat: migrate ESG with train-only graph history and factored relations |
+| commit56 | 随本节交付的提交 | fix: align point observations by real node IDs and UTC time |
 
 ## commit1：修复基础交通缓存（670b325）
 
@@ -657,6 +658,16 @@ forward 由配置决定预测长度，每步重新编码当前窗口；预测回
 仓库外实际生成、训练、独立评估、续训 **4 条命令成功**，预测 [11,2,6,2]、独立预测/指标完全一致；第三轮累计 12 次更新、缓存 miss/hit/hit。图历史从原始训练前 36 步准备为 [72,6] 并保存在纯权重 buffer；原尺度 masked MAE 独立复算约 8.088161，与评估 loss 一致。安全权重包含输入说明，独立评估没有训练产物，见 [CLI](esg-cli-validation.json)。本批不声称论文精度或全硬件认证，保留 dense 图和全训练前缀编码成本。
 
 清单更新为 **76/100**、24 条 pending；扣除延期 Common 与模板后，还有 **15 个实际模型**：DMVSTNet、GMAN、STAGGCN、STMGAT、D2STGNN、STGODE、SSTBAN、STTSNet、FOGS、DSTAGNN、HIEST、MultiSPANS、STWave、PDFormer、STGNCDE。它们及最终全量交付审计仍在主线范围内，本批不将整个方案标记为完成。
+
+## commit56：修复公共点数据的真实节点/时钟对齐与旧缓存隔离
+
+新问题：HIEST 节点重排检查发现，公共点读取器按 CSV 行块重塑观测，没有用 entity_id 对齐实际 geo_id；.geo 重排、时间优先或完全乱序 .dyna 会静默让图和数据错位。重复/缺失/未知节点也缺少完整性拒绝。只修读取器仍可能继续使用旧错误原始缓存。
+
+处理：按 UTC 唯一排序时间与 .geo 实际 ID 位置逐行填充 [T,N,F]；要求每时间×节点恰好一行，检查有限唯一 ID、必需列、重复/缺失记录、未知节点、空时钟、无限值与观测列。NaN 缺测显式保留。公共只读元信息增加 node_ids，输入布局增加 point_alignment=timestamp_entity_id_v2；点缓存使用 point-time-entity-v2 命名空间，保留旧文件并停止复用。安全权重输入说明/完整数据状态因此能拒绝缺少新身份声明的旧点检查点，不自动给旧错误权重补声明；详见 [修复说明](point-identity_zh.md)。
+
+验证：新增 **18 项通过**，6 组数字/文本 ID 与节点分块/时间优先/完全乱序，逐原始时间和实际 ID 验证全部观测/目标/图及冷热缓存；9 类无效节点/完整性/时钟/数值输入；旧位置缓存不复用且保留、UTC 偏移/NaN；真实训练后 CSV 行重排评估一致，缺失对齐声明或改变节点轴时权重加载拒绝。相关缓存/切分/配置合计 **43 passed**。独立于进行中的 HIEST 迁移，完整回归 **1281 passed，0 failed，0 errors，0 skipped**，见 [汇总](remaining-validation.json)。
+
+仓库外公开夹具、训练、独立评估、续训 **4 条命令成功**，实际 IDs [108,71,3]、观测完全打乱，导出原始真值逐时间/真实 ID 复算一致；预测 [9,2,3,1]，独立预测/指标一致，第三轮累计 9 次更新。公开 GRU 示例保持 cache=false（本次 CLI 三次均 disabled，缓存复用另由专项验证），见 [CLI](point-identity-cli-validation.json)。本批不增加模型计数：仍为 **76/100**，排除延期 Common 与模板后还有 **15 个实际模型**及最终验收；HIEST 工作已本地保留，继续下一批迁移。
 
 ## 持续完成的清单
 

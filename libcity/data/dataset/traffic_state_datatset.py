@@ -279,47 +279,41 @@ class TrafficStateDataset(AbstractDataset):
         raise NotImplementedError('Please implement the function `_load_dyna()`.')
 
     def _load_dyna_3d(self, filename):
-        """
-        加载.dyna文件，格式[dyna_id, type, time, entity_id, properties(若干列)],
-        .geo文件中的id顺序应该跟.dyna中一致,
-        其中全局参数`data_col`用于指定需要加载的数据的列，不设置则默认全部加载
-
-        Args:
-            filename(str): 数据文件名，不包含后缀
-
-        Returns:
-            np.ndarray: 数据数组, 3d-array: (len_time, num_nodes, feature_dim)
-        """
-        # 加载数据集
+        """Align point observations by UTC timestamp and actual geo_id order."""
         self._logger.info("Loading file " + filename + '.dyna')
-        dynafile = pd.read_csv(self.data_path + filename + '.dyna')
-        if self.data_col != '':  # 根据指定的列加载数据集
-            if isinstance(self.data_col, list):
-                data_col = self.data_col.copy()
-            else:  # str
-                data_col = [self.data_col].copy()
-            data_col.insert(0, 'time')
-            data_col.insert(1, 'entity_id')
-            dynafile = dynafile[data_col]
-        else:  # 不指定则加载所有列
-            dynafile = dynafile[dynafile.columns[2:]]  # 从time列开始所有列
-        # 求时间序列
-        self.timesolts = list(dynafile['time'][:int(dynafile.shape[0] / len(self.geo_ids))])
-        self.idx_of_timesolts = dict()
-        if not dynafile['time'].isna().any():  # 时间没有空值
-            self.timesolts = list(map(lambda x: x.replace('T', ' ').replace('Z', ''), self.timesolts))
-            self.timesolts = np.array(self.timesolts, dtype='datetime64[ns]')
-            for idx, _ts in enumerate(self.timesolts):
-                self.idx_of_timesolts[_ts] = idx
-        # 转3-d数组
-        feature_dim = len(dynafile.columns) - 2
-        df = dynafile[dynafile.columns[-feature_dim:]]
-        len_time = len(self.timesolts)
-        data = []
-        for i in range(0, df.shape[0], len_time):
-            data.append(df[i:i + len_time].values)
-        data = np.array(data, dtype=float)  # (len(self.geo_ids), len_time, feature_dim)
-        data = data.swapaxes(0, 1)  # (len_time, len(self.geo_ids), feature_dim)
+        ids = pd.Index(self.geo_ids)
+        if not len(ids) or ids.hasnans or ids.has_duplicates or (
+                pd.api.types.is_numeric_dtype(ids.dtype) and not np.isfinite(ids).all()):
+            raise ValueError('Point .geo requires nonempty distinct finite node IDs')
+        frame = pd.read_csv(self.data_path + filename + '.dyna')
+        if not {'time', 'entity_id'} <= set(frame):
+            raise ValueError('Point .dyna requires time and entity_id columns')
+        reserved = {'dyna_id', 'type', 'time', 'entity_id'}
+        selected = self.data_col
+        columns = ([name for name in frame if name not in reserved] if selected is None or selected == '' else
+                   selected.copy() if isinstance(selected, list) else [selected])
+        if (not columns or any(not isinstance(name, str) or name in reserved or name not in frame for name in columns)
+                or len(set(columns)) != len(columns)):
+            raise ValueError('Point data_col must select distinct observation columns')
+        stamp = pd.to_datetime(frame['time'], utc=True, errors='raise')
+        if stamp.isna().any():
+            raise ValueError('Point observation timestamps must be finite')
+        clock = pd.DatetimeIndex(stamp.unique()).sort_values()
+        nodes = frame['entity_id'].map(self.geo_to_ind)
+        if nodes.isna().any():
+            raise ValueError('Point observation entity_id is absent from .geo')
+        time_index = clock.get_indexer(stamp)
+        node_index = nodes.to_numpy(dtype=np.int64)
+        pairs = time_index * len(ids) + node_index
+        if not len(clock) or len(pairs) != len(clock) * len(ids) or len(np.unique(pairs)) != len(pairs):
+            raise ValueError('Point data require exactly one row per timestamp and geo node; encode missing values as NaN')
+        values = frame[columns].to_numpy(dtype=np.float64)
+        if np.isinf(values).any():
+            raise ValueError('Point observations must not contain infinities')
+        data = np.empty((len(clock), len(ids), len(columns)), dtype=np.float64)
+        data[time_index, node_index] = values
+        self.timesolts = clock.to_numpy(dtype='datetime64[ns]')
+        self.idx_of_timesolts = {value: index for index, value in enumerate(self.timesolts)}
         self._logger.info("Loaded file " + filename + '.dyna' + ', shape=' + str(data.shape))
         return data
 
