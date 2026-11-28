@@ -1,0 +1,7 @@
+{
+  "model": {"params": {"blocks": 4, "layers": 2, "run_gconv": true,
+    "residual_channels": 40, "dilation_channels": 40, "skip_channels": 320, "end_channels": 640,
+    "kernel_size": 2, "heads": 8, "feat_drop": 0.6, "attn_drop": 0.6, "negative_slope": 0.2}},
+  "training": {"epochs": 100, "optimizer": {"name": "adam", "lr": 0.001},
+    "loss": {"name": "mse"}, "clip_grad_norm": 5.0, "early_stopping": {"patience": 0}}
+}

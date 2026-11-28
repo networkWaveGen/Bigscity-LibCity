@@ -1,0 +1,285 @@
+{
+  "passed": true,
+  "source": "D:\\LibCity 2.0\\LibCity-modernization",
+  "directory": "D:\\LibCity 2.0\\.runtime-tests\\stmgat-cli-v4vbvxty",
+  "commands": [
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\tools\\make_runtime_fixture.py",
+        "--directory",
+        "D:\\LibCity 2.0\\.runtime-tests\\stmgat-cli-v4vbvxty\\example",
+        "--model",
+        "STMGAT"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\stmgat-cli-v4vbvxty",
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "train",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\stmgat-cli-v4vbvxty\\example\\stmgat.json",
+        "--set",
+        "runtime.exp_id=train"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\stmgat-cli-v4vbvxty",
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "evaluate",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\stmgat-cli-v4vbvxty\\example\\stmgat.json",
+        "--checkpoint",
+        "D:\\LibCity 2.0\\.runtime-tests\\stmgat-cli-v4vbvxty\\example\\runs\\train\\checkpoints\\best.pt",
+        "--set",
+        "runtime.exp_id=evaluated"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\stmgat-cli-v4vbvxty",
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "train",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\stmgat-cli-v4vbvxty\\example\\stmgat.json",
+        "--resume",
+        "D:\\LibCity 2.0\\.runtime-tests\\stmgat-cli-v4vbvxty\\example\\runs\\train\\checkpoints\\last.pt",
+        "--set",
+        "training.epochs=3",
+        "--set",
+        "runtime.exp_id=resumed"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\stmgat-cli-v4vbvxty",
+      "exit_code": 0
+    }
+  ],
+  "prediction_shape": [
+    11,
+    2,
+    4,
+    2
+  ],
+  "independent_predictions_equal": true,
+  "independent_metrics_equal": true,
+  "global_raw_mse": 57.42093276977539,
+  "evaluation_loss": 57.420934503728695,
+  "resumed_epoch": 3,
+  "optimizer_steps": 12,
+  "cache_statuses": [
+    "miss",
+    "hit",
+    "hit"
+  ],
+  "edge_index_shape": [
+    2,
+    7
+  ],
+  "dgl_installed": false,
+  "input_specification_saved": true,
+  "weights_only_safe_load": true,
+  "evaluate_has_no_training_artifacts": true,
+  "runtime_info": {
+    "train": {
+      "python": "3.12.13",
+      "pytorch": "2.15.0+cpu",
+      "numpy": "2.5.5",
+      "platform": "Windows-11-10.0.26200-SP0",
+      "mode": "train",
+      "execution_kind": "neural",
+      "device": "cpu",
+      "seed": 17,
+      "benchmark_protocol": "task_default",
+      "split": {
+        "train": 31,
+        "val": 11,
+        "test": 11,
+        "train_padded": false,
+        "semantics": "target_time_v1",
+        "input_window": 4,
+        "requested_input_window": 4,
+        "adapter": "window",
+        "intervals": {
+          "train": {
+            "samples": 31,
+            "target_start": "2024-01-01T04:00:00.000000000",
+            "target_end": "2024-01-02T11:00:00.000000000",
+            "target_index_start": 4,
+            "target_index_end": 35
+          },
+          "val": {
+            "samples": 11,
+            "target_start": "2024-01-02T12:00:00.000000000",
+            "target_end": "2024-01-02T23:00:00.000000000",
+            "target_index_start": 36,
+            "target_index_end": 47
+          },
+          "test": {
+            "samples": 11,
+            "target_start": "2024-01-03T00:00:00.000000000",
+            "target_end": "2024-01-03T11:00:00.000000000",
+            "target_index_start": 48,
+            "target_index_end": 59
+          }
+        },
+        "train_end": "2024-01-02T12:00:00.000000000",
+        "val_end": "2024-01-03T00:00:00.000000000",
+        "scaler_fit_end_exclusive": "2024-01-02T12:00:00.000000000",
+        "discarded_boundary_windows": 2,
+        "history_span_points": 4,
+        "cache": {
+          "status": "miss",
+          "path": "D:\\LibCity 2.0\\.runtime-tests\\stmgat-cli-v4vbvxty\\example\\cache\\traffic-raw-v1\\6013cf509f7fd3617d92c3e4.npz"
+        },
+        "sampling_gap_policy": "full_input_span_contiguous",
+        "input_missing_observations": "raw_zero_before_scaling"
+      },
+      "protocol_changes": {
+        "data.input_window": 4
+      },
+      "capabilities": {
+        "requires_checkpoint": true,
+        "supports_resume": true,
+        "supports_validation": true
+      }
+    },
+    "evaluated": {
+      "python": "3.12.13",
+      "pytorch": "2.15.0+cpu",
+      "numpy": "2.5.5",
+      "platform": "Windows-11-10.0.26200-SP0",
+      "mode": "evaluate",
+      "execution_kind": "neural",
+      "device": "cpu",
+      "seed": 17,
+      "benchmark_protocol": "task_default",
+      "split": {
+        "train": 31,
+        "val": 11,
+        "test": 11,
+        "train_padded": false,
+        "semantics": "target_time_v1",
+        "input_window": 4,
+        "requested_input_window": 4,
+        "adapter": "window",
+        "intervals": {
+          "train": {
+            "samples": 31,
+            "target_start": "2024-01-01T04:00:00.000000000",
+            "target_end": "2024-01-02T11:00:00.000000000",
+            "target_index_start": 4,
+            "target_index_end": 35
+          },
+          "val": {
+            "samples": 11,
+            "target_start": "2024-01-02T12:00:00.000000000",
+            "target_end": "2024-01-02T23:00:00.000000000",
+            "target_index_start": 36,
+            "target_index_end": 47
+          },
+          "test": {
+            "samples": 11,
+            "target_start": "2024-01-03T00:00:00.000000000",
+            "target_end": "2024-01-03T11:00:00.000000000",
+            "target_index_start": 48,
+            "target_index_end": 59
+          }
+        },
+        "train_end": "2024-01-02T12:00:00.000000000",
+        "val_end": "2024-01-03T00:00:00.000000000",
+        "scaler_fit_end_exclusive": "2024-01-02T12:00:00.000000000",
+        "discarded_boundary_windows": 2,
+        "history_span_points": 4,
+        "cache": {
+          "status": "hit",
+          "path": "D:\\LibCity 2.0\\.runtime-tests\\stmgat-cli-v4vbvxty\\example\\cache\\traffic-raw-v1\\6013cf509f7fd3617d92c3e4.npz"
+        },
+        "sampling_gap_policy": "full_input_span_contiguous",
+        "input_missing_observations": "raw_zero_before_scaling"
+      },
+      "protocol_changes": {
+        "data.input_window": 4
+      },
+      "capabilities": {
+        "requires_checkpoint": true,
+        "supports_resume": true,
+        "supports_validation": true
+      }
+    },
+    "resumed": {
+      "python": "3.12.13",
+      "pytorch": "2.15.0+cpu",
+      "numpy": "2.5.5",
+      "platform": "Windows-11-10.0.26200-SP0",
+      "mode": "train",
+      "execution_kind": "neural",
+      "device": "cpu",
+      "seed": 17,
+      "benchmark_protocol": "task_default",
+      "split": {
+        "train": 31,
+        "val": 11,
+        "test": 11,
+        "train_padded": false,
+        "semantics": "target_time_v1",
+        "input_window": 4,
+        "requested_input_window": 4,
+        "adapter": "window",
+        "intervals": {
+          "train": {
+            "samples": 31,
+            "target_start": "2024-01-01T04:00:00.000000000",
+            "target_end": "2024-01-02T11:00:00.000000000",
+            "target_index_start": 4,
+            "target_index_end": 35
+          },
+          "val": {
+            "samples": 11,
+            "target_start": "2024-01-02T12:00:00.000000000",
+            "target_end": "2024-01-02T23:00:00.000000000",
+            "target_index_start": 36,
+            "target_index_end": 47
+          },
+          "test": {
+            "samples": 11,
+            "target_start": "2024-01-03T00:00:00.000000000",
+            "target_end": "2024-01-03T11:00:00.000000000",
+            "target_index_start": 48,
+            "target_index_end": 59
+          }
+        },
+        "train_end": "2024-01-02T12:00:00.000000000",
+        "val_end": "2024-01-03T00:00:00.000000000",
+        "scaler_fit_end_exclusive": "2024-01-02T12:00:00.000000000",
+        "discarded_boundary_windows": 2,
+        "history_span_points": 4,
+        "cache": {
+          "status": "hit",
+          "path": "D:\\LibCity 2.0\\.runtime-tests\\stmgat-cli-v4vbvxty\\example\\cache\\traffic-raw-v1\\6013cf509f7fd3617d92c3e4.npz"
+        },
+        "sampling_gap_policy": "full_input_span_contiguous",
+        "input_missing_observations": "raw_zero_before_scaling"
+      },
+      "protocol_changes": {
+        "data.input_window": 4
+      },
+      "capabilities": {
+        "requires_checkpoint": true,
+        "supports_resume": true,
+        "supports_validation": true
+      }
+    }
+  },
+  "scope": "Actual published STMGAT directed sparse point example with native incoming edge attention, isolated node and all-output raw MSE; CPU functionality, not paper accuracy"
+}

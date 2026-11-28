@@ -29,6 +29,8 @@ class ModelSpec:
 
 
 MODELS = {
+    'STMGAT': ModelSpec('libcity.model.traffic_speed_prediction.runtime_stmgat:STMGAT',
+        prepare_data='libcity.data.stmgat_bundle:prepare_stmgat'),
     'HIEST': ModelSpec('libcity.model.traffic_speed_prediction.runtime_hiest:HIEST',
         prepare_data='libcity.data.hiest_bundle:prepare_hiest',loss='libcity.executor.hiest_step:HIESTLoss',
         step='libcity.executor.hiest_step:auxiliary_step'),

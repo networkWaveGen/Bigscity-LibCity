@@ -107,6 +107,17 @@ def validate(config, preset):
     if model['name']=='STDN':
         for key in ('cnn_flat_size','lstm_out_size'):
             _positive(model['params'][key],'STDN '+key)
+    if model['name']=='STMGAT':
+        params=model['params']
+        for key in ('blocks','layers','kernel_size','residual_channels','dilation_channels','skip_channels','end_channels','heads'):
+            _positive(params[key],'STMGAT '+key)
+        for key in ('feat_drop','attn_drop'):
+            _number(params[key],'STMGAT '+key)
+            if params[key]>=1: raise ValueError('STMGAT dropout must be below one')
+        _number(params['negative_slope'],'STMGAT negative_slope')
+        if params['run_gconv'] and params['blocks']*params['layers']>1 and params['residual_channels']!=params['dilation_channels']:
+            raise ValueError('STMGAT graph residual requires equal residual_channels and dilation_channels')
+        if data['sampling']['name']!='window': raise ValueError('STMGAT requires continuous window sampling')
     if model['name']=='HIEST':
         params=model['params']
         for key in ('blocks','layers','kernel_size','residual_channels','dilation_channels','skip_channels','end_channels','global_nodes'):
@@ -322,7 +333,7 @@ def validate(config, preset):
                 _positive(data['sampling'].get(key,1),f'data.sampling.{key}')
         if data['graph'].get('name') not in ('binary', 'weighted', 'distance','inverse_distance','distance_bands')+(
                 ('svd_gaussian',) if model['name']=='CCRNN' else ('dynamic',) if model['name'] in ('DMSTGCN','ESG') else
-                ('risk_multigraph',) if model['name']=='GSNet' else ('none',) if model['name'] in ('CSTN','DSAN','STDN') else ()):
+                ('risk_multigraph',) if model['name']=='GSNet' else ('none',) if model['name'] in ('CSTN','DSAN','STDN','STMGAT') else ()):
             raise ValueError('Unknown data.graph.name')
         if (data['graph']['name']=='distance_bands' and model['name']!='MultiSTGCnet') or (
                 model['name']=='MultiSTGCnet' and data['graph']['name'] not in ('distance_bands','binary')):

@@ -8,6 +8,8 @@
 
 公共点数据现按真实 geo_id 和 UTC 时间对齐，支持节点分块、时间优先和完全乱序的 .dyna，拒绝重复/缺失/未知节点记录。点原始缓存切换到新命名空间，元数据记录 node_ids 与 point_alignment；缺少新身份说明的旧点检查点需重新训练，不自动补声明，详见 [节点身份修复](point-identity_zh.md)。
 
+STMGAT 已用原生 PyTorch 有向边注意力接入统一生命周期，无需 DGL；用 `--model STMGAT` 生成 stmgat.json。保留两层多头注意力和时间门控，修复四维 Conv1d、长历史图宽度、多目标输出及死参数。自动补一个自环，空图/孤立节点可运行；run_gconv=false 配合 graph.name=none 可只运行时间分支。配置、默认原尺度 MSE 与验收见 [STMGAT 说明](stmgat_zh.md)。
+
 HIEST 已接入重叠区域、逐样本三级图和显式重建/余弦辅助训练；用 `--model HIEST` 生成 hiest.json 后执行统一训练、独立评估和续训。自动双连通分区覆盖关节点、桥和孤立节点，也可通过 data.graph.region_groups 指定真实 ID 组。普通 forward 只返回预测，评估不执行最终辅助图或使用辅助损失，输出支持全部预测步和目标通道；配置、数学修订及验收见 [HIEST 说明](hiest_zh.md)。
 
 OD 原始数据和多空间轴指标已补齐公共组件，支持起点/终点身份、原始正值掩码、训练区间归一化、历史与已知未来协变量分离、缓存及来源版本校验，见 [OD 数据说明](od-data_zh.md)。GEML、CSTN 均已接入。

@@ -1,5 +1,5 @@
 {
-  "scope": "Remaining-work commits 1-57; whole-library migration remains in progress",
+  "scope": "Remaining-work commits 1-58; whole-library migration remains in progress",
   "environment": {
     "python": "3.12.13",
     "torch": "2.15.0+cpu",
@@ -9,7 +9,7 @@
     "scikit_learn": "1.9.1"
   },
   "full_tests": {
-    "tests": 1325,
+    "tests": 1356,
     "failures": 0,
     "errors": 0,
     "skipped": 0
@@ -1143,6 +1143,37 @@
     "test_multitarget_single_node_float64_and_label_input_isolation[3]",
     "test_teacher_and_known_future_inputs_are_explicit",
     "test_actual_cpu_amp_training",
+    "test_edge_attention_matches_independent_incoming_formulas_and_all_gradients[graph0]",
+    "test_edge_attention_matches_independent_incoming_formulas_and_all_gradients[graph1]",
+    "test_edge_attention_matches_independent_incoming_formulas_and_all_gradients[graph2]",
+    "test_original_temporal_network_and_independent_gat_reference_all_live_gradients[two-layer]",
+    "test_original_temporal_network_and_independent_gat_reference_all_live_gradients[long-history-multioutput]",
+    "test_original_temporal_network_and_independent_gat_reference_all_live_gradients[defaults]",
+    "test_original_temporal_network_and_independent_gat_reference_all_live_gradients[temporal-only]",
+    "test_original_temporal_network_and_independent_gat_reference_all_live_gradients[singleton-one-layer]",
+    "test_actual_dropout_batchnorm_train_raw_mse_evaluate_and_exact_resume[standard-True]",
+    "test_actual_dropout_batchnorm_train_raw_mse_evaluate_and_exact_resume[minmax01-False]",
+    "test_graph_identity_single_self_loop_weight_magnitude_and_inference_independence",
+    "test_stable_softmax_is_local_to_each_incoming_neighborhood",
+    "test_history_imputation_raw_targets_cache_and_training_prefix_isolation",
+    "test_cpu_amp_real_singleton_tail_without_dgl[False]",
+    "test_cpu_amp_real_singleton_tail_without_dgl[True]",
+    "test_windows_spawn_and_no_rel_temporal_only",
+    "test_invalid_stmgat_configuration_rejected_before_data[change0]",
+    "test_invalid_stmgat_configuration_rejected_before_data[change1]",
+    "test_invalid_stmgat_configuration_rejected_before_data[change2]",
+    "test_invalid_stmgat_configuration_rejected_before_data[change3]",
+    "test_invalid_stmgat_configuration_rejected_before_data[change4]",
+    "test_invalid_stmgat_configuration_rejected_before_data[change5]",
+    "test_invalid_stmgat_configuration_rejected_before_data[change6]",
+    "test_invalid_stmgat_configuration_rejected_before_data[change7]",
+    "test_invalid_stmgat_configuration_rejected_before_data[change8]",
+    "test_invalid_stmgat_configuration_rejected_before_data[change9]",
+    "test_invalid_stmgat_configuration_rejected_before_data[change10]",
+    "test_invalid_stmgat_configuration_rejected_before_data[change11]",
+    "test_invalid_graph_rejected[graph0]",
+    "test_invalid_graph_rejected[graph1]",
+    "test_invalid_graph_rejected[graph2]",
     "test_corrected_original_full_relation_forecast_and_every_gradient[1-0-0-1-1-1-1]",
     "test_corrected_original_full_relation_forecast_and_every_gradient[1-2-1-4-2-1-4]",
     "test_corrected_original_full_relation_forecast_and_every_gradient[2-1-2-4-3-2-5]",
@@ -1344,8 +1375,8 @@
   ],
   "inventory": {
     "total": 100,
-    "migrated": 77,
-    "pending": 23
+    "migrated": 78,
+    "pending": 22
   },
   "history": [
     {
@@ -2032,6 +2063,20 @@
         "total": 100,
         "migrated": 76,
         "pending": 24
+      }
+    },
+    {
+      "scope": "commits 1-57, through bbb088a",
+      "full_tests": {
+        "tests": 1325,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "inventory": {
+        "total": 100,
+        "migrated": 77,
+        "pending": 23
       }
     }
   ],
@@ -3011,7 +3056,7 @@
       "Static arrays are read-only metadata; numeric contents are model buffers, while checkpoint metadata stores only shape/dtype"
     ]
   },
-  "results_file": "D:\\LibCity 2.0\\.runtime-tests\\remaining-suite-55-results.xml",
+  "results_file": "D:\\LibCity 2.0\\.runtime-tests\\remaining-suite-56-results.xml",
   "rgsl_cli": {
     "passed": true,
     "source": "D:\\LibCity 2.0\\LibCity-modernization",
@@ -6374,5 +6419,298 @@
     "tests": "tests/test_runtime_hiest.py",
     "documentation": "hiest_zh.md",
     "scope": "Native HIEST corrected live reference, sample-local hierarchy and Gram losses, stable overlap real-ID regions, exact valid counts, train/evaluate/exact resume, original NaN/zero targets, true singleton-tail CPU AMP/spawn and published CLI; not paper accuracy"
+  },
+  "stmgat_cli": {
+    "passed": true,
+    "source": "D:\\LibCity 2.0\\LibCity-modernization",
+    "directory": "D:\\LibCity 2.0\\.runtime-tests\\stmgat-cli-v4vbvxty",
+    "commands": [
+      {
+        "command": [
+          "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+          "-B",
+          "D:\\LibCity 2.0\\LibCity-modernization\\tools\\make_runtime_fixture.py",
+          "--directory",
+          "D:\\LibCity 2.0\\.runtime-tests\\stmgat-cli-v4vbvxty\\example",
+          "--model",
+          "STMGAT"
+        ],
+        "cwd": "D:\\LibCity 2.0\\.runtime-tests\\stmgat-cli-v4vbvxty",
+        "exit_code": 0
+      },
+      {
+        "command": [
+          "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+          "-B",
+          "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+          "train",
+          "--config",
+          "D:\\LibCity 2.0\\.runtime-tests\\stmgat-cli-v4vbvxty\\example\\stmgat.json",
+          "--set",
+          "runtime.exp_id=train"
+        ],
+        "cwd": "D:\\LibCity 2.0\\.runtime-tests\\stmgat-cli-v4vbvxty",
+        "exit_code": 0
+      },
+      {
+        "command": [
+          "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+          "-B",
+          "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+          "evaluate",
+          "--config",
+          "D:\\LibCity 2.0\\.runtime-tests\\stmgat-cli-v4vbvxty\\example\\stmgat.json",
+          "--checkpoint",
+          "D:\\LibCity 2.0\\.runtime-tests\\stmgat-cli-v4vbvxty\\example\\runs\\train\\checkpoints\\best.pt",
+          "--set",
+          "runtime.exp_id=evaluated"
+        ],
+        "cwd": "D:\\LibCity 2.0\\.runtime-tests\\stmgat-cli-v4vbvxty",
+        "exit_code": 0
+      },
+      {
+        "command": [
+          "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+          "-B",
+          "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+          "train",
+          "--config",
+          "D:\\LibCity 2.0\\.runtime-tests\\stmgat-cli-v4vbvxty\\example\\stmgat.json",
+          "--resume",
+          "D:\\LibCity 2.0\\.runtime-tests\\stmgat-cli-v4vbvxty\\example\\runs\\train\\checkpoints\\last.pt",
+          "--set",
+          "training.epochs=3",
+          "--set",
+          "runtime.exp_id=resumed"
+        ],
+        "cwd": "D:\\LibCity 2.0\\.runtime-tests\\stmgat-cli-v4vbvxty",
+        "exit_code": 0
+      }
+    ],
+    "prediction_shape": [
+      11,
+      2,
+      4,
+      2
+    ],
+    "independent_predictions_equal": true,
+    "independent_metrics_equal": true,
+    "global_raw_mse": 57.42093276977539,
+    "evaluation_loss": 57.420934503728695,
+    "resumed_epoch": 3,
+    "optimizer_steps": 12,
+    "cache_statuses": [
+      "miss",
+      "hit",
+      "hit"
+    ],
+    "edge_index_shape": [
+      2,
+      7
+    ],
+    "dgl_installed": false,
+    "input_specification_saved": true,
+    "weights_only_safe_load": true,
+    "evaluate_has_no_training_artifacts": true,
+    "runtime_info": {
+      "train": {
+        "python": "3.12.13",
+        "pytorch": "2.15.0+cpu",
+        "numpy": "2.5.5",
+        "platform": "Windows-11-10.0.26200-SP0",
+        "mode": "train",
+        "execution_kind": "neural",
+        "device": "cpu",
+        "seed": 17,
+        "benchmark_protocol": "task_default",
+        "split": {
+          "train": 31,
+          "val": 11,
+          "test": 11,
+          "train_padded": false,
+          "semantics": "target_time_v1",
+          "input_window": 4,
+          "requested_input_window": 4,
+          "adapter": "window",
+          "intervals": {
+            "train": {
+              "samples": 31,
+              "target_start": "2024-01-01T04:00:00.000000000",
+              "target_end": "2024-01-02T11:00:00.000000000",
+              "target_index_start": 4,
+              "target_index_end": 35
+            },
+            "val": {
+              "samples": 11,
+              "target_start": "2024-01-02T12:00:00.000000000",
+              "target_end": "2024-01-02T23:00:00.000000000",
+              "target_index_start": 36,
+              "target_index_end": 47
+            },
+            "test": {
+              "samples": 11,
+              "target_start": "2024-01-03T00:00:00.000000000",
+              "target_end": "2024-01-03T11:00:00.000000000",
+              "target_index_start": 48,
+              "target_index_end": 59
+            }
+          },
+          "train_end": "2024-01-02T12:00:00.000000000",
+          "val_end": "2024-01-03T00:00:00.000000000",
+          "scaler_fit_end_exclusive": "2024-01-02T12:00:00.000000000",
+          "discarded_boundary_windows": 2,
+          "history_span_points": 4,
+          "cache": {
+            "status": "miss",
+            "path": "D:\\LibCity 2.0\\.runtime-tests\\stmgat-cli-v4vbvxty\\example\\cache\\traffic-raw-v1\\6013cf509f7fd3617d92c3e4.npz"
+          },
+          "sampling_gap_policy": "full_input_span_contiguous",
+          "input_missing_observations": "raw_zero_before_scaling"
+        },
+        "protocol_changes": {
+          "data.input_window": 4
+        },
+        "capabilities": {
+          "requires_checkpoint": true,
+          "supports_resume": true,
+          "supports_validation": true
+        }
+      },
+      "evaluated": {
+        "python": "3.12.13",
+        "pytorch": "2.15.0+cpu",
+        "numpy": "2.5.5",
+        "platform": "Windows-11-10.0.26200-SP0",
+        "mode": "evaluate",
+        "execution_kind": "neural",
+        "device": "cpu",
+        "seed": 17,
+        "benchmark_protocol": "task_default",
+        "split": {
+          "train": 31,
+          "val": 11,
+          "test": 11,
+          "train_padded": false,
+          "semantics": "target_time_v1",
+          "input_window": 4,
+          "requested_input_window": 4,
+          "adapter": "window",
+          "intervals": {
+            "train": {
+              "samples": 31,
+              "target_start": "2024-01-01T04:00:00.000000000",
+              "target_end": "2024-01-02T11:00:00.000000000",
+              "target_index_start": 4,
+              "target_index_end": 35
+            },
+            "val": {
+              "samples": 11,
+              "target_start": "2024-01-02T12:00:00.000000000",
+              "target_end": "2024-01-02T23:00:00.000000000",
+              "target_index_start": 36,
+              "target_index_end": 47
+            },
+            "test": {
+              "samples": 11,
+              "target_start": "2024-01-03T00:00:00.000000000",
+              "target_end": "2024-01-03T11:00:00.000000000",
+              "target_index_start": 48,
+              "target_index_end": 59
+            }
+          },
+          "train_end": "2024-01-02T12:00:00.000000000",
+          "val_end": "2024-01-03T00:00:00.000000000",
+          "scaler_fit_end_exclusive": "2024-01-02T12:00:00.000000000",
+          "discarded_boundary_windows": 2,
+          "history_span_points": 4,
+          "cache": {
+            "status": "hit",
+            "path": "D:\\LibCity 2.0\\.runtime-tests\\stmgat-cli-v4vbvxty\\example\\cache\\traffic-raw-v1\\6013cf509f7fd3617d92c3e4.npz"
+          },
+          "sampling_gap_policy": "full_input_span_contiguous",
+          "input_missing_observations": "raw_zero_before_scaling"
+        },
+        "protocol_changes": {
+          "data.input_window": 4
+        },
+        "capabilities": {
+          "requires_checkpoint": true,
+          "supports_resume": true,
+          "supports_validation": true
+        }
+      },
+      "resumed": {
+        "python": "3.12.13",
+        "pytorch": "2.15.0+cpu",
+        "numpy": "2.5.5",
+        "platform": "Windows-11-10.0.26200-SP0",
+        "mode": "train",
+        "execution_kind": "neural",
+        "device": "cpu",
+        "seed": 17,
+        "benchmark_protocol": "task_default",
+        "split": {
+          "train": 31,
+          "val": 11,
+          "test": 11,
+          "train_padded": false,
+          "semantics": "target_time_v1",
+          "input_window": 4,
+          "requested_input_window": 4,
+          "adapter": "window",
+          "intervals": {
+            "train": {
+              "samples": 31,
+              "target_start": "2024-01-01T04:00:00.000000000",
+              "target_end": "2024-01-02T11:00:00.000000000",
+              "target_index_start": 4,
+              "target_index_end": 35
+            },
+            "val": {
+              "samples": 11,
+              "target_start": "2024-01-02T12:00:00.000000000",
+              "target_end": "2024-01-02T23:00:00.000000000",
+              "target_index_start": 36,
+              "target_index_end": 47
+            },
+            "test": {
+              "samples": 11,
+              "target_start": "2024-01-03T00:00:00.000000000",
+              "target_end": "2024-01-03T11:00:00.000000000",
+              "target_index_start": 48,
+              "target_index_end": 59
+            }
+          },
+          "train_end": "2024-01-02T12:00:00.000000000",
+          "val_end": "2024-01-03T00:00:00.000000000",
+          "scaler_fit_end_exclusive": "2024-01-02T12:00:00.000000000",
+          "discarded_boundary_windows": 2,
+          "history_span_points": 4,
+          "cache": {
+            "status": "hit",
+            "path": "D:\\LibCity 2.0\\.runtime-tests\\stmgat-cli-v4vbvxty\\example\\cache\\traffic-raw-v1\\6013cf509f7fd3617d92c3e4.npz"
+          },
+          "sampling_gap_policy": "full_input_span_contiguous",
+          "input_missing_observations": "raw_zero_before_scaling"
+        },
+        "protocol_changes": {
+          "data.input_window": 4
+        },
+        "capabilities": {
+          "requires_checkpoint": true,
+          "supports_resume": true,
+          "supports_validation": true
+        }
+      }
+    },
+    "scope": "Actual published STMGAT directed sparse point example with native incoming edge attention, isolated node and all-output raw MSE; CPU functionality, not paper accuracy"
+  },
+  "stmgat_validation": {
+    "passed": true,
+    "new_tests": 31,
+    "related_tests": 61,
+    "tests": "tests/test_runtime_stmgat.py",
+    "documentation": "stmgat_zh.md",
+    "scope": "Native directed incoming attention, old temporal network with independent GAT formula, exact live gradients and BN, long history/multi-output/no-graph dimensions, raw MSE and targets, no DGL CPU AMP/singleton tail/spawn, train/evaluate/exact resume and published CLI; not paper accuracy"
   }
 }

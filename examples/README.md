@@ -433,3 +433,10 @@ nodes include overlapping biconnected regions, a bridge and an isolated node.
 The native module predicts all horizons/outputs without labels; an explicit
 training step computes sample-local graph reconstruction and signed cosine
 auxiliary costs. See [HIEST configuration and semantics](../docs/modernization/runtime/hiest_zh.md).
+
+STMGAT uses native PyTorch directed edge attention and needs no DGL. Generate
+with `--model STMGAT`, then use `stmgat.json` for train/evaluate/resume. The
+example has four real-ID nodes, a directed ring, an isolated node and two
+forecast targets. Both feature and attention dropout are supported; long
+histories and multi-output heads use explicit dimensions. See
+[STMGAT semantics](../docs/modernization/runtime/stmgat_zh.md).

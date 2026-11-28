@@ -112,6 +112,17 @@ def dsan_fixture(root):
     return grid_fixture(root,steps=60)
 
 
+def stmgat_fixture(root,name='GATTiny',steps=60):
+    folder=periodic_fixture(root,name,steps,nodes=4,features=3,outputs=2)
+    ids=np.array([71,3,108,400]);path=folder/f'{name}.geo';geo=pd.read_csv(path);geo['geo_id']=ids
+    geo.sample(frac=1,random_state=23).to_csv(path,index=False)
+    path=folder/f'{name}.dyna';frame=pd.read_csv(path);frame['entity_id']=frame['entity_id'].map(dict(enumerate(ids)))
+    frame.to_csv(path,index=False)
+    pd.DataFrame(dict(rel_id=range(3),type='geo',origin_id=ids[:3],destination_id=ids[[1,2,0]],
+        distance=[1.,2.,3.])).to_csv(folder/f'{name}.rel',index=False)
+    return folder
+
+
 def hiest_fixture(root,name='HierarchyTiny',steps=60):
     folder=atomic_fixture(root,name,steps,nodes=7)
     ids=np.array([71,3,108,19,250,6,400])

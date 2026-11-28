@@ -62,7 +62,8 @@
 | commit54 | 09077cf | feat: migrate STDN with causal volume-flow sampling and shifted attention |
 | commit55 | 4ae8e8c | feat: migrate ESG with train-only graph history and factored relations |
 | commit56 | 87c269f | fix: align point observations by real node IDs and UTC time |
-| commit57 | 随本节交付的提交 | feat: migrate HIEST with sample-isolated hierarchy and auxiliary training |
+| commit57 | bbb088a | feat: migrate HIEST with sample-isolated hierarchy and auxiliary training |
+| commit58 | 随本节交付的提交 | feat: migrate STMGAT with native directed attention and explicit temporal widths |
 
 ## commit1：修复基础交通缓存（670b325）
 
@@ -681,6 +682,18 @@ forward 由配置决定预测长度，每步重新编码当前窗口；预测回
 仓库外实际生成、训练、独立评估、续训 **4 条命令成功**，7 个非连续 ID 节点自动划为 4 个重叠/桥/孤立区域，预测 [11,2,7,2]，独立预测/指标完全一致；第三轮累计 12 次更新、缓存 miss/hit/hit。原尺度 masked MAE 独立复算约 3.913424，与评估一致；静态图/成员随纯权重保存，独立评估没有训练产物，见 [CLI](hiest-cli-validation.json)。本批修正数学轴语义，不宣称与旧错误实现数值等价或复现论文精度；总层数为一时预测仅依赖时间 skip 的原结构保留，稠密图平方成本与 CUDA/MPS 专项认证另行记录。
 
 清单更新为 **77/100**、23 条 pending；扣除延期 Common 和模板后还剩 **14 个实际模型**：DMVSTNet、GMAN、STAGGCN、STMGAT、D2STGNN、STGODE、SSTBAN、STTSNet、FOGS、DSTAGNN、MultiSPANS、STWave、PDFormer、STGNCDE。它们及最终完整交付审计仍在主线范围内，不将本批通过当作全库完成。
+
+## commit58：迁移 STMGAT 原生有向注意力与实际时间宽度
+
+原问题：STMGAT 尚未接入新运行时，DGL 批图与固定设备强耦合；Conv1d 接收四维 Tensor 无法执行。GAT 宽度按预设感受野构建，长历史不匹配；感受野混用 output_dim，输出把剩余时间维当目标维。空图 zip 解包失败、自环重复，图残差宽度不匹配缺少检查；最后一层 GAT/BN 及图模式残差卷积为死参数。
+
+处理：实现标准 nn.Module 和轻量历史适配，复用公共 train_loop、评估与安全续训；DGL 替换为原生有向入邻域多头 softmax/index_add，单份边 buffer 保持样本独立，空图和孤立节点补一个自环。保留完整每头 C×T 投影、连续两层 GAT、逐头 bias/ELU 后均值和原时间/图残差；注意力数值在低精度下用 float32，各目标邻域独立稳定化。全部卷积修为 Conv2d，GAT 宽度依实际剩余历史推导，输出头显式 H×O；无图模式保留异宽投影，可不读 .rel。删无效 GAT/BN/投影与未使用的 dropout 配置；保留 feat_drop/attn_drop。历史补零与原始 NaN/0 目标分开，默认原尺度 MSE 保留真实零值、不原地抹去微小真值，详见 [STMGAT 说明](stmgat_zh.md)。
+
+验证：新增 **31 项通过**，三组独立入邻域公式与全部梯度、五组旧时间网络结合独立 DGL 公式的预测/全部有效参数与输入梯度/BN（含默认 40/320/640/8、长历史/多目标、异宽无图、单层单节点），方向/权重幅值/单次自环/孤立节点/局部极值稳定、物理节点置换/跨样本隔离、float64/无标签/无推理 RNG、原始 NaN/零值 MSE/缓存/未来隔离，两种配置的 dropout/BN/Adam/metric 调度/早停/最佳模型/RNG/加载器精确恢复，禁止 DGL 导入后的 CPU AMP、真实单样本尾批、Windows spawn/无 .rel 与 15 类配置和图拒绝。相关配置/点身份合计 **61 passed**，迁移表专项通过；完整回归 **1356 passed，0 failed，0 errors，0 skipped**，见 [汇总](remaining-validation.json)。
+
+仓库外实际生成、训练、独立评估、续训 **4 条命令成功**，环境未安装 DGL；4 个真实 ID 节点、有向三节点环/孤立节点、3 个历史通道/2 个目标，预测 [11,2,4,2]，独立预测/指标完全一致。第三轮累计 12 次更新、缓存 miss/hit/hit，原尺度 MSE 复算约 57.420934 与评估一致，7 条边随纯权重安全保存，独立评估没有训练产物，见 [CLI](stmgat-cli-validation.json)。本批不声称直接跑通原不可运行 DGL 源码或复现论文精度；每头完整时间宽度与平方参数成本保留，CUDA/MPS 专项另行记录。
+
+清单更新为 **78/100**、22 条 pending；扣除延期 Common 和模板后还剩 **13 个实际模型**：DMVSTNet、GMAN、STAGGCN、D2STGNN、STGODE、SSTBAN、STTSNet、FOGS、DSTAGNN、MultiSPANS、STWave、PDFormer、STGNCDE。它们及最终完整交付验收仍在主线范围内，继续分批实施。
 
 ## 持续完成的清单
 
