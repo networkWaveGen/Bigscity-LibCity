@@ -1,5 +1,5 @@
 {
-  "scope": "Remaining-work commits 1-56; whole-library migration remains in progress",
+  "scope": "Remaining-work commits 1-57; whole-library migration remains in progress",
   "environment": {
     "python": "3.12.13",
     "torch": "2.15.0+cpu",
@@ -9,7 +9,7 @@
     "scikit_learn": "1.9.1"
   },
   "full_tests": {
-    "tests": 1281,
+    "tests": 1325,
     "failures": 0,
     "errors": 0,
     "skipped": 0
@@ -708,6 +708,50 @@
     "test_invalid_hierarchy_configuration_is_rejected_before_data[options4]",
     "test_invalid_hierarchy_configuration_is_rejected_before_data[options5]",
     "test_metadata_partition_input_length_and_nonhierarchical_config_guards",
+    "test_corrected_original_full_predictions_auxiliary_features_and_all_live_gradients[two-samples]",
+    "test_corrected_original_full_predictions_auxiliary_features_and_all_live_gradients[multioutput]",
+    "test_corrected_original_full_predictions_auxiliary_features_and_all_live_gradients[defaults]",
+    "test_corrected_original_full_predictions_auxiliary_features_and_all_live_gradients[singletons-zero-hop]",
+    "test_biconnected_regions_include_articulation_overlap_and_isolates_with_real_ids",
+    "test_invalid_explicit_overlapping_regions_are_rejected[groups0]",
+    "test_invalid_explicit_overlapping_regions_are_rejected[groups1]",
+    "test_invalid_explicit_overlapping_regions_are_rejected[groups2]",
+    "test_invalid_explicit_overlapping_regions_are_rejected[groups3]",
+    "test_invalid_explicit_overlapping_regions_are_rejected[groups4]",
+    "test_auxiliary_reconstruction_and_cosine_match_independent_per_sample_formulas_and_gradients[1]",
+    "test_auxiliary_reconstruction_and_cosine_match_independent_per_sample_formulas_and_gradients[3]",
+    "test_data_identity_probability_targets_raw_cache_reuse_and_future_isolation",
+    "test_weighted_reconstruction_requires_probabilities_or_explicit_binary_targets",
+    "test_all_support_families_and_inference_avoid_last_auxiliary_graph[doubletransition]",
+    "test_all_support_families_and_inference_avoid_last_auxiliary_graph[transition]",
+    "test_all_support_families_and_inference_avoid_last_auxiliary_graph[symnadj]",
+    "test_all_support_families_and_inference_avoid_last_auxiliary_graph[normlap]",
+    "test_all_support_families_and_inference_avoid_last_auxiliary_graph[scalap]",
+    "test_all_support_families_and_inference_avoid_last_auxiliary_graph[identity]",
+    "test_actual_auxiliary_dropout_batchnorm_train_raw_evaluate_and_exact_resume[standard]",
+    "test_actual_auxiliary_dropout_batchnorm_train_raw_evaluate_and_exact_resume[minmax01]",
+    "test_global_graph_and_predictions_are_independent_of_other_samples",
+    "test_missing_history_is_imputed_without_losing_original_nan_or_zero_targets",
+    "test_physical_node_order_changes_keep_regions_and_predictions_aligned",
+    "test_auxiliary_valid_count_weighting_and_microbatch_gradients_include_exact_large_counts[False]",
+    "test_auxiliary_valid_count_weighting_and_microbatch_gradients_include_exact_large_counts[True]",
+    "test_cpu_amp_real_tail_and_short_auto_layers_global_singleton[False]",
+    "test_cpu_amp_real_tail_and_short_auto_layers_global_singleton[True]",
+    "test_windows_spawn_transports_hierarchy_inputs",
+    "test_invalid_hiest_configuration_fails_before_data_reads[change0]",
+    "test_invalid_hiest_configuration_fails_before_data_reads[change1]",
+    "test_invalid_hiest_configuration_fails_before_data_reads[change2]",
+    "test_invalid_hiest_configuration_fails_before_data_reads[change3]",
+    "test_invalid_hiest_configuration_fails_before_data_reads[change4]",
+    "test_invalid_hiest_configuration_fails_before_data_reads[change5]",
+    "test_invalid_hiest_configuration_fails_before_data_reads[change6]",
+    "test_invalid_hiest_configuration_fails_before_data_reads[change7]",
+    "test_invalid_hiest_configuration_fails_before_data_reads[change8]",
+    "test_invalid_hiest_configuration_fails_before_data_reads[change9]",
+    "test_invalid_hiest_configuration_fails_before_data_reads[change10]",
+    "test_invalid_hiest_configuration_fails_before_data_reads[change11]",
+    "test_invalid_hiest_configuration_fails_before_data_reads[change12]",
+    "test_invalid_hiest_configuration_fails_before_data_reads[change13]",
     "test_memory_recurrence_matches_independent_gates_and_depends_on_previous_cell",
     "test_original_classifier_and_gradients_with_explicitly_corrected_memory",
     "test_full_training_ranking_export_and_exact_resume",
@@ -1300,8 +1344,8 @@
   ],
   "inventory": {
     "total": 100,
-    "migrated": 76,
-    "pending": 24
+    "migrated": 77,
+    "pending": 23
   },
   "history": [
     {
@@ -1966,6 +2010,20 @@
       "scope": "commits 1-55, through 4ae8e8c",
       "full_tests": {
         "tests": 1263,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "inventory": {
+        "total": 100,
+        "migrated": 76,
+        "pending": 24
+      }
+    },
+    {
+      "scope": "commits 1-56, through 87c269f",
+      "full_tests": {
+        "tests": 1281,
         "failures": 0,
         "errors": 0,
         "skipped": 0
@@ -2953,7 +3011,7 @@
       "Static arrays are read-only metadata; numeric contents are model buffers, while checkpoint metadata stores only shape/dtype"
     ]
   },
-  "results_file": "D:\\LibCity 2.0\\.runtime-tests\\remaining-suite-54-results.xml",
+  "results_file": "D:\\LibCity 2.0\\.runtime-tests\\remaining-suite-55-results.xml",
   "rgsl_cli": {
     "passed": true,
     "source": "D:\\LibCity 2.0\\LibCity-modernization",
@@ -5915,5 +5973,406 @@
     "tests": "tests/test_runtime_point_identity.py",
     "documentation": "point-identity_zh.md",
     "scope": "Real-ID and chronological point alignment, isolated raw-cache namespace and explicit checkpoint identity; HIEST migration not included and inventory unchanged"
+  },
+  "hiest_cli": {
+    "passed": true,
+    "source": "D:\\LibCity 2.0\\LibCity-modernization",
+    "directory": "D:\\LibCity 2.0\\.runtime-tests\\hiest-cli-zmywqmdi",
+    "commands": [
+      {
+        "command": [
+          "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+          "-B",
+          "D:\\LibCity 2.0\\LibCity-modernization\\tools\\make_runtime_fixture.py",
+          "--directory",
+          "D:\\LibCity 2.0\\.runtime-tests\\hiest-cli-zmywqmdi\\example",
+          "--model",
+          "HIEST"
+        ],
+        "cwd": "D:\\LibCity 2.0\\.runtime-tests\\hiest-cli-zmywqmdi",
+        "exit_code": 0
+      },
+      {
+        "command": [
+          "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+          "-B",
+          "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+          "train",
+          "--config",
+          "D:\\LibCity 2.0\\.runtime-tests\\hiest-cli-zmywqmdi\\example\\hiest.json",
+          "--set",
+          "runtime.exp_id=train"
+        ],
+        "cwd": "D:\\LibCity 2.0\\.runtime-tests\\hiest-cli-zmywqmdi",
+        "exit_code": 0
+      },
+      {
+        "command": [
+          "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+          "-B",
+          "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+          "evaluate",
+          "--config",
+          "D:\\LibCity 2.0\\.runtime-tests\\hiest-cli-zmywqmdi\\example\\hiest.json",
+          "--checkpoint",
+          "D:\\LibCity 2.0\\.runtime-tests\\hiest-cli-zmywqmdi\\example\\runs\\train\\checkpoints\\best.pt",
+          "--set",
+          "runtime.exp_id=evaluated"
+        ],
+        "cwd": "D:\\LibCity 2.0\\.runtime-tests\\hiest-cli-zmywqmdi",
+        "exit_code": 0
+      },
+      {
+        "command": [
+          "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+          "-B",
+          "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+          "train",
+          "--config",
+          "D:\\LibCity 2.0\\.runtime-tests\\hiest-cli-zmywqmdi\\example\\hiest.json",
+          "--resume",
+          "D:\\LibCity 2.0\\.runtime-tests\\hiest-cli-zmywqmdi\\example\\runs\\train\\checkpoints\\last.pt",
+          "--set",
+          "training.epochs=3",
+          "--set",
+          "runtime.exp_id=resumed"
+        ],
+        "cwd": "D:\\LibCity 2.0\\.runtime-tests\\hiest-cli-zmywqmdi",
+        "exit_code": 0
+      }
+    ],
+    "prediction_shape": [
+      11,
+      2,
+      7,
+      2
+    ],
+    "independent_predictions_equal": true,
+    "independent_metrics_equal": true,
+    "global_raw_masked_mae": 3.913423538208008,
+    "evaluation_loss": 3.913423711603338,
+    "resumed_epoch": 3,
+    "optimizer_steps": 12,
+    "cache_statuses": [
+      "miss",
+      "hit",
+      "hit"
+    ],
+    "hierarchy": {
+      "method": "biconnected_components",
+      "threshold": 0.8,
+      "region_node_ids": [
+        [
+          108,
+          19,
+          250
+        ],
+        [
+          108,
+          3,
+          71
+        ],
+        [
+          250,
+          6
+        ],
+        [
+          400
+        ]
+      ],
+      "regional_nodes": 4,
+      "mapping": "column_normalized_membership",
+      "reconstruction": "binary"
+    },
+    "membership_shape": [
+      7,
+      4
+    ],
+    "support_shape": [
+      2,
+      7,
+      7
+    ],
+    "input_specification_saved": true,
+    "weights_only_safe_load": true,
+    "evaluate_has_no_training_artifacts": true,
+    "runtime_info": {
+      "train": {
+        "python": "3.12.13",
+        "pytorch": "2.15.0+cpu",
+        "numpy": "2.5.5",
+        "platform": "Windows-11-10.0.26200-SP0",
+        "mode": "train",
+        "execution_kind": "neural",
+        "device": "cpu",
+        "seed": 17,
+        "benchmark_protocol": "task_default",
+        "split": {
+          "train": 31,
+          "val": 11,
+          "test": 11,
+          "train_padded": false,
+          "semantics": "target_time_v1",
+          "input_window": 4,
+          "requested_input_window": 4,
+          "adapter": "window",
+          "intervals": {
+            "train": {
+              "samples": 31,
+              "target_start": "2024-01-01T00:20:00.000000000",
+              "target_end": "2024-01-01T02:55:00.000000000",
+              "target_index_start": 4,
+              "target_index_end": 35
+            },
+            "val": {
+              "samples": 11,
+              "target_start": "2024-01-01T03:00:00.000000000",
+              "target_end": "2024-01-01T03:55:00.000000000",
+              "target_index_start": 36,
+              "target_index_end": 47
+            },
+            "test": {
+              "samples": 11,
+              "target_start": "2024-01-01T04:00:00.000000000",
+              "target_end": "2024-01-01T04:55:00.000000000",
+              "target_index_start": 48,
+              "target_index_end": 59
+            }
+          },
+          "train_end": "2024-01-01T03:00:00.000000000",
+          "val_end": "2024-01-01T04:00:00.000000000",
+          "scaler_fit_end_exclusive": "2024-01-01T03:00:00.000000000",
+          "discarded_boundary_windows": 2,
+          "history_span_points": 4,
+          "cache": {
+            "status": "miss",
+            "path": "D:\\LibCity 2.0\\.runtime-tests\\hiest-cli-zmywqmdi\\example\\cache\\traffic-raw-v1\\a99bf7dae446db816b9a421c.npz"
+          },
+          "sampling_gap_policy": "full_input_span_contiguous",
+          "hierarchy": {
+            "method": "biconnected_components",
+            "threshold": 0.8,
+            "region_node_ids": [
+              [
+                108,
+                19,
+                250
+              ],
+              [
+                108,
+                3,
+                71
+              ],
+              [
+                250,
+                6
+              ],
+              [
+                400
+              ]
+            ],
+            "regional_nodes": 4,
+            "mapping": "column_normalized_membership",
+            "reconstruction": "binary"
+          },
+          "input_missing_observations": "raw_zero_before_scaling"
+        },
+        "protocol_changes": {
+          "data.input_window": 4
+        },
+        "capabilities": {
+          "requires_checkpoint": true,
+          "supports_resume": true,
+          "supports_validation": true
+        }
+      },
+      "evaluated": {
+        "python": "3.12.13",
+        "pytorch": "2.15.0+cpu",
+        "numpy": "2.5.5",
+        "platform": "Windows-11-10.0.26200-SP0",
+        "mode": "evaluate",
+        "execution_kind": "neural",
+        "device": "cpu",
+        "seed": 17,
+        "benchmark_protocol": "task_default",
+        "split": {
+          "train": 31,
+          "val": 11,
+          "test": 11,
+          "train_padded": false,
+          "semantics": "target_time_v1",
+          "input_window": 4,
+          "requested_input_window": 4,
+          "adapter": "window",
+          "intervals": {
+            "train": {
+              "samples": 31,
+              "target_start": "2024-01-01T00:20:00.000000000",
+              "target_end": "2024-01-01T02:55:00.000000000",
+              "target_index_start": 4,
+              "target_index_end": 35
+            },
+            "val": {
+              "samples": 11,
+              "target_start": "2024-01-01T03:00:00.000000000",
+              "target_end": "2024-01-01T03:55:00.000000000",
+              "target_index_start": 36,
+              "target_index_end": 47
+            },
+            "test": {
+              "samples": 11,
+              "target_start": "2024-01-01T04:00:00.000000000",
+              "target_end": "2024-01-01T04:55:00.000000000",
+              "target_index_start": 48,
+              "target_index_end": 59
+            }
+          },
+          "train_end": "2024-01-01T03:00:00.000000000",
+          "val_end": "2024-01-01T04:00:00.000000000",
+          "scaler_fit_end_exclusive": "2024-01-01T03:00:00.000000000",
+          "discarded_boundary_windows": 2,
+          "history_span_points": 4,
+          "cache": {
+            "status": "hit",
+            "path": "D:\\LibCity 2.0\\.runtime-tests\\hiest-cli-zmywqmdi\\example\\cache\\traffic-raw-v1\\a99bf7dae446db816b9a421c.npz"
+          },
+          "sampling_gap_policy": "full_input_span_contiguous",
+          "hierarchy": {
+            "method": "biconnected_components",
+            "threshold": 0.8,
+            "region_node_ids": [
+              [
+                108,
+                19,
+                250
+              ],
+              [
+                108,
+                3,
+                71
+              ],
+              [
+                250,
+                6
+              ],
+              [
+                400
+              ]
+            ],
+            "regional_nodes": 4,
+            "mapping": "column_normalized_membership",
+            "reconstruction": "binary"
+          },
+          "input_missing_observations": "raw_zero_before_scaling"
+        },
+        "protocol_changes": {
+          "data.input_window": 4
+        },
+        "capabilities": {
+          "requires_checkpoint": true,
+          "supports_resume": true,
+          "supports_validation": true
+        }
+      },
+      "resumed": {
+        "python": "3.12.13",
+        "pytorch": "2.15.0+cpu",
+        "numpy": "2.5.5",
+        "platform": "Windows-11-10.0.26200-SP0",
+        "mode": "train",
+        "execution_kind": "neural",
+        "device": "cpu",
+        "seed": 17,
+        "benchmark_protocol": "task_default",
+        "split": {
+          "train": 31,
+          "val": 11,
+          "test": 11,
+          "train_padded": false,
+          "semantics": "target_time_v1",
+          "input_window": 4,
+          "requested_input_window": 4,
+          "adapter": "window",
+          "intervals": {
+            "train": {
+              "samples": 31,
+              "target_start": "2024-01-01T00:20:00.000000000",
+              "target_end": "2024-01-01T02:55:00.000000000",
+              "target_index_start": 4,
+              "target_index_end": 35
+            },
+            "val": {
+              "samples": 11,
+              "target_start": "2024-01-01T03:00:00.000000000",
+              "target_end": "2024-01-01T03:55:00.000000000",
+              "target_index_start": 36,
+              "target_index_end": 47
+            },
+            "test": {
+              "samples": 11,
+              "target_start": "2024-01-01T04:00:00.000000000",
+              "target_end": "2024-01-01T04:55:00.000000000",
+              "target_index_start": 48,
+              "target_index_end": 59
+            }
+          },
+          "train_end": "2024-01-01T03:00:00.000000000",
+          "val_end": "2024-01-01T04:00:00.000000000",
+          "scaler_fit_end_exclusive": "2024-01-01T03:00:00.000000000",
+          "discarded_boundary_windows": 2,
+          "history_span_points": 4,
+          "cache": {
+            "status": "hit",
+            "path": "D:\\LibCity 2.0\\.runtime-tests\\hiest-cli-zmywqmdi\\example\\cache\\traffic-raw-v1\\a99bf7dae446db816b9a421c.npz"
+          },
+          "sampling_gap_policy": "full_input_span_contiguous",
+          "hierarchy": {
+            "method": "biconnected_components",
+            "threshold": 0.8,
+            "region_node_ids": [
+              [
+                108,
+                19,
+                250
+              ],
+              [
+                108,
+                3,
+                71
+              ],
+              [
+                250,
+                6
+              ],
+              [
+                400
+              ]
+            ],
+            "regional_nodes": 4,
+            "mapping": "column_normalized_membership",
+            "reconstruction": "binary"
+          },
+          "input_missing_observations": "raw_zero_before_scaling"
+        },
+        "protocol_changes": {
+          "data.input_window": 4
+        },
+        "capabilities": {
+          "requires_checkpoint": true,
+          "supports_resume": true,
+          "supports_validation": true
+        }
+      }
+    },
+    "scope": "Actual published HIEST point example with overlapping real-ID regions, per-sample hierarchy and explicit auxiliary training; CPU functionality, not paper accuracy"
+  },
+  "hiest_validation": {
+    "passed": true,
+    "new_tests": 44,
+    "related_tests": 121,
+    "tests": "tests/test_runtime_hiest.py",
+    "documentation": "hiest_zh.md",
+    "scope": "Native HIEST corrected live reference, sample-local hierarchy and Gram losses, stable overlap real-ID regions, exact valid counts, train/evaluate/exact resume, original NaN/zero targets, true singleton-tail CPU AMP/spawn and published CLI; not paper accuracy"
   }
 }

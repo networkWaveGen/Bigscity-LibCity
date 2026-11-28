@@ -1,0 +1,11 @@
+{
+  "model": {"params": {"blocks": 4, "layers": 2, "apt_layer": true, "kernel_size": 2,
+    "residual_channels": 32, "dilation_channels": 32, "skip_channels": 256, "end_channels": 512,
+    "global_nodes": 15, "adjtype": "doubletransition", "order": 2, "dropout": 0.3,
+    "n1": 1.0, "n2": 1.0, "n3": 1.0, "n4": 1.0}},
+  "data": {"scaler": {"name": "standard"},
+    "graph": {"region_threshold": 0.8, "region_groups": null, "reconstruction": "binary"}},
+  "training": {"epochs": 100, "optimizer": {"name": "adam", "lr": 0.001}, "clip_grad_norm": 5.0,
+    "loss": {"name": "masked_mae", "mask_value": 0.0, "original_weight": 0.01, "regional_weight": 0.01, "orthogonal_weight": 0.1},
+    "early_stopping": {"patience": 0}}
+}

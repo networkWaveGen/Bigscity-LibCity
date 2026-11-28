@@ -29,6 +29,9 @@ class ModelSpec:
 
 
 MODELS = {
+    'HIEST': ModelSpec('libcity.model.traffic_speed_prediction.runtime_hiest:HIEST',
+        prepare_data='libcity.data.hiest_bundle:prepare_hiest',loss='libcity.executor.hiest_step:HIESTLoss',
+        step='libcity.executor.hiest_step:auxiliary_step'),
     'ESG': ModelSpec('libcity.model.traffic_flow_prediction.runtime_esg:ESG',
         prepare_data='libcity.data.esg_bundle:prepare_esg'),
     'STDN': ModelSpec('libcity.model.traffic_flow_prediction.runtime_stdn:STDN',protocol='stdn_grid',

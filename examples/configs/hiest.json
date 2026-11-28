@@ -1,0 +1,10 @@
+{
+  "model": {"name": "HIEST", "params": {"blocks": 1, "layers": 2, "apt_layer": false,
+    "residual_channels": 4, "dilation_channels": 4, "skip_channels": 6, "end_channels": 8,
+    "global_nodes": 3, "dropout": 0.2}},
+  "data": {"dataset": "HierarchyTiny", "data_dir": "data", "cache_dir": "cache",
+    "input_window": 4, "output_window": 2, "pad_training": false},
+  "training": {"epochs": 2, "batch_size": 5, "accumulation_steps": 2},
+  "evaluation": {"batch_size": 4},
+  "runtime": {"device": "cpu", "seed": 17, "output_dir": "runs", "exp_id": "hiest-demo"}
+}

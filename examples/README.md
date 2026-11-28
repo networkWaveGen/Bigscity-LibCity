@@ -426,3 +426,10 @@ history as a device-following buffer in the standalone inference weights.
 The complete supported-model inventory and migration details are in the
 [runtime guide](../docs/modernization/runtime/README_zh.md). Small examples prove
 execution and reproducibility, not real-city benchmark accuracy.
+
+HIEST hierarchical point forecasts can be generated with `--model HIEST`; use
+`hiest.json` for the same train/evaluate/resume lifecycle. The seven real-ID
+nodes include overlapping biconnected regions, a bridge and an isolated node.
+The native module predicts all horizons/outputs without labels; an explicit
+training step computes sample-local graph reconstruction and signed cosine
+auxiliary costs. See [HIEST configuration and semantics](../docs/modernization/runtime/hiest_zh.md).

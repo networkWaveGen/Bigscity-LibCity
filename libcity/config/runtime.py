@@ -107,6 +107,15 @@ def validate(config, preset):
     if model['name']=='STDN':
         for key in ('cnn_flat_size','lstm_out_size'):
             _positive(model['params'][key],'STDN '+key)
+    if model['name']=='HIEST':
+        params=model['params']
+        for key in ('blocks','layers','kernel_size','residual_channels','dilation_channels','skip_channels','end_channels','global_nodes'):
+            _positive(params[key],'HIEST '+key)
+        _positive(params['order'],'HIEST order',zero=True)
+        _number(params['dropout'],'HIEST dropout')
+        if params['dropout']>=1 or params['adjtype'] not in ('doubletransition','transition','symnadj','normlap','scalap','identity'):
+            raise ValueError('HIEST dropout or adjtype is invalid')
+        for key in ('n1','n2','n3','n4'): _number(params[key],'HIEST '+key)
     if model['name']=='ESG':
         params=model['params']
         for key in ('n_blocks','n_layers','residual_channels','end_channels','st_embedding_dim',
@@ -191,8 +200,21 @@ def validate(config, preset):
             'GTS':('history_channel','history_steps'),
             'CCRNN':('svd_rank','svd_channels','normalization'),
             'GSNet':('road_column','risk_column','poi_column','use_poi'),
-            'ESG':('history_steps','history_channels')}.get(model['name'],())
+            'ESG':('history_steps','history_channels'),
+            'HIEST':('region_threshold','region_groups','reconstruction')}.get(model['name'],())
         _known(data['graph'], ('name', 'symmetric', 'self_loops', 'epsilon','reachability_column','distance_column')+graph_keys, 'data.graph')
+        if model['name']=='HIEST':
+            for key,value in dict(region_threshold=.8,region_groups=None,reconstruction='binary').items():
+                data['graph'].setdefault(key,value)
+            _number(data['graph']['region_threshold'],'HIEST graph.region_threshold')
+            groups=data['graph']['region_groups']
+            if groups is not None and (not isinstance(groups,list) or not groups or any(not isinstance(group,list) or not group or
+                    any(type(value) not in (int,float,str) or isinstance(value,str) and not value or
+                        type(value) in (int,float) and not math.isfinite(value) for value in group) for group in groups)):
+                raise ValueError('HIEST region_groups requires nonempty lists of finite real node IDs or null')
+            if data['graph']['reconstruction'] not in ('binary','weights'):
+                raise ValueError('HIEST reconstruction must be binary or weights')
+            if data['sampling']['name']!='window': raise ValueError('HIEST requires continuous window sampling')
         if model['name']=='ESG':
             _known(data['graph'],('name','symmetric','self_loops','history_steps','history_channels'),'ESG data.graph')
             if data['graph']['name']!='dynamic' or data['graph'].get('symmetric',False) or data['graph'].get('self_loops',False):
@@ -362,7 +384,7 @@ def validate(config, preset):
         'scheduler': ('name', 'interval', 'step_size', 'gamma', 'milestones', 'T_max', 'eta_min', 'patience',
                       'factor', 'monitor', 'mode', 'threshold', 'max_lr', 'total_steps', 'pct_start', 'warmup_steps',
                       'model_dim', 'lr_multiplier'),
-        'loss': ('name', 'mask_value','alpha','eps')+(('thresholds','weights') if model['name']=='GSNet' else ())+(('od_weight','origin_weight','destination_weight') if model['name']=='GEML' else ())+(('delta',) if training['loss'].get('name') in ('huber','masked_huber') else ())+(('negative_samples',) if spec.protocol in ('atst_ranking','stan_ranking') else
+        'loss': ('name', 'mask_value','alpha','eps')+(('original_weight','regional_weight','orthogonal_weight') if model['name']=='HIEST' else ())+(('thresholds','weights') if model['name']=='GSNet' else ())+(('od_weight','origin_weight','destination_weight') if model['name']=='GEML' else ())+(('delta',) if training['loss'].get('name') in ('huber','masked_huber') else ())+(('negative_samples',) if spec.protocol in ('atst_ranking','stan_ranking') else
             ('negative_samples','temperature','num_nearest','exclude_visited') if spec.protocol=='geosan_ranking' else ()),
         'early_stopping': ('patience', 'min_delta')}.items():
         _known(training[key], names, f'training.{key}')
@@ -413,6 +435,10 @@ def validate(config, preset):
         spec.task,('mae','mse','masked_mae','masked_mse','huber','masked_huber'))
     if model['name'] in ('CCRNN','DSAN'):
         losses += ('rmse','masked_rmse')
+    if model['name']=='HIEST':
+        for key,default in dict(original_weight=.01,regional_weight=.01,orthogonal_weight=.1).items():
+            training['loss'].setdefault(key,default)
+            _number(training['loss'][key],'HIEST loss.'+key)
     if model['name']=='GSNet':
         losses = ('risk_mse',)
         loss = training['loss']

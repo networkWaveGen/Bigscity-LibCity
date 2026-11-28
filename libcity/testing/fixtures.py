@@ -112,6 +112,25 @@ def dsan_fixture(root):
     return grid_fixture(root,steps=60)
 
 
+def hiest_fixture(root,name='HierarchyTiny',steps=60):
+    folder=atomic_fixture(root,name,steps,nodes=7)
+    ids=np.array([71,3,108,19,250,6,400])
+    path=folder/f'{name}.geo';geo=pd.read_csv(path);geo['geo_id']=ids
+    geo.sample(frac=1,random_state=23).to_csv(path,index=False)
+    path=folder/f'{name}.dyna';frame=pd.read_csv(path).rename(columns={'speed':'value_0'})
+    frame['value_1']=20+frame['entity_id']*.3+np.cos((frame['dyna_id']%steps)/3)
+    frame['entity_id']=frame['entity_id'].map(dict(enumerate(ids)))
+    frame.to_csv(path,index=False)
+    edges=[(0,1),(1,2),(2,0),(2,3),(3,4),(4,2),(4,5)]
+    pairs=[pair for edge in edges for pair in (edge,edge[::-1])]
+    pd.DataFrame(dict(rel_id=range(len(pairs)),type='geo',origin_id=[int(ids[a]) for a,b in pairs],
+        destination_id=[int(ids[b]) for a,b in pairs],distance=1.)).to_csv(folder/f'{name}.rel',index=False)
+    path=folder/'config.json';raw=json.loads(path.read_text(encoding='utf-8'))
+    raw.update(data_col=['value_0','value_1'],output_dim=2)
+    path.write_text(json.dumps(raw),encoding='utf-8')
+    return folder
+
+
 def stdn_fixture(root,name='STDNTiny',steps=160,rows=2,columns=3,features=2,outputs=2):
     folder=grid_fixture(root,name,steps,rows,columns,features,outputs)
     clock=pd.date_range('2024-01-01',periods=steps,freq='h',tz='UTC')

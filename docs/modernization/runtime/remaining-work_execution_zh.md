@@ -61,7 +61,8 @@
 | commit53 | 76535dc | feat: migrate GSNet with forecast-time attention and region objectives |
 | commit54 | 09077cf | feat: migrate STDN with causal volume-flow sampling and shifted attention |
 | commit55 | 4ae8e8c | feat: migrate ESG with train-only graph history and factored relations |
-| commit56 | 随本节交付的提交 | fix: align point observations by real node IDs and UTC time |
+| commit56 | 87c269f | fix: align point observations by real node IDs and UTC time |
+| commit57 | 随本节交付的提交 | feat: migrate HIEST with sample-isolated hierarchy and auxiliary training |
 
 ## commit1：修复基础交通缓存（670b325）
 
@@ -668,6 +669,18 @@ forward 由配置决定预测长度，每步重新编码当前窗口；预测回
 验证：新增 **18 项通过**，6 组数字/文本 ID 与节点分块/时间优先/完全乱序，逐原始时间和实际 ID 验证全部观测/目标/图及冷热缓存；9 类无效节点/完整性/时钟/数值输入；旧位置缓存不复用且保留、UTC 偏移/NaN；真实训练后 CSV 行重排评估一致，缺失对齐声明或改变节点轴时权重加载拒绝。相关缓存/切分/配置合计 **43 passed**。独立于进行中的 HIEST 迁移，完整回归 **1281 passed，0 failed，0 errors，0 skipped**，见 [汇总](remaining-validation.json)。
 
 仓库外公开夹具、训练、独立评估、续训 **4 条命令成功**，实际 IDs [108,71,3]、观测完全打乱，导出原始真值逐时间/真实 ID 复算一致；预测 [9,2,3,1]，独立预测/指标一致，第三轮累计 9 次更新。公开 GRU 示例保持 cache=false（本次 CLI 三次均 disabled，缓存复用另由专项验证），见 [CLI](point-identity-cli-validation.json)。本批不增加模型计数：仍为 **76/100**，排除延期 Common 与模板后还有 **15 个实际模型**及最终验收；HIEST 工作已本地保留，继续下一批迁移。
+
+## commit57：迁移 HIEST 重叠分区、逐样本层次图与显式辅助训练
+
+原问题：HIEST 尚未接入统一运行时；原图/区域映射固定设备，普通 forward 返回辅助特征。旧全局图和重建 Gram 的轴重排错误且混合不同样本；单支持类型与共享 GCN 宽度不匹配，零 hop 仍追加传播项；多目标输出把剩余时间维当目标轴。自适应层数在极短历史时可能为零或 kernel_size=1 除零，单节点/单样本 BN 会失败，多个 residual/BN 层从未参与训练。
+
+处理：实现标准 nn.Module、prepare_hiest 与独立辅助 step，复用公共训练、评估及安全检查点。以真实 ID 和稳定顺序构建双连通重叠分区，覆盖桥、关节点和孤立节点，也允许显式指定完整覆盖的区域；列归一化成员矩阵与支持图注册 buffer。逐样本计算正确 Gram，保留原停止图梯度、行归一化/softmax 与四步增强顺序；重建使用稳定 BCEWithLogits，概率目标明确检查，有符号余弦保留且单全局节点为零。辅助项按精确有效目标数加权，原尺度 NaN/0 目标不被历史补零覆盖。输出显式 H×O，修复零 hop/单支持/极短历史；删死层、普通推理跳过最终仅供辅助的图。六类支持矩阵抽为 HGCN/HIEST 公共工具，HGCN 数值与错误合同保持，详见 [HIEST 说明](hiest_zh.md)。
+
+验证：新增 **44 项通过**，四组修正旧轴后的预测/全部有效参数和输入梯度（含默认宽度、多目标、零 hop 与单节点），独立逐样本 BCE/有符号余弦公式及梯度，真实 ID 与物理节点重排、关节点/桥/孤立区域、六种支持、普通推理不执行辅助图、缓存与未来隔离/原始 NaN 和零、257/259 个目标的精确计数及微批梯度、两种 scaler 的 dropout/BN/Adam/metric 调度/早停/最佳模型/RNG/加载器完整恢复、真实单样本尾批 CPU AMP、Windows spawn 和 14 类配置拒绝。相关 HGCN/配置/点身份合计 **121 passed**，迁移表专项通过；完整回归 **1325 passed，0 failed，0 errors，0 skipped**，见 [汇总](remaining-validation.json)。
+
+仓库外实际生成、训练、独立评估、续训 **4 条命令成功**，7 个非连续 ID 节点自动划为 4 个重叠/桥/孤立区域，预测 [11,2,7,2]，独立预测/指标完全一致；第三轮累计 12 次更新、缓存 miss/hit/hit。原尺度 masked MAE 独立复算约 3.913424，与评估一致；静态图/成员随纯权重保存，独立评估没有训练产物，见 [CLI](hiest-cli-validation.json)。本批修正数学轴语义，不宣称与旧错误实现数值等价或复现论文精度；总层数为一时预测仅依赖时间 skip 的原结构保留，稠密图平方成本与 CUDA/MPS 专项认证另行记录。
+
+清单更新为 **77/100**、23 条 pending；扣除延期 Common 和模板后还剩 **14 个实际模型**：DMVSTNet、GMAN、STAGGCN、STMGAT、D2STGNN、STGODE、SSTBAN、STTSNet、FOGS、DSTAGNN、MultiSPANS、STWave、PDFormer、STGNCDE。它们及最终完整交付审计仍在主线范围内，不将本批通过当作全库完成。
 
 ## 持续完成的清单
 
