@@ -2,14 +2,8 @@
 import random
 
 from libcity.executor.curriculum import teacher_probability
-from libcity.executor.evaluate import ForecastLoss
-from libcity.executor.root_loss import RootMeanSquaredLoss
+from libcity.executor.root_loss import build_forecast_loss as build_loss
 from libcity.executor.train import train_loop
-
-
-def build_loss(bundle,config):
-    return (RootMeanSquaredLoss(bundle,config) if config['name'] in ('rmse','masked_rmse') else
-        ForecastLoss(config,bundle.scaler,bundle.metadata.output_dim))
 
 
 def curriculum_step(loss_fn,strategy):

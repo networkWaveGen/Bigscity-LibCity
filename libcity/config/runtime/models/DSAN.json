@@ -1,0 +1,8 @@
+{
+  "model": {"params": {"L": 3, "d": 64, "n_h": 8, "B": 3, "l_d": 2, "r_d": 0.1}},
+  "data": {"graph": {"name": "none"}, "scaler": {"name": "standard"},
+    "features": {"load_external": true, "time_in_day": true, "day_in_week": true}},
+  "training": {"epochs": 100, "optimizer": {"name": "adam", "lr": 0.0001, "eps": 0.000000001},
+    "scheduler": {"name": "multistep", "interval": "epoch", "milestones": [5,20,40,70], "gamma": 0.1},
+    "loss": {"name": "masked_rmse", "mask_value": 0.0}, "early_stopping": {"patience": 50}}
+}

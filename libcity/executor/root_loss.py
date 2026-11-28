@@ -4,6 +4,11 @@ import math
 from libcity.executor.evaluate import ForecastLoss
 
 
+def build_forecast_loss(bundle,config):
+    return (RootMeanSquaredLoss(bundle,config) if config['name'] in ('rmse','masked_rmse') else
+        ForecastLoss(config,bundle.scaler,bundle.metadata.output_dim))
+
+
 class RootMeanSquaredLoss(ForecastLoss):
     """Emit mean-squared statistics; the loop applies the outer square root.
 

@@ -1,0 +1,8 @@
+{
+  "model": {"name": "DSAN", "params": {"L": 2, "d": 8, "n_h": 2, "B": 1, "l_d": 1, "r_d": 0.1}},
+  "data": {"dataset": "GridTiny", "data_dir": "data", "cache_dir": "cache",
+    "input_window": 4, "output_window": 2, "pad_training": false},
+  "training": {"epochs": 2, "batch_size": 5, "accumulation_steps": 2},
+  "evaluation": {"batch_size": 4},
+  "runtime": {"device": "cpu", "seed": 17, "output_dir": "runs", "exp_id": "dsan-demo"}
+}

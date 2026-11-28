@@ -104,6 +104,14 @@ def validate(config, preset):
     if model['name']=='CSTN':
         for key in ('n_layers','c_lt'):
             _positive(model['params'][key],'CSTN '+key)
+    if model['name']=='DSAN':
+        params = model['params']
+        for key in ('L','d','n_h','B'):
+            _positive(params[key],'DSAN '+key)
+        _positive(params['l_d'],'DSAN l_d',zero=True)
+        _number(params['r_d'],'DSAN r_d')
+        if params['d']%params['n_h'] or params['r_d']>=1:
+            raise ValueError('DSAN requires d divisible by n_h and r_d below one')
     if spec.kind=='external':
         _validate_external(data,training,evaluation,runtime,model['name'])
         return
@@ -178,8 +186,15 @@ def validate(config, preset):
                 raise ValueError('data.graph.reachability_column is a TGCLSTM column name or null')
         _known(data['sampling'], ('name','closeness','period','trend','interval_period','interval_trend',
                                   'temporal_history','period_steps','trend_steps'), 'data.sampling')
-        if data['sampling'].get('name') not in ('window','cpt','crann','grid_cpt','frame_cpt','seasonal_windows','od_window'):
+        if data['sampling'].get('name') not in ('window','cpt','crann','grid_cpt','frame_cpt','seasonal_windows','od_window','grid_window'):
             raise ValueError('Unknown data.sampling.name')
+        if (spec.protocol=='grid_window') != (data['sampling']['name']=='grid_window'):
+            raise ValueError('grid_window sampling requires a registered grid_window model and vice versa')
+        if model['name']=='DSAN':
+            _known(data['sampling'],('name',),'DSAN data.sampling')
+            _known(data['graph'],('name','symmetric','self_loops'),'DSAN data.graph')
+            if data['graph']['name']!='none' or data['graph'].get('symmetric',False) or data['graph'].get('self_loops',False):
+                raise ValueError('DSAN uses grid positions, requiring graph.name=none without graph switches')
         if (spec.protocol=='od_window') != (data['sampling']['name']=='od_window'):
             raise ValueError('od_window sampling requires a registered OD model and vice versa')
         if spec.protocol=='od_window' and model['name']!='CSTN' and data['graph']['name'] not in ('weighted','binary'):
@@ -207,7 +222,7 @@ def validate(config, preset):
             for key in ('interval_period','interval_trend'):
                 _positive(data['sampling'].get(key,1),f'data.sampling.{key}')
         if data['graph'].get('name') not in ('binary', 'weighted', 'distance','inverse_distance','distance_bands')+(
-                ('svd_gaussian',) if model['name']=='CCRNN' else ('dynamic',) if model['name']=='DMSTGCN' else ('none',) if model['name']=='CSTN' else ()):
+                ('svd_gaussian',) if model['name']=='CCRNN' else ('dynamic',) if model['name']=='DMSTGCN' else ('none',) if model['name'] in ('CSTN','DSAN') else ()):
             raise ValueError('Unknown data.graph.name')
         if (data['graph']['name']=='distance_bands' and model['name']!='MultiSTGCnet') or (
                 model['name']=='MultiSTGCnet' and data['graph']['name'] not in ('distance_bands','binary')):
@@ -310,7 +325,7 @@ def validate(config, preset):
     eta_losses = ('cumulative_relative_rmse',) if spec.protocol=='ttpnet_eta' else ('mae','mse')
     losses={'traj_loc_pred':trajectory_losses,'road_representation':road_losses,'eta':eta_losses}.get(
         spec.task,('mae','mse','masked_mae','masked_mse','huber','masked_huber'))
-    if model['name']=='CCRNN':
+    if model['name'] in ('CCRNN','DSAN'):
         losses += ('rmse','masked_rmse')
     if model['name']=='GEML':
         losses = ('mse','masked_mse')

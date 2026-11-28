@@ -29,6 +29,8 @@ class ModelSpec:
 
 
 MODELS = {
+    'DSAN': ModelSpec('libcity.model.traffic_flow_prediction.runtime_dsan:DSAN',protocol='grid_window',
+        prepare_data='libcity.data.grid_traffic:prepare_grid',loss='libcity.executor.root_loss:build_forecast_loss'),
     'CSTN': ModelSpec('libcity.model.traffic_od_prediction.runtime_cstn:CSTN',protocol='od_window',
         prepare_data='libcity.data.od_bundle:prepare_od'),
     'GEML': ModelSpec('libcity.model.traffic_od_prediction.runtime_geml:GEML',protocol='od_window',

@@ -55,7 +55,8 @@
 | commit47 | 0ef3677 | feat: add OD data bundles and spatial-axis evaluation |
 | commit48 | 9cb1e60 | feat: migrate GEML with corrected periodic memory and raw OD objectives |
 | commit49 | dbe6b3f | feat: migrate CSTN with causal grid OD contexts and independent correlations |
-| commit50 | 随本节交付的提交 | fix: validate neural inference inputs before loading weights |
+| commit50 | aafc857 | fix: validate neural inference inputs before loading weights |
+| commit51 | 随本节交付的提交 | feat: migrate DSAN with isolated grid attention and raw masks |
 
 ## commit1：修复基础交通缓存（670b325）
 
@@ -594,6 +595,18 @@ forward 由配置决定预测长度，每步重新编码当前窗口；预测回
 验证：新增 **13 项通过**：Tensor 键和版本元信息、快照独立/标准 PyTorch 加载/单文件复制；七种形状可兼容的错误 scaler/节点/网格/未来及历史顺序/窗口/结构在加载前拒绝；公共 API 允许批次/训练补齐变化且不创建训练组件；旧最佳缺说明拒绝、旧完整状态零额外更新导出、冲突说明恢复前拒绝、测试观测变化允许。相关 CSTN/GEML/引擎/旧入口合计 **109 passed**。完整回归 **1085 passed，0 failed，0 errors，0 skipped**，见 [汇总](remaining-validation.json)。
 
 实际发布 CSTN 的夹具、训练、复制后的独立权重评估、错误 scaler 拒绝、续训共 **5 条命令全部符合预期**；其中 4 条成功、1 条按预期明确失败。正确预测/指标完全一致，第三轮 9 次更新，没有训练产物或额外说明文件依赖，见 [CLI](inference-weights-cli-validation.json)。本批不增加模型计数：仍为 **72/100**，排除延期 Common 与模板后还有 **19 个模型**及最终验收。
+
+## commit51：迁移 DSAN，修复局部布局、跨样本注意力与无效层
+
+原问题：局部区域折叠入 batch 后按普通 repeat 对齐全局上下文，混入其他样本。局部卷积在折叠后的全局网格而非每个真实方块中执行；Enc-D/Dec-S/Dec-T 每层反复读取初始输入，早期层输出未用于预测。注意力按已经分头的宽度又除一次头数，因果掩码遮蔽对角，全空行产生无意义均匀权重。FFN/种子宽度写死 64/2，输出交换矩形行列；掩码依据归一化值求和，位置每次重建且依赖固定 device，入口读取 y。
+
+处理：实现标准 DSAN，保留全局/局部编码、每历史位置独立卷积、时间到预测窗投影和空间/时间切换解码。明确 B/N/时间/空间轴，广播只在同一样本内；pad/unfold 提取真实局部方块。所有层逐层传递，修正 head_dim 缩放、可见对角及全遮蔽行零注意力，恢复真实网格/目标通道顺序；各位置和映射注册 buffer。前向只用历史及原始掩码，不持有 scaler/logger/device，也不读 y。沿用 LibCity 历史尾窗种子；预测窗更长时用最后已知帧延长，不冒充真实未来，不声称作者逐步自回归训练或论文精度等价。
+
+新增 grid_window 连续偏移，目标时间互斥、训练区间归一化和 y_raw 保留；原始有限非零掩码在归一化前生成。图 none 不读 .rel，来源清单覆盖实际 .grid。共享原始缓存可复用窗口/切分/scaler，命中不重读完整外部/观测行；加强 dtype/有限值/时钟/区间损坏重建，允许连续窗口使用非整日频率，原 CPT 顺序不变。默认 masked_rmse 复用公共整组累积与评估开方；共用构造器供 CCRNN/DSAN 使用，CCRNN 的原导入名保留。配置、夹具、示例与注册同步接入，详见 [修复说明](dsan_zh.md)。
+
+验证：新增 **37 项通过**，四组修正旧 Torch 子模块、按样本/区域独立运行的完整预测及全部参数/输入/外部梯度，覆盖默认宽度/层数及不同目标/宽度/矩形/半径；SDPA 头缩放/掩码/全空梯度、NumPy 位置、局部方块/布尔与梯度、物理节点置换、跨样本零梯度、无标签/未来输入/RNG、长预测；原始零/NaN/训练统计/时间与未来隔离、缓存无完整行重读及四类损坏、非整日时钟；两种 scaler 的 dropout/Adam/metric 调度全状态精确续训，单格/单帧真实尾批 CPU AMP 和 Windows spawn。连同原网格/根损失/CCRNN **143 passed**；完整回归 **1122 passed，0 failed，0 errors，0 skipped**，见 [汇总](remaining-validation.json)。
+
+仓库外夹具、训练、独立评估和续训 **4 条命令成功**，预测 [11,2,6,2]，独立预测与指标完全一致；续训第三轮累计 12 次更新，缓存 miss/hit/hit。原尺度 masked RMSE 独立计算约 4.077559，与评估 loss 一致；安全权重带公共输入说明，独立评估没有训练产物，见 [CLI](dsan-cli-validation.json)。清单为 **73/100**、27 条 pending；排除延期 Common 与模板后，还有 **18 个实际模型**及最终全量验收。
 
 ## 持续完成的清单
 

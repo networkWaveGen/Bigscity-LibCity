@@ -5,7 +5,7 @@ from pathlib import Path
 import sys
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT))
-from libcity.testing.fixtures import atomic_fixture,crann_fixture,map_fixture,task_fixture,road_feature_fixture,multiscale_fixture,tgclstm_fixture,strnn_fixture,serm_fixture,ttpnet_fixture,grid_fixture,periodic_fixture,reslstm_fixture,dgcn_fixture,dmstgcn_fixture,geml_fixture,cstn_fixture
+from libcity.testing.fixtures import atomic_fixture,crann_fixture,map_fixture,task_fixture,road_feature_fixture,multiscale_fixture,tgclstm_fixture,strnn_fixture,serm_fixture,ttpnet_fixture,grid_fixture,periodic_fixture,reslstm_fixture,dgcn_fixture,dmstgcn_fixture,geml_fixture,cstn_fixture,dsan_fixture
 from libcity.model.runtime_registry import model_spec
 
 
@@ -17,7 +17,7 @@ def main(argv=None):
     parser=argparse.ArgumentParser()
     parser.add_argument('--directory',required=True,type=Path)
     parser.add_argument('--task',choices=EXAMPLES)
-    parser.add_argument('--model',choices=('GRU','CSTN','GEML','DMSTGCN','CCRNN','RGSL','GTS','HGCN','DGCN','STPGCN','STSGCN','DKFN','ResLSTM','CRANN','ChebConv','GAT','GeomGCN','STResNet','ACFM','CONVGCN','MultiSTGCnet','ASTGCN','MSTGCN','MegaCRN','TESTAM','ToGCN','SimST','STNN','TGCLSTM','STTN','TimeMixer','STG2Seq','DeepMove','STRNN','HSTLSTM','ATSTLSTM','SERM','STAN','CARA','LSTPM','GeoSAN','TTPNet','Node2Vec','DeepWalk'),help='Optional named model example')
+    parser.add_argument('--model',choices=('GRU','DSAN','CSTN','GEML','DMSTGCN','CCRNN','RGSL','GTS','HGCN','DGCN','STPGCN','STSGCN','DKFN','ResLSTM','CRANN','ChebConv','GAT','GeomGCN','STResNet','ACFM','CONVGCN','MultiSTGCnet','ASTGCN','MSTGCN','MegaCRN','TESTAM','ToGCN','SimST','STNN','TGCLSTM','STTN','TimeMixer','STG2Seq','DeepMove','STRNN','HSTLSTM','ATSTLSTM','SERM','STAN','CARA','LSTPM','GeoSAN','TTPNet','Node2Vec','DeepWalk'),help='Optional named model example')
     args=parser.parse_args(argv)
     selected_task = model_spec(args.model).task if args.model else args.task or 'traffic_state_pred'
     if args.model and args.task and args.task!=selected_task:
@@ -25,7 +25,7 @@ def main(argv=None):
     args.task = args.task or selected_task
     directory=args.directory.expanduser().resolve()
     directory.mkdir(parents=True,exist_ok=True)
-    fixture=(cstn_fixture if args.model=='CSTN' else geml_fixture if args.model=='GEML' else dmstgcn_fixture if args.model=='DMSTGCN' else dgcn_fixture if args.model=='DGCN' else reslstm_fixture if args.model=='ResLSTM' else periodic_fixture if args.model in ('CONVGCN','MultiSTGCnet') else grid_fixture if args.model in ('STResNet','ACFM') else road_feature_fixture if args.model in ('ChebConv','GAT','GeomGCN') else
+    fixture=(dsan_fixture if args.model=='DSAN' else cstn_fixture if args.model=='CSTN' else geml_fixture if args.model=='GEML' else dmstgcn_fixture if args.model=='DMSTGCN' else dgcn_fixture if args.model=='DGCN' else reslstm_fixture if args.model=='ResLSTM' else periodic_fixture if args.model in ('CONVGCN','MultiSTGCnet') else grid_fixture if args.model in ('STResNet','ACFM') else road_feature_fixture if args.model in ('ChebConv','GAT','GeomGCN') else
         (tgclstm_fixture if args.model=='TGCLSTM' else crann_fixture if args.model=='CRANN' else multiscale_fixture if args.model in ('ASTGCN','MSTGCN') else atomic_fixture) if args.task=='traffic_state_pred' else
         map_fixture if args.task=='map_matching' else ttpnet_fixture if args.model=='TTPNet' else serm_fixture if args.model=='SERM' else strnn_fixture if args.model in ('STRNN','HSTLSTM','ATSTLSTM','STAN','CARA','LSTPM','GeoSAN') else task_fixture)
     fixture(directory/'data')

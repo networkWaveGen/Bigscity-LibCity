@@ -1,6 +1,6 @@
 # RMSE 的累积更新与评估聚合
 
-该组件由 commit44 加入，并已由 CCRNN 原生运行时接入。CCRNN 的命令行配置可选择 rmse/masked_rmse；Python 自定义训练同样可传入 loss_fn 组合使用。各模型的默认损失和能力范围仍以模型预设及迁移清单为准。
+该组件由 commit44 加入，已由 CCRNN 和 DSAN 原生运行时接入，两者的命令行配置可选择 rmse/masked_rmse。共用 build_forecast_loss 构造器按名称选择 RMSE 或普通预测损失，CCRNN 的原导入名保留；Python 自定义训练同样可传入 loss_fn 组合使用。各模型的默认损失和能力范围仍以模型预设及迁移清单为准。
 
 ## 问题与目标
 
