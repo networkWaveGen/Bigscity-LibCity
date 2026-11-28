@@ -1,0 +1,7 @@
+{
+  "model": {"params": {"rnn_units": 64, "num_layers": 2, "embed_dim": 8, "cheb_k": 2}},
+  "data": {"scaler": {"name": "standard"}},
+  "training": {"epochs": 100, "optimizer": {"name": "adam", "lr": 0.003},
+    "early_stopping": {"patience": 15}, "loss": {"name": "masked_mae", "mask_value": 0},
+    "strategy": {"temperature": 1.0}}
+}

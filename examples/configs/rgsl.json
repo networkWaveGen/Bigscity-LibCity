@@ -1,0 +1,8 @@
+{
+  "data": {"dataset": "Tiny", "data_dir": "data", "cache_dir": "cache",
+    "input_window": 4, "output_window": 2, "pad_training": false},
+  "model": {"name": "RGSL", "params": {"rnn_units": 16, "num_layers": 1, "embed_dim": 4}},
+  "training": {"epochs": 2, "batch_size": 5, "accumulation_steps": 2},
+  "evaluation": {"batch_size": 5},
+  "runtime": {"device": "cpu", "seed": 17, "output_dir": "runs", "exp_id": "rgsl"}
+}

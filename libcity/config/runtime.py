@@ -295,6 +295,9 @@ def validate(config, preset):
         _positive(strategy.get('graph_regularization_epochs'),'strategy.graph_regularization_epochs',zero=True)
         _number(strategy.get('temperature'),'strategy.temperature',strict=True)
         _number(strategy.get('graph_regularization_weight'),'strategy.graph_regularization_weight')
+    if model['name']=='RGSL':
+        _known(training['strategy'],('temperature',),'training.strategy')
+        _number(training['strategy'].get('temperature'),'RGSL strategy.temperature',strict=True)
     if spec.task=='traj_loc_pred':
         _number(data['session_gap_hours'],'session_gap_hours',strict=True)
         _positive(data['min_session_length'],'min_session_length')

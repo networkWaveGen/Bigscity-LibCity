@@ -47,7 +47,8 @@
 | commit39 | 3fbe3d7 | feat: migrate DGCN with explicit CPT axes and dynamic graphs |
 | commit40 | ed4daee | fix: compute CPT histories from exact active physical periods |
 | commit41 | f17311e | feat: migrate HGCN with complete region aggregation and static graph state |
-| commit42 | 随本节交付的提交 | feat: migrate GTS with train-only graph features and explicit graph training |
+| commit42 | 1020ca6 | feat: migrate GTS with train-only graph features and explicit graph training |
+| commit43 | 随本节交付的提交 | feat: migrate RGSL with stable mixed graphs and explicit sampling |
 
 ## commit1：修复基础交通缓存（670b325）
 
@@ -484,6 +485,20 @@ forward 由配置决定预测长度，每步重新编码当前窗口；预测回
 验证：新增 **31 项通过**，四组受控 Gumbel 的旧完整预测/图 logits/BCE/全部梯度/BN 对照包含默认 64/100/3 网络及训练模式，另有三组扩散单元与图梯度、配对分解、解析直通梯度、无标签/RNG/样本独立、仅训练序列/缓存/通道/连续性/未来隔离、只读大数组/检查点元信息、显式课程/稳定 BCE/正则截止及空目标、每次评估只算一张新图。真实原子数据完整训练/独立评估/中断续训跨正则截止后，模型、BN、Adam、调度器、Torch/NumPy RNG 和任务状态逐项完全相等；单节点及单特征步真实尾批 CPU AMP 通过。定向合计 **39 passed**，完整回归 **865 passed，0 failed，0 errors，0 skipped**，见 [汇总](remaining-validation.json)。
 
 仓库外实际夹具生成、训练、独立评估和续训共 **4 条命令成功**，预测形状 [9,2,3,1]，独立评估预测/指标完全一致；续训第三轮共 9 次参数更新，缓存 miss/hit/hit。三个进程的图特征均为训练前 28 帧、形状 [28,3]；完整权重保存对应 buffer，元信息仅 shape/dtype，独立评估不创建训练产物。见 [GTS CLI](gts-cli-validation.json)。迁移表为 **67/100**，33 条 pending；排除延期 Common 与模板后仍有 **24 个交通预测模型**及最终全量验收待完成。
+
+## commit43：迁移 RGSL，修复图数值与重复计算
+
+原问题：旧 forward 用 if self.train 判断模式，实际拿到绑定方法，且两条分支都随机采图，验证/独立评估不稳定。零向量余弦和空学习图的 max(L)-min(L) 会除零；静态图/多项式未注册 buffer，adj/tilde 属性会保留计算图。静态高阶 Chebyshev 用元素乘法而学习分支用矩阵乘法，cheb_k=1 又多生成一项；小于 16 通道会创建零宽门控层。每个时间步及门/更新分支重复生成学习基底和节点专属参数，末层堆叠最终不使用的全时序隐藏状态，输入/输出宽度默认 1。
+
+处理：新增原生显式/隐式双图混合循环网络，保留原节点专属卷积、两支通道注意力、循环门和多步卷积头。输入/输出宽度取元信息，门控中间维至少 1；静态图基底/单位阵/掩码使用 buffer，不持有 scaler/logger/device 或带梯度的图属性。余弦加入安全归一化，空图伪尺度回退 1，静态零图回退 -I；静态/学习基底统一矩阵递推，支持单项阶数。公共未归一化谱缩放提取到 runtime_graph，DGCN 复用相同计算并保持原状态键。学习基底每个前向生成一次，各层门/更新节点参数准备一次；仅非末层保存完整时间序列。
+
+经 [作者采图代码](https://github.com/alipay/RGSL/blob/main/model/RGSL.py) 核对，保留原扰动分数的线性直通梯度，不自行改成 softmax 梯度或额外取对数。training.strategy.temperature 显式设置其尺度（默认 1），训练专用前向使用 Torch Gumbel RNG，普通 forward 只返回确定性预测 Tensor，不读取标签；每次完整评估只计算一次新图基底，不跨训练更新保留图。默认 Adam 0.003、100 轮上限、早停 patience=15、原尺度 masked_mae 排除零目标，没有新增图 BCE。提供 rgsl.json 与夹具命令；缓存、切分、设备、AMP、累积和续训沿用公共组件。
+
+验证：新增 **28 项通过**，四组受控噪声旧完整预测/全部参数与输入梯度对照覆盖默认 64 单元双层/12 步及高阶、多目标（高阶参考明确修正旧静态递推）。另验证原线性直通梯度/大分数硬值、矩阵多项式、空采图/静态零图/零嵌入/单节点有限梯度、低通道/batch=1/float64、无标签/无 RNG/无跨样本影响、基底与节点参数单次准备、每次评估新图。真实原子数据训练/独立评估与随机采图/Adam/指数调度/RNG 中断恢复逐项完全一致；三种真实尾批 CPU AMP 通过。含 DGCN 和清单检查合计 **60 passed**；完整回归与跨进程命令结果见 [汇总](remaining-validation.json) 和 [RGSL CLI](rgsl-cli-validation.json)。
+
+仓库外夹具、训练、独立评估、续训共 **4 条命令成功**，预测形状 [9,2,3,1]，独立预测与指标完全一致；续训第三轮共 9 次参数更新，缓存 miss/hit/hit，静态基底 [2,3,3] 保存为安全 Tensor 权重，独立评估不创建训练产物。默认二阶计算保留，高阶静态递推、确定性评估、低宽门控和退化图属于明确修订，不声称旧错误流程或论文精度等价。清单为 **68/100** 已迁移，32 条 pending；排除延期 Common 与模板后还有 **23 个交通预测模型**及最终全量验收。
+
+本批完整回归：**893 passed，0 failed，0 errors，0 skipped**；[汇总](remaining-validation.json) 保存本次用例与结果文件位置，既有 GTS 及 DGCN 检查均通过。
 
 ## 持续完成的清单
 

@@ -1,0 +1,121 @@
+{
+  "passed": true,
+  "source": "D:\\LibCity 2.0\\LibCity-modernization",
+  "directory": "D:\\LibCity 2.0\\.runtime-tests\\rgsl-cli-5snoca2u",
+  "commands": [
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\tools\\make_runtime_fixture.py",
+        "--directory",
+        "D:\\LibCity 2.0\\.runtime-tests\\rgsl-cli-5snoca2u\\example",
+        "--model",
+        "RGSL"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\rgsl-cli-5snoca2u",
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "train",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\rgsl-cli-5snoca2u\\example\\rgsl.json",
+        "--set",
+        "runtime.exp_id=train"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\rgsl-cli-5snoca2u",
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "evaluate",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\rgsl-cli-5snoca2u\\example\\rgsl.json",
+        "--checkpoint",
+        "D:\\LibCity 2.0\\.runtime-tests\\rgsl-cli-5snoca2u\\example\\runs\\train\\checkpoints\\best.pt",
+        "--set",
+        "runtime.exp_id=evaluated"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\rgsl-cli-5snoca2u",
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "train",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\rgsl-cli-5snoca2u\\example\\rgsl.json",
+        "--resume",
+        "D:\\LibCity 2.0\\.runtime-tests\\rgsl-cli-5snoca2u\\example\\runs\\train\\checkpoints\\last.pt",
+        "--set",
+        "training.epochs=3",
+        "--set",
+        "runtime.exp_id=resumed"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\rgsl-cli-5snoca2u",
+      "exit_code": 0
+    }
+  ],
+  "model": "RGSL",
+  "metrics": {
+    "MAE@1": 0.9857213055645978,
+    "RMSE@1": 1.20352896516664,
+    "MAE@2": 1.0928063922458224,
+    "RMSE@2": 1.3570668123956857,
+    "loss": 1.0392638643582661
+  },
+  "prediction_shape": [
+    9,
+    2,
+    3,
+    1
+  ],
+  "independent_metrics_exact": true,
+  "independent_predictions_exact": true,
+  "checkpoint_format": 3,
+  "resumed_state": {
+    "stage": "train",
+    "epoch": 3,
+    "batches_seen": 15,
+    "optimizer_steps": 9,
+    "best_metric": 0.8192087941699557,
+    "task_state": {}
+  },
+  "cache_statuses": [
+    "miss",
+    "hit",
+    "hit"
+  ],
+  "checkpoint_static_basis_shape": [
+    2,
+    3,
+    3
+  ],
+  "evaluation_training_artifacts_created": false,
+  "python": "3.12.13",
+  "torch": "2.15.0+cpu",
+  "numpy": "2.5.5",
+  "author_sources": [
+    "https://github.com/alipay/RGSL/blob/main/model/RGSL.py",
+    "https://github.com/alipay/RGSL/blob/main/model/RGCN.py"
+  ],
+  "notes": [
+    "Executed four CLI commands outside the source directory",
+    "Original perturbed-score linear straight-through derivative is retained, without inserting softmax",
+    "Inference uses a deterministic argmax graph, with one learned basis per complete evaluation",
+    "Static higher-order Chebyshev recurrence uses matrix products, correcting the legacy elementwise product",
+    "Zero embeddings and empty learned/static graphs have finite fallbacks",
+    "Static supports and graph masks are model buffers; no differentiable graph persists on the model",
+    "Graph basis and node-specific parameter preparation are shared across observed time steps",
+    "Exact continuous-versus-resumed model, optimizer, schedule, Torch sampling RNG and task state checked by tests"
+  ]
+}

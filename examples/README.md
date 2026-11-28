@@ -364,6 +364,18 @@ uses one deterministic graph per call. Both paths predict without implicit y
 access. Dense edge computation and the history-length-dependent projection
 remain scale costs; select history_steps explicitly for large training series.
 
+Generate RGSL with `--model RGSL`, then use rgsl.json with the same lifecycle
+commands. rnn_units, num_layers, embed_dim and cheb_k select network structure;
+training.strategy.temperature defaults to one. The original implementation uses
+a perturbed-score linear straight-through gradient, rather than a softmax
+surrogate; positive temperature rescales that gradient. Training samples graphs
+explicitly, while inference/evaluation use deterministic edges. Static supports
+and graph masks are buffers, learned bases and node-specific weights are prepared
+once per forward, and full checkpoints restore graph-sampling RNG. Matrix
+Chebyshev recurrence corrects the old high-order static elementwise products;
+zero graphs, zero embeddings and narrow channel gates have finite handling.
+Default training uses raw-scale masked MAE excluding zero targets and Adam 0.003.
+
 The complete supported-model inventory and migration details are in the
 [runtime guide](../docs/modernization/runtime/README_zh.md). Small examples prove
 execution and reproducibility, not real-city benchmark accuracy.

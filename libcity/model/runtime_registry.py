@@ -29,6 +29,8 @@ class ModelSpec:
 
 
 MODELS = {
+    'RGSL': ModelSpec('libcity.model.traffic_flow_prediction.runtime_rgsl:RGSL',
+        train='libcity.executor.rgsl_step:train',evaluate_loader='libcity.executor.rgsl_step:evaluate_rgsl'),
     'GTS': ModelSpec('libcity.model.traffic_speed_prediction.runtime_gts:GTS',
         prepare_data='libcity.data.gts_bundle:prepare_gts',train='libcity.executor.gts_train:train',
         evaluate_loader='libcity.executor.gts_train:evaluate_gts'),

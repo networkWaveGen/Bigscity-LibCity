@@ -1,5 +1,5 @@
 {
-  "scope": "Remaining-work commits 1-42; whole-library migration remains in progress",
+  "scope": "Remaining-work commits 1-43; whole-library migration remains in progress",
   "environment": {
     "python": "3.12.13",
     "torch": "2.15.0+cpu",
@@ -9,7 +9,7 @@
     "scikit_learn": "1.9.1"
   },
   "full_tests": {
-    "tests": 865,
+    "tests": 893,
     "failures": 0,
     "errors": 0,
     "skipped": 0
@@ -624,6 +624,34 @@
     "test_flat_configs_and_training_mode_aliases_are_not_silently_accepted",
     "test_native_eta_export_keeps_repeated_users_and_all_tail_trajectories",
     "test_visualization_cli_uses_explicit_paths_from_outside_source",
+    "test_original_mixed_graph_forecast_and_all_gradients_with_controlled_sampling[64-2-2-8-1-1-12-12]",
+    "test_original_mixed_graph_forecast_and_all_gradients_with_controlled_sampling[16-1-2-4-3-2-4-3]",
+    "test_original_mixed_graph_forecast_and_all_gradients_with_controlled_sampling[16-2-3-5-2-2-3-2]",
+    "test_original_mixed_graph_forecast_and_all_gradients_with_controlled_sampling[32-1-4-4-2-1-1-1]",
+    "test_author_linear_straight_through_gradient_and_hard_values_are_preserved",
+    "test_static_graph_basis_uses_matrix_chebyshev_recurrence[1]",
+    "test_static_graph_basis_uses_matrix_chebyshev_recurrence[2]",
+    "test_static_graph_basis_uses_matrix_chebyshev_recurrence[3]",
+    "test_static_graph_basis_uses_matrix_chebyshev_recurrence[5]",
+    "test_degenerate_graph_empty_sample_zero_embeddings_and_dtype_have_finite_gradients[1-1-1]",
+    "test_degenerate_graph_empty_sample_zero_embeddings_and_dtype_have_finite_gradients[1-3-2]",
+    "test_degenerate_graph_empty_sample_zero_embeddings_and_dtype_have_finite_gradients[4-2-16]",
+    "test_degenerate_graph_empty_sample_zero_embeddings_and_dtype_have_finite_gradients[4-4-3]",
+    "test_forward_is_label_free_deterministic_batch_independent_and_does_not_cache_graphs",
+    "test_graph_and_embedding_parameters_are_prepared_once_per_forward",
+    "test_evaluation_uses_one_fresh_learned_basis_per_call",
+    "test_real_atomic_train_evaluate_and_stochastic_adam_schedule_rng_exact_resume",
+    "test_actual_cpu_amp_with_true_single_sample_tail[1-1-1]",
+    "test_actual_cpu_amp_with_true_single_sample_tail[1-3-2]",
+    "test_actual_cpu_amp_with_true_single_sample_tail[4-3-16]",
+    "test_invalid_dimensions_are_rejected[params0]",
+    "test_invalid_dimensions_are_rejected[params1]",
+    "test_invalid_dimensions_are_rejected[params2]",
+    "test_invalid_dimensions_are_rejected[params3]",
+    "test_invalid_training_policy_is_rejected[strategy0]",
+    "test_invalid_training_policy_is_rejected[strategy1]",
+    "test_invalid_training_policy_is_rejected[strategy2]",
+    "test_invalid_graph_and_input_dimensions_are_rejected",
     "test_reference_forward_and_gradients_with_no_forward_filesystem[ChebConv]",
     "test_reference_forward_and_gradients_with_no_forward_filesystem[GAT]",
     "test_chebyshev_zero_order_and_independent_dual_support_polynomials",
@@ -884,8 +912,8 @@
   ],
   "inventory": {
     "total": 100,
-    "migrated": 67,
-    "pending": 33
+    "migrated": 68,
+    "pending": 32
   },
   "history": [
     {
@@ -1362,6 +1390,20 @@
         "total": 100,
         "migrated": 66,
         "pending": 34
+      }
+    },
+    {
+      "scope": "commits 1-42, through 1020ca6",
+      "full_tests": {
+        "tests": 865,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "inventory": {
+        "total": 100,
+        "migrated": 67,
+        "pending": 33
       }
     }
   ],
@@ -2341,5 +2383,126 @@
       "Static arrays are read-only metadata; numeric contents are model buffers, while checkpoint metadata stores only shape/dtype"
     ]
   },
-  "results_file": "D:\\LibCity 2.0\\.runtime-tests\\remaining-suite-39-results.xml"
+  "results_file": "D:\\LibCity 2.0\\.runtime-tests\\remaining-suite-40-results.xml",
+  "rgsl_cli": {
+    "passed": true,
+    "source": "D:\\LibCity 2.0\\LibCity-modernization",
+    "directory": "D:\\LibCity 2.0\\.runtime-tests\\rgsl-cli-5snoca2u",
+    "commands": [
+      {
+        "command": [
+          "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+          "-B",
+          "D:\\LibCity 2.0\\LibCity-modernization\\tools\\make_runtime_fixture.py",
+          "--directory",
+          "D:\\LibCity 2.0\\.runtime-tests\\rgsl-cli-5snoca2u\\example",
+          "--model",
+          "RGSL"
+        ],
+        "cwd": "D:\\LibCity 2.0\\.runtime-tests\\rgsl-cli-5snoca2u",
+        "exit_code": 0
+      },
+      {
+        "command": [
+          "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+          "-B",
+          "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+          "train",
+          "--config",
+          "D:\\LibCity 2.0\\.runtime-tests\\rgsl-cli-5snoca2u\\example\\rgsl.json",
+          "--set",
+          "runtime.exp_id=train"
+        ],
+        "cwd": "D:\\LibCity 2.0\\.runtime-tests\\rgsl-cli-5snoca2u",
+        "exit_code": 0
+      },
+      {
+        "command": [
+          "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+          "-B",
+          "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+          "evaluate",
+          "--config",
+          "D:\\LibCity 2.0\\.runtime-tests\\rgsl-cli-5snoca2u\\example\\rgsl.json",
+          "--checkpoint",
+          "D:\\LibCity 2.0\\.runtime-tests\\rgsl-cli-5snoca2u\\example\\runs\\train\\checkpoints\\best.pt",
+          "--set",
+          "runtime.exp_id=evaluated"
+        ],
+        "cwd": "D:\\LibCity 2.0\\.runtime-tests\\rgsl-cli-5snoca2u",
+        "exit_code": 0
+      },
+      {
+        "command": [
+          "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+          "-B",
+          "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+          "train",
+          "--config",
+          "D:\\LibCity 2.0\\.runtime-tests\\rgsl-cli-5snoca2u\\example\\rgsl.json",
+          "--resume",
+          "D:\\LibCity 2.0\\.runtime-tests\\rgsl-cli-5snoca2u\\example\\runs\\train\\checkpoints\\last.pt",
+          "--set",
+          "training.epochs=3",
+          "--set",
+          "runtime.exp_id=resumed"
+        ],
+        "cwd": "D:\\LibCity 2.0\\.runtime-tests\\rgsl-cli-5snoca2u",
+        "exit_code": 0
+      }
+    ],
+    "model": "RGSL",
+    "metrics": {
+      "MAE@1": 0.9857213055645978,
+      "RMSE@1": 1.20352896516664,
+      "MAE@2": 1.0928063922458224,
+      "RMSE@2": 1.3570668123956857,
+      "loss": 1.0392638643582661
+    },
+    "prediction_shape": [
+      9,
+      2,
+      3,
+      1
+    ],
+    "independent_metrics_exact": true,
+    "independent_predictions_exact": true,
+    "checkpoint_format": 3,
+    "resumed_state": {
+      "stage": "train",
+      "epoch": 3,
+      "batches_seen": 15,
+      "optimizer_steps": 9,
+      "best_metric": 0.8192087941699557,
+      "task_state": {}
+    },
+    "cache_statuses": [
+      "miss",
+      "hit",
+      "hit"
+    ],
+    "checkpoint_static_basis_shape": [
+      2,
+      3,
+      3
+    ],
+    "evaluation_training_artifacts_created": false,
+    "python": "3.12.13",
+    "torch": "2.15.0+cpu",
+    "numpy": "2.5.5",
+    "author_sources": [
+      "https://github.com/alipay/RGSL/blob/main/model/RGSL.py",
+      "https://github.com/alipay/RGSL/blob/main/model/RGCN.py"
+    ],
+    "notes": [
+      "Executed four CLI commands outside the source directory",
+      "Original perturbed-score linear straight-through derivative is retained, without inserting softmax",
+      "Inference uses a deterministic argmax graph, with one learned basis per complete evaluation",
+      "Static higher-order Chebyshev recurrence uses matrix products, correcting the legacy elementwise product",
+      "Zero embeddings and empty learned/static graphs have finite fallbacks",
+      "Static supports and graph masks are model buffers; no differentiable graph persists on the model",
+      "Graph basis and node-specific parameter preparation are shared across observed time steps",
+      "Exact continuous-versus-resumed model, optimizer, schedule, Torch sampling RNG and task state checked by tests"
+    ]
+  }
 }

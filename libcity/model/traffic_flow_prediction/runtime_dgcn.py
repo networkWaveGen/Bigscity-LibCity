@@ -1,23 +1,13 @@
 """Dynamic graph convolutions over explicitly ordered CPT history chunks."""
 import math
 
-import numpy as np
 import torch
 from torch import nn
 from torch.nn import functional as F
 
 from libcity.model.runtime_attention import TemporalAttention
+from libcity.model.runtime_graph import scaled_laplacian
 from libcity.model.runtime_norm import SingletonBatchNorm2d
-
-
-def scaled_laplacian(adjacency):
-    graph = np.array(adjacency,dtype=np.float64,copy=True)
-    if graph.ndim!=2 or not len(graph) or graph.shape[0]!=graph.shape[1] or not np.isfinite(graph).all() or np.any(graph<0):
-        raise ValueError('DGCN requires a finite nonnegative square adjacency')
-    laplacian = np.diag(graph.sum(1))-graph
-    maximum = float(np.linalg.eigvals(laplacian).real.max())
-    scaled = 2*laplacian/maximum-np.eye(len(graph)) if maximum>1e-12 else -np.eye(len(graph))
-    return torch.tensor(scaled,dtype=torch.float32)
 
 
 def graph_support(base, residual, epsilon):
