@@ -1,0 +1,210 @@
+{
+  "passed": true,
+  "source": "D:\\LibCity 2.0\\LibCity-modernization",
+  "directory": "D:\\LibCity 2.0\\.runtime-tests\\cpt-after-8zpcsh_l",
+  "commands": [
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "train",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\cpt-after-8zpcsh_l\\daily.json"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\cpt-after-8zpcsh_l",
+      "exit_code": 0,
+      "expected_success": true
+    },
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "evaluate",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\cpt-after-8zpcsh_l\\daily.json",
+        "--checkpoint",
+        "D:\\LibCity 2.0\\.runtime-tests\\cpt-after-8zpcsh_l\\runs\\train\\checkpoints\\best.pt",
+        "--set",
+        "runtime.exp_id=evaluated"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\cpt-after-8zpcsh_l",
+      "exit_code": 0,
+      "expected_success": true
+    },
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "train",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\cpt-after-8zpcsh_l\\daily.json",
+        "--resume",
+        "D:\\LibCity 2.0\\.runtime-tests\\cpt-after-8zpcsh_l\\runs\\train\\checkpoints\\last.pt",
+        "--set",
+        "training.epochs=3",
+        "--set",
+        "runtime.exp_id=resumed"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\cpt-after-8zpcsh_l",
+      "exit_code": 0,
+      "expected_success": true
+    },
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "train",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\cpt-before-gzewn07e\\weekly.json",
+        "--resume",
+        "D:\\LibCity 2.0\\.runtime-tests\\cpt-before-gzewn07e\\runs\\before\\checkpoints\\last.pt",
+        "--set",
+        "training.epochs=2",
+        "--set",
+        "runtime.exp_id=rejected-weekly"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\cpt-after-8zpcsh_l",
+      "exit_code": 1,
+      "expected_success": false
+    },
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "train",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\cpt-before-gzewn07e\\weekly.json",
+        "--set",
+        "runtime.exp_id=corrected-weekly"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\cpt-after-8zpcsh_l",
+      "exit_code": 0,
+      "expected_success": true
+    },
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "train",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\dgcn-cli-aw4hzgf0\\example\\dgcn.json",
+        "--resume",
+        "D:\\LibCity 2.0\\.runtime-tests\\dgcn-cli-aw4hzgf0\\example\\runs\\resumed\\checkpoints\\last.pt",
+        "--set",
+        "training.epochs=4",
+        "--set",
+        "runtime.exp_id=cpt-compatible-resume"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\cpt-after-8zpcsh_l",
+      "exit_code": 0,
+      "expected_success": true
+    }
+  ],
+  "config": {
+    "data": {
+      "dataset": "DailyTiny",
+      "data_dir": "data",
+      "cache_dir": "cache",
+      "input_window": 4,
+      "output_window": 4,
+      "sampling": {
+        "name": "cpt",
+        "closeness": 0,
+        "period": 1,
+        "trend": 0
+      },
+      "pad_training": false
+    },
+    "model": {
+      "name": "DGCN",
+      "params": {
+        "c_out": 4,
+        "K": 2,
+        "dropout": 0.2
+      }
+    },
+    "training": {
+      "epochs": 2,
+      "batch_size": 8,
+      "accumulation_steps": 2
+    },
+    "evaluation": {
+      "batch_size": 8
+    },
+    "runtime": {
+      "device": "cpu",
+      "seed": 17,
+      "output_dir": "runs",
+      "exp_id": "train"
+    }
+  },
+  "daily_two_hour": {
+    "prediction_shape": [
+      21,
+      4,
+      3,
+      2
+    ],
+    "independent_metrics_exact": true,
+    "independent_predictions_exact": true,
+    "metrics": {
+      "MAE@1": 8.348217949034675,
+      "RMSE@1": 9.016932518673324,
+      "MAE@2": 8.381012840876503,
+      "RMSE@2": 9.000398725223155,
+      "MAE@3": 8.450031991988894,
+      "RMSE@3": 9.036764103939912,
+      "MAE@4": 8.554816685025655,
+      "RMSE@4": 9.124518138134802,
+      "loss": 81.80804770333427
+    },
+    "cache_statuses": [
+      "miss",
+      "hit",
+      "hit"
+    ],
+    "resumed_state": {
+      "stage": "train",
+      "epoch": 3,
+      "batches_seen": 24,
+      "optimizer_steps": 12,
+      "best_metric": 81.05407242547898,
+      "task_state": {}
+    },
+    "history_span_points": 12,
+    "physical_shift_seconds": 86400
+  },
+  "weekly_seven_minute": {
+    "baseline_commit": "3fbe3d7",
+    "before_directory": "D:\\LibCity 2.0\\.runtime-tests\\cpt-before-gzewn07e",
+    "old_history_span_points": 1344,
+    "old_physical_shift_seconds": 564480,
+    "corrected_history_span_points": 1440,
+    "corrected_physical_shift_seconds": 604800,
+    "old_checkpoint_rejected": true,
+    "rejection_reason": "Resume dataset metadata/normalization state does not match checkpoint",
+    "raw_cache_reused": true,
+    "baseline_command": [
+      "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+      "-B",
+      "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+      "train",
+      "--config",
+      "D:\\LibCity 2.0\\.runtime-tests\\cpt-before-gzewn07e\\weekly.json"
+    ],
+    "baseline_exit_code": 0
+  },
+  "unchanged_hourly_checkpoint": {
+    "baseline_commit": "3fbe3d7",
+    "checkpoint": "D:\\LibCity 2.0\\.runtime-tests\\dgcn-cli-aw4hzgf0",
+    "resume_accepted": true,
+    "epoch": 4,
+    "optimizer_steps": 20
+  }
+}

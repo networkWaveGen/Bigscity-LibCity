@@ -330,8 +330,10 @@ one dense spatiotemporal graph per query. This remains a dense spatial model.
 Generate DGCN with `--model DGCN`; the hourly fixture spans enough history for
 two weekly chunks. Run dgcn.json with the same lifecycle commands. Its small
 example uses horizon=1 and five CPT frames. The named dgcn_cpt protocol retains
-the original five twelve-frame chunks by default, requiring at least twelve
-samples per hour under the current common CPT adapter. CPT categories, widths,
+the original five twelve-frame chunks by default. Its active recent-hour history
+must contain twelve frames. Daily/weekly-only histories may use other sampling
+intervals and longer horizons: each active physical period must be exactly
+representable, and the full horizon must end before the target. CPT categories, widths,
 odd temporal kernels and attention-head counts are configurable. The corrected
 coarse attention groups complete history chunks instead of interleaving their
 positions. Training MSE includes raw zero targets by default; metric masks are

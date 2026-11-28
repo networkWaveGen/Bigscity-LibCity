@@ -44,7 +44,8 @@
 | commit36 | 0a3308d | feat: migrate ResLSTM with independent batches and explicit periods |
 | commit37 | 05765a3 | feat: migrate STSGCN with fresh graph masks and explicit Huber loss |
 | commit38 | 5972104 | feat: migrate STPGCN with registered layers and factored relations |
-| commit39 | 随本节交付的提交 | feat: migrate DGCN with explicit CPT axes and dynamic graphs |
+| commit39 | 3fbe3d7 | feat: migrate DGCN with explicit CPT axes and dynamic graphs |
+| commit40 | 随本节交付的提交 | fix: compute CPT histories from exact active physical periods |
 
 ## commit1：修复基础交通缓存（670b325）
 
@@ -440,10 +441,22 @@ forward 由配置决定预测长度，每步重新编码当前窗口；预测回
 
 新增公共 CPT 待修项：当前以 3600//time_intervals 推算日/周位移，非整小时约数可能产生不精确的物理周期；同时统一限制 horizon<=每小时点数，会错误拒绝仅日/周输入的较长预测。需要单独按每个激活类别的实际秒数验证/计算位移，并按最短激活位移限制完整预测窗，保证所有输入早于目标；已通过的五分钟/小时配置的样本语义应保持一致。
 
+## commit40：按物理周期修复公共 CPT 位移和长预测检查
+
+问题：原适配以 3600//time_intervals 取整后乘日/周小时数。7 分钟的纯周输入会得到 1344 帧，即 564480 秒（6 天 12 小时 48 分钟），而不是 1440 帧/604800 秒的完整一周；2 小时采样则因每小时点数为 0 被拒绝，即使日周期可以精确表示。原统一 horizon<=每小时点数限制还会错误拒绝仅日/周输入的合法长预测。
+
+处理：新增轻量 cpt_offsets，按每个激活类别的真实 3600/86400/604800 秒及其周期倍数换算帧位移。位移必须被采样间隔精确表示；未启用的类别不施加无关频率限制。每段完整输入都必须在目标前结束，因此 horizon 仅受最短激活位移约束。保持 trend/period/closeness 与每类近到远的既有容器顺序、现有分层字段、缓存边界和目标互斥切分。
+
+对原本准确的整小时约数，数组、max_position 和 temporal_indices 完全相同，不强制重训或丢弃原始缓存。原来可运行但周期不精确的配置会获得修正后的 max_position，已有检查点数据元信息校验会在加载模型/优化器前拒绝沿用错误语义；不修改检查点格式，不绕过现有保护。原始时序缓存不存展开窗口，因此同一来源的缓存仍安全复用。
+
+验证：新增 **24 项通过**，覆盖五种既有频率的旧数组逐项一致、7 分钟仅周/七日倍数、2 小时仅日/日周组合、整日采样仅周、无法精确表示的启用周期、完整窗口到达目标时拒绝、非法采样间隔、真实两小时日周期逐帧相差一天/互斥目标/训练统计，以及真实 7 分钟数据的一周对齐和采样身份变化；与多周期模型和定制训练合计 **41 项通过**。完整回归 **787 passed，0 failed，0 errors，0 skipped**，见 [汇总](remaining-validation.json)。
+
+修复前已用 commit39 实际训练并保存 7 分钟错误周周期检查点；修复后实际拒绝其续训，随后同一原始缓存上按正确 1440 帧重新训练成功。此前小时级 DGCN 检查点仍可继续到第四轮/20 次更新。新两小时日周期 4 步预测完成训练、独立评估和续训，预测与指标完全一致、缓存 miss/hit/hit。新增 6 条仓库外命令中 5 条成功、1 条按预期拒绝，见 [CPT 记录](cpt-cli-validation.json)。迁移表仍为 65/100，本期实际模型仍剩 26 个，最终全量验收未完成。
+
 ## 持续完成的清单
 
 - [x] 基础交通缓存保存、读取、失效和独立目录。
 - [x] CRANN 的统一输入、原始目标、完整训练/评估/续训与无标签推理。
-- [ ] 公共 CPT 按激活类别的物理周期计算位移与历史窗口合法性，修正非小时整除频率和仅日/周长预测的检查。
+- [x] 公共 CPT 按激活类别的物理周期计算位移与历史窗口合法性，修正非小时整除频率和仅日/周长预测的检查（commit40）。
 - [ ] 全部未延期模型迁移、实际验证与迁移 CSV 更新（基线 15/100 已迁移；模板及第 8 节 Common 事项另行标注）。
 - [ ] 扩大后的完整回归、发布示例与最终逐项验收；在此之前不声明主线全部完成。

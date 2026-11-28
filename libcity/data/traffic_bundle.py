@@ -126,13 +126,8 @@ def prepare_traffic(data, training, evaluation, seed, logger=None):
         offsets = np.arange(-length, 0)
         layout = dict(kind='crann', length=length, temporal_history=sampling['temporal_history'])
     if sampling['name']=='cpt':
-        points = 3600//metadata.get('time_intervals', 300)
-        if points < horizon:
-            raise ValueError('CPT requires output_window <= points per hour')
-        segments = [(sampling.get('trend',0),7*24*sampling.get('interval_trend',1)),
-                    (sampling.get('period',0),24*sampling.get('interval_period',1)), (sampling.get('closeness',0),1)]
-        offsets = np.array([-depend*points*units+i for count,units in segments
-                            for depend in range(1,count+1) for i in range(horizon)], dtype=np.int64)
+        from libcity.data.cpt_offsets import cpt_offsets
+        offsets = cpt_offsets(sampling,metadata.get('time_intervals',300),horizon)
         maximum = int(-offsets.min())
         layout = dict(kind='cpt', length=len(offsets), max_position=maximum,
                       temporal_indices=(offsets+maximum).tolist(), sampling=dict(sampling))

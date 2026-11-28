@@ -1,5 +1,5 @@
 {
-  "scope": "Remaining-work commits 1-39; whole-library migration remains in progress",
+  "scope": "Remaining-work commits 1-40; whole-library migration remains in progress",
   "environment": {
     "python": "3.12.13",
     "torch": "2.15.0+cpu",
@@ -8,7 +8,7 @@
     "gensim": "4.4.0"
   },
   "full_tests": {
-    "tests": 763,
+    "tests": 787,
     "failures": 0,
     "errors": 0,
     "skipped": 0
@@ -135,6 +135,30 @@
     "test_adapter_matches_atomic_baseline_and_metadata_is_readonly",
     "test_calendar_feature_does_not_implicitly_enable_external_file",
     "test_cli_model_switch_uses_new_preset_without_old_architecture_fields",
+    "test_existing_hour_divisor_protocol_offsets_and_layout_remain_identical[60-12]",
+    "test_existing_hour_divisor_protocol_offsets_and_layout_remain_identical[300-12]",
+    "test_existing_hour_divisor_protocol_offsets_and_layout_remain_identical[600-6]",
+    "test_existing_hour_divisor_protocol_offsets_and_layout_remain_identical[1800-2]",
+    "test_existing_hour_divisor_protocol_offsets_and_layout_remain_identical[3600-1]",
+    "test_only_active_physical_shifts_constrain_frequency_and_complete_history[sampling0-420-4-1440]",
+    "test_only_active_physical_shifts_constrain_frequency_and_complete_history[sampling1-7200-4-12]",
+    "test_only_active_physical_shifts_constrain_frequency_and_complete_history[sampling2-420-4-1440]",
+    "test_only_active_physical_shifts_constrain_frequency_and_complete_history[sampling3-86400-3-7]",
+    "test_only_active_physical_shifts_constrain_frequency_and_complete_history[sampling4-7200-12-12]",
+    "test_unrepresentable_active_periods_fail_instead_of_silently_drifting[sampling0-420]",
+    "test_unrepresentable_active_periods_fail_instead_of_silently_drifting[sampling1-420]",
+    "test_unrepresentable_active_periods_fail_instead_of_silently_drifting[sampling2-7200]",
+    "test_unrepresentable_active_periods_fail_instead_of_silently_drifting[sampling3-420]",
+    "test_each_complete_input_window_ends_before_the_target[sampling0-300-13]",
+    "test_each_complete_input_window_ends_before_the_target[sampling1-7200-13]",
+    "test_each_complete_input_window_ends_before_the_target[sampling2-86400-8]",
+    "test_each_complete_input_window_ends_before_the_target[sampling3-7200-13]",
+    "test_invalid_source_interval_is_rejected[0]",
+    "test_invalid_source_interval_is_rejected[-1]",
+    "test_invalid_source_interval_is_rejected[True]",
+    "test_invalid_source_interval_is_rejected[300.0]",
+    "test_two_hour_daily_only_bundle_has_exact_day_alignment_and_disjoint_targets",
+    "test_weekly_seven_minute_bundle_records_corrected_sampling_identity",
     "test_cpu_convolution_amp_lifecycle_and_backend_restoration",
     "test_cpu_amp_fallback_does_not_require_a_convolution_module",
     "test_cpu_lstm_amp_forward_workspace_and_exact_resume",
@@ -1218,6 +1242,20 @@
         "migrated": 64,
         "pending": 36
       }
+    },
+    {
+      "scope": "commits 1-39, through 3fbe3d7",
+      "full_tests": {
+        "tests": 763,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "inventory": {
+        "total": 100,
+        "migrated": 65,
+        "pending": 35
+      }
     }
   ],
   "current_cli": {
@@ -1730,5 +1768,215 @@
       "Dropout, BatchNorm, optimizer, scheduler and RNG continuation checked exactly by tests",
       "Training MSE includes raw zero targets; evaluation mask is configured independently"
     ]
+  },
+  "cpt_cli": {
+    "passed": true,
+    "source": "D:\\LibCity 2.0\\LibCity-modernization",
+    "directory": "D:\\LibCity 2.0\\.runtime-tests\\cpt-after-8zpcsh_l",
+    "commands": [
+      {
+        "command": [
+          "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+          "-B",
+          "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+          "train",
+          "--config",
+          "D:\\LibCity 2.0\\.runtime-tests\\cpt-after-8zpcsh_l\\daily.json"
+        ],
+        "cwd": "D:\\LibCity 2.0\\.runtime-tests\\cpt-after-8zpcsh_l",
+        "exit_code": 0,
+        "expected_success": true
+      },
+      {
+        "command": [
+          "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+          "-B",
+          "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+          "evaluate",
+          "--config",
+          "D:\\LibCity 2.0\\.runtime-tests\\cpt-after-8zpcsh_l\\daily.json",
+          "--checkpoint",
+          "D:\\LibCity 2.0\\.runtime-tests\\cpt-after-8zpcsh_l\\runs\\train\\checkpoints\\best.pt",
+          "--set",
+          "runtime.exp_id=evaluated"
+        ],
+        "cwd": "D:\\LibCity 2.0\\.runtime-tests\\cpt-after-8zpcsh_l",
+        "exit_code": 0,
+        "expected_success": true
+      },
+      {
+        "command": [
+          "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+          "-B",
+          "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+          "train",
+          "--config",
+          "D:\\LibCity 2.0\\.runtime-tests\\cpt-after-8zpcsh_l\\daily.json",
+          "--resume",
+          "D:\\LibCity 2.0\\.runtime-tests\\cpt-after-8zpcsh_l\\runs\\train\\checkpoints\\last.pt",
+          "--set",
+          "training.epochs=3",
+          "--set",
+          "runtime.exp_id=resumed"
+        ],
+        "cwd": "D:\\LibCity 2.0\\.runtime-tests\\cpt-after-8zpcsh_l",
+        "exit_code": 0,
+        "expected_success": true
+      },
+      {
+        "command": [
+          "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+          "-B",
+          "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+          "train",
+          "--config",
+          "D:\\LibCity 2.0\\.runtime-tests\\cpt-before-gzewn07e\\weekly.json",
+          "--resume",
+          "D:\\LibCity 2.0\\.runtime-tests\\cpt-before-gzewn07e\\runs\\before\\checkpoints\\last.pt",
+          "--set",
+          "training.epochs=2",
+          "--set",
+          "runtime.exp_id=rejected-weekly"
+        ],
+        "cwd": "D:\\LibCity 2.0\\.runtime-tests\\cpt-after-8zpcsh_l",
+        "exit_code": 1,
+        "expected_success": false
+      },
+      {
+        "command": [
+          "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+          "-B",
+          "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+          "train",
+          "--config",
+          "D:\\LibCity 2.0\\.runtime-tests\\cpt-before-gzewn07e\\weekly.json",
+          "--set",
+          "runtime.exp_id=corrected-weekly"
+        ],
+        "cwd": "D:\\LibCity 2.0\\.runtime-tests\\cpt-after-8zpcsh_l",
+        "exit_code": 0,
+        "expected_success": true
+      },
+      {
+        "command": [
+          "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+          "-B",
+          "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+          "train",
+          "--config",
+          "D:\\LibCity 2.0\\.runtime-tests\\dgcn-cli-aw4hzgf0\\example\\dgcn.json",
+          "--resume",
+          "D:\\LibCity 2.0\\.runtime-tests\\dgcn-cli-aw4hzgf0\\example\\runs\\resumed\\checkpoints\\last.pt",
+          "--set",
+          "training.epochs=4",
+          "--set",
+          "runtime.exp_id=cpt-compatible-resume"
+        ],
+        "cwd": "D:\\LibCity 2.0\\.runtime-tests\\cpt-after-8zpcsh_l",
+        "exit_code": 0,
+        "expected_success": true
+      }
+    ],
+    "config": {
+      "data": {
+        "dataset": "DailyTiny",
+        "data_dir": "data",
+        "cache_dir": "cache",
+        "input_window": 4,
+        "output_window": 4,
+        "sampling": {
+          "name": "cpt",
+          "closeness": 0,
+          "period": 1,
+          "trend": 0
+        },
+        "pad_training": false
+      },
+      "model": {
+        "name": "DGCN",
+        "params": {
+          "c_out": 4,
+          "K": 2,
+          "dropout": 0.2
+        }
+      },
+      "training": {
+        "epochs": 2,
+        "batch_size": 8,
+        "accumulation_steps": 2
+      },
+      "evaluation": {
+        "batch_size": 8
+      },
+      "runtime": {
+        "device": "cpu",
+        "seed": 17,
+        "output_dir": "runs",
+        "exp_id": "train"
+      }
+    },
+    "daily_two_hour": {
+      "prediction_shape": [
+        21,
+        4,
+        3,
+        2
+      ],
+      "independent_metrics_exact": true,
+      "independent_predictions_exact": true,
+      "metrics": {
+        "MAE@1": 8.348217949034675,
+        "RMSE@1": 9.016932518673324,
+        "MAE@2": 8.381012840876503,
+        "RMSE@2": 9.000398725223155,
+        "MAE@3": 8.450031991988894,
+        "RMSE@3": 9.036764103939912,
+        "MAE@4": 8.554816685025655,
+        "RMSE@4": 9.124518138134802,
+        "loss": 81.80804770333427
+      },
+      "cache_statuses": [
+        "miss",
+        "hit",
+        "hit"
+      ],
+      "resumed_state": {
+        "stage": "train",
+        "epoch": 3,
+        "batches_seen": 24,
+        "optimizer_steps": 12,
+        "best_metric": 81.05407242547898,
+        "task_state": {}
+      },
+      "history_span_points": 12,
+      "physical_shift_seconds": 86400
+    },
+    "weekly_seven_minute": {
+      "baseline_commit": "3fbe3d7",
+      "before_directory": "D:\\LibCity 2.0\\.runtime-tests\\cpt-before-gzewn07e",
+      "old_history_span_points": 1344,
+      "old_physical_shift_seconds": 564480,
+      "corrected_history_span_points": 1440,
+      "corrected_physical_shift_seconds": 604800,
+      "old_checkpoint_rejected": true,
+      "rejection_reason": "Resume dataset metadata/normalization state does not match checkpoint",
+      "raw_cache_reused": true,
+      "baseline_command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "train",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\cpt-before-gzewn07e\\weekly.json"
+      ],
+      "baseline_exit_code": 0
+    },
+    "unchanged_hourly_checkpoint": {
+      "baseline_commit": "3fbe3d7",
+      "checkpoint": "D:\\LibCity 2.0\\.runtime-tests\\dgcn-cli-aw4hzgf0",
+      "resume_accepted": true,
+      "epoch": 4,
+      "optimizer_steps": 20
+    }
   }
 }
