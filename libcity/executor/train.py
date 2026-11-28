@@ -7,7 +7,7 @@ import math
 import torch
 
 from libcity.executor.components import EarlyStopper, MetricTracker, build_optimizer, build_scheduler
-from libcity.executor.evaluate import ForecastLoss, evaluate_loop, move_batch, supervised_step
+from libcity.executor.evaluate import ForecastLoss, aggregate_loss, evaluate_loop, move_batch, supervised_step
 from libcity.utils.runtime_checkpoint import CheckpointManager
 from libcity.data.sources import atomic_sources
 
@@ -150,6 +150,7 @@ def train_loop(context, step_fn=None, *, until_epoch=None, epochs=None):
         raise ValueError('Training requires both train and validation loaders')
     step_fn = step_fn or supervised_step(context.loss_fn)
     accumulation = training['accumulation_steps']
+    gradient_divisor = getattr(context.loss_fn,'gradient_divisor',None)
     target = training['epochs'] if epochs is None else epochs
     end = target if until_epoch is None else min(target, until_epoch)
     if context.stopper.stopped:
@@ -158,7 +159,7 @@ def train_loop(context, step_fn=None, *, until_epoch=None, epochs=None):
         optimizer_steps_before = context.state.optimizer_steps
         context.model.train()
         context.optimizer.zero_grad(set_to_none=True)
-        group_weight = 0
+        group_total,group_weight = 0.,0
         total, count = 0., 0
         for index, batch in enumerate(context.bundle.train):
             batch = move_batch(batch, context.device)
@@ -170,17 +171,20 @@ def train_loop(context, step_fn=None, *, until_epoch=None, epochs=None):
             # objective, including missing targets and a short last batch.
             backward(context, result.loss * result.weight)
             group_weight += result.weight
-            total += result.loss.item() * result.weight
+            statistic = result.loss.item() * result.weight
+            group_total += statistic
+            total += statistic
             count += result.weight
             context.state.batches_seen += 1
             if (index + 1) % accumulation == 0 or index + 1 == len(context.bundle.train):
-                optimizer_update(context, group_weight)
-                group_weight = 0
+                divisor = gradient_divisor(group_total,group_weight) if gradient_divisor is not None else group_weight
+                optimizer_update(context, divisor)
+                group_total,group_weight = 0.,0
         evaluator = context.evaluate_fn or evaluate_loop
         metrics = evaluator(context.model, context.bundle.val, device=context.device,
             loss_fn=context.loss_fn, evaluation=context.config['evaluation'], prefix='val_').metrics
         context.state.epoch = epoch + 1
-        if complete_epoch(context, metrics, total / count if count else 0.,optimizer_steps_before=optimizer_steps_before):
+        if complete_epoch(context, metrics, aggregate_loss(context.loss_fn,total,count),optimizer_steps_before=optimizer_steps_before):
             break
     if context.checkpoints.best_state is None:
         raise ValueError('No completed epoch with a finite validation metric is available')

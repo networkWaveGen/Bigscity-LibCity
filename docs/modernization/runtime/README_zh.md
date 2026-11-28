@@ -64,6 +64,8 @@ last.pt 格式版本为 3，还校验只读数据元信息、采样布局、归�
 
 `training.optimizer.groups` 接受模块前缀、lr、weight_decay 和 freeze。调度器显式设置 interval=step/epoch/metric。梯度累积按真实有效目标数归一化，并在每轮最后一个不足累积组的尾批完成更新；只有实际优化器更新才步进 step 调度器。默认循环支持最小化或最大化指定监控指标、早停、CPU/CUDA/MPS 设备选择和 AMP。CPU AMP 使用 bfloat16，并实际探测 oneDNN 卷积反向能力；后端不支持时使用原生反向内核，退出后恢复设置，前向仍保留 AMP。硬件覆盖以各批次记录为准；阶段五已有代表模型 CUDA 记录，MPS 尚未认证。
 
+RMSE 等非线性目标接入默认循环时，需要声明可加统计的汇总与梯度归一化规则；公共组件现已预留 aggregate/gradient_divisor 两个损失方法。CCRNN 所需的 RootMeanSquaredLoss、整组 RMSE 梯度与跨批评估说明见 [专项说明](root-loss_zh.md)。这是底层扩展能力，模型可用性仍以迁移清单和各模型配置为准。
+
 ## 预测输入与目标时间轴
 
 交通适配现在记录 `split.semantics=target_time_v1`。按原始时间点确定边界，只有目标窗口完整属于该区间的样本才能进入对应集合；丢弃跨边界目标窗口，历史可使用切分点前的已知观测。归一化只拟合原始训练时间区间，验证和测试不 padding。除默认比例外，可在 data.split 中同时提供 train_end/val_end（ISO 时间戳，右侧区间从该时刻开始）。真实 METR-LA 运行记录见 [报告](metr-la-phase3.json)。

@@ -48,7 +48,8 @@
 | commit40 | ed4daee | fix: compute CPT histories from exact active physical periods |
 | commit41 | f17311e | feat: migrate HGCN with complete region aggregation and static graph state |
 | commit42 | 1020ca6 | feat: migrate GTS with train-only graph features and explicit graph training |
-| commit43 | 随本节交付的提交 | feat: migrate RGSL with stable mixed graphs and explicit sampling |
+| commit43 | 8df7954 | feat: migrate RGSL with stable mixed graphs and explicit sampling |
+| commit44 | 随本节交付的提交 | feat: preserve RMSE reduction across accumulation and evaluation |
 
 ## commit1：修复基础交通缓存（670b325）
 
@@ -499,6 +500,16 @@ forward 由配置决定预测长度，每步重新编码当前窗口；预测回
 仓库外夹具、训练、独立评估、续训共 **4 条命令成功**，预测形状 [9,2,3,1]，独立预测与指标完全一致；续训第三轮共 9 次参数更新，缓存 miss/hit/hit，静态基底 [2,3,3] 保存为安全 Tensor 权重，独立评估不创建训练产物。默认二阶计算保留，高阶静态递推、确定性评估、低宽门控和退化图属于明确修订，不声称旧错误流程或论文精度等价。清单为 **68/100** 已迁移，32 条 pending；排除延期 Common 与模板后还有 **23 个交通预测模型**及最终全量验收。
 
 本批完整回归：**893 passed，0 failed，0 errors，0 skipped**；[汇总](remaining-validation.json) 保存本次用例与结果文件位置，既有 GTS 及 DGCN 检查均通过。
+
+## commit44：补齐 CCRNN 所需的 RMSE 聚合与梯度累积
+
+接入 CCRNN 时确认其原目标是 masked_rmse。公共运行时原先只开放 MAE/MSE/Huber 等可按有效数线性聚合的目标，尚无 RMSE 的整组开方机制；若直接添加逐批 sqrt 再走原加权平均，评估和累积梯度都会变成另一个目标。本批先补基础能力，不提前把 CCRNN 标记为已迁移。
+
+处理：新增 RootMeanSquaredLoss，复用原尺度、精确原始掩码和有限值检查，返回平均平方误差和有效数这两个可加统计。默认循环每个微批累计平方误差梯度，到更新边界通过可选 gradient_divisor 按整组 RMSE 链式法则归一化，再执行原裁剪/优化器/调度；可选 aggregate 在评估和训练日志中统一开方。现有损失未声明这两个方法时，继续原有效数加权平均与更新规则。无需保存微批计算图或改变检查点格式，完全空组保持跳步，精确拟合选择有限零次梯度并保留优化器状态步进语义。
+
+验证：新增 **16 项通过**，原尺度双精度/四组掩码与独立 RMSE 梯度、精确拟合/全空统计、四种评估批次划分、带/不带裁剪的 SGD 动量/权重衰减/step 调度与直接整批 RMSE 更新对照、真实累积尾组、双层 dropout/shuffle/Adam/metric 调度/RNG 精确续训和实际 CPU AMP。完整回归 **909 passed，0 failed，0 errors，0 skipped**。详见 [修复说明](root-loss_zh.md) 与 [完整报告](remaining-validation.json)。
+
+本批不新增模型迁移计数，清单仍为 **68/100**；排除延期 Common 和模板后，还有 **23 个模型**及最终全量验收。CCRNN 的原始训练区间 SVD、图预处理和原生训练/评估接入继续实施。
 
 ## 持续完成的清单
 

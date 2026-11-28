@@ -77,6 +77,12 @@ def supervised_step(loss_fn):
     return step
 
 
+def aggregate_loss(loss_fn,total,weight):
+    """Finalize additive batch statistics, including a declared nonlinear loss."""
+    aggregate = getattr(loss_fn,'aggregate',None)
+    return aggregate(total,weight) if aggregate is not None else total/weight if weight else 0.
+
+
 def write_metrics(metrics,directory):
     directory=Path(directory)
     directory.mkdir(parents=True,exist_ok=True)
@@ -111,7 +117,7 @@ def evaluate_loop(model, loader, *, device, loss_fn, evaluation, directory=None,
                 predictions.append(raw_prediction.cpu().numpy())
                 targets.append(raw_target.cpu().numpy())
     metrics = {prefix + key: value for key, value in accumulator.compute().items()}
-    metrics[prefix + 'loss'] = total / weight if weight else 0.
+    metrics[prefix + 'loss'] = aggregate_loss(loss_fn,total,weight)
     artifacts = {}
     if directory is not None:
         directory = Path(directory)
