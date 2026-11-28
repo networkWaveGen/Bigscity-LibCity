@@ -39,6 +39,7 @@ class ForecastLoss:
     def __init__(self, config, scaler, output_dim):
         self.name, self.mask_value = config['name'], config.get('mask_value', 0.)
         self.scaler, self.output_dim = scaler, output_dim
+        self.delta = config.get('delta',1.)
 
     def inputs(self,batch):
         return model_inputs(batch,self.output_dim)
@@ -63,7 +64,10 @@ class ForecastLoss:
         if not torch.isfinite(prediction[valid]).all():
             raise ValueError('Training/evaluation prediction contains non-finite values')
         residual = prediction[valid] - target[valid]
-        loss = residual.square().mean() if self.name.endswith('mse') else residual.abs().mean()
+        if self.name.endswith('huber'):
+            loss = torch.nn.functional.huber_loss(residual,torch.zeros_like(residual),delta=self.delta)
+        else:
+            loss = residual.square().mean() if self.name.endswith('mse') else residual.abs().mean()
         return StepResult(loss, count)
 
 

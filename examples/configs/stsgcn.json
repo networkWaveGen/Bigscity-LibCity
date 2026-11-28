@@ -1,0 +1,9 @@
+{
+  "data": {"dataset": "Tiny", "data_dir": "data", "cache_dir": "cache",
+    "input_window": 6, "output_window": 2, "pad_training": false},
+  "model": {"name": "STSGCN", "params": {"first_layer_embedding_size": 4,
+    "filters": [[4,4],[6,6]], "output_hidden_size": 8, "use_mask": true}},
+  "training": {"epochs": 2, "batch_size": 5, "accumulation_steps": 2},
+  "evaluation": {"batch_size": 5},
+  "runtime": {"device": "cpu", "seed": 17, "output_dir": "runs", "exp_id": "stsgcn"}
+}

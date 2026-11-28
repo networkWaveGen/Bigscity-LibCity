@@ -155,7 +155,7 @@ def validate(config, preset):
                 raise ValueError('CPT sampling requires at least one history segment')
             for key in ('interval_period','interval_trend'):
                 _positive(data['sampling'].get(key,1),f'data.sampling.{key}')
-        if data['graph'].get('name') not in ('binary', 'weighted', 'distance','distance_bands'):
+        if data['graph'].get('name') not in ('binary', 'weighted', 'distance','inverse_distance','distance_bands'):
             raise ValueError('Unknown data.graph.name')
         if (data['graph']['name']=='distance_bands' and model['name']!='MultiSTGCnet') or (
                 model['name']=='MultiSTGCnet' and data['graph']['name'] not in ('distance_bands','binary')):
@@ -209,7 +209,7 @@ def validate(config, preset):
         'scheduler': ('name', 'interval', 'step_size', 'gamma', 'milestones', 'T_max', 'eta_min', 'patience',
                       'factor', 'monitor', 'mode', 'max_lr', 'total_steps', 'pct_start', 'warmup_steps',
                       'model_dim', 'lr_multiplier'),
-        'loss': ('name', 'mask_value','alpha','eps')+(('negative_samples',) if spec.protocol in ('atst_ranking','stan_ranking') else
+        'loss': ('name', 'mask_value','alpha','eps')+(('delta',) if training['loss'].get('name') in ('huber','masked_huber') else ())+(('negative_samples',) if spec.protocol in ('atst_ranking','stan_ranking') else
             ('negative_samples','temperature','num_nearest','exclude_visited') if spec.protocol=='geosan_ranking' else ()),
         'early_stopping': ('patience', 'min_delta')}.items():
         _known(training[key], names, f'training.{key}')
@@ -253,9 +253,11 @@ def validate(config, preset):
         'cara_ranking':('bpr',),'geosan_ranking':('weighted_binary',)}.get(spec.protocol,('nll',))
     eta_losses = ('cumulative_relative_rmse',) if spec.protocol=='ttpnet_eta' else ('mae','mse')
     losses={'traj_loc_pred':trajectory_losses,'road_representation':road_losses,'eta':eta_losses}.get(
-        spec.task,('mae','mse','masked_mae','masked_mse'))
+        spec.task,('mae','mse','masked_mae','masked_mse','huber','masked_huber'))
     if training['loss'].get('name') not in losses:
         raise ValueError('Unknown training.loss.name')
+    if training['loss']['name'] in ('huber','masked_huber'):
+        _number(training['loss'].get('delta',1.),'training.loss.delta',strict=True)
     _positive(training['early_stopping']['patience'], 'early_stopping.patience', zero=True)
     _number(training['early_stopping']['min_delta'], 'early_stopping.min_delta')
     if training['clip_grad_norm'] is not None:

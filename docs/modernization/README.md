@@ -2,7 +2,7 @@
 
 - [源码用法与五类示例](runtime/README_zh.md)
 - [阶段五验收](runtime/phase5_acceptance_zh.md) 与 [执行/Commit 映射](runtime/phase5_execution_zh.md)
-- [100 条模型迁移清单](runtime/model-migration.csv)：60 个入口对应 62 条已迁移记录，38 条 pending；最新执行范围见 [主线剩余问题记录](runtime/remaining-work_execution_zh.md)
+- [100 条模型迁移清单](runtime/model-migration.csv)：61 个入口对应 63 条已迁移记录，37 条 pending；最新执行范围见 [主线剩余问题记录](runtime/remaining-work_execution_zh.md)
 - [旧测试迁移映射](runtime/phase5-test-migration.json) 与 [移除/参考配置清单](runtime/phase5-retirement.json)
 
 仅新入口提供实验执行。旧 ConfigParser、Batch、Executor、registry 工厂和检查点迁移工具已删除。reference 目录中的旧配置、经典基线数学代码以及保留的待迁移模型源码不是第二套受支持入口。

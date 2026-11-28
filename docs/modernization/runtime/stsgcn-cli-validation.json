@@ -1,0 +1,105 @@
+{
+  "passed": true,
+  "source": "D:\\LibCity 2.0\\LibCity-modernization",
+  "directory": "D:\\LibCity 2.0\\.runtime-tests\\stsgcn-cli-_p6sdxcx",
+  "commands": [
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\tools\\make_runtime_fixture.py",
+        "--directory",
+        "D:\\LibCity 2.0\\.runtime-tests\\stsgcn-cli-_p6sdxcx\\example",
+        "--model",
+        "STSGCN"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\stsgcn-cli-_p6sdxcx",
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "train",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\stsgcn-cli-_p6sdxcx\\example\\stsgcn.json",
+        "--set",
+        "runtime.exp_id=train"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\stsgcn-cli-_p6sdxcx",
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "evaluate",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\stsgcn-cli-_p6sdxcx\\example\\stsgcn.json",
+        "--checkpoint",
+        "D:\\LibCity 2.0\\.runtime-tests\\stsgcn-cli-_p6sdxcx\\example\\runs\\train\\checkpoints\\best.pt",
+        "--set",
+        "runtime.exp_id=evaluated"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\stsgcn-cli-_p6sdxcx",
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "train",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\stsgcn-cli-_p6sdxcx\\example\\stsgcn.json",
+        "--resume",
+        "D:\\LibCity 2.0\\.runtime-tests\\stsgcn-cli-_p6sdxcx\\example\\runs\\train\\checkpoints\\last.pt",
+        "--set",
+        "training.epochs=3",
+        "--set",
+        "runtime.exp_id=resumed"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\stsgcn-cli-_p6sdxcx",
+      "exit_code": 0
+    }
+  ],
+  "model": "STSGCN",
+  "metrics": {
+    "MAE@1": 1.0878122117784288,
+    "RMSE@1": 1.3231922797416862,
+    "MAE@2": 1.6860060162014432,
+    "RMSE@2": 1.8876508163573273,
+    "loss": 0.9503373172548082
+  },
+  "prediction_shape": [
+    9,
+    2,
+    3,
+    1
+  ],
+  "independent_metrics_exact": true,
+  "independent_predictions_exact": true,
+  "checkpoint_format": 3,
+  "resumed_state": {
+    "stage": "train",
+    "epoch": 3,
+    "batches_seen": 15,
+    "optimizer_steps": 9,
+    "best_metric": 0.39792481395933366,
+    "task_state": {}
+  },
+  "cache_statuses": [
+    "miss",
+    "hit",
+    "hit"
+  ],
+  "notes": [
+    "Executed outside the source directory",
+    "Published example enables trainable graph mask",
+    "No retain_graph needed",
+    "Huber delta=1 on raw targets",
+    "Exact full optimizer/RNG continuation checked by test_runtime_stsgcn.py"
+  ]
+}

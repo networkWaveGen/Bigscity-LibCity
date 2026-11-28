@@ -261,7 +261,7 @@ class TrafficStateDataset(AbstractDataset):
 
     def _distance_inverse(self):
         self._logger.info("Start Calculate the weight by _distance_inverse!")
-        self.adj_mx = 1 / self.adj_mx
+        self.adj_mx = np.divide(1.,self.adj_mx,out=np.ones_like(self.adj_mx),where=self.adj_mx!=0)
         self.adj_mx[np.isinf(self.adj_mx)] = 1
 
     def _load_dyna(self, filename):

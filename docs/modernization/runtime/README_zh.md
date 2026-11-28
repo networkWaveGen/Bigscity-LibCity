@@ -16,6 +16,8 @@ DKFN 示例可用 `tools/make_runtime_fixture.py --directory <目录> --model DK
 
 ResLSTM 示例用 `--model ResLSTM` 生成，对 reslstm.json 执行相同训练/评估/续训命令。至少提供两列原始流量，flow_indices 可选择对应列；历史日历/.ext 单独作为全网外部信息，不读取未来真实值。reslstm_windows 默认每段 5 帧、服务偏移 72/360 帧，发布夹具有足够长的时间轴。季节窗口之间允许停运间隔，但每段及近期到目标须连续，策略写入摘要；LSTM 沿节点轴运行，batch 样本互相独立。详见 [模型说明](models_zh.md)。
 
+STSGCN 示例用 `tools/make_runtime_fixture.py --directory <目录> --model STSGCN` 生成，对 stsgcn.json 使用相同的 train/evaluate/resume 命令。示例启用图掩码，不需要 retain_graph。module_type 可选 individual/sharing，filters 的每个块内部宽度须相同，历史长度必须大于块数的两倍；act_type 可选 GLU/relu。默认图为 .rel 距离倒数图，训练为原尺度 Huber，阈值在 training.loss.delta 设置；需要排除原始零目标时显式选择 masked_huber。模型推理只读取历史 X，完整配置、有意修复和边界见 [模型说明](models_zh.md)。
+
 ## GRU 完整例子
 
 从源码根目录运行，数据、缓存和输出都可放在仓库外：

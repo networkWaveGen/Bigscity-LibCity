@@ -1,0 +1,10 @@
+{
+  "model": {"params": {"module_type": "individual", "act_type": "GLU",
+    "temporal_emb": true, "spatial_emb": true, "use_mask": false,
+    "first_layer_embedding_size": 64, "filters": [[64,64,64],[64,64,64],[64,64,64],[64,64,64]],
+    "output_hidden_size": 128}},
+  "data": {"scaler": {"name": "standard"}, "features": {"time_in_day": true},
+    "graph": {"name": "inverse_distance", "symmetric": true, "self_loops": false}},
+  "training": {"batch_size": 32, "optimizer": {"name": "adam", "lr": 0.001},
+    "loss": {"name": "huber", "delta": 1.0}, "early_stopping": {"patience": 50}}
+}

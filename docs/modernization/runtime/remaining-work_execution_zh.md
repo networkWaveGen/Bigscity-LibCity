@@ -41,7 +41,8 @@
 | commit33 | c4cc695 | feat: migrate grid forecasts with causal CPT inputs |
 | commit34 | 85c8280 | feat: migrate periodic graph forecasts with explicit distance bands |
 | commit35 | e538689 | feat: migrate DKFN with sample-local variance and causal rollout |
-| commit36 | 随本节交付的提交 | feat: migrate ResLSTM with independent batches and explicit periods |
+| commit36 | 0a3308d | feat: migrate ResLSTM with independent batches and explicit periods |
+| commit37 | 随本节交付的提交 | feat: migrate STSGCN with fresh graph masks and explicit Huber loss |
 
 ## commit1：修复基础交通缓存（670b325）
 
@@ -392,6 +393,20 @@ forward 由配置决定预测长度，每步重新编码当前窗口；预测回
 验证：新增 **31 项通过**，包含四种默认/交换流量及有/无外部网络的修正旧周期轴/SAME 池化/batch 轴参考前向和全部梯度、八种节点/窗口奇偶组合的负无穷尾部补齐独立参考/梯度、完整训练/独立评估/BN/Adam/多步调度器/早停/RNG 精确续训、全部分支真实更新、无跨样本预测及梯度、多步/多目标/单节点/batch=1/float64/输入与 buffer 不变、原始与外部字段推断/未来隔离及历史外部梯度、训练统计/缓存/未来标签变化隔离、真实单样本尾批 BN/CPU AMP、无效结构与协议、两模型服务停运间隙。原先以默认 allclose 判断随机网络微小输出变化的检查改为双精度输入梯度证明，同时保留未使用/未来输入变化后预测严格相同的检查。提取 BN 后与既有网格/清单检查 **73 项通过**（此时尚未加入两项服务间隙用例），最终当前源码完整回归 **642 passed，0 failed，0 errors，0 skipped**，见 [汇总](remaining-validation.json)。
 
 仓库外实际夹具、训练、独立评估和续训共 **4 条成功命令**，预测/指标逐元素一致，续训第三轮共 24 次参数更新，原始缓存复用，见 [CLI](reslstm-cli-validation.json)。本批明确修正旧错误轴/池化，不声称旧错误路径或论文精度复现。发布配置与较长夹具、参数和输入说明；迁移表更新为 **62/100**，38 条 pending，排除 7 个延期 Common 与 2 个模板后，本期仍有 **29 个交通模型**及最终全量验收待完成。
+
+## commit37：迁移 STSGCN 并修复图掩码与原尺度 Huber 训练
+
+问题：STSGCN 未接入新入口；旧 use_mask 在初始化时只计算一次 mask*adj，保存过期 autograd 图并要求 retain_graph=True；位置嵌入使用原地加法。实际损失调用固定 delta=1 的 Huber，与创建但未使用的 SmoothL1Loss(beta=rho) 不一致；公共损失此前不支持 Huber。模型预设的距离倒数图也不能直接用已有二值/原权重/高斯图替代。
+
+处理：新增独立标准 nn.Module，保留 individual/sharing、GLU/relu、可选时空/首层嵌入、逐预测步独立输出头和默认四块结构。三帧图是只读元信息的独立 buffer，带掩码乘积在每次前向重新创建；位置嵌入不修改输入。共享模式按明确的时间、样本和节点顺序打包窗口；关闭的嵌入不创建无效参数，网络不保留空包装。块内最大聚合要求同宽，历史/配置/图/输入形状在运行前给出明确错误。
+
+新增 data.graph.name=inverse_distance：正距离转倒数、缺边保留 0、显式零距离按旧规则取 1，无权重图仍保持二值；有向与对称规则明确，负距离拒绝，缓存按图选择隔离。旧倒数运算改用带 where 的除法，避免显式零距离先除零。默认 symmetric=true 使用公共 max(A,A.T)，不保留两方向不同距离时的行顺序覆盖行为。
+
+公共 ForecastLoss/配置增加 huber 与 masked_huber、正有限阈值 delta；损失与掩码使用原始目标，保持 float64，AMP 在 float32 上计算。STSGCN 默认保留实际使用的 delta=1 Huber，移除无效模型 rho；无需专用外层训练循环，即可训练、独立评估、完整续训和按有效目标数累积梯度。其他任务的损失枚举保持原约束。
+
+验证：新增 **54 项通过**，包括 16 种旧网络前向/全部梯度与默认四块对照、三帧有向图/静态所有权、连续三次掩码参数更新（不使用 retain_graph）、非原地输入/样本独立、多步/多目标/batch=1/float64、原尺度 Huber 阈值/有效计数/梯度、距离倒数缺边/零距离/方向/缓存与无权重回退、两种模块完整训练/独立评估/mask/Adam/调度器/RNG 精确续训、单节点空空间图尾批 CPU AMP，以及错误参数检查。
+
+仓库外发布夹具、训练、独立评估、续训共 **4 条命令成功**，预测与指标完全一致，续训第三轮共 9 次参数更新，缓存 miss/hit/hit，见 [CLI](stsgcn-cli-validation.json)。当前完整回归 **696 passed，0 failed，0 errors，0 skipped**，见 [汇总](remaining-validation.json)。迁移表更新为 **63/100**，37 条 pending；排除 7 个延期 Common 和 2 个模板后，本期仍有 **28 个交通预测模型**及最终全量验收待完成，不声明主线全部完成。
 
 ## 持续完成的清单
 

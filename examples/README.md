@@ -306,6 +306,17 @@ prediction scores; isolated-node vectors have no context-learning signal. These
 small examples use two epochs, while the model protocol retains the legacy
 1000-epoch default; use an explicit epoch budget for actual experiments.
 
+STSGCN can be generated with `--model STSGCN`; use the resulting stsgcn.json
+with the same train/evaluate/resume commands. The small example enables the
+learned graph mask and uses two synchronous blocks; the default model keeps
+four blocks. Each block consumes two history frames, so input_window must be
+greater than twice the number of blocks. Filters within one block must share
+the same width. Both individual and sharing modules, GLU/relu and positional
+embedding switches are supported. The preset uses inverse-distance edges and
+raw-scale Huber loss with `training.loss.delta=1`; select `masked_huber` explicitly
+to exclude zero targets. Mask products are recomputed each forward pass, so
+ordinary backward and the public resume lifecycle work without retain_graph.
+
 The complete supported-model inventory and migration details are in the
 [runtime guide](../docs/modernization/runtime/README_zh.md). Small examples prove
 execution and reproducibility, not real-city benchmark accuracy.

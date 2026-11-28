@@ -1,9 +1,10 @@
 # 新运行时模型迁移范围
 
-当前共 60 个运行时入口，对应原清单中的 62 个任务—模型条目（轨迹 RNN/LSTM/GRU 共用一个入口）。完整 [100 项 CSV](model-migration.csv) 逐项记录实际能力、依赖、验证与后续动作；其余 38 项仍为 pending，不会自动回退到旧运行时。轨迹预测全部 13 个非模板条目、两个 ETA 模型、三个地图匹配算法和六个道路表征模型均已接入。排除七个延期 Common 变体和两个模板后，本期仍有 29 个交通预测模型待迁移。37 个特殊交通数据集的深度整理仍延后。交通数据统一使用目标时间互斥切分。
+当前共 61 个运行时入口，对应原清单中的 63 个任务—模型条目（轨迹 RNN/LSTM/GRU 共用一个入口）。完整 [100 项 CSV](model-migration.csv) 逐项记录实际能力、依赖、验证与后续动作；其余 37 项仍为 pending，不会自动回退到旧运行时。轨迹预测全部 13 个非模板条目、两个 ETA 模型、三个地图匹配算法和六个道路表征模型均已接入。排除七个延期 Common 变体和两个模板后，本期仍有 28 个交通预测模型待迁移。37 个特殊交通数据集的深度整理仍延后。交通数据统一使用目标时间互斥切分。
 
 | 名称 | 任务/数据 | 训练接入 | 检查点/续训能力 | 实际验证级别 |
 | --- | --- | --- | --- | --- |
+| STSGCN | traffic_state_pred / 连续三帧同步图与逐步预测头 | 默认 train_loop | 需要权重；图掩码完整续训 | 16 种旧 individual/sharing、GLU/relu、嵌入组合前向及全部梯度、默认四层网络、三帧有向图 buffer、每次前向重建掩码乘积与三次更新、无原地输入修改/跨样本梯度、多步/多目标/batch=1/float64、原尺度 Huber/阈值/零值掩码、完整训练/独立评估/mask/Adam/调度器/RNG 精确续训、距离倒数/缺边/零距离/缓存、单节点尾批 CPU AMP 与实际 CLI |
 | ResLSTM | traffic_state_pred / 双流量周期残差、图拓扑与历史外部流 | 默认 train_loop | 需要权重；完整续训 | 修正周期轴/SAME 池化/batch 轴后的旧模块预测与全部梯度、默认及交换流量列、全部池化尺寸奇偶/负输入、多步/多目标/batch=1/float64、无跨样本预测/梯度、历史外部列与未来隔离、训练统计/缓存、完整训练/独立评估/BN/Adam/多步调度/RNG 精确续训、单样本尾批 BN/CPU AMP、服务窗口停运间隔和实际 CLI |
 | DKFN | traffic_state_pred / 连续窗口与图/自身双循环流 | 默认 train_loop | 需要权重；完整续训 | 修正逐样本方差及正系数后的旧递推/预测/全部梯度、12 种图阶数/钳制/输入输出维度对照、作者融合式/系数链式梯度、无跨样本梯度、图 buffer/幂/原尺度掩码、已知未来特征滚动、零方差/单节点/孤立图/系数边界、batch=1/float64、完整训练/独立评估/RMSprop/调度器/RNG 精确续训、CPU AMP 和实际 CLI |
 | CONVGCN / MultiSTGCnet | traffic_state_pred / 服务周期窗口、逐帧 CPT 与点图 | 默认 train_loop | 需要权重；完整续训 | 修正节点通道/最近分支后的旧公式与全部梯度、独立第二目标/最后完整窗口、有限边距离分组/最大值/常量/零距离/孤立点、图与 ID 对齐/无原地修改、单分支/多步/多目标/batch=1/float64、完整训练/独立评估/优化器/调度器/RNG 精确续训、距离列缓存与来源保护、CPU AMP 和实际 CLI |
@@ -167,5 +168,13 @@ ResLSTM 保留 LibCity 的两条流量残差 CNN、近期第一流量的规范�
 三个季节窗口明确作为 CNN 的三个通道，修复旧 reshape 把周期和帧混排的问题。LSTM 使用 batch_first=True，序列轴是节点而非其他样本；推理和梯度不再跨 batch 传播。池化按[作者的 SAME 设定](https://github.com/JinleiZhangBJTU/ResNet-LSTM-GCN/blob/master/ResLSTM.py)在尾部补齐，实际展平宽度从 ceil(nodes/2)*ceil(history/2) 推导，支持奇偶节点/窗口、单节点、任意显式预测步与目标数。没有下采样的残差单元不再创建无用投影。默认 base_channels=32、recurrent_hidden=128、recurrent_layers=2；外部循环网络保留 LibCity 的两层 LSTM 串联形态，并不宣称与作者 Keras 外部分支完全相同。图一次性规范化为 buffer，不用 np.matrix、矩阵求逆或每次前向重建。单空间元素尾批的 BN 复用公共运行统计回退，和网格模型共用独立的 runtime_norm 模块。
 
 服务时间片窗口的长期跨度可能包含夜间停运。seasonal_windows（ResLSTM/CONVGCN）允许三个窗口之间的未采样区间有停运间隙，但每个窗口内部，以及近期窗口到完整目标跨度均须连续；原子文件边界仍不能跨越，常规/日历窗口仍检查完整输入跨度。该策略写入 sampling_gap_policy；有间隙的数据在元信息中加入 seasonal_segments_v1，避免旧样本语义无声续训。归一化仍仅使用训练区间，目标集合仍严格互斥，原始缓存继续复用。本批数值对照明确修正轴与池化，不声称复现旧错误布局或原论文精度。
+
+STSGCN 保留 individual（每个时间位置独立图模块）和 sharing（所有三帧窗口共享图模块）两种结构，以及 GLU/relu、时空位置嵌入、可选首层嵌入和每个预测步独立的输出头。每个同步块将历史长度减少 2，input_window 必须大于块数的两倍；同一个块内部的图层宽度必须一致，才可对中心帧逐层取最大值，不同块之间允许改变宽度。默认保留四个 [64,64,64] 块、首层宽度 64 和预测隐藏宽度 128；output_hidden_size 可显式修改。不创建关闭的嵌入参数，不再为维持旧类嵌套增加空包装。
+
+三帧局部图保留每帧内部的空间边、相邻帧同节点双向边与权重为 1 的自环。基础图是独立 buffer；启用 use_mask 时，每次 forward 重新计算 adjacency*mask，不保存带有过期计算图的乘积，不需要 retain_graph=True。位置嵌入使用非原地相加，无首层投影时也不会修改调用方输入。模型仅接收历史 X，不读取 y 或预测时刻的真实观测；输出始终为 [B,H,N,F]。
+
+STSGCN 预设显式选择 data.graph.name=inverse_distance，并保留 symmetric=true。原始 .rel 的正距离 d 转为 1/d，未列边为 0，显式零距离按 LibCity 原规则取 1；无权重的 .rel 保持二值图，不把缺边补成全连接。对称化采用当前公共规则 max(A,A.T)，两方向原始距离不相等时相当于采用较近的一条，不沿用旧读取顺序覆盖规则。负距离拒绝，零距离使用带 where 的除法以避免除零告警；图选择进入缓存身份，不能混用原始距离图缓存。
+
+训练损失显式为 training.loss.name=huber、delta=1，在原尺度上计算；旧模型虽然创建了 SmoothL1Loss(beta=rho)，实际 calculate_loss 却没有调用它，rho 从未改变实际目标。新接口不保留这个无效模型参数；调整阈值应修改 training.loss.delta，且使用 Huber 定义而非除以 delta 的 SmoothL1 定义。公共损失另支持 masked_huber，按 y_raw 排除指定原始零值并按有效目标数聚合；这不改变独立评估的指标掩码规则。支持三轮完整训练/独立评估/精确续训以及实际 CPU AMP，不声称真实城市长训精度或全硬件认证。
 
 阶段三、四有意调整见 [新增记录](phases34_execution_zh.md)。旧依赖处理步骤及已完成结果见 [登记](optional_dependencies_zh.md)。

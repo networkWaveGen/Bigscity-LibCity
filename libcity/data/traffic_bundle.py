@@ -51,9 +51,10 @@ def _read_atomic(data, metadata, logger=None):
     folder = Path(data['data_dir']) / data['dataset']
     graph_config, options = data['graph'], data['features']
     legacy = dict(metadata, dataset=data['dataset'], data_dir=data['data_dir'], cache_dir=data['cache_dir'],
-        cache_dataset=False, init_weight_inf_or_zero='inf' if graph_config['name']=='distance' else 'zero',
+        cache_dataset=False, init_weight_inf_or_zero='inf' if graph_config['name'] in ('distance','inverse_distance') else 'zero',
         set_weight_link_or_dist='link' if graph_config['name'] in ('binary','distance_bands') else 'dist',
-        calculate_weight_adj=graph_config['name']=='distance', weight_adj_epsilon=graph_config.get('epsilon', .1),
+        calculate_weight_adj=graph_config['name']=='distance', distance_inverse=graph_config['name']=='inverse_distance',
+        weight_adj_epsilon=graph_config.get('epsilon', .1),
         add_time_in_day=options['time_in_day'], add_day_in_week=options['day_in_week'])
     if graph_config['name']=='distance_bands' and graph_config.get('distance_column'):
         legacy['weight_col'] = graph_config['distance_column']
@@ -91,6 +92,8 @@ def _read_atomic(data, metadata, logger=None):
         raise ValueError('data_files must be in chronological order without overlapping timestamps')
     history, target, known = map(np.concatenate, (histories, targets, knowns))
     graph = reader.adj_mx.copy()
+    if graph_config['name']=='inverse_distance' and np.any(graph<0):
+        raise ValueError('Inverse-distance graphs require nonnegative distances')
     if graph_config.get('symmetric',False):
         graph = np.maximum(graph, graph.T)
     if graph_config.get('self_loops',False):
