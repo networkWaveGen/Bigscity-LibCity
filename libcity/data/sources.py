@@ -3,7 +3,7 @@ import json
 from pathlib import Path
 
 
-SUFFIXES = {'.geo','.rel','.dyna','.grid','.ext','.usr'}
+SUFFIXES = {'.geo','.rel','.dyna','.grid','.od','.gridod','.ext','.usr'}
 FILE_FIELDS = {'geo_file':'.geo','rel_file':'.rel','data_files':'.dyna','dyna_file':'.dyna',
                'ext_file':'.ext','usr_file':'.usr','truth_file':'.dyna'}
 
@@ -27,6 +27,9 @@ def atomic_sources(data):
                 if (key=='data_files' and data.get('sampling',{}).get('name')=='grid_cpt'
                         and (folder/(name+'.grid')).is_file()):
                     suffix = '.grid'
+                if key=='data_files' and data.get('sampling',{}).get('name')=='od_window':
+                    suffix = next((candidate for candidate in ('.od','.gridod','.dyna')
+                        if (folder/(name+candidate)).is_file()),'.od')
                 paths.add((folder/(name+suffix)).resolve())
     records = []
     for path in paths:

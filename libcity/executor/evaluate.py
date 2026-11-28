@@ -30,6 +30,8 @@ def model_inputs(batch, output_dim):
     inputs = {'X': batch['X']}
     if 'history_features' in batch:
         inputs['history_features'] = batch['history_features']
+    if 'history_mask' in batch:
+        inputs['history_mask'] = batch['history_mask']
     if 'future_features' in batch:
         inputs['future_features'] = batch['future_features']
     return inputs

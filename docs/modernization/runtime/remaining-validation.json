@@ -1,5 +1,5 @@
 {
-  "scope": "Remaining-work commits 1-46; whole-library migration remains in progress",
+  "scope": "Remaining-work commits 1-47; whole-library migration remains in progress",
   "environment": {
     "python": "3.12.13",
     "torch": "2.15.0+cpu",
@@ -9,7 +9,7 @@
     "scikit_learn": "1.9.1"
   },
   "full_tests": {
-    "tests": 989,
+    "tests": 1009,
     "failures": 0,
     "errors": 0,
     "skipped": 0
@@ -626,6 +626,26 @@
     "test_unequal_filters_multiple_targets_batch_one_float64_and_no_labels[MSTGCN]",
     "test_cpu_amp_and_single_node_zero_laplacian[ASTGCN]",
     "test_cpu_amp_and_single_node_zero_laplacian[MSTGCN]",
+    "test_shuffled_od_and_grid_atoms_align_both_axes_to_geo_ids_and_keep_features_separate[od]",
+    "test_shuffled_od_and_grid_atoms_align_both_axes_to_geo_ids_and_keep_features_separate[dyna]",
+    "test_shuffled_od_and_grid_atoms_align_both_axes_to_geo_ids_and_keep_features_separate[gridod]",
+    "test_target_intervals_are_disjoint_scaler_is_train_only_and_raw_positive_mask_survives_scaling",
+    "test_missing_history_is_zero_imputed_but_raw_targets_and_masks_remain_exact",
+    "test_raw_cache_reuses_windows_split_scaler_and_batch_changes_and_rebuilds_damage[shape]",
+    "test_raw_cache_reuses_windows_split_scaler_and_batch_changes_and_rebuilds_damage[dtype]",
+    "test_raw_cache_reuses_windows_split_scaler_and_batch_changes_and_rebuilds_damage[known]",
+    "test_windows_do_not_cross_clock_gaps_or_data_file_boundaries",
+    "test_malformed_dense_od_rows_fail_clearly[duplicate]",
+    "test_malformed_dense_od_rows_fail_clearly[missing]",
+    "test_malformed_dense_od_rows_fail_clearly[unknown]",
+    "test_malformed_dense_od_rows_fail_clearly[infinite]",
+    "test_node_od_and_grid_od_metrics_match_direct_numpy_over_all_spatial_axes[single-spatial0]",
+    "test_node_od_and_grid_od_metrics_match_direct_numpy_over_all_spatial_axes[single-spatial1]",
+    "test_node_od_and_grid_od_metrics_match_direct_numpy_over_all_spatial_axes[single-spatial2]",
+    "test_node_od_and_grid_od_metrics_match_direct_numpy_over_all_spatial_axes[average-spatial0]",
+    "test_node_od_and_grid_od_metrics_match_direct_numpy_over_all_spatial_axes[average-spatial1]",
+    "test_node_od_and_grid_od_metrics_match_direct_numpy_over_all_spatial_axes[average-spatial2]",
+    "test_real_od_generic_train_export_and_checkpoint_resume_without_claiming_native_model_migration",
     "test_convgcn_original_graph_projection_corrected_conv_channel_axes_and_all_gradients[1-1]",
     "test_convgcn_original_graph_projection_corrected_conv_channel_axes_and_all_gradients[2-1]",
     "test_convgcn_original_graph_projection_corrected_conv_channel_axes_and_all_gradients[1-2]",
@@ -1542,6 +1562,20 @@
         "total": 100,
         "migrated": 69,
         "pending": 31
+      }
+    },
+    {
+      "scope": "commits 1-46, through d6ca1f8",
+      "full_tests": {
+        "tests": 989,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "inventory": {
+        "total": 100,
+        "migrated": 70,
+        "pending": 30
       }
     }
   ],
@@ -2521,7 +2555,7 @@
       "Static arrays are read-only metadata; numeric contents are model buffers, while checkpoint metadata stores only shape/dtype"
     ]
   },
-  "results_file": "D:\\LibCity 2.0\\.runtime-tests\\remaining-suite-43-results.xml",
+  "results_file": "D:\\LibCity 2.0\\.runtime-tests\\remaining-suite-44-results.xml",
   "rgsl_cli": {
     "passed": true,
     "source": "D:\\LibCity 2.0\\LibCity-modernization",
@@ -2935,6 +2969,20 @@
       "Unused residual convolutions and final graph/auxiliary computations are omitted",
       "Continuous/resumed dropout, BatchNorm, Adam, metric scheduler and RNG states match exactly in tests",
       "Both batch and layer normalization, singleton CPU AMP and spawned calendar/scaler workers are covered"
+    ]
+  },
+  "od_data_validation": {
+    "passed": true,
+    "tests": 20,
+    "scope": "Shared OD data/metrics prerequisite; GEML and CSTN remain pending",
+    "evidence": "tests/test_runtime_od_data.py",
+    "documentation": "od-data_zh.md",
+    "checks": [
+      "Three atomic formats, geo ID and grid layout alignment, strict dense OD records",
+      "Target-time disjoint windows, train-only scaling, historical masks and known-future isolation",
+      "Reusable raw cache, corruption rebuilding, source versions and temporal/file boundaries",
+      "Independent NumPy metrics over node, OD and grid OD spatial axes in both modes",
+      "ODProbe actual train/evaluate/export, exact optimizer/RNG continuation and changed OD source rejection"
     ]
   }
 }

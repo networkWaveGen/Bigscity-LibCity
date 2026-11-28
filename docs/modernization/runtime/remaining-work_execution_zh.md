@@ -51,7 +51,8 @@
 | commit43 | 8df7954 | feat: migrate RGSL with stable mixed graphs and explicit sampling |
 | commit44 | 81a5c83 | feat: preserve RMSE reduction across accumulation and evaluation |
 | commit45 | 1b3737b | feat: migrate CCRNN with train-only SVD graphs and exact RMSE training |
-| commit46 | 随本节交付的提交 | feat: migrate DMSTGCN with real calendar and train-only stream scaling |
+| commit46 | d6ca1f8 | feat: migrate DMSTGCN with real calendar and train-only stream scaling |
+| commit47 | 随本节交付的提交 | feat: add OD data bundles and spatial-axis evaluation |
 
 ## commit1：修复基础交通缓存（670b325）
 
@@ -540,6 +541,18 @@ forward 由配置决定预测长度，每步重新编码当前窗口；预测回
 验证：新增 **33 项通过**，四组修正旧网络的完整预测、全部有效梯度与训练 BN 对照，包含默认 32/512/40 宽度、八个时间层及 batch/layer；独立图收缩/各嵌入梯度和四种有向幂、真实非午夜时段、仅训练辅助归一化、坏 .rel 隔离/缓存、未来目标修改不影响首个验证输入或统计、未选中/标签/未来输入隔离、动态形状/多目标头顺序、单块/零阶/单节点/batch=1/float64、两种归一化的 dropout/BN/Adam/metric 调度/RNG 精确续训。真实单样本/节点/时间尾批 CPU AMP 与 Windows spawn 通过；既有 STPGCN 日历检查同步通过。完整回归 **989 passed，0 failed，0 errors，0 skipped**，见 [报告](remaining-validation.json)。
 
 仓库外夹具、训练、独立评估、续训 **4 条命令成功**，预测形状 [11,2,4,1]，独立预测/指标完全一致；续训到第三轮共 12 次更新，缓存 miss/hit/hit，三个进程的主/辅助索引和训练区间额外 scaler 描述一致，实际时段数 24。独立评估不创建训练产物，见 [CLI 记录](dmstgcn-cli-validation.json)。清单为 **70/100** 已迁移，30 条 pending；排除延期 Common 与模板后，还有 **21 个交通模型**及最终全量验收。
+
+## commit47：补齐 OD 数据与多空间轴评估
+
+原问题：普通交通输入只保留单个节点空间轴，公共指标限制四维；OD 原子文件的起点/终点身份、网格位置、原始正值掩码和来源版本还没有统一实现，不能据此完成 GEML/CSTN 的原生迁移。
+
+处理：新增 prepare_od，支持 .od/.gridod 及 OD 形式 .dyna，按 .geo 实际 ID 同时对齐起点和终点轴，网格位置保存在只读元信息；要求每个时间/起点/终点恰好一行，零流量显式编码。历史流量、原始布尔正值掩码、历史全局协变量、明确已知未来列和原始目标分开提供。按原始时间切分，窗口不跨文件或时钟缺口，scaler 只拟合原始训练区间；验证/测试不补样本。原始缓存不展开滑窗，窗口/切分/scaler/批次变化可复用，损坏时重建。原始来源版本检查纳入 OD 文件，继续仅用路径、大小和修改时间。
+
+指标放开为 [B,H,...,C]，按每个预测步累计所有空间/特征及批次的统计，保留 single/average 模式；预测文件保持起点和终点空间结构。公共输入构建显式传递历史掩码，继续排除 y/y_raw。组件入口、字段和限制见 [OD 数据说明](od-data_zh.md)。
+
+验证：新增 **20 项通过**，覆盖三种格式、乱序/不连续 ID/网格、真实目标切分/训练统计/未来隔离、零与 NaN、缓存复用和三种损坏重建、多文件/时钟缺口及无效行、三种空间布局的六类指标独立 NumPy 对照。测试模型 ODProbe 实际训练、独立评估、导出 OD 预测，参数/优化器/调度器/AMP/计数/早停/最佳权重/RNG/加载器状态精确续训；只修改测试区间原始 OD 值时续训明确拒绝。完整回归 **1009 passed，0 failed，0 errors，0 skipped**，见 [报告](remaining-validation.json)。
+
+本批只交付数据和指标前置能力，未增加 GEML/CSTN 的模型注册或 CLI 支持，不将测试模型当作实际模型迁移。清单仍为 **70/100** 已迁移，30 条 pending；排除延期 Common 与模板后，仍有 **21 个实际模型**及最终全量验收。
 
 ## 持续完成的清单
 

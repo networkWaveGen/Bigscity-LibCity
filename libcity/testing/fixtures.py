@@ -63,6 +63,43 @@ def periodic_fixture(root,name='PeriodicTiny',steps=400,nodes=4,features=2,outpu
     return folder
 
 
+def od_fixture(root,name='ODTiny',steps=48,nodes=3,features=2,outputs=1,grid_shape=None,extension=None):
+    folder = Path(root)/name
+    folder.mkdir(parents=True,exist_ok=True)
+    nodes = grid_shape[0]*grid_shape[1] if grid_shape else nodes
+    order = np.random.default_rng(19).permutation(nodes)
+    ids = 53+order*7
+    geo = pd.DataFrame(dict(geo_id=ids,type='Polygon' if grid_shape else 'Point',coordinates='[]'))
+    if grid_shape:
+        geo['row_id'],geo['column_id'] = order//grid_shape[1],order%grid_shape[1]
+    geo.to_csv(folder/f'{name}.geo',index=False)
+    rel = [dict(rel_id=i*nodes+j,type='geo',origin_id=int(ids[i]),destination_id=int(ids[j]),distance=1+2*i+j)
+        for i in range(nodes) for j in range(nodes) if i!=j]
+    pd.DataFrame(rel,columns=['rel_id','type','origin_id','destination_id','distance']).to_csv(folder/f'{name}.rel',index=False)
+    clock = pd.date_range('2024-01-01',periods=steps,freq='5min',tz='UTC')
+    records = []
+    for time in range(steps):
+        for origin in range(nodes):
+            for destination in range(nodes):
+                row = dict(dyna_id=len(records),type='state',time=clock[time].strftime('%Y-%m-%dT%H:%M:%SZ'))
+                if grid_shape:
+                    row.update(origin_row_id=int(geo.iloc[origin]['row_id']),origin_column_id=int(geo.iloc[origin]['column_id']),
+                        destination_row_id=int(geo.iloc[destination]['row_id']),destination_column_id=int(geo.iloc[destination]['column_id']))
+                else:
+                    row.update(origin_id=int(ids[origin]),destination_id=int(ids[destination]))
+                row.update({f'flow_{feature}':0. if (time,origin,destination,feature)==(6,1,2,0) else
+                    10+time*.1+origin*3+destination*.7+feature*100 for feature in range(features)})
+                records.append(row)
+    suffix = extension or ('.gridod' if grid_shape else '.od')
+    pd.DataFrame(records).sample(frac=1,random_state=17).to_csv(folder/f'{name}{suffix}',index=False)
+    pd.DataFrame(dict(ext_id=range(steps),time=clock.strftime('%Y-%m-%dT%H:%M:%SZ'),weather=np.arange(steps)*2+.5,
+        holiday=np.arange(steps)%7)).sample(frac=1,random_state=21).to_csv(folder/f'{name}.ext',index=False)
+    (folder/'config.json').write_text(json.dumps(dict(geo_file=name,rel_file=name,data_files=name,
+        data_col=[f'flow_{feature}' for feature in range(features)],output_dim=outputs,time_intervals=300,
+        ext_file=name,ext_col=['weather','holiday'],weight_col='distance')),encoding='utf-8')
+    return folder
+
+
 def dmstgcn_fixture(root,name='Tiny'):
     return periodic_fixture(root,name=name,steps=60,nodes=4,features=2,outputs=1)
 

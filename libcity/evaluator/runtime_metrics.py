@@ -9,8 +9,8 @@ class ForecastMetrics:
         self.statistics = None
 
     def update(self, prediction, target):
-        if prediction.shape != target.shape or target.ndim != 4:
-            raise ValueError('Forecast predictions and targets must share shape (B,T,N,D)')
+        if prediction.shape != target.shape or target.ndim < 4:
+            raise ValueError('Forecast predictions and targets must share shape (B,T,...,D), including node or OD axes')
         prediction, target = prediction.detach().double(), target.detach().double()
         valid = torch.isfinite(target)
         if self.mask_value is not None:
@@ -21,7 +21,7 @@ class ForecastMetrics:
         truth = torch.where(valid, target, 0.)
         percentage_valid = valid & (target != 0)
         ratio = torch.where(percentage_valid, delta.abs() / target.abs(), 0.)
-        dimensions = (0, 2, 3)
+        dimensions = (0,*range(2,target.ndim))
         values = torch.stack([valid.sum(dimensions), delta.abs().sum(dimensions), delta.square().sum(dimensions),
             ratio.sum(dimensions), percentage_valid.sum(dimensions), truth.sum(dimensions), truth.square().sum(dimensions),
             delta.sum(dimensions)], dim=1).cpu()
