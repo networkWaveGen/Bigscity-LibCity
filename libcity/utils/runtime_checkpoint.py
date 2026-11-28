@@ -1,5 +1,6 @@
 """Safe tensor-only inference weights and independent complete training snapshots."""
 from dataclasses import asdict
+from collections import OrderedDict
 from collections.abc import Mapping
 import os
 from pathlib import Path
@@ -52,6 +53,39 @@ def data_state(bundle):
     return result
 
 
+def inference_spec(bundle,config):
+    """Meaning of model inputs/outputs, independent of storage and batch size."""
+    data = {key:value for key,value in config['data'].items()
+        if key not in ('data_dir','cache_dir','cache','pad_training')}
+    return plain(dict(format_version=1,model=config['model'],data=data,dataset=data_state(bundle)))
+
+
+def weight_spec(state):
+    return getattr(state,'_metadata',{}).get('',{}).get('libcity_input_spec')
+
+
+def stamp_weights(state,spec):
+    if spec is not None:
+        if not isinstance(state,OrderedDict):
+            state = OrderedDict(state)
+        if not hasattr(state,'_metadata'):
+            state._metadata = OrderedDict()
+        # State-dict metadata is retained by torch.save/weights_only loading
+        # and ignored by ordinary nn.Module.load_state_dict. Values stay tensors.
+        state._metadata.setdefault('',{})['libcity_input_spec'] = plain(spec)
+    return state
+
+
+def require_weight_spec(state,expected,*,allow_missing=False):
+    actual = weight_spec(state)
+    if actual is None:
+        if allow_missing:
+            return
+        raise ValueError('Evaluation weights lack an input specification; resume a validated last.pt to export best.pt')
+    if actual!=expected:
+        raise ValueError('Evaluation model/data input specification does not match checkpoint (normalization, identities, layout or configuration)')
+
+
 def rng_state():
     numpy = np.random.get_state()
     state = dict(python=random.getstate(), numpy=dict(name=numpy[0], keys=numpy[1].tolist(),
@@ -76,9 +110,10 @@ def restore_rng(state):
 
 
 class CheckpointManager:
-    def __init__(self, directory):
+    def __init__(self, directory, *, input_spec=None):
         self.directory = Path(directory)
         self.best_state = None
+        self.input_spec = plain(input_spec)
 
     def _save(self, name, payload):
         self.directory.mkdir(parents=True, exist_ok=True)
@@ -92,7 +127,7 @@ class CheckpointManager:
         return path
 
     def save_best(self, model):
-        self.best_state = copy_state_to_cpu(model.state_dict())
+        self.best_state = stamp_weights(copy_state_to_cpu(model.state_dict()),self.input_spec)
         return self._save('best.pt', self.best_state)
 
     def save_weights(self,model,name='weights.pt'):
@@ -100,7 +135,7 @@ class CheckpointManager:
         if Path(name).name!=name or '/' in name or '\\' in name:
             raise ValueError('Weight filename must stay inside the checkpoint directory')
         require_pt(name)
-        return self._save(name,copy_state_to_cpu(model.state_dict()))
+        return self._save(name,stamp_weights(copy_state_to_cpu(model.state_dict()),self.input_spec))
 
     def save_last(self, context):
         payload = dict(format_version=3, model=copy_state_to_cpu(context.model.state_dict()),
@@ -130,6 +165,9 @@ class CheckpointManager:
             raise ValueError('Resume dataset metadata/normalization state does not match checkpoint')
         if payload['atomic_sources']!=context.atomic_sources:
             raise ValueError('Resume atomic source files changed (names, sizes or modification times); start a fresh run for modified data')
+        if payload['best_model'] is not None and self.input_spec is not None:
+            require_weight_spec(payload['best_model'],self.input_spec,allow_missing=True)
+            payload['best_model'] = stamp_weights(payload['best_model'],self.input_spec)
         if prepare is not None:
             prepare(context,payload['train_state'])
         context.model.load_state_dict(payload['model'])
@@ -151,8 +189,10 @@ class CheckpointManager:
         return payload
 
     @staticmethod
-    def load_weights(path, model):
+    def load_weights(path, model, *, input_spec=None):
         state = torch.load(require_pt(path), map_location='cpu', weights_only=True)
         if not isinstance(state, dict) or not all(isinstance(value, torch.Tensor) for value in state.values()):
             raise ValueError('Evaluation requires a pure model state_dict (best.pt)')
+        if input_spec is not None:
+            require_weight_spec(state,input_spec)
         model.load_state_dict(state)

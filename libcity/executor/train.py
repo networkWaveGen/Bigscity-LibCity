@@ -8,7 +8,7 @@ import torch
 
 from libcity.executor.components import EarlyStopper, MetricTracker, build_optimizer, build_scheduler
 from libcity.executor.evaluate import ForecastLoss, aggregate_loss, evaluate_loop, move_batch, supervised_step
-from libcity.utils.runtime_checkpoint import CheckpointManager
+from libcity.utils.runtime_checkpoint import CheckpointManager,inference_spec
 from libcity.data.sources import atomic_sources
 
 
@@ -81,7 +81,7 @@ def build_context(model, bundle, config, device, directory, logger, *, steps_per
     if native_cpu_forward:
         logger.info('CPU AMP: recurrent forward must also use native kernels to avoid a oneDNN backward workspace')
     return TrainingContext(model, bundle, config, device, directory, tracker,
-        CheckpointManager(directory / 'checkpoints'), TrainState(), optimizer, schedule, scaler, stopper, loss,
+        CheckpointManager(directory / 'checkpoints',input_spec=inference_spec(bundle,config)), TrainState(), optimizer, schedule, scaler, stopper, loss,
         evaluate_fn, native_cpu_backward, native_cpu_forward, sources)
 
 

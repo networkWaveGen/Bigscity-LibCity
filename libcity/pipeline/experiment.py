@@ -15,7 +15,7 @@ from libcity.executor.evaluate import ExperimentResult, ForecastLoss, evaluate_l
 from libcity.executor.train import build_context, train_loop
 from libcity.executor.algorithm import AlgorithmContext
 from libcity.model.runtime_registry import model_spec, resolve
-from libcity.utils.runtime_checkpoint import CheckpointManager
+from libcity.utils.runtime_checkpoint import CheckpointManager,inference_spec
 
 
 def select_device(value, *, allowed=('cpu','cuda','mps')):
@@ -166,7 +166,8 @@ def run_experiment(mode, config_file=None, *, config=None, overrides=None, check
             if not isinstance(score, (float, int)) or not np.isfinite(score):
                 raise ValueError('Training entry must return a finite scalar validation score')
         elif spec.requires_checkpoint:
-            CheckpointManager.load_weights(checkpoint, model)
+            CheckpointManager.load_weights(checkpoint, model,
+                input_spec=inference_spec(bundle,cfg) if spec.kind=='neural' else None)
         if mode=='train' and not evaluate_test:
             result=ExperimentResult({'validation_score':float(score)})
         elif spec.evaluate:

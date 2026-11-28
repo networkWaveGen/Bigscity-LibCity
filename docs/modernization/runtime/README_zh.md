@@ -64,6 +64,8 @@ print(result.artifacts['best'])
 
 ## 训练与产物
 
+神经模型的 `best.pt` 仍是可单文件复制的安全 state_dict，附带输入说明元信息。独立评估在加载参数前核对模型、归一化、节点身份及输入布局，避免相同形状下静默错用数据。缺少说明的旧权重可从通过完整校验的 `last.pt` 重新导出，已完成 epoch 时无需额外更新；详见 [权重输入检查](inference-weights_zh.md)。
+
 神经网络训练实验写入 `<output_dir>/<exp_id>/`，含 resolved_config.json、runtime_info.json、run.log、metrics.jsonl、checkpoints/best.pt、checkpoints/last.pt 和 eval/ 下的 JSON/CSV 指标及可选预测文件。`evaluation.save_predictions=false` 关闭预测导出。TensorBoard 仅在支持它的训练且 `runtime.tensorboard=true` 时创建；独立评估不创建优化器、训练记录器或 TensorBoard。
 
 基础安装不要求 TensorBoard。启用该后端时安装 `pip install -e '.[tensorboard]'`；dev 组为可选记录器的验收保留该依赖。Trafformer 单独需要 `pip install -e '.[transformer]'`。

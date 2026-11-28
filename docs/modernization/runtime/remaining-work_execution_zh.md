@@ -54,7 +54,8 @@
 | commit46 | d6ca1f8 | feat: migrate DMSTGCN with real calendar and train-only stream scaling |
 | commit47 | 0ef3677 | feat: add OD data bundles and spatial-axis evaluation |
 | commit48 | 9cb1e60 | feat: migrate GEML with corrected periodic memory and raw OD objectives |
-| commit49 | 随本节交付的提交 | feat: migrate CSTN with causal grid OD contexts and independent correlations |
+| commit49 | dbe6b3f | feat: migrate CSTN with causal grid OD contexts and independent correlations |
+| commit50 | 随本节交付的提交 | fix: validate neural inference inputs before loading weights |
 
 ## commit1：修复基础交通缓存（670b325）
 
@@ -581,6 +582,18 @@ forward 由配置决定预测长度，每步重新编码当前窗口；预测回
 验证：新增 **27 项通过**，四组修正旧 GCC/天气广播/状态类型的网络前向及全部有效参数、流量、外部特征梯度，包含默认三层/75 通道。独立逐列相关公式/梯度、跨样本零梯度、双轴节点置换、实际天气输入逐步推进、未来目标及未知天气隔离、原始训练归一化、坏关系文件隔离/缓存、可选协变量、单格/单帧/float64、真实尾批 CPU AMP、两种 scaler 的实际训练/独立评估/Adam/metric 调度/最佳权重/RNG 精确恢复均通过。含既有 OD/GEML 合计 **83 passed**；完整回归 **1072 passed，0 failed，0 errors，0 skipped**，见 [汇总](remaining-validation.json)。
 
 仓库外夹具、训练、独立评估和续训 **4 条命令成功**，预测 [9,2,4,4,1]、独立预测和指标完全一致；续训第三轮 9 次参数更新，缓存 miss/hit/hit。安全纯权重保存显式网格和协变量映射，独立评估没有训练产物；原尺度 MSE 与导出预测独立计算一致，见 [CLI](cstn-cli-validation.json)。清单为 **72/100**，28 条 pending；排除延期 Common 与模板后，还有 **19 个实际模型**及最终全量验收。
+
+## commit50：阻止独立评估静默加载不匹配输入的权重
+
+新问题：独立评估原先只校验纯 Tensor 权重及参数名/形状。已复现训练用 MinMax01Scaler、评估改用 StandardScaler 仍可加载；相同形状的节点、网格和协变量顺序变化也可能被旧 buffer 覆盖。完整 last.pt 已有数据状态保护，纯 best.pt 尚缺同类输入语义约束。
+
+处理：创建神经训练上下文时提取模型配置、有效数据声明、数据身份/布局及归一化类型/统计。保存到标准 state_dict 的根模块元信息 libcity_input_spec，不增加权重键、不保存优化器/RNG、不创建 sidecar；普通 PyTorch load_state_dict 及 weights_only=True 保持可用。统一评估入口在加载任何模型参数/buffer 前比较当前说明，拒绝不兼容输入。根数据/缓存目录、缓存开关、训练补齐和训练/评估批次不参与比较；原始测试观测变化而输入定义/训练统计不变时允许评估，不对文件做内容哈希。
+
+缺少说明的旧 best.pt 明确拒绝。可由原配置/原数据通过完整模型、设置、数据状态和来源版本检查的 last.pt 重新导出；已完成 epoch 时不增加参数更新，也不改写原文件。已存在但冲突的最佳说明在恢复参数/优化器/RNG 前拒绝。外部算法仍使用各自身份检查，完整续训保持原文件版本规则。字段、迁移办法和边界见 [修复说明](inference-weights_zh.md)。
+
+验证：新增 **13 项通过**：Tensor 键和版本元信息、快照独立/标准 PyTorch 加载/单文件复制；七种形状可兼容的错误 scaler/节点/网格/未来及历史顺序/窗口/结构在加载前拒绝；公共 API 允许批次/训练补齐变化且不创建训练组件；旧最佳缺说明拒绝、旧完整状态零额外更新导出、冲突说明恢复前拒绝、测试观测变化允许。相关 CSTN/GEML/引擎/旧入口合计 **109 passed**。完整回归 **1085 passed，0 failed，0 errors，0 skipped**，见 [汇总](remaining-validation.json)。
+
+实际发布 CSTN 的夹具、训练、复制后的独立权重评估、错误 scaler 拒绝、续训共 **5 条命令全部符合预期**；其中 4 条成功、1 条按预期明确失败。正确预测/指标完全一致，第三轮 9 次更新，没有训练产物或额外说明文件依赖，见 [CLI](inference-weights-cli-validation.json)。本批不增加模型计数：仍为 **72/100**，排除延期 Common 与模板后还有 **19 个模型**及最终验收。
 
 ## 持续完成的清单
 
