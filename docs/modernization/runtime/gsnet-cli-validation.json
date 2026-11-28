@@ -1,0 +1,362 @@
+{
+  "passed": true,
+  "source": "D:\\LibCity 2.0\\LibCity-modernization",
+  "directory": "D:\\LibCity 2.0\\.runtime-tests\\gsnet-cli-tmotm498",
+  "commands": [
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\tools\\make_runtime_fixture.py",
+        "--directory",
+        "D:\\LibCity 2.0\\.runtime-tests\\gsnet-cli-tmotm498\\example",
+        "--model",
+        "GSNet"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\gsnet-cli-tmotm498",
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "train",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\gsnet-cli-tmotm498\\example\\gsnet.json",
+        "--set",
+        "runtime.exp_id=train"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\gsnet-cli-tmotm498",
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "evaluate",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\gsnet-cli-tmotm498\\example\\gsnet.json",
+        "--checkpoint",
+        "D:\\LibCity 2.0\\.runtime-tests\\gsnet-cli-tmotm498\\example\\runs\\train\\checkpoints\\best.pt",
+        "--set",
+        "runtime.exp_id=evaluated"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\gsnet-cli-tmotm498",
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "train",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\gsnet-cli-tmotm498\\example\\gsnet.json",
+        "--resume",
+        "D:\\LibCity 2.0\\.runtime-tests\\gsnet-cli-tmotm498\\example\\runs\\train\\checkpoints\\last.pt",
+        "--set",
+        "training.epochs=3",
+        "--set",
+        "runtime.exp_id=resumed"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\gsnet-cli-tmotm498",
+      "exit_code": 0
+    }
+  ],
+  "prediction_shape": [
+    19,
+    2,
+    6,
+    1
+  ],
+  "independent_predictions_equal": true,
+  "independent_metrics_equal": true,
+  "global_raw_region_squared_risk_mse": 320.2520961323051,
+  "evaluation_loss": 320.25211374383224,
+  "resumed_epoch": 3,
+  "optimizer_steps": 12,
+  "cache_statuses": [
+    "miss",
+    "hit",
+    "hit"
+  ],
+  "grid_cells": 6,
+  "graph_nodes": 3,
+  "regions": [
+    true,
+    false,
+    true,
+    false,
+    false,
+    true
+  ],
+  "input_specification_saved": true,
+  "weights_only_safe_load": true,
+  "evaluate_has_no_training_artifacts": true,
+  "runtime_info": {
+    "train": {
+      "python": "3.12.13",
+      "pytorch": "2.15.0+cpu",
+      "numpy": "2.5.5",
+      "platform": "Windows-11-10.0.26200-SP0",
+      "mode": "train",
+      "execution_kind": "neural",
+      "device": "cpu",
+      "seed": 17,
+      "benchmark_protocol": "risk_cpt",
+      "split": {
+        "semantics": "target_time_v1",
+        "adapter": "risk_cpt",
+        "grid_shape": [
+          2,
+          3
+        ],
+        "input_window": 3,
+        "history_span_points": 24,
+        "requested_input_window": 3,
+        "offsets": [
+          -1,
+          -2,
+          -24
+        ],
+        "intervals": {
+          "train": {
+            "samples": 32,
+            "target_index_start": 24,
+            "target_index_end": 56
+          },
+          "val": {
+            "samples": 18,
+            "target_index_start": 57,
+            "target_index_end": 75
+          },
+          "test": {
+            "samples": 19,
+            "target_index_start": 76,
+            "target_index_end": 95
+          }
+        },
+        "train": 32,
+        "val": 18,
+        "test": 19,
+        "train_end": "2024-01-03T09:00:00.000000000",
+        "val_end": "2024-01-04T04:00:00.000000000",
+        "scaler_fit_end_exclusive": "2024-01-03T09:00:00.000000000",
+        "train_padded": false,
+        "cache": {
+          "status": "miss",
+          "path": "D:\\LibCity 2.0\\.runtime-tests\\gsnet-cli-tmotm498\\example\\cache\\traffic-raw-v1\\f50b730c48a065ac6c4cf05f.npz"
+        },
+        "external_scaling": "minmax01",
+        "input_missing_observations": "zero",
+        "graph_nodes": 3,
+        "graph_views": [
+          "road",
+          "risk",
+          "poi"
+        ],
+        "risk_regions": 3
+      },
+      "protocol_changes": {
+        "data.input_window": 3,
+        "data.sampling": {
+          "name": "risk_cpt",
+          "closeness": 2,
+          "period": 1,
+          "trend": 0,
+          "interval_period": 1,
+          "interval_trend": 1
+        },
+        "evaluation.metrics": [
+          "RMSE",
+          "Recall",
+          "MAP"
+        ],
+        "evaluation.mask_value": null,
+        "benchmark.protocol": "risk_cpt"
+      },
+      "capabilities": {
+        "requires_checkpoint": true,
+        "supports_resume": true,
+        "supports_validation": true
+      }
+    },
+    "evaluated": {
+      "python": "3.12.13",
+      "pytorch": "2.15.0+cpu",
+      "numpy": "2.5.5",
+      "platform": "Windows-11-10.0.26200-SP0",
+      "mode": "evaluate",
+      "execution_kind": "neural",
+      "device": "cpu",
+      "seed": 17,
+      "benchmark_protocol": "risk_cpt",
+      "split": {
+        "semantics": "target_time_v1",
+        "adapter": "risk_cpt",
+        "grid_shape": [
+          2,
+          3
+        ],
+        "input_window": 3,
+        "history_span_points": 24,
+        "requested_input_window": 3,
+        "offsets": [
+          -1,
+          -2,
+          -24
+        ],
+        "intervals": {
+          "train": {
+            "samples": 32,
+            "target_index_start": 24,
+            "target_index_end": 56
+          },
+          "val": {
+            "samples": 18,
+            "target_index_start": 57,
+            "target_index_end": 75
+          },
+          "test": {
+            "samples": 19,
+            "target_index_start": 76,
+            "target_index_end": 95
+          }
+        },
+        "train": 32,
+        "val": 18,
+        "test": 19,
+        "train_end": "2024-01-03T09:00:00.000000000",
+        "val_end": "2024-01-04T04:00:00.000000000",
+        "scaler_fit_end_exclusive": "2024-01-03T09:00:00.000000000",
+        "train_padded": false,
+        "cache": {
+          "status": "hit",
+          "path": "D:\\LibCity 2.0\\.runtime-tests\\gsnet-cli-tmotm498\\example\\cache\\traffic-raw-v1\\f50b730c48a065ac6c4cf05f.npz"
+        },
+        "external_scaling": "minmax01",
+        "input_missing_observations": "zero",
+        "graph_nodes": 3,
+        "graph_views": [
+          "road",
+          "risk",
+          "poi"
+        ],
+        "risk_regions": 3
+      },
+      "protocol_changes": {
+        "data.input_window": 3,
+        "data.sampling": {
+          "name": "risk_cpt",
+          "closeness": 2,
+          "period": 1,
+          "trend": 0,
+          "interval_period": 1,
+          "interval_trend": 1
+        },
+        "evaluation.metrics": [
+          "RMSE",
+          "Recall",
+          "MAP"
+        ],
+        "evaluation.mask_value": null,
+        "benchmark.protocol": "risk_cpt"
+      },
+      "capabilities": {
+        "requires_checkpoint": true,
+        "supports_resume": true,
+        "supports_validation": true
+      }
+    },
+    "resumed": {
+      "python": "3.12.13",
+      "pytorch": "2.15.0+cpu",
+      "numpy": "2.5.5",
+      "platform": "Windows-11-10.0.26200-SP0",
+      "mode": "train",
+      "execution_kind": "neural",
+      "device": "cpu",
+      "seed": 17,
+      "benchmark_protocol": "risk_cpt",
+      "split": {
+        "semantics": "target_time_v1",
+        "adapter": "risk_cpt",
+        "grid_shape": [
+          2,
+          3
+        ],
+        "input_window": 3,
+        "history_span_points": 24,
+        "requested_input_window": 3,
+        "offsets": [
+          -1,
+          -2,
+          -24
+        ],
+        "intervals": {
+          "train": {
+            "samples": 32,
+            "target_index_start": 24,
+            "target_index_end": 56
+          },
+          "val": {
+            "samples": 18,
+            "target_index_start": 57,
+            "target_index_end": 75
+          },
+          "test": {
+            "samples": 19,
+            "target_index_start": 76,
+            "target_index_end": 95
+          }
+        },
+        "train": 32,
+        "val": 18,
+        "test": 19,
+        "train_end": "2024-01-03T09:00:00.000000000",
+        "val_end": "2024-01-04T04:00:00.000000000",
+        "scaler_fit_end_exclusive": "2024-01-03T09:00:00.000000000",
+        "train_padded": false,
+        "cache": {
+          "status": "hit",
+          "path": "D:\\LibCity 2.0\\.runtime-tests\\gsnet-cli-tmotm498\\example\\cache\\traffic-raw-v1\\f50b730c48a065ac6c4cf05f.npz"
+        },
+        "external_scaling": "minmax01",
+        "input_missing_observations": "zero",
+        "graph_nodes": 3,
+        "graph_views": [
+          "road",
+          "risk",
+          "poi"
+        ],
+        "risk_regions": 3
+      },
+      "protocol_changes": {
+        "data.input_window": 3,
+        "data.sampling": {
+          "name": "risk_cpt",
+          "closeness": 2,
+          "period": 1,
+          "trend": 0,
+          "interval_period": 1,
+          "interval_trend": 1
+        },
+        "evaluation.metrics": [
+          "RMSE",
+          "Recall",
+          "MAP"
+        ],
+        "evaluation.mask_value": null,
+        "benchmark.protocol": "risk_cpt"
+      },
+      "capabilities": {
+        "requires_checkpoint": true,
+        "supports_resume": true,
+        "supports_validation": true
+      }
+    }
+  },
+  "scope": "Actual published GSNet example, CPU functionality and corrected LibCity model; not paper accuracy or author-normalized risk-bin parity"
+}

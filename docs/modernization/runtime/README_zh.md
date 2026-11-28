@@ -14,7 +14,7 @@ CSTN 可用 `--model CSTN` 生成网格 OD 示例，使用相同的生命周期�
 
 DSAN 可用 `--model DSAN` 生成连续网格示例，使用 `grid_window` 与无静态图配置；原始历史掩码在归一化前计算。全局/局部与空间/时间注意力保持明确样本轴，所有堆叠逐层传递；默认训练为公共 masked_rmse，支持梯度累积和精确续训。采用历史种子并行预测，不读取目标或未来观测；参数、长预测窗扩展和算法修订见 [DSAN 说明](dsan_zh.md)。
 
-GSNet 的完整网格/部分图映射、风险分档加权目标和区域排名评估已补齐组件，接口及验证范围见 [风险组件说明](risk-components_zh.md)。原生 GSNet 网络尚未注册，仍属于待迁移模型；组件测试模型不计入支持数量。
+GSNet 已接入原生网格/多图时空网络、风险分档目标和区域排名评估；用 `--model GSNet` 生成 gsnet.json，再执行相同的训练/独立评估/续训命令。`.geo` 可只覆盖部分图节点，映射到完整网格；未来上下文只读取第一真实预测时刻的已知信息，多步目标全部监督。默认 risk_cpt 最近 3 帧加前 4 周同刻；示例显式缩短周期。配置、修订及实际验收见 [GSNet 说明](gsnet_zh.md)，数据/目标/指标公式见 [风险组件说明](risk-components_zh.md)。
 
 道路表征的 ChebConv/GAT/GeomGCN 使用具名 `road_reconstruction` 协议，任务默认配置与模型预设分开加载；预设仍不能静默改写协议字段。协议名称及相对于默认边采样协议的差异会写入日志和 runtime_info.json。生成示例可用 `tools/make_runtime_fixture.py --directory <目录> --model ChebConv`、`--model GAT` 或 `--model GeomGCN`；它们重建静态节点属性并导出全节点嵌入，使用全图批次与互斥监督节点集合，不将此指标解释为下游分类精度。GeomGCN 的道路边/自环分区以 PyTorch 聚合实现，不需要 DGL；训练、独立评估与完整续训均使用公共入口。它保留 LibCity 的两分区重建变体，不包含原论文的几何邻域构建；合并维度与有意修复见模型说明。
 

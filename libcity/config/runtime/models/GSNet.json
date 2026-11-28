@@ -1,0 +1,9 @@
+{
+  "model": {"params": {"num_of_gru_layers": 5, "gru_hidden_size": 256, "gcn_nums_filters": [64,64]}},
+  "data": {"scaler": {"name": "minmax01"},
+    "graph": {"name": "risk_multigraph", "road_column": null, "risk_column": null, "poi_column": null, "use_poi": true, "symmetric": false, "self_loops": false},
+    "features": {"load_external": true, "time_in_day": true, "day_in_week": true,
+      "graph_columns": null, "external_scaler": {"name": "minmax01"}}},
+  "training": {"epochs": 200, "batch_size": 32, "optimizer": {"name": "adam", "lr": 0.00001},
+    "early_stopping": {"patience": 10, "min_delta": 0.000001}}
+}

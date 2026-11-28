@@ -399,6 +399,15 @@ history/kernel/channel dimensions. Unused final graph/auxiliary layers are
 removed. Both batch/layer normalization and full dropout/BN continuation use
 the shared train/evaluate/resume lifecycle.
 
+Generate GSNet with `--model GSNet`, then use gsnet.json with the same
+train/evaluate/resume commands. The fixture contains a full 2x3 risk grid and
+three noncontiguous graph nodes with road, risk and POI views. History and
+known forecast-time covariates remain separate; only the first known future
+timestamp conditions the original parallel fusion head. All forecast steps
+receive the raw-scale region-squared, risk-bin-weighted objective. Region
+metrics include zero-risk targets; predictions export unmodified truth plus
+a regions mask. The example explicitly shortens the default four-week history.
+
 The complete supported-model inventory and migration details are in the
 [runtime guide](../docs/modernization/runtime/README_zh.md). Small examples prove
 execution and reproducibility, not real-city benchmark accuracy.

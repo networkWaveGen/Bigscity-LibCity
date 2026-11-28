@@ -104,6 +104,12 @@ def validate(config, preset):
     if model['name']=='CSTN':
         for key in ('n_layers','c_lt'):
             _positive(model['params'][key],'CSTN '+key)
+    if model['name']=='GSNet':
+        for key in ('num_of_gru_layers','gru_hidden_size'):
+            _positive(model['params'][key],'GSNet '+key)
+        filters = model['params']['gcn_nums_filters']
+        if not isinstance(filters,list) or not filters or any(type(value) is not int or value<1 for value in filters):
+            raise ValueError('GSNet gcn_nums_filters must be a nonempty list of positive integers')
     if model['name']=='DSAN':
         params = model['params']
         for key in ('L','d','n_h','B'):
@@ -137,7 +143,16 @@ def validate(config, preset):
             if key in data['split'] and not isinstance(data['split'][key],str):
                 raise TypeError(f'data.split.{key} must be an ISO timestamp')
         stream_keys = ('primary_index','auxiliary_index') if model['name']=='DMSTGCN' else ()
-        _known(data['features'], ('load_external', 'time_in_day', 'day_in_week', 'known_future_columns')+stream_keys, 'data.features')
+        risk_keys = ('graph_columns','external_scaler') if model['name']=='GSNet' else ()
+        _known(data['features'], ('load_external', 'time_in_day', 'day_in_week', 'known_future_columns')+stream_keys+risk_keys, 'data.features')
+        if risk_keys:
+            columns = data['features']['graph_columns']
+            if columns is not None and (not isinstance(columns,list) or not columns or
+                    any(not isinstance(value,str) or not value for value in columns) or len(set(columns))!=len(columns)):
+                raise ValueError('GSNet features.graph_columns requires unique nonempty observation names or null')
+            _known(data['features']['external_scaler'],('name',),'data.features.external_scaler')
+            if data['features']['external_scaler'].get('name') not in ('none','normal','standard','minmax01','minmax11','log'):
+                raise ValueError('Unknown GSNet external_scaler.name')
         if stream_keys:
             for key in stream_keys:
                 _positive(data['features'][key],'features.'+key,zero=True)
@@ -149,8 +164,19 @@ def validate(config, preset):
         _known(data['scaler'], ('name',), 'data.scaler')
         graph_keys = {'HGCN':('cluster_nodes','cluster_labels','cluster_epsilon'),
             'GTS':('history_channel','history_steps'),
-            'CCRNN':('svd_rank','svd_channels','normalization')}.get(model['name'],())
+            'CCRNN':('svd_rank','svd_channels','normalization'),
+            'GSNet':('road_column','risk_column','poi_column','use_poi')}.get(model['name'],())
         _known(data['graph'], ('name', 'symmetric', 'self_loops', 'epsilon','reachability_column','distance_column')+graph_keys, 'data.graph')
+        if model['name']=='GSNet':
+            _known(data['graph'],('name','symmetric','self_loops')+graph_keys,'GSNet data.graph')
+            if data['graph']['name']!='risk_multigraph':
+                raise ValueError('GSNet requires risk_multigraph relations')
+            if type(data['graph'].get('use_poi')) is not bool:
+                raise TypeError('GSNet graph.use_poi must be boolean')
+            for key in ('road_column','risk_column','poi_column'):
+                value = data['graph'].get(key)
+                if value is not None and (not isinstance(value,str) or not value):
+                    raise ValueError('GSNet graph.'+key+' must be a column name or null')
         if model['name']=='HGCN':
             for key,value in dict(cluster_nodes=0,cluster_labels=None,cluster_epsilon=.1).items():
                 data['graph'].setdefault(key,value)
@@ -186,8 +212,12 @@ def validate(config, preset):
                 raise ValueError('data.graph.reachability_column is a TGCLSTM column name or null')
         _known(data['sampling'], ('name','closeness','period','trend','interval_period','interval_trend',
                                   'temporal_history','period_steps','trend_steps'), 'data.sampling')
-        if data['sampling'].get('name') not in ('window','cpt','crann','grid_cpt','frame_cpt','seasonal_windows','od_window','grid_window'):
+        if data['sampling'].get('name') not in ('window','cpt','crann','grid_cpt','frame_cpt','seasonal_windows','od_window','grid_window','risk_cpt'):
             raise ValueError('Unknown data.sampling.name')
+        if (spec.protocol=='risk_cpt') != (data['sampling']['name']=='risk_cpt'):
+            raise ValueError('risk_cpt sampling requires a registered risk_cpt model and vice versa')
+        if spec.protocol=='risk_cpt':
+            _known(data['sampling'],('name','closeness','period','trend','interval_period','interval_trend'),'GSNet data.sampling')
         if (spec.protocol=='grid_window') != (data['sampling']['name']=='grid_window'):
             raise ValueError('grid_window sampling requires a registered grid_window model and vice versa')
         if model['name']=='DSAN':
@@ -214,7 +244,7 @@ def validate(config, preset):
                 _positive(data['sampling'].get(key),f'data.sampling.{key}')
         if data['sampling']['name']=='crann':
             _positive(data['sampling'].get('temporal_history'), 'data.sampling.temporal_history')
-        if data['sampling']['name'] in ('cpt','grid_cpt','frame_cpt'):
+        if data['sampling']['name'] in ('cpt','grid_cpt','frame_cpt','risk_cpt'):
             for key in ('closeness','period','trend'):
                 _positive(data['sampling'].get(key,0),f'data.sampling.{key}',zero=True)
             if not sum(data['sampling'].get(key,0) for key in ('closeness','period','trend')):
@@ -222,7 +252,8 @@ def validate(config, preset):
             for key in ('interval_period','interval_trend'):
                 _positive(data['sampling'].get(key,1),f'data.sampling.{key}')
         if data['graph'].get('name') not in ('binary', 'weighted', 'distance','inverse_distance','distance_bands')+(
-                ('svd_gaussian',) if model['name']=='CCRNN' else ('dynamic',) if model['name']=='DMSTGCN' else ('none',) if model['name'] in ('CSTN','DSAN') else ()):
+                ('svd_gaussian',) if model['name']=='CCRNN' else ('dynamic',) if model['name']=='DMSTGCN' else
+                ('risk_multigraph',) if model['name']=='GSNet' else ('none',) if model['name'] in ('CSTN','DSAN') else ()):
             raise ValueError('Unknown data.graph.name')
         if (data['graph']['name']=='distance_bands' and model['name']!='MultiSTGCnet') or (
                 model['name']=='MultiSTGCnet' and data['graph']['name'] not in ('distance_bands','binary')):
@@ -261,6 +292,14 @@ def validate(config, preset):
     if not isinstance(evaluation['metrics'], list) or not evaluation['metrics']:
         raise ValueError('evaluation.metrics must be a nonempty list')
     allowed_metrics = {'MAE', 'MSE', 'RMSE', 'MAPE', 'R2', 'EVAR'}
+    if model['name']=='GSNet':
+        ranking = {'Precision','Recall','F1-Score','MAP','PCC'}
+        allowed_metrics |= ranking
+        _positive(evaluation['topk'],'GSNet evaluation.topk')
+        if evaluation['mask_value'] is not None:
+            raise ValueError('GSNet evaluation includes real zero risks; mask_value must be null')
+        if any(isinstance(name,str) and name.startswith('masked_') and name.removeprefix('masked_') in ranking for name in evaluation['metrics']):
+            raise ValueError('GSNet ranking metrics use region eligibility, without masked_ prefixes')
     if spec.task=='traj_loc_pred':
         if not isinstance(evaluation['topk'],list) or not evaluation['topk'] or any(type(k) is not int or k<1 for k in evaluation['topk']):
             raise ValueError('evaluation.topk requires positive integers')
@@ -276,7 +315,7 @@ def validate(config, preset):
         'scheduler': ('name', 'interval', 'step_size', 'gamma', 'milestones', 'T_max', 'eta_min', 'patience',
                       'factor', 'monitor', 'mode', 'threshold', 'max_lr', 'total_steps', 'pct_start', 'warmup_steps',
                       'model_dim', 'lr_multiplier'),
-        'loss': ('name', 'mask_value','alpha','eps')+(('od_weight','origin_weight','destination_weight') if model['name']=='GEML' else ())+(('delta',) if training['loss'].get('name') in ('huber','masked_huber') else ())+(('negative_samples',) if spec.protocol in ('atst_ranking','stan_ranking') else
+        'loss': ('name', 'mask_value','alpha','eps')+(('thresholds','weights') if model['name']=='GSNet' else ())+(('od_weight','origin_weight','destination_weight') if model['name']=='GEML' else ())+(('delta',) if training['loss'].get('name') in ('huber','masked_huber') else ())+(('negative_samples',) if spec.protocol in ('atst_ranking','stan_ranking') else
             ('negative_samples','temperature','num_nearest','exclude_visited') if spec.protocol=='geosan_ranking' else ()),
         'early_stopping': ('patience', 'min_delta')}.items():
         _known(training[key], names, f'training.{key}')
@@ -327,6 +366,21 @@ def validate(config, preset):
         spec.task,('mae','mse','masked_mae','masked_mse','huber','masked_huber'))
     if model['name'] in ('CCRNN','DSAN'):
         losses += ('rmse','masked_rmse')
+    if model['name']=='GSNet':
+        losses = ('risk_mse',)
+        loss = training['loss']
+        if loss.get('mask_value') is not None:
+            raise ValueError('GSNet risk loss includes real zero risks; mask_value must be null')
+        thresholds,weights = loss.get('thresholds'),loss.get('weights')
+        for key,values in (('thresholds',thresholds),('weights',weights)):
+            if values is not None:
+                if not isinstance(values,list):
+                    raise ValueError('GSNet loss.'+key+' must be a numeric list or null')
+                for value in values: _number(value,'GSNet loss.'+key)
+        if thresholds is not None and any(right<=left for left,right in zip(thresholds,thresholds[1:])):
+            raise ValueError('GSNet loss.thresholds must be strictly increasing')
+        if weights is not None and (not weights or not any(weights) or thresholds is not None and len(weights)!=len(thresholds)+1):
+            raise ValueError('GSNet loss.weights must have positive mass and match the risk bins')
     if model['name']=='GEML':
         losses = ('mse','masked_mse')
         weights = [training['loss'].get(key) for key in ('od_weight','origin_weight','destination_weight')]

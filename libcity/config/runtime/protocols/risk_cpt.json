@@ -1,0 +1,6 @@
+{
+  "data": {"output_window": 1, "sampling": {"name": "risk_cpt", "closeness": 3, "period": 4,
+    "trend": 0, "interval_period": 7, "interval_trend": 1}},
+  "training": {"loss": {"name": "risk_mse", "mask_value": null, "thresholds": null, "weights": null}},
+  "evaluation": {"metrics": ["RMSE", "Recall", "MAP"], "mask_value": null, "topk": 10}
+}

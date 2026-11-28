@@ -29,6 +29,9 @@ class ModelSpec:
 
 
 MODELS = {
+    'GSNet': ModelSpec('libcity.model.traffic_accident_prediction.runtime_gsnet:GSNet',protocol='risk_cpt',
+        prepare_data='libcity.data.gsnet_bundle:prepare_gsnet',loss='libcity.executor.risk_loss:RiskLoss',
+        evaluate_loader='libcity.executor.risk_evaluation:evaluate_risk'),
     'DSAN': ModelSpec('libcity.model.traffic_flow_prediction.runtime_dsan:DSAN',protocol='grid_window',
         prepare_data='libcity.data.grid_traffic:prepare_grid',loss='libcity.executor.root_loss:build_forecast_loss'),
     'CSTN': ModelSpec('libcity.model.traffic_od_prediction.runtime_cstn:CSTN',protocol='od_window',

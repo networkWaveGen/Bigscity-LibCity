@@ -57,7 +57,8 @@
 | commit49 | dbe6b3f | feat: migrate CSTN with causal grid OD contexts and independent correlations |
 | commit50 | aafc857 | fix: validate neural inference inputs before loading weights |
 | commit51 | 956930e | feat: migrate DSAN with isolated grid attention and raw masks |
-| commit52 | 随本节交付的提交 | feat: add risk-grid bundles and region-aware evaluation |
+| commit52 | 79a13e3 | feat: add risk-grid bundles and region-aware evaluation |
+| commit53 | 随本节交付的提交 | feat: migrate GSNet with forecast-time attention and region objectives |
 
 ## commit1：修复基础交通缓存（670b325）
 
@@ -618,6 +619,18 @@ forward 由配置决定预测长度，每步重新编码当前窗口；预测回
 验证：新增 **28 项通过**，覆盖部分图/完整网格、双/三图、身份与只读映射、未来目标隔离、训练外部统计、缓存复用、原尺度独立损失/梯度及微批加权、NumPy 排名/误差/PCC 参考、真实尾批 CPU AMP，以及组件测试模型 RiskProbe 的完整训练/独立评估/精确续训/来源变化拒绝。相关网格与 DSAN 合计 **108 passed**；完整回归 **1150 passed，0 failed，0 errors，0 skipped**，见 [汇总](remaining-validation.json)。
 
 本批只交付公共前置组件，**不把 RiskProbe 当作 GSNet**，没有 GSNet 原生网络注册、正式配置或 CLI 验收。模型计数仍为 **73/100**、27 条 pending；扣除延期 Common 与模板后还有 **18 个实际模型**及最终全量验收。下一批继续接入 GSNet 网络与完整生命周期。
+
+## commit53：迁移 GSNet 原生网络与完整风险预测生命周期
+
+原问题：GSNet 网络尚未注册到新入口；旧默认 GCN 宽度是不可迭代整数，图和网格身份/矩形轴混淆；时间注意力读取历史首帧而非预测时刻，单样本/单时间轴被无条件 squeeze 压掉；输出把 horizon 放在最后一维，损失按 output_dim=1 切片时只监督第一预测步。图 Tensor 固定设备、模型持有 scaler，缺少统一的安全权重评估和完整续训。
+
+处理：实现标准 nn.Module，保留两层网格卷积/逐格 GRU 与多图 GCN/逐节点 GRU、时间注意力、16 通道融合和并行多步输出。图传播广播静态矩阵，图/映射/索引注册独立 buffer；无 POI 或无已知未来特征时不创建无效分支参数。时间上下文只来自第一个真实预测时刻的已知向量，不读目标；输出统一 [B,H,N,1]，复用 commit52 风险目标监督全部预测步。修复单格/单帧/矩形布局及默认宽度列表，使用实际 CPT 历史长度。原生网络、risk_cpt 协议、配置校验、正式夹具示例和模型注册均接入统一训练、区域评估与安全续训，见 [GSNet 说明](gsnet_zh.md)。
+
+验证：新增 **33 项通过**，四组旧核心模块前向及所有参数/输入梯度（含默认 5 层/256 隐藏/[64,64] 图宽）、两/三图与图节点置换、静态所有权/设备 dtype、真实未来时间及跨样本/标签隔离、全部预测步梯度、单格/单帧/零外部/零未来特征、两种 scaler 的实际训练/独立评估/原尺度区域损失复算/优化器/metric 调度/早停/最佳模型/RNG/加载器精确恢复、真实尾批 CPU AMP 和 Windows spawn、19 类非法配置。相关组件与配置合计 **73 passed**；完整回归 **1183 passed，0 failed，0 errors，0 skipped**，见 [汇总](remaining-validation.json)。
+
+仓库外实际生成、训练、独立评估、续训 **4 条命令成功**，完整网格 6 格与图 3 节点，预测 [19,2,6,1]，独立预测和指标完全一致；第三轮累计 12 次更新、缓存 miss/hit/hit。原尺度区域平方分档 MSE 独立复算约 320.252096，与评估 loss 的浮点精度一致；安全纯权重包含输入说明，独立评估没有训练产物，见 [CLI](gsnet-cli-validation.json)。原融合头仍仅用第一预测时刻条件一次性输出 H 步；阈值按原尺度解释、数值外部列按训练区间独立归一化、排名并列和零事故处理均为明确修订，不宣称论文精度或作者归一化目标等价。
+
+清单更新为 **74/100**、26 条 pending；扣除延期 Common 与模板后还有 **17 个实际模型**：DMVSTNet、GMAN、STDN、STAGGCN、STMGAT、D2STGNN、STGODE、ESG、SSTBAN、STTSNet、FOGS、DSTAGNN、HIEST、MultiSPANS、STWave、PDFormer、STGNCDE。它们及最终全量交付验收仍在主线范围内，本批不将整个方案标为完成。
 
 ## 持续完成的清单
 
