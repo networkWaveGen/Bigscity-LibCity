@@ -124,7 +124,18 @@ def validate(config, preset):
                 raise TypeError(f'data.split.{key} must be an ISO timestamp')
         _known(data['features'], ('load_external', 'time_in_day', 'day_in_week', 'known_future_columns'), 'data.features')
         _known(data['scaler'], ('name',), 'data.scaler')
-        _known(data['graph'], ('name', 'symmetric', 'self_loops', 'epsilon','reachability_column','distance_column'), 'data.graph')
+        hierarchy_keys = ('cluster_nodes','cluster_labels','cluster_epsilon') if model['name']=='HGCN' else ()
+        _known(data['graph'], ('name', 'symmetric', 'self_loops', 'epsilon','reachability_column','distance_column')+hierarchy_keys, 'data.graph')
+        if model['name']=='HGCN':
+            for key,value in dict(cluster_nodes=0,cluster_labels=None,cluster_epsilon=.1).items():
+                data['graph'].setdefault(key,value)
+            _positive(data['graph']['cluster_nodes'],'graph.cluster_nodes',zero=True)
+            _number(data['graph']['cluster_epsilon'],'graph.cluster_epsilon')
+            if data['graph']['cluster_epsilon']>1:
+                raise ValueError('graph.cluster_epsilon must be between zero and one')
+            labels = data['graph']['cluster_labels']
+            if labels is not None and (not isinstance(labels,list) or not labels or any(type(value) is not int or value<0 for value in labels)):
+                raise ValueError('graph.cluster_labels must be a nonempty list of nonnegative integers or null')
         if 'distance_column' in data['graph']:
             column = data['graph']['distance_column']
             if model['name']!='MultiSTGCnet' or (column is not None and (not isinstance(column,str) or not column)):

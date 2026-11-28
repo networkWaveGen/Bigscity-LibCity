@@ -45,7 +45,8 @@
 | commit37 | 05765a3 | feat: migrate STSGCN with fresh graph masks and explicit Huber loss |
 | commit38 | 5972104 | feat: migrate STPGCN with registered layers and factored relations |
 | commit39 | 3fbe3d7 | feat: migrate DGCN with explicit CPT axes and dynamic graphs |
-| commit40 | 随本节交付的提交 | fix: compute CPT histories from exact active physical periods |
+| commit40 | ed4daee | fix: compute CPT histories from exact active physical periods |
+| commit41 | 随本节交付的提交 | feat: migrate HGCN with complete region aggregation and static graph state |
 
 ## commit1：修复基础交通缓存（670b325）
 
@@ -452,6 +453,20 @@ forward 由配置决定预测长度，每步重新编码当前窗口；预测回
 验证：新增 **24 项通过**，覆盖五种既有频率的旧数组逐项一致、7 分钟仅周/七日倍数、2 小时仅日/日周组合、整日采样仅周、无法精确表示的启用周期、完整窗口到达目标时拒绝、非法采样间隔、真实两小时日周期逐帧相差一天/互斥目标/训练统计，以及真实 7 分钟数据的一周对齐和采样身份变化；与多周期模型和定制训练合计 **41 项通过**。完整回归 **787 passed，0 failed，0 errors，0 skipped**，见 [汇总](remaining-validation.json)。
 
 修复前已用 commit39 实际训练并保存 7 分钟错误周周期检查点；修复后实际拒绝其续训，随后同一原始缓存上按正确 1440 帧重新训练成功。此前小时级 DGCN 检查点仍可继续到第四轮/20 次更新。新两小时日周期 4 步预测完成训练、独立评估和续训，预测与指标完全一致、缓存 miss/hit/hit。新增 6 条仓库外命令中 5 条成功、1 条按预期拒绝，见 [CPT 记录](cpt-cli-validation.json)。迁移表仍为 65/100，本期实际模型仍剩 26 个，最终全量验收未完成。
+
+## commit41：迁移 HGCN 并补齐区域成员、静态分区和图状态
+
+问题：旧 get_input_cluster 只将每个区域第一个节点加两次，其他成员完全没有贡献；ReLU 自适应图的零度行出现除零。支持图和 transmit 保存在普通属性/列表中，不完整参与设备/精度迁移和检查点；区域图标准差为零产生无效尺度。无条件 squeeze 破坏单节点/单区域/单样本，输出 Linear 要求时间轴最终为 1，导致输入写死在 12 帧。h/h_cluster 和 gate 卷积从未参与前向，nhid 也未用于构建网络。
+
+处理：新增原生节点/区域双层网络，保留四个图池化块、三个学习式传递、跳连及原多目标头。区域特征按只读成员矩阵汇总所有组员一次，静态支持/成员/单位图注册为 buffer，自适应图每次前向生成，零度行使用单位行。末层时间核根据剩余长度推导，默认 [3,2] 要求历史至少 10 帧，可显式缩短核；时序注意力/BN 使用明确轴。删除无效图残差/门内卷积和旧无效 nhid，不持有 scaler/logger/device。
+
+专用数据适配仅按静态图做谱分区，不使用任何流量或验证/测试目标。分区选项位于 data.graph，固定局部随机种子并规范组编号；支持自动 min(10,N)、指定组数和 .geo 顺序显式标签，单节点/零图/每节点一组有确定规则。保留组间权重和的原 Gaussian 规则，标准差为零用零图。实际分区进入只读元信息和安全续训检查；分区设置与原始缓存身份分离，改变组标签仍可复用原始时序缓存。使用现有核心 scikit-learn，不新增依赖。
+
+提取公共 runtime_attention，供 DGCN 与 HGCN 共享双线性时间注意力，DGCN 状态键和数值不变。默认 HGCN 保留 32/256/512 宽度、10 维自适应图、2 阶传播、dropout=0.3、六种图支持规则、Adam 0.001、指数 epoch 调度 gamma=0.92 与 masked_mae。
+
+验证：新增 **47 项通过**，含六种图及默认宽度/训练态共八组修正旧聚合后的完整预测/全部有效梯度/BN 对照、独立旧静态图公式、全成员和梯度守恒、谱分区/私有 RNG/显式标签、常量区域图与零度行、六组历史/核/图阶数/特征/目标/batch=1/float64、输入/图/样本独立、分区设置复用缓存/未来目标变化不影响分区或输入、真实谱分区完整训练/独立评估/dropout/BN/Adam/调度器/RNG 精确续训，以及单节点/单区域/单时间步真实尾批 CPU AMP。与 DGCN 及清单检查合计 79 项；完整回归 **834 passed，0 failed，0 errors，0 skipped**，见 [汇总](remaining-validation.json)。
+
+仓库外实际夹具、训练、独立评估和续训共 **4 条命令成功**，跨进程分区均为 [0,1,0]，预测/指标完全一致；续训第三轮共 6 次参数更新，缓存 miss/hit/hit，见 [CLI](hgcn-cli-validation.json)。对照明确修复旧成员聚合、单轴及静态 dtype，不声称旧错误训练流程或论文精度复现。迁移表为 **66/100**，34 条 pending；排除延期 Common 与模板后仍有 **25 个交通预测模型**及最终全量验收待完成。
 
 ## 持续完成的清单
 

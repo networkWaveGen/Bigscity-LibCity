@@ -1,0 +1,10 @@
+{
+  "model": {"params": {"channels": 32, "skip_channels": 256, "end_channels": 512,
+    "adjtype": "doubletransition", "dropout": 0.3, "adaptive_dim": 10,
+    "graph_order": 2, "temporal_kernels": [3,2]}},
+  "data": {"scaler": {"name": "standard"}, "features": {"time_in_day": true},
+    "graph": {"cluster_nodes": 0, "cluster_labels": null, "cluster_epsilon": 0.1}},
+  "training": {"optimizer": {"name": "adam", "lr": 0.001},
+    "scheduler": {"name": "exponential", "interval": "epoch", "gamma": 0.92},
+    "loss": {"name": "masked_mae", "mask_value": 0.0}, "early_stopping": {"patience": 50}}
+}

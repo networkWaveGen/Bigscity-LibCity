@@ -22,6 +22,8 @@ STPGCN 示例用 `--model STPGCN` 生成，对 stpgcn.json 使用相同 train/ev
 
 DGCN 示例用 `--model DGCN` 生成，按 dgcn.json 执行相同 train/evaluate/resume 命令。具名 dgcn_cpt 默认取最近 2 小时、前一天和前两周的各 12 步，总共 60 帧；小时级小例子显式改为一步、共 5 帧。c_out/K/Kt/attention_heads/dropout 控制动态图通道、Chebyshev 阶数、奇数时间核、注意力头数与丢弃率，周期类别由 data.sampling 声明。模型按布局恢复每类内远到近顺序，粗周期输入轴已纠正。训练 MSE 默认包含原始零目标；边界、语义变化及当前公共 CPT 数据频率约束见 [模型说明](models_zh.md)。
 
+HGCN 示例用 `--model HGCN` 生成，对 hgcn.json 使用相同生命周期命令。data.graph.cluster_nodes=0 自动选 min(10,N) 个区域；示例设为 2 并实际运行固定种子的静态路网谱聚类，也可用 cluster_labels 按 .geo 顺序给出分区。区域输入使用所有组员之和，图与分区是只读元信息，改变分区设置可复用原始缓存。temporal_kernels 默认 [3,2]，要求历史至少 10 帧；缩短核可运行更短历史。默认保留双层图与多步/多目标输出，全部训练/评估/续训使用公共入口。区域图的原高斯规则、退化处理和参数说明见 [模型说明](models_zh.md)。
+
 ## GRU 完整例子
 
 从源码根目录运行，数据、缓存和输出都可放在仓库外：

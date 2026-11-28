@@ -1,0 +1,113 @@
+{
+  "passed": true,
+  "source": "D:\\LibCity 2.0\\LibCity-modernization",
+  "directory": "D:\\LibCity 2.0\\.runtime-tests\\hgcn-cli-vfoj67zm",
+  "commands": [
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\tools\\make_runtime_fixture.py",
+        "--directory",
+        "D:\\LibCity 2.0\\.runtime-tests\\hgcn-cli-vfoj67zm\\example",
+        "--model",
+        "HGCN"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\hgcn-cli-vfoj67zm",
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "train",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\hgcn-cli-vfoj67zm\\example\\hgcn.json",
+        "--set",
+        "runtime.exp_id=train"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\hgcn-cli-vfoj67zm",
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "evaluate",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\hgcn-cli-vfoj67zm\\example\\hgcn.json",
+        "--checkpoint",
+        "D:\\LibCity 2.0\\.runtime-tests\\hgcn-cli-vfoj67zm\\example\\runs\\train\\checkpoints\\best.pt",
+        "--set",
+        "runtime.exp_id=evaluated"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\hgcn-cli-vfoj67zm",
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "train",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\hgcn-cli-vfoj67zm\\example\\hgcn.json",
+        "--resume",
+        "D:\\LibCity 2.0\\.runtime-tests\\hgcn-cli-vfoj67zm\\example\\runs\\train\\checkpoints\\last.pt",
+        "--set",
+        "training.epochs=3",
+        "--set",
+        "runtime.exp_id=resumed"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\hgcn-cli-vfoj67zm",
+      "exit_code": 0
+    }
+  ],
+  "model": "HGCN",
+  "metrics": {
+    "MAE@1": 1.544533129091616,
+    "RMSE@1": 1.7674503965150132,
+    "MAE@2": 0.9018482985319914,
+    "RMSE@2": 1.1015158155020277,
+    "loss": 1.2231907579633925
+  },
+  "prediction_shape": [
+    9,
+    2,
+    3,
+    1
+  ],
+  "independent_metrics_exact": true,
+  "independent_predictions_exact": true,
+  "checkpoint_format": 3,
+  "resumed_state": {
+    "stage": "train",
+    "epoch": 3,
+    "batches_seen": 9,
+    "optimizer_steps": 6,
+    "best_metric": 0.8471995923254225,
+    "task_state": {}
+  },
+  "cache_statuses": [
+    "miss",
+    "hit",
+    "hit"
+  ],
+  "spectral_partition_labels": [
+    0,
+    1,
+    0
+  ],
+  "partition_equal_across_processes": true,
+  "notes": [
+    "Executed outside the source directory",
+    "Real seeded spectral partition into two regions uses only the static road graph",
+    "Region inputs sum every assigned node exactly once",
+    "Static supports, membership and identity fallbacks are saved as buffers",
+    "Dropout, BatchNorm, Adam, exponential schedule and RNG continuation checked exactly by tests",
+    "Legacy Gaussian of summed cluster weights retained; undefined constant scale uses zero graph"
+  ],
+  "scikit_learn": "1.9.1"
+}

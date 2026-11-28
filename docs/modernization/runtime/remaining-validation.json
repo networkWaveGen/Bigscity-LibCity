@@ -1,14 +1,15 @@
 {
-  "scope": "Remaining-work commits 1-40; whole-library migration remains in progress",
+  "scope": "Remaining-work commits 1-41; whole-library migration remains in progress",
   "environment": {
     "python": "3.12.13",
     "torch": "2.15.0+cpu",
     "numpy": "2.5.5",
     "platform": "Windows-11-10.0.26200-SP0",
-    "gensim": "4.4.0"
+    "gensim": "4.4.0",
+    "scikit_learn": "1.9.1"
   },
   "full_tests": {
-    "tests": 787,
+    "tests": 834,
     "failures": 0,
     "errors": 0,
     "skipped": 0
@@ -378,6 +379,53 @@
     "test_incompatible_residual_modes_fail_with_specific_error[params2]",
     "test_grid_sampling_and_model_must_be_selected_together[STResNet-window]",
     "test_grid_sampling_and_model_must_be_selected_together[GRU-grid_cpt]",
+    "test_original_hierarchy_prediction_all_effective_gradients_and_bn_with_correct_member_sum[doubletransition-4-8-8-False]",
+    "test_original_hierarchy_prediction_all_effective_gradients_and_bn_with_correct_member_sum[transition-4-8-8-False]",
+    "test_original_hierarchy_prediction_all_effective_gradients_and_bn_with_correct_member_sum[symnadj-4-8-8-False]",
+    "test_original_hierarchy_prediction_all_effective_gradients_and_bn_with_correct_member_sum[normlap-4-8-8-False]",
+    "test_original_hierarchy_prediction_all_effective_gradients_and_bn_with_correct_member_sum[scalap-4-8-8-False]",
+    "test_original_hierarchy_prediction_all_effective_gradients_and_bn_with_correct_member_sum[identity-4-8-8-False]",
+    "test_original_hierarchy_prediction_all_effective_gradients_and_bn_with_correct_member_sum[doubletransition-4-8-8-True]",
+    "test_original_hierarchy_prediction_all_effective_gradients_and_bn_with_correct_member_sum[doubletransition-32-256-512-False]",
+    "test_static_supports_match_original_directed_formulas_and_own_input[doubletransition]",
+    "test_static_supports_match_original_directed_formulas_and_own_input[transition]",
+    "test_static_supports_match_original_directed_formulas_and_own_input[symnadj]",
+    "test_static_supports_match_original_directed_formulas_and_own_input[normlap]",
+    "test_static_supports_match_original_directed_formulas_and_own_input[scalap]",
+    "test_static_supports_match_original_directed_formulas_and_own_input[identity]",
+    "test_every_cluster_member_contributes_once_with_correct_source_gradients",
+    "test_zero_degree_adaptive_rows_and_constant_cluster_graph_are_finite",
+    "test_spectral_partition_is_seeded_static_and_uses_private_numpy_rng",
+    "test_degenerate_partition_handles_singleton_all_nodes_and_empty_graph[1-0]",
+    "test_degenerate_partition_handles_singleton_all_nodes_and_empty_graph[4-0]",
+    "test_degenerate_partition_handles_singleton_all_nodes_and_empty_graph[4-1]",
+    "test_degenerate_partition_handles_singleton_all_nodes_and_empty_graph[4-2]",
+    "test_explicit_partition_preserves_node_order_and_gaussian_sum_formula",
+    "test_general_history_feature_target_graph_orders_singletons_and_effective_gradients[10-1-labels0-1-1-1-kernels0]",
+    "test_general_history_feature_target_graph_orders_singletons_and_effective_gradients[12-4-labels1-2-2-2-kernels1]",
+    "test_general_history_feature_target_graph_orders_singletons_and_effective_gradients[15-4-labels2-3-2-3-kernels2]",
+    "test_general_history_feature_target_graph_orders_singletons_and_effective_gradients[1-1-labels3-2-2-2-kernels3]",
+    "test_general_history_feature_target_graph_orders_singletons_and_effective_gradients[5-3-labels4-2-1-1-kernels4]",
+    "test_general_history_feature_target_graph_orders_singletons_and_effective_gradients[8-3-labels5-1-3-2-kernels5]",
+    "test_eval_is_label_free_batch_independent_and_graph_input_state_are_owned",
+    "test_partition_settings_reuse_raw_cache_and_future_targets_do_not_change_hierarchy",
+    "test_spectral_hierarchy_train_evaluate_dropout_bn_adam_schedule_rng_exact_resume",
+    "test_actual_cpu_amp_single_node_single_region_and_single_time_tail[False]",
+    "test_actual_cpu_amp_single_node_single_region_and_single_time_tail[True]",
+    "test_invalid_model_parameters_fail_early[params0]",
+    "test_invalid_model_parameters_fail_early[params1]",
+    "test_invalid_model_parameters_fail_early[params2]",
+    "test_invalid_model_parameters_fail_early[params3]",
+    "test_invalid_model_parameters_fail_early[params4]",
+    "test_invalid_model_parameters_fail_early[params5]",
+    "test_invalid_model_parameters_fail_early[params6]",
+    "test_invalid_hierarchy_configuration_is_rejected_before_data[options0]",
+    "test_invalid_hierarchy_configuration_is_rejected_before_data[options1]",
+    "test_invalid_hierarchy_configuration_is_rejected_before_data[options2]",
+    "test_invalid_hierarchy_configuration_is_rejected_before_data[options3]",
+    "test_invalid_hierarchy_configuration_is_rejected_before_data[options4]",
+    "test_invalid_hierarchy_configuration_is_rejected_before_data[options5]",
+    "test_metadata_partition_input_length_and_nonhierarchical_config_guards",
     "test_memory_recurrence_matches_independent_gates_and_depends_on_previous_cell",
     "test_original_classifier_and_gradients_with_explicitly_corrected_memory",
     "test_full_training_ranking_export_and_exact_resume",
@@ -805,8 +853,8 @@
   ],
   "inventory": {
     "total": 100,
-    "migrated": 65,
-    "pending": 35
+    "migrated": 66,
+    "pending": 34
   },
   "history": [
     {
@@ -1247,6 +1295,20 @@
       "scope": "commits 1-39, through 3fbe3d7",
       "full_tests": {
         "tests": 763,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "inventory": {
+        "total": 100,
+        "migrated": 65,
+        "pending": 35
+      }
+    },
+    {
+      "scope": "commits 1-40, through ed4daee",
+      "full_tests": {
+        "tests": 787,
         "failures": 0,
         "errors": 0,
         "skipped": 0
@@ -1978,5 +2040,118 @@
       "epoch": 4,
       "optimizer_steps": 20
     }
+  },
+  "hgcn_cli": {
+    "passed": true,
+    "source": "D:\\LibCity 2.0\\LibCity-modernization",
+    "directory": "D:\\LibCity 2.0\\.runtime-tests\\hgcn-cli-vfoj67zm",
+    "commands": [
+      {
+        "command": [
+          "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+          "-B",
+          "D:\\LibCity 2.0\\LibCity-modernization\\tools\\make_runtime_fixture.py",
+          "--directory",
+          "D:\\LibCity 2.0\\.runtime-tests\\hgcn-cli-vfoj67zm\\example",
+          "--model",
+          "HGCN"
+        ],
+        "cwd": "D:\\LibCity 2.0\\.runtime-tests\\hgcn-cli-vfoj67zm",
+        "exit_code": 0
+      },
+      {
+        "command": [
+          "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+          "-B",
+          "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+          "train",
+          "--config",
+          "D:\\LibCity 2.0\\.runtime-tests\\hgcn-cli-vfoj67zm\\example\\hgcn.json",
+          "--set",
+          "runtime.exp_id=train"
+        ],
+        "cwd": "D:\\LibCity 2.0\\.runtime-tests\\hgcn-cli-vfoj67zm",
+        "exit_code": 0
+      },
+      {
+        "command": [
+          "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+          "-B",
+          "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+          "evaluate",
+          "--config",
+          "D:\\LibCity 2.0\\.runtime-tests\\hgcn-cli-vfoj67zm\\example\\hgcn.json",
+          "--checkpoint",
+          "D:\\LibCity 2.0\\.runtime-tests\\hgcn-cli-vfoj67zm\\example\\runs\\train\\checkpoints\\best.pt",
+          "--set",
+          "runtime.exp_id=evaluated"
+        ],
+        "cwd": "D:\\LibCity 2.0\\.runtime-tests\\hgcn-cli-vfoj67zm",
+        "exit_code": 0
+      },
+      {
+        "command": [
+          "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+          "-B",
+          "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+          "train",
+          "--config",
+          "D:\\LibCity 2.0\\.runtime-tests\\hgcn-cli-vfoj67zm\\example\\hgcn.json",
+          "--resume",
+          "D:\\LibCity 2.0\\.runtime-tests\\hgcn-cli-vfoj67zm\\example\\runs\\train\\checkpoints\\last.pt",
+          "--set",
+          "training.epochs=3",
+          "--set",
+          "runtime.exp_id=resumed"
+        ],
+        "cwd": "D:\\LibCity 2.0\\.runtime-tests\\hgcn-cli-vfoj67zm",
+        "exit_code": 0
+      }
+    ],
+    "model": "HGCN",
+    "metrics": {
+      "MAE@1": 1.544533129091616,
+      "RMSE@1": 1.7674503965150132,
+      "MAE@2": 0.9018482985319914,
+      "RMSE@2": 1.1015158155020277,
+      "loss": 1.2231907579633925
+    },
+    "prediction_shape": [
+      9,
+      2,
+      3,
+      1
+    ],
+    "independent_metrics_exact": true,
+    "independent_predictions_exact": true,
+    "checkpoint_format": 3,
+    "resumed_state": {
+      "stage": "train",
+      "epoch": 3,
+      "batches_seen": 9,
+      "optimizer_steps": 6,
+      "best_metric": 0.8471995923254225,
+      "task_state": {}
+    },
+    "cache_statuses": [
+      "miss",
+      "hit",
+      "hit"
+    ],
+    "spectral_partition_labels": [
+      0,
+      1,
+      0
+    ],
+    "partition_equal_across_processes": true,
+    "notes": [
+      "Executed outside the source directory",
+      "Real seeded spectral partition into two regions uses only the static road graph",
+      "Region inputs sum every assigned node exactly once",
+      "Static supports, membership and identity fallbacks are saved as buffers",
+      "Dropout, BatchNorm, Adam, exponential schedule and RNG continuation checked exactly by tests",
+      "Legacy Gaussian of summed cluster weights retained; undefined constant scale uses zero graph"
+    ],
+    "scikit_learn": "1.9.1"
   }
 }

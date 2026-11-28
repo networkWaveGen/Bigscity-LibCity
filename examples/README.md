@@ -339,6 +339,17 @@ coarse attention groups complete history chunks instead of interleaving their
 positions. Training MSE includes raw zero targets by default; metric masks are
 configured independently. Numerical checks explicitly account for the axis fix.
 
+Generate HGCN with `--model HGCN`, then use hgcn.json with the same lifecycle
+commands. The small example performs seeded spectral clustering into two regions
+using only the static road graph. Configure data.graph.cluster_nodes (0 selects
+min(10,N)), optional geo-ordered cluster_labels, and cluster_epsilon. Every node
+contributes once to its region sum. Partition changes reuse the raw cache, while
+safe resume checks the actual hierarchy. Default temporal_kernels=[3,2] require
+at least ten history frames; smaller kernels support shorter histories. The
+model retains both hierarchy levels, three transfers and the original output
+head. Region adjacency keeps the legacy Gaussian of summed weights, with a
+finite zero-graph fallback for an undefined constant scale.
+
 The complete supported-model inventory and migration details are in the
 [runtime guide](../docs/modernization/runtime/README_zh.md). Small examples prove
 execution and reproducibility, not real-city benchmark accuracy.

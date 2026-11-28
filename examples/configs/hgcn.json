@@ -1,0 +1,8 @@
+{
+  "data": {"dataset": "Tiny", "data_dir": "data", "cache_dir": "cache",
+    "input_window": 12, "output_window": 2, "pad_training": false, "graph": {"cluster_nodes": 2}},
+  "model": {"name": "HGCN", "params": {"channels": 4, "skip_channels": 8, "end_channels": 8}},
+  "training": {"epochs": 2, "batch_size": 5, "accumulation_steps": 2},
+  "evaluation": {"batch_size": 5},
+  "runtime": {"device": "cpu", "seed": 17, "output_dir": "runs", "exp_id": "hgcn"}
+}
