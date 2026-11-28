@@ -40,12 +40,15 @@ class GridWindows(Dataset):
         return sample
 
 
-def prepare_grid(data, training, evaluation, seed, logger=None):
+def prepare_grid(data, training, evaluation, seed, logger=None, *, geo_transform=None):
     folder = Path(data['data_dir'])/data['dataset']
     raw = json.loads((folder/'config.json').read_text(encoding='utf-8'))
     raw = {**raw, **raw.get('info', {})}
     geo_path = folder/(raw.get('geo_file',data['dataset'])+'.geo')
     geo = pd.read_csv(geo_path)
+    if geo_transform is not None:
+        geo = geo_transform(raw,geo)
+    risk = data['sampling']['name']=='risk_cpt'
     if not {'geo_id','row_id','column_id'} <= set(geo):
         raise ValueError('Grid .geo requires geo_id, row_id and column_id')
     ids = geo['geo_id'].tolist()
@@ -81,7 +84,7 @@ def prepare_grid(data, training, evaluation, seed, logger=None):
     interval = raw.get('time_intervals',300)
     if type(output_dim) is not int or not 1 <= output_dim <= len(columns):
         raise ValueError('Grid output_dim must select one or more leading observation columns')
-    if type(interval) is not int or interval < 1 or (data['sampling']['name']=='grid_cpt' and 86400 % interval):
+    if type(interval) is not int or interval < 1 or (data['sampling']['name'] in ('grid_cpt','risk_cpt') and 86400 % interval):
         raise ValueError('Grid time_intervals must be positive integer seconds; CPT requires dividing a day')
     options = data['features']
     requested = options['known_future_columns']
@@ -94,9 +97,16 @@ def prepare_grid(data, training, evaluation, seed, logger=None):
         ext_names = [ext_names] if isinstance(ext_names,str) else ext_names
         if len(set(ext_names))!=len(ext_names) or not set(ext_names)<=set(header):
             raise ValueError('Grid ext_col must select unique covariates')
-    if set(requested)-set(ext_names):
+    observed_future = [name for name in columns if name in requested] if risk else []
+    if any(name in columns[:output_dim] for name in observed_future):
+        raise ValueError('Risk targets cannot be declared as known future observations')
+    if set(requested)-set(ext_names)-set(observed_future):
         raise ValueError('known_future_columns must name loaded .ext covariates')
-    calendar_width = int(options['time_in_day'])+7*int(options['day_in_week'])
+    calendar_names = (([f'hour_{index}' for index in range(24)] if risk else ['time_in_day']) if options['time_in_day'] else [])+(
+        [f'day_of_week_{index}' for index in range(7)] if options['day_in_week'] else [])
+    calendar_width = len(calendar_names)
+    if risk and (set(columns)&set(calendar_names+ext_names) or len(set(calendar_names+ext_names))!=len(calendar_names+ext_names)):
+        raise ValueError('Risk observation, calendar and external names must be distinct')
     known_columns = list(range(calendar_width))+[calendar_width+ext_names.index(name) for name in ext_names if name in requested]
 
     def build():
@@ -133,7 +143,7 @@ def prepare_grid(data, training, evaluation, seed, logger=None):
             features = []
             if options['time_in_day']:
                 seconds = times.hour*3600+times.minute*60+times.second
-                features.append(np.asarray(seconds,dtype=np.float64)[:,None]/86400)
+                features.append(np.eye(24,dtype=np.float64)[times.hour] if risk else np.asarray(seconds,dtype=np.float64)[:,None]/86400)
             if options['day_in_week']:
                 features.append(np.eye(7,dtype=np.float64)[times.day_of_week])
             if ext is not None:
@@ -151,7 +161,14 @@ def prepare_grid(data, training, evaluation, seed, logger=None):
         if np.any(np.diff(clock) <= np.timedelta64(0,'s')):
             raise ValueError('Grid data_files must be chronological without overlapping timestamps')
         external = np.concatenate(externals)
-        return dict(history=np.concatenate(histories),external=external,known=external[:,known_columns],
+        history = np.concatenate(histories)
+        known = external[:,known_columns]
+        if observed_future:
+            global_values = history[:,:, [columns.index(name) for name in observed_future]]
+            if not np.isfinite(global_values).all() or not np.all(global_values==global_values[:,:1]):
+                raise ValueError('Known future risk observation columns must be finite and identical across grid cells')
+            known = np.concatenate((known,global_values[:,0]),1)
+        return dict(history=history,external=external,known=known,
                     clock=clock,intervals=np.asarray(intervals,dtype=np.int64))
 
     fields = ('history','external','known','clock','intervals')
@@ -163,7 +180,7 @@ def prepare_grid(data, training, evaluation, seed, logger=None):
             raise ValueError('Grid cached observations and covariates must be numeric')
         if (arrays['history'].shape != (length,len(ids),len(columns)) or
             arrays['external'].shape != (length,calendar_width+len(ext_names)) or
-            arrays['known'].shape != (length,len(known_columns)) or np.isnat(arrays['clock']).any() or
+            arrays['known'].shape != (length,len(known_columns)+len(observed_future)) or np.isnat(arrays['clock']).any() or
             np.any(np.diff(arrays['clock'])<=np.timedelta64(0,'s')) or np.isinf(arrays['history']).any() or
             not np.isfinite(arrays['external']).all() or not np.isfinite(arrays['known']).all()):
             raise ValueError('Grid array dimensions do not match atomic metadata')
@@ -171,17 +188,17 @@ def prepare_grid(data, training, evaluation, seed, logger=None):
         if (spans.dtype.kind not in 'iu' or spans.ndim!=2 or spans.shape[1]!=2 or np.any(spans[:,1]<=spans[:,0]) or
                 not np.array_equal(spans.ravel(),np.r_[0,np.repeat(spans[1:,0],2),length])):
             raise ValueError('Grid cached file intervals must partition the timeline')
-    arrays,cache = prepare_arrays(data,raw,build,logger,namespace='grid-cpt-v1',source_paths=sources,fields=fields,validate=validate)
+    arrays,cache = prepare_arrays(data,raw,build,logger,namespace='risk-grid-v1' if risk else 'grid-cpt-v1',source_paths=sources,fields=fields,validate=validate)
     clock = arrays['clock']
     sampling = data['sampling']
     if sampling['name']=='grid_window':
         offsets = list(range(-data['input_window'],0))
-    elif sampling['name']=='grid_cpt':
+    elif sampling['name'] in ('grid_cpt','risk_cpt'):
         offsets = [-index for index in range(1,sampling.get('closeness',0)+1)]
         offsets += [-index*86400//interval*sampling.get('interval_period',1) for index in range(1,sampling.get('period',0)+1)]
         offsets += [-index*7*86400//interval*sampling.get('interval_trend',1) for index in range(1,sampling.get('trend',0)+1)]
     else:
-        raise ValueError('Grid data require grid_cpt or grid_window sampling')
+        raise ValueError('Grid data require grid_cpt, risk_cpt or grid_window sampling')
     offsets = np.asarray(offsets,dtype=np.int64)
     horizon = data['output_window']
     starts = np.concatenate([np.arange(left-offsets.min(),right-horizon+1) for left,right in arrays['intervals']])
@@ -194,10 +211,11 @@ def prepare_grid(data, training, evaluation, seed, logger=None):
         segment_order=['window'] if sampling['name']=='grid_window' else ['closeness','period','trend'],
         grid_shape=[height,width],grid_order=np.argsort(linear),node_positions=linear,
         historical_external_dim=calendar_width+len(ext_names),future_external_dim=len(known_columns),
-        future_feature_names=(['time_in_day'] if options['time_in_day'] else [])+
-            ([f'day_of_week_{index}' for index in range(7)] if options['day_in_week'] else [])+
-            [name for name in ext_names if name in requested],
+        future_feature_names=calendar_names+[name for name in ext_names if name in requested]+observed_future,
         target_semantics='raw_and_scaled',split_semantics='target_time_v1')
+    if risk:
+        layout['historical_feature_names'] = calendar_names+ext_names
+        layout['future_external_dim'] = len(known_columns)+len(observed_future)
     if sampling['name']=='grid_window':
         layout['history_mask'] = 'finite_nonzero_raw_observations'
     metadata = DatasetMetadata(data['dataset'],len(ids),len(columns),output_dim,

@@ -112,6 +112,29 @@ def dsan_fixture(root):
     return grid_fixture(root,steps=60)
 
 
+def risk_fixture(root,name='RiskTiny',steps=96,poi=True):
+    folder = grid_fixture(root,name=name,steps=steps,rows=2,columns=3,features=3,outputs=1)
+    ids = [71,3,108]
+    cells = [(1,2),(0,0),(0,2)]
+    pd.DataFrame(dict(geo_id=ids,row_id=[value[0] for value in cells],column_id=[value[1] for value in cells],
+        risk_mask=[.5,1.,2.],type='Polygon',coordinates='[]')).to_csv(folder/f'{name}.geo',index=False)
+    records = [dict(rel_id=i*3+j,type='geo',origin_id=ids[i],destination_id=ids[j],
+        road=float(i==j or abs(i-j)==1),risk=.3*(i+1)/(j+1),poi=1. if i==j else .2+.1*i)
+        for i in range(3) for j in range(3)]
+    relation = pd.DataFrame(records)
+    if not poi: relation = relation.drop(columns='poi')
+    relation.sample(frac=1,random_state=13).to_csv(folder/f'{name}.rel',index=False)
+    frame = pd.read_csv(folder/f'{name}.grid')
+    frame['value_2'] = pd.to_datetime(frame['time'],utc=True).dt.dayofweek
+    frame.to_csv(folder/f'{name}.grid',index=False)
+    path = folder/'config.json';raw=json.loads(path.read_text(encoding='utf-8'))
+    raw.update(grid_len_row=2,grid_len_column=3,rel_file=name,weight_col=['road','risk']+(['poi'] if poi else []),
+        graph_input_col=['value_0','value_1'],target_time_col=['value_2'],
+        risk_thresholds=[0.,20.,28.],risk_weights=[.05,.2,.25,.5])
+    path.write_text(json.dumps(raw),encoding='utf-8')
+    return folder
+
+
 def dmstgcn_fixture(root,name='Tiny'):
     return periodic_fixture(root,name=name,steps=60,nodes=4,features=2,outputs=1)
 

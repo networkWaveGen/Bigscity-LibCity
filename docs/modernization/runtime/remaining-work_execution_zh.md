@@ -56,7 +56,8 @@
 | commit48 | 9cb1e60 | feat: migrate GEML with corrected periodic memory and raw OD objectives |
 | commit49 | dbe6b3f | feat: migrate CSTN with causal grid OD contexts and independent correlations |
 | commit50 | aafc857 | fix: validate neural inference inputs before loading weights |
-| commit51 | 随本节交付的提交 | feat: migrate DSAN with isolated grid attention and raw masks |
+| commit51 | 956930e | feat: migrate DSAN with isolated grid attention and raw masks |
+| commit52 | 随本节交付的提交 | feat: add risk-grid bundles and region-aware evaluation |
 
 ## commit1：修复基础交通缓存（670b325）
 
@@ -607,6 +608,16 @@ forward 由配置决定预测长度，每步重新编码当前窗口；预测回
 验证：新增 **37 项通过**，四组修正旧 Torch 子模块、按样本/区域独立运行的完整预测及全部参数/输入/外部梯度，覆盖默认宽度/层数及不同目标/宽度/矩形/半径；SDPA 头缩放/掩码/全空梯度、NumPy 位置、局部方块/布尔与梯度、物理节点置换、跨样本零梯度、无标签/未来输入/RNG、长预测；原始零/NaN/训练统计/时间与未来隔离、缓存无完整行重读及四类损坏、非整日时钟；两种 scaler 的 dropout/Adam/metric 调度全状态精确续训，单格/单帧真实尾批 CPU AMP 和 Windows spawn。连同原网格/根损失/CCRNN **143 passed**；完整回归 **1122 passed，0 failed，0 errors，0 skipped**，见 [汇总](remaining-validation.json)。
 
 仓库外夹具、训练、独立评估和续训 **4 条命令成功**，预测 [11,2,6,2]，独立预测与指标完全一致；续训第三轮累计 12 次更新，缓存 miss/hit/hit。原尺度 masked RMSE 独立计算约 4.077559，与评估 loss 一致；安全权重带公共输入说明，独立评估没有训练产物，见 [CLI](dsan-cli-validation.json)。清单为 **73/100**、27 条 pending；排除延期 Common 与模板后，还有 **18 个实际模型**及最终全量验收。
+
+## commit52：补齐风险网格、部分图映射与区域评估前置组件
+
+原问题：GSNet 把完整网格与图节点混作相同身份，按 geo_id 数值取下标，无法正确处理部分覆盖及乱序非连续 ID；未来时间上下文、训练区间外部归一化、区域平方权重和事故排名口径尚未适配统一运行时。
+
+处理：新增风险数据适配，显式建立完整行优先网格与实际图节点的映射；读取给定 road/risk 和可选 poi 图，区域掩码与图分别作为只读元数据。复用公共原始缓存，按目标时间互斥切分，只从训练区间拟合主/外部 scaler；日历 one-hot 保持含义，未来输入只含日历及明确声明为已知的非目标列。新增 RiskLoss，保留原尺度分档、区域归一化权重的平方作用，按有效目标数处理缺失值、微批与尾批。新增区域评估：精确 top-k、稳定并列顺序、零事故帧和 PCC 退化规则；原始预测/真值完整导出，另存区域布尔向量。接口、公式及有意调整见 [风险组件说明](risk-components_zh.md)。
+
+验证：新增 **28 项通过**，覆盖部分图/完整网格、双/三图、身份与只读映射、未来目标隔离、训练外部统计、缓存复用、原尺度独立损失/梯度及微批加权、NumPy 排名/误差/PCC 参考、真实尾批 CPU AMP，以及组件测试模型 RiskProbe 的完整训练/独立评估/精确续训/来源变化拒绝。相关网格与 DSAN 合计 **108 passed**；完整回归 **1150 passed，0 failed，0 errors，0 skipped**，见 [汇总](remaining-validation.json)。
+
+本批只交付公共前置组件，**不把 RiskProbe 当作 GSNet**，没有 GSNet 原生网络注册、正式配置或 CLI 验收。模型计数仍为 **73/100**、27 条 pending；扣除延期 Common 与模板后还有 **18 个实际模型**及最终全量验收。下一批继续接入 GSNet 网络与完整生命周期。
 
 ## 持续完成的清单
 

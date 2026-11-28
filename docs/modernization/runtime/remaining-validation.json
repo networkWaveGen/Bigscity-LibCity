@@ -1,5 +1,5 @@
 {
-  "scope": "Remaining-work commits 1-51; whole-library migration remains in progress",
+  "scope": "Remaining-work commits 1-52; whole-library migration remains in progress",
   "environment": {
     "python": "3.12.13",
     "torch": "2.15.0+cpu",
@@ -9,7 +9,7 @@
     "scikit_learn": "1.9.1"
   },
   "full_tests": {
-    "tests": 1122,
+    "tests": 1150,
     "failures": 0,
     "errors": 0,
     "skipped": 0
@@ -865,6 +865,34 @@
     "test_invalid_training_policy_is_rejected[strategy1]",
     "test_invalid_training_policy_is_rejected[strategy2]",
     "test_invalid_graph_and_input_dimensions_are_rejected",
+    "test_partial_noncontiguous_graph_ids_map_to_full_grid_and_preserve_graph_views[False]",
+    "test_partial_noncontiguous_graph_ids_map_to_full_grid_and_preserve_graph_views[True]",
+    "test_known_future_time_flags_and_train_only_numeric_scalers_are_separate_from_risk_targets",
+    "test_invalid_risk_data_or_future_declarations_fail_clearly[target]",
+    "test_invalid_risk_data_or_future_declarations_fail_clearly[spatial-observation]",
+    "test_invalid_risk_data_or_future_declarations_fail_clearly[missing-dimensions]",
+    "test_invalid_risk_data_or_future_declarations_fail_clearly[unknown-id]",
+    "test_invalid_risk_data_or_future_declarations_fail_clearly[duplicate-edge]",
+    "test_invalid_risk_data_or_future_declarations_fail_clearly[empty-mask]",
+    "test_raw_spatial_square_weights_and_threshold_ties_match_independent_objective_and_gradients[False-none]",
+    "test_raw_spatial_square_weights_and_threshold_ties_match_independent_objective_and_gradients[False-standard]",
+    "test_raw_spatial_square_weights_and_threshold_ties_match_independent_objective_and_gradients[False-minmax]",
+    "test_raw_spatial_square_weights_and_threshold_ties_match_independent_objective_and_gradients[True-none]",
+    "test_raw_spatial_square_weights_and_threshold_ties_match_independent_objective_and_gradients[True-standard]",
+    "test_raw_spatial_square_weights_and_threshold_ties_match_independent_objective_and_gradients[True-minmax]",
+    "test_empty_thresholds_constant_weights_and_no_known_active_targets_have_finite_zero_gradients",
+    "test_weighted_risk_gradients_accumulate_by_known_region_count_across_unequal_batches",
+    "test_raw_risk_cache_reuses_graph_selection_and_external_scaler_without_rereading_observations",
+    "test_invalid_risk_bin_configuration_is_rejected[thresholds0-weights0]",
+    "test_invalid_risk_bin_configuration_is_rejected[thresholds1-weights1]",
+    "test_invalid_risk_bin_configuration_is_rejected[thresholds2-weights2]",
+    "test_invalid_risk_bin_configuration_is_rejected[thresholds3-weights3]",
+    "test_rankings_and_spatial_regression_match_numpy_across_batches_and_ties[1-single]",
+    "test_rankings_and_spatial_regression_match_numpy_across_batches_and_ties[1-average]",
+    "test_rankings_and_spatial_regression_match_numpy_across_batches_and_ties[10-single]",
+    "test_rankings_and_spatial_regression_match_numpy_across_batches_and_ties[10-average]",
+    "test_actual_risk_components_train_export_and_full_resume_without_claiming_native_gsnet",
+    "test_actual_risk_weighted_loss_and_rankings_support_cpu_amp_and_real_tail",
     "test_reference_forward_and_gradients_with_no_forward_filesystem[ChebConv]",
     "test_reference_forward_and_gradients_with_no_forward_filesystem[GAT]",
     "test_chebyshev_zero_order_and_independent_dual_support_polynomials",
@@ -1745,6 +1773,20 @@
         "total": 100,
         "migrated": 72,
         "pending": 28
+      }
+    },
+    {
+      "scope": "commits 1-51, through 956930e",
+      "full_tests": {
+        "tests": 1122,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "inventory": {
+        "total": 100,
+        "migrated": 73,
+        "pending": 27
       }
     }
   ],
@@ -2724,7 +2766,7 @@
       "Static arrays are read-only metadata; numeric contents are model buffers, while checkpoint metadata stores only shape/dtype"
     ]
   },
-  "results_file": "D:\\LibCity 2.0\\.runtime-tests\\remaining-suite-48-results.xml",
+  "results_file": "D:\\LibCity 2.0\\.runtime-tests\\remaining-suite-49-results.xml",
   "rgsl_cli": {
     "passed": true,
     "source": "D:\\LibCity 2.0\\LibCity-modernization",
@@ -4306,5 +4348,13 @@
       }
     },
     "scope": "Actual published DSAN contiguous-grid example, CPU functionality and corrected LibCity variant, not paper accuracy"
+  },
+  "risk_components_validation": {
+    "passed": true,
+    "new_tests": 28,
+    "related_tests": 108,
+    "tests": "tests/test_runtime_risk_components.py",
+    "documentation": "risk-components_zh.md",
+    "scope": "Risk-grid, graph identity, loss and evaluation prerequisites only; GSNet neural registration and CLI pending; model inventory unchanged"
   }
 }

@@ -14,6 +14,8 @@ CSTN 可用 `--model CSTN` 生成网格 OD 示例，使用相同的生命周期�
 
 DSAN 可用 `--model DSAN` 生成连续网格示例，使用 `grid_window` 与无静态图配置；原始历史掩码在归一化前计算。全局/局部与空间/时间注意力保持明确样本轴，所有堆叠逐层传递；默认训练为公共 masked_rmse，支持梯度累积和精确续训。采用历史种子并行预测，不读取目标或未来观测；参数、长预测窗扩展和算法修订见 [DSAN 说明](dsan_zh.md)。
 
+GSNet 的完整网格/部分图映射、风险分档加权目标和区域排名评估已补齐组件，接口及验证范围见 [风险组件说明](risk-components_zh.md)。原生 GSNet 网络尚未注册，仍属于待迁移模型；组件测试模型不计入支持数量。
+
 道路表征的 ChebConv/GAT/GeomGCN 使用具名 `road_reconstruction` 协议，任务默认配置与模型预设分开加载；预设仍不能静默改写协议字段。协议名称及相对于默认边采样协议的差异会写入日志和 runtime_info.json。生成示例可用 `tools/make_runtime_fixture.py --directory <目录> --model ChebConv`、`--model GAT` 或 `--model GeomGCN`；它们重建静态节点属性并导出全节点嵌入，使用全图批次与互斥监督节点集合，不将此指标解释为下游分类精度。GeomGCN 的道路边/自环分区以 PyTorch 聚合实现，不需要 DGL；训练、独立评估与完整续训均使用公共入口。它保留 LibCity 的两分区重建变体，不包含原论文的几何邻域构建；合并维度与有意修复见模型说明。
 
 STResNet/ACFM 的原子网格示例可用 `tools/make_runtime_fixture.py --directory <目录> --model STResNet` 或 `--model ACFM` 创建，再对生成的 stresnet.json/acfm.json 执行相同的 train/evaluate/resume 命令。`grid_cpt` 协议默认单步、最近 3 个时间片和前一天同刻；data.sampling 可显式配置周周期，output_window 可显式增大。`.geo` 需包含完整矩形的 row_id/column_id；`.grid` 行按时间/行列对齐，输出沿原 geo_id 顺序排列。历史外部观测与未来已知特征分开，只有日历及 known_future_columns 会进入预测时刻输入；不能把实际未来天气或观测当已知。默认缓存可复用，.grid 修改会使缓存失效并拒绝旧状态续训。详见 [模型说明](models_zh.md)。
