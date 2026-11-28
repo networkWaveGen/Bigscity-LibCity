@@ -1,0 +1,8 @@
+{
+  "data": {"dataset": "Tiny", "data_dir": "data", "cache_dir": "cache",
+    "input_window": 1, "output_window": 1, "pad_training": false},
+  "model": {"name": "DGCN", "params": {"c_out": 4, "K": 2, "Kt": 3, "dropout": 0.2}},
+  "training": {"epochs": 2, "batch_size": 16, "accumulation_steps": 2},
+  "evaluation": {"batch_size": 17},
+  "runtime": {"device": "cpu", "seed": 17, "output_dir": "runs", "exp_id": "dgcn"}
+}

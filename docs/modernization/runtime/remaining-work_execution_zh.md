@@ -43,7 +43,8 @@
 | commit35 | e538689 | feat: migrate DKFN with sample-local variance and causal rollout |
 | commit36 | 0a3308d | feat: migrate ResLSTM with independent batches and explicit periods |
 | commit37 | 05765a3 | feat: migrate STSGCN with fresh graph masks and explicit Huber loss |
-| commit38 | 随本节交付的提交 | feat: migrate STPGCN with registered layers and factored relations |
+| commit38 | 5972104 | feat: migrate STPGCN with registered layers and factored relations |
+| commit39 | 随本节交付的提交 | feat: migrate DGCN with explicit CPT axes and dynamic graphs |
 
 ## commit1：修复基础交通缓存（670b325）
 
@@ -423,9 +424,26 @@ forward 由配置决定预测长度，每步重新编码当前窗口；预测回
 
 仓库外夹具、训练、独立评估及续训共 **4 条命令成功**，预测与指标完全一致，续训第三轮共 9 次参数更新，24 个高斯参数张量写入检查点，缓存 miss/hit/hit，见 [CLI](stpgcn-cli-validation.json)。当前完整回归 **732 passed，0 failed，0 errors，0 skipped**，见 [汇总](remaining-validation.json)。迁移表更新为 **64/100**，36 条 pending；排除 7 个延期 Common 和 2 个模板后，本期仍有 **27 个交通预测模型**及最终全量验收待完成。
 
+## commit39：迁移 DGCN 并纠正粗周期轴、图状态与固定长度
+
+问题：旧网络在注意力/掩码/输出中写死 60/48/12，其他周期数或预测长度会切出空片或形状错误；粗注意力 view 把时间位置交错到周期轴。无条件 squeeze 和 float32/device 常量破坏单样本与 double；图残差 Parameter.to(device) 存在迁移后不注册风险。空间注意力的 LayerNorm 从未执行；K=1 却始终创建两个 Chebyshev 项，无法运行。训练 MSE 的零值规则也不能仅凭名字判断。
+
+处理：新增独立标准 DGCN 与 dgcn_cpt 协议，默认保留 2/1/2 个 12 步周期、两层动态图、64 通道、3 阶图卷积和 3 点时间核。模型按只读 CPT 元信息恢复类别及远近顺序，粗注意力显式将整块 H 帧送入通道组；时间掩码、输出头和 LayerNorm 尺寸由 M/H/N 推导。支持单类别/任意非空周期数、多目标、非默认奇数核与头数，保留默认四组输出的计算形式，不用简单网络替换旧动态图。
+
+图使用未归一化 D-A 的最大实特征值缩放，零图/单节点有有限回退，静态矩阵/单位项/掩码注册为 buffer，图残差是直接注册的 Parameter。逐行除法替代对角矩阵乘法，保留原 epsilon 加法并限制接近零的分母；动态 LSTM 状态随输入精度/设备创建。删除未使用的注意力归一化；K=1 不再创建无用图参数。公共 singleton BN 以同一回退逻辑支持 1d/2d，单节点单样本真实尾批可训练，不复制样本。
+
+模型只读取 X；保留原尺度 MSE、Adam 0.0005、指数 epoch 调度 gamma=0.92、关闭早停。旧默认 masked_mse_torch 实际只忽略缺失值，因此明确 mask_value=null，零目标参与训练；评估掩码仍按公共协议独立设置。全部训练、独立评估与 dropout/BN/优化器/调度器/RNG 状态恢复使用公共运行时。
+
+验证：新增 **31 项通过**，含默认 60 帧下 4/8/64 通道的新旧前向/全部有效梯度与训练 BN 状态对照（明确纠正粗周期轴和旧状态精度），粗块逐索引输入、3 种 Chebyshev 阶数/奇数核、未归一化有向拉普拉斯/空图、行归一化抵消、6 组不同周期/预测窗/头数/特征/目标/batch=1/float64、无标签/样本独立/静态状态所有权、真实默认 12 步完整数据、训练统计/目标隔离/缓存、完整训练/独立评估/dropout/BN/Adam/指数调度/RNG 精确续训，以及普通和单块 singleton CPU AMP 尾批。核心与清单检查合计 32 项通过。
+
+仓库外夹具、训练、独立评估与续训共 **4 条命令成功**，预测/指标完全一致，续训第三轮共 15 次参数更新，缓存 miss/hit/hit，见 [CLI](dgcn-cli-validation.json)。当前完整回归 **763 passed，0 failed，0 errors，0 skipped**，见 [汇总](remaining-validation.json)。迁移表为 **65/100**，35 条 pending；排除延期 Common 与模板后仍有 **26 个模型**，最终验收未完成。
+
+新增公共 CPT 待修项：当前以 3600//time_intervals 推算日/周位移，非整小时约数可能产生不精确的物理周期；同时统一限制 horizon<=每小时点数，会错误拒绝仅日/周输入的较长预测。需要单独按每个激活类别的实际秒数验证/计算位移，并按最短激活位移限制完整预测窗，保证所有输入早于目标；已通过的五分钟/小时配置的样本语义应保持一致。
+
 ## 持续完成的清单
 
 - [x] 基础交通缓存保存、读取、失效和独立目录。
 - [x] CRANN 的统一输入、原始目标、完整训练/评估/续训与无标签推理。
+- [ ] 公共 CPT 按激活类别的物理周期计算位移与历史窗口合法性，修正非小时整除频率和仅日/周长预测的检查。
 - [ ] 全部未延期模型迁移、实际验证与迁移 CSV 更新（基线 15/100 已迁移；模板及第 8 节 Common 事项另行标注）。
 - [ ] 扩大后的完整回归、发布示例与最终逐项验收；在此之前不声明主线全部完成。

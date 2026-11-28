@@ -20,6 +20,8 @@ STSGCN 示例用 `tools/make_runtime_fixture.py --directory <目录> --model STS
 
 STPGCN 示例用 `--model STPGCN` 生成，对 stpgcn.json 使用相同 train/evaluate/resume 命令。C/L/d 设置通道/层数/位置嵌入，alpha 是有向空间跳数上限，beta 是当前时段之前的历史范围；两者允许为零。日历从原子真实 UTC 时间戳生成独立 int64 history_features，不需要把星期、时刻加入数值 X。采样间隔须整除一天，按午夜计算时段。全部关系、卷积与选择层均参与训练并写入检查点；高斯关系采用数学等价的空间/时间分解，不增加专用训练循环。语义修订、范围与限制见 [模型说明](models_zh.md)。
 
+DGCN 示例用 `--model DGCN` 生成，按 dgcn.json 执行相同 train/evaluate/resume 命令。具名 dgcn_cpt 默认取最近 2 小时、前一天和前两周的各 12 步，总共 60 帧；小时级小例子显式改为一步、共 5 帧。c_out/K/Kt/attention_heads/dropout 控制动态图通道、Chebyshev 阶数、奇数时间核、注意力头数与丢弃率，周期类别由 data.sampling 声明。模型按布局恢复每类内远到近顺序，粗周期输入轴已纠正。训练 MSE 默认包含原始零目标；边界、语义变化及当前公共 CPT 数据频率约束见 [模型说明](models_zh.md)。
+
 ## GRU 完整例子
 
 从源码根目录运行，数据、缓存和输出都可放在仓库外：

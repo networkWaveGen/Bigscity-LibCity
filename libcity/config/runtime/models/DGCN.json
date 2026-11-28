@@ -1,0 +1,8 @@
+{
+  "model": {"params": {"c_out": 64, "K": 3, "Kt": 3, "attention_heads": 4,
+    "dropout": 0.5, "normalization_epsilon": 0.0001}},
+  "data": {"scaler": {"name": "standard"}},
+  "training": {"optimizer": {"name": "adam", "lr": 0.0005},
+    "scheduler": {"name": "exponential", "interval": "epoch", "gamma": 0.92},
+    "loss": {"name": "masked_mse", "mask_value": null}, "early_stopping": {"patience": 0}}
+}

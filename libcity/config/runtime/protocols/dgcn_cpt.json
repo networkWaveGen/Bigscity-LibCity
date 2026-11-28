@@ -1,0 +1,5 @@
+{
+  "data": {"input_window": 12, "output_window": 12,
+    "sampling": {"name": "cpt", "closeness": 2, "period": 1, "trend": 2,
+      "interval_period": 1, "interval_trend": 1}}
+}

@@ -42,6 +42,10 @@ def multiscale_fixture(root, name='Tiny'):
     return atomic_fixture(root,name=name,steps=400,interval_minutes=60)
 
 
+def dgcn_fixture(root,name='Tiny'):
+    return atomic_fixture(root,name=name,steps=800,interval_minutes=60)
+
+
 def periodic_fixture(root,name='PeriodicTiny',steps=400,nodes=4,features=2,outputs=2,interval_minutes=60):
     folder = atomic_fixture(root,name=name,steps=steps,nodes=nodes,interval_minutes=interval_minutes)
     frame = pd.read_csv(folder/f'{name}.dyna').rename(columns={'speed':'value_0'})

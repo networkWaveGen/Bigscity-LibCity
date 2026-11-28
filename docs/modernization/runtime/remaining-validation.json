@@ -1,5 +1,5 @@
 {
-  "scope": "Remaining-work commits 1-38; whole-library migration remains in progress",
+  "scope": "Remaining-work commits 1-39; whole-library migration remains in progress",
   "environment": {
     "python": "3.12.13",
     "torch": "2.15.0+cpu",
@@ -8,7 +8,7 @@
     "gensim": "4.4.0"
   },
   "full_tests": {
-    "tests": 732,
+    "tests": 763,
     "failures": 0,
     "errors": 0,
     "skipped": 0
@@ -165,6 +165,37 @@
     "test_actual_cpu_amp_training[RNN]",
     "test_actual_cpu_amp_training[GRU]",
     "test_actual_cpu_amp_training[LSTM]",
+    "test_default_sixty_frame_corrected_original_forecast_all_gradients_and_bn_state[4-False]",
+    "test_default_sixty_frame_corrected_original_forecast_all_gradients_and_bn_state[8-True]",
+    "test_default_sixty_frame_corrected_original_forecast_all_gradients_and_bn_state[64-False]",
+    "test_coarse_attention_projection_observes_whole_chunks_without_interleaving",
+    "test_dynamic_chebyshev_terms_preserve_feature_order_and_general_temporal_kernel[1-1]",
+    "test_dynamic_chebyshev_terms_preserve_feature_order_and_general_temporal_kernel[2-3]",
+    "test_dynamic_chebyshev_terms_preserve_feature_order_and_general_temporal_kernel[3-5]",
+    "test_unnormalized_scaled_laplacian_and_owned_buffers_handle_empty_and_directed_graphs[1]",
+    "test_unnormalized_scaled_laplacian_and_owned_buffers_handle_empty_and_directed_graphs[2]",
+    "test_unnormalized_scaled_laplacian_and_owned_buffers_handle_empty_and_directed_graphs[3]",
+    "test_row_normalization_preserves_original_formula_and_guards_cancellation",
+    "test_general_cpt_chunks_horizons_features_single_nodes_and_all_parameter_gradients[counts0-1-1-1-1-1-1-1-4]",
+    "test_general_cpt_chunks_horizons_features_single_nodes_and_all_parameter_gradients[counts1-2-1-2-2-4-2-3-4]",
+    "test_general_cpt_chunks_horizons_features_single_nodes_and_all_parameter_gradients[counts2-3-3-2-1-6-3-5-2]",
+    "test_general_cpt_chunks_horizons_features_single_nodes_and_all_parameter_gradients[counts3-2-3-2-2-4-2-1-1]",
+    "test_general_cpt_chunks_horizons_features_single_nodes_and_all_parameter_gradients[counts4-1-3-1-2-8-3-3-4]",
+    "test_general_cpt_chunks_horizons_features_single_nodes_and_all_parameter_gradients[counts5-3-1-2-2-4-2-5-2]",
+    "test_eval_is_label_free_sample_independent_and_preserves_graph_input_and_state",
+    "test_full_default_protocol_reads_five_twelve_step_chunks_and_forecasts_without_labels",
+    "test_common_cpt_reordering_train_statistics_cache_and_future_target_isolation",
+    "test_train_evaluate_dropout_bn_adam_exponential_rng_exact_resume",
+    "test_real_single_node_tail_cpu_amp_and_singleton_normalization[False]",
+    "test_real_single_node_tail_cpu_amp_and_singleton_normalization[True]",
+    "test_invalid_model_parameters_fail_early[params0]",
+    "test_invalid_model_parameters_fail_early[params1]",
+    "test_invalid_model_parameters_fail_early[params2]",
+    "test_invalid_model_parameters_fail_early[params3]",
+    "test_invalid_model_parameters_fail_early[params4]",
+    "test_invalid_model_parameters_fail_early[params5]",
+    "test_invalid_model_parameters_fail_early[params6]",
+    "test_horizon_protocol_loss_and_shape_guards",
     "test_original_recurrent_equations_with_explicit_local_variances_and_positive_coefficient_gradients[1-False-dimensions0]",
     "test_original_recurrent_equations_with_explicit_local_variances_and_positive_coefficient_gradients[1-False-dimensions1]",
     "test_original_recurrent_equations_with_explicit_local_variances_and_positive_coefficient_gradients[1-False-dimensions2]",
@@ -750,8 +781,8 @@
   ],
   "inventory": {
     "total": 100,
-    "migrated": 64,
-    "pending": 36
+    "migrated": 65,
+    "pending": 35
   },
   "history": [
     {
@@ -1173,6 +1204,20 @@
         "migrated": 63,
         "pending": 37
       }
+    },
+    {
+      "scope": "commits 1-38, through 5972104",
+      "full_tests": {
+        "tests": 732,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "inventory": {
+        "total": 100,
+        "migrated": 64,
+        "pending": 36
+      }
     }
   ],
   "current_cli": {
@@ -1580,6 +1625,110 @@
       "Registered Gaussian, graph-convolution and feature-selection modules are included in checkpoints",
       "All-layer optimizer/RNG continuation is checked exactly by test_runtime_stpgcn.py",
       "Gaussian relation uses mathematically equivalent spatial/temporal factors"
+    ]
+  },
+  "dgcn_cli": {
+    "passed": true,
+    "source": "D:\\LibCity 2.0\\LibCity-modernization",
+    "directory": "D:\\LibCity 2.0\\.runtime-tests\\dgcn-cli-aw4hzgf0",
+    "commands": [
+      {
+        "command": [
+          "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+          "-B",
+          "D:\\LibCity 2.0\\LibCity-modernization\\tools\\make_runtime_fixture.py",
+          "--directory",
+          "D:\\LibCity 2.0\\.runtime-tests\\dgcn-cli-aw4hzgf0\\example",
+          "--model",
+          "DGCN"
+        ],
+        "cwd": "D:\\LibCity 2.0\\.runtime-tests\\dgcn-cli-aw4hzgf0",
+        "exit_code": 0
+      },
+      {
+        "command": [
+          "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+          "-B",
+          "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+          "train",
+          "--config",
+          "D:\\LibCity 2.0\\.runtime-tests\\dgcn-cli-aw4hzgf0\\example\\dgcn.json",
+          "--set",
+          "runtime.exp_id=train"
+        ],
+        "cwd": "D:\\LibCity 2.0\\.runtime-tests\\dgcn-cli-aw4hzgf0",
+        "exit_code": 0
+      },
+      {
+        "command": [
+          "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+          "-B",
+          "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+          "evaluate",
+          "--config",
+          "D:\\LibCity 2.0\\.runtime-tests\\dgcn-cli-aw4hzgf0\\example\\dgcn.json",
+          "--checkpoint",
+          "D:\\LibCity 2.0\\.runtime-tests\\dgcn-cli-aw4hzgf0\\example\\runs\\train\\checkpoints\\best.pt",
+          "--set",
+          "runtime.exp_id=evaluated"
+        ],
+        "cwd": "D:\\LibCity 2.0\\.runtime-tests\\dgcn-cli-aw4hzgf0",
+        "exit_code": 0
+      },
+      {
+        "command": [
+          "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+          "-B",
+          "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+          "train",
+          "--config",
+          "D:\\LibCity 2.0\\.runtime-tests\\dgcn-cli-aw4hzgf0\\example\\dgcn.json",
+          "--resume",
+          "D:\\LibCity 2.0\\.runtime-tests\\dgcn-cli-aw4hzgf0\\example\\runs\\train\\checkpoints\\last.pt",
+          "--set",
+          "training.epochs=3",
+          "--set",
+          "runtime.exp_id=resumed"
+        ],
+        "cwd": "D:\\LibCity 2.0\\.runtime-tests\\dgcn-cli-aw4hzgf0",
+        "exit_code": 0
+      }
+    ],
+    "model": "DGCN",
+    "metrics": {
+      "MAE@1": 0.8556085606416066,
+      "RMSE@1": 1.0573536490515352,
+      "loss": 1.1179967182688415
+    },
+    "prediction_shape": [
+      160,
+      1,
+      3,
+      1
+    ],
+    "independent_metrics_exact": true,
+    "independent_predictions_exact": true,
+    "checkpoint_format": 3,
+    "resumed_state": {
+      "stage": "train",
+      "epoch": 3,
+      "batches_seen": 27,
+      "optimizer_steps": 15,
+      "best_metric": 1.0705366794019937,
+      "task_state": {}
+    },
+    "cache_statuses": [
+      "miss",
+      "hit",
+      "hit"
+    ],
+    "notes": [
+      "Executed outside the source directory",
+      "Named dgcn_cpt protocol; hourly small example explicitly selects horizon=1 and five CPT frames",
+      "Default five twelve-frame chunks and 64-channel structure are checked by test_runtime_dgcn.py",
+      "Corrected coarse spatial-attention chunk layout; CPT families use oldest-first chunks",
+      "Dropout, BatchNorm, optimizer, scheduler and RNG continuation checked exactly by tests",
+      "Training MSE includes raw zero targets; evaluation mask is configured independently"
     ]
   }
 }

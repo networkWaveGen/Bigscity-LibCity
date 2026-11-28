@@ -29,6 +29,7 @@ class ModelSpec:
 
 
 MODELS = {
+    'DGCN': ModelSpec('libcity.model.traffic_flow_prediction.runtime_dgcn:DGCN',protocol='dgcn_cpt'),
     'STPGCN': ModelSpec('libcity.model.traffic_flow_prediction.runtime_stpgcn:STPGCN',
         prepare_data='libcity.data.stpgcn_bundle:prepare_stpgcn'),
     'STSGCN': ModelSpec('libcity.model.traffic_flow_prediction.runtime_stsgcn:STSGCN'),
