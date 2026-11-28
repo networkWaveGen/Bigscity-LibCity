@@ -1,0 +1,8 @@
+{
+  "data": {"dataset": "Tiny", "data_dir": "data", "cache_dir": "cache",
+    "input_window": 4, "output_window": 2},
+  "model": {"name": "STPGCN", "params": {"C": 4, "L": 2, "d": 2, "alpha": 1, "beta": 2}},
+  "training": {"epochs": 2, "batch_size": 5, "accumulation_steps": 2},
+  "evaluation": {"batch_size": 5},
+  "runtime": {"device": "cpu", "seed": 17, "output_dir": "runs", "exp_id": "stpgcn"}
+}

@@ -42,7 +42,8 @@
 | commit34 | 85c8280 | feat: migrate periodic graph forecasts with explicit distance bands |
 | commit35 | e538689 | feat: migrate DKFN with sample-local variance and causal rollout |
 | commit36 | 0a3308d | feat: migrate ResLSTM with independent batches and explicit periods |
-| commit37 | 随本节交付的提交 | feat: migrate STSGCN with fresh graph masks and explicit Huber loss |
+| commit37 | 05765a3 | feat: migrate STSGCN with fresh graph masks and explicit Huber loss |
+| commit38 | 随本节交付的提交 | feat: migrate STPGCN with registered layers and factored relations |
 
 ## commit1：修复基础交通缓存（670b325）
 
@@ -407,6 +408,20 @@ forward 由配置决定预测长度，每步重新编码当前窗口；预测回
 验证：新增 **54 项通过**，包括 16 种旧网络前向/全部梯度与默认四块对照、三帧有向图/静态所有权、连续三次掩码参数更新（不使用 retain_graph）、非原地输入/样本独立、多步/多目标/batch=1/float64、原尺度 Huber 阈值/有效计数/梯度、距离倒数缺边/零距离/方向/缓存与无权重回退、两种模块完整训练/独立评估/mask/Adam/调度器/RNG 精确续训、单节点空空间图尾批 CPU AMP，以及错误参数检查。
 
 仓库外发布夹具、训练、独立评估、续训共 **4 条命令成功**，预测与指标完全一致，续训第三轮共 9 次参数更新，缓存 miss/hit/hit，见 [CLI](stsgcn-cli-validation.json)。当前完整回归 **696 passed，0 failed，0 errors，0 skipped**，见 [汇总](remaining-validation.json)。迁移表更新为 **63/100**，37 条 pending；排除 7 个延期 Common 和 2 个模板后，本期仍有 **28 个交通预测模型**及最终全量验收待完成，不声明主线全部完成。
+
+## commit38：迁移 STPGCN 并补齐可训练层、真实日历与空间跳数
+
+问题：旧关系推断/图卷积/特征选择保存在普通列表中，六个高斯组件也未注册，导致对应参数不进入常规优化器、state_dict 或设备迁移。范围掩码原地改写空间跳数，位置编码只剩 0/1；不可达索引缺乏独立含义。最终 GLU 写死 C*4，只能适配 L=3。旧数据以样本序号猜测日历，points_per_hour 使用 time_intervals//60，且首次切分还引用了未定义 num_samples；无法可靠对应真实起始星期、午夜和采样频率。
+
+处理：新增独立标准模型、专用轻量 CalendarWindows 适配及预设。所有层与高斯组件注册为 ModuleList，融合宽度按 C*(L+1) 构建；静态有向最短跳数与范围掩码分别存为 buffer，不改动只读图。跳数 0/1/2 等保持真实含义，不可达或超界使用独立 alpha+1 索引；alpha/beta 可为零。保持空间对/转置、GLU、LayerNorm、跳连和逐目标预测布局，不添加模型内部损失、设备常量或日志。
+
+公共窗口仅额外保存原始 clock 引用，STPGCN 按已有窗口索引生成独立的 int64 历史星期/时段；日历不会受归一化、浮点舍入或目标值影响。使用真实 UTC 时间戳，星期一为 0，steps_per_day=86400/time_intervals；保留公共互斥切分、训练统计、尾批与源版本缓存/续训检查。标准 model_inputs 已支持 history_features，沿用原尺度 masked_mae 及公共 train_loop，无需复制外层训练或评估。
+
+旧六个高斯分数是可分离的空间/时间加和，本轮做数学等价分解：先对完整历史聚合空间，再按查询的 beta+1 个因果时段聚合时间。关系权重只存 [N,N] 与 [B,T,beta+1]，不重复构建每个查询的 [B,beta+1,N,N] 大张量；没有改变为 softmax 或近似算法。稠密空间模型本身仍保留，不声称实测大城市加速或论文精度。数值参考先明确纠正上述旧错误，再独立运行原完整关系与逐时刻计算，核对预测及所有梯度。
+
+验证：新增 **36 项通过**，包括六组层数/跳数/时间范围/特征/目标组合与默认 64/3/8 网络的全部梯度对照、关系因子精确对照、SciPy 独立最短路、真实跳数/不可达/参数注册、因果/样本独立/无标签/batch=1/float64、六种采样间隔跨周末午夜、真实原子日历/缓存/互斥目标/训练统计/未来标签隔离、全部关系/卷积/选择层实际更新、完整训练/独立评估/Adam/调度器/RNG 精确续训、单节点 [5,5,5,5,1] 尾批 CPU AMP、spawn 和错误参数检查。
+
+仓库外夹具、训练、独立评估及续训共 **4 条命令成功**，预测与指标完全一致，续训第三轮共 9 次参数更新，24 个高斯参数张量写入检查点，缓存 miss/hit/hit，见 [CLI](stpgcn-cli-validation.json)。当前完整回归 **732 passed，0 failed，0 errors，0 skipped**，见 [汇总](remaining-validation.json)。迁移表更新为 **64/100**，36 条 pending；排除 7 个延期 Common 和 2 个模板后，本期仍有 **27 个交通预测模型**及最终全量验收待完成。
 
 ## 持续完成的清单
 

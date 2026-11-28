@@ -317,6 +317,16 @@ raw-scale Huber loss with `training.loss.delta=1`; select `masked_huber` explici
 to exclude zero targets. Mask products are recomputed each forward pass, so
 ordinary backward and the public resume lifecycle work without retain_graph.
 
+Generate STPGCN with `--model STPGCN`, then use stpgcn.json with the same public
+train/evaluate/resume commands. C/L/d configure channels, layer count and position
+width; alpha bounds outgoing spatial hops and beta bounds the causal past.
+Both bounds may be zero. Historical UTC weekday and time-slot indices come from
+actual source timestamps as int64 history_features, with Monday=0 and slots from
+midnight. The sampling interval must be an integer divisor of one day. Calendar
+channels do not need to be appended to X. All Gaussian/graph/selection modules
+are registered and checkpointed; equivalent factored relations avoid constructing
+one dense spatiotemporal graph per query. This remains a dense spatial model.
+
 The complete supported-model inventory and migration details are in the
 [runtime guide](../docs/modernization/runtime/README_zh.md). Small examples prove
 execution and reproducibility, not real-city benchmark accuracy.

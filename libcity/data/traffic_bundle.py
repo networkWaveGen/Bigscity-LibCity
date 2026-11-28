@@ -25,8 +25,9 @@ def fit_scaler(name, values):
 
 
 class TrafficWindows(Dataset):
-    def __init__(self, history, targets, known, starts, offsets, horizon, output_dim, scaler):
+    def __init__(self, history, targets, known, starts, offsets, horizon, output_dim, scaler, clock=None):
         self.history, self.targets, self.known = history, targets, known
+        self.clock = clock
         self.target_starts = np.asarray(starts, dtype=np.int64)
         self.offsets, self.horizon, self.output_dim, self.scaler = offsets, horizon, output_dim, scaler
 
@@ -175,7 +176,7 @@ def prepare_traffic(data, training, evaluation, seed, logger=None):
         if index==0 and data['pad_training']:
             padding = (-len(chosen)) % training['batch_size']
             chosen = np.pad(chosen, (0,padding), mode='edge')
-        dataset = TrafficWindows(history,target,known,chosen,offsets,horizon,output_dim,scaler)
+        dataset = TrafficWindows(history,target,known,chosen,offsets,horizon,output_dim,scaler,clock)
         cfg = training if index==0 else evaluation
         loaders.append(DataLoader(dataset,batch_size=cfg['batch_size'],num_workers=cfg['num_workers'],
             shuffle=training['shuffle'] if index==0 else False, generator=generator if index==0 else None))

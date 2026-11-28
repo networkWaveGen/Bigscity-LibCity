@@ -1,0 +1,7 @@
+{
+  "model": {"params": {"C": 64, "L": 3, "d": 8, "alpha": 4, "beta": 2}},
+  "data": {"pad_training": false, "scaler": {"name": "standard"},
+    "graph": {"name": "binary", "symmetric": false, "self_loops": false}},
+  "training": {"batch_size": 32, "optimizer": {"name": "adam", "lr": 0.002},
+    "loss": {"name": "masked_mae", "mask_value": 0.0}, "early_stopping": {"patience": 150}}
+}

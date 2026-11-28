@@ -29,6 +29,8 @@ class ModelSpec:
 
 
 MODELS = {
+    'STPGCN': ModelSpec('libcity.model.traffic_flow_prediction.runtime_stpgcn:STPGCN',
+        prepare_data='libcity.data.stpgcn_bundle:prepare_stpgcn'),
     'STSGCN': ModelSpec('libcity.model.traffic_flow_prediction.runtime_stsgcn:STSGCN'),
     'ResLSTM': ModelSpec('libcity.model.traffic_flow_prediction.runtime_reslstm:ResLSTM',protocol='reslstm_windows',
         prepare_data='libcity.data.reslstm_bundle:prepare_reslstm'),

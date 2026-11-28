@@ -1,0 +1,106 @@
+{
+  "passed": true,
+  "source": "D:\\LibCity 2.0\\LibCity-modernization",
+  "directory": "D:\\LibCity 2.0\\.runtime-tests\\stpgcn-cli-r41zl_dy",
+  "commands": [
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\tools\\make_runtime_fixture.py",
+        "--directory",
+        "D:\\LibCity 2.0\\.runtime-tests\\stpgcn-cli-r41zl_dy\\example",
+        "--model",
+        "STPGCN"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\stpgcn-cli-r41zl_dy",
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "train",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\stpgcn-cli-r41zl_dy\\example\\stpgcn.json",
+        "--set",
+        "runtime.exp_id=train"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\stpgcn-cli-r41zl_dy",
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "evaluate",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\stpgcn-cli-r41zl_dy\\example\\stpgcn.json",
+        "--checkpoint",
+        "D:\\LibCity 2.0\\.runtime-tests\\stpgcn-cli-r41zl_dy\\example\\runs\\train\\checkpoints\\best.pt",
+        "--set",
+        "runtime.exp_id=evaluated"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\stpgcn-cli-r41zl_dy",
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "D:\\LibCity 2.0\\.runtime-envs\\phase5-clean\\Scripts\\python.exe",
+        "-B",
+        "D:\\LibCity 2.0\\LibCity-modernization\\run_model.py",
+        "train",
+        "--config",
+        "D:\\LibCity 2.0\\.runtime-tests\\stpgcn-cli-r41zl_dy\\example\\stpgcn.json",
+        "--resume",
+        "D:\\LibCity 2.0\\.runtime-tests\\stpgcn-cli-r41zl_dy\\example\\runs\\train\\checkpoints\\last.pt",
+        "--set",
+        "training.epochs=3",
+        "--set",
+        "runtime.exp_id=resumed"
+      ],
+      "cwd": "D:\\LibCity 2.0\\.runtime-tests\\stpgcn-cli-r41zl_dy",
+      "exit_code": 0
+    }
+  ],
+  "model": "STPGCN",
+  "metrics": {
+    "MAE@1": 0.9508617542408131,
+    "RMSE@1": 1.1860097501049593,
+    "MAE@2": 0.7748476311012551,
+    "RMSE@2": 0.8934477533161331,
+    "loss": 0.8628547522756789
+  },
+  "prediction_shape": [
+    9,
+    2,
+    3,
+    1
+  ],
+  "independent_metrics_exact": true,
+  "independent_predictions_exact": true,
+  "checkpoint_format": 3,
+  "resumed_state": {
+    "stage": "train",
+    "epoch": 3,
+    "batches_seen": 15,
+    "optimizer_steps": 9,
+    "best_metric": 1.0437992281383939,
+    "task_state": {}
+  },
+  "cache_statuses": [
+    "miss",
+    "hit",
+    "hit"
+  ],
+  "saved_gaussian_parameter_tensors": 24,
+  "notes": [
+    "Executed outside the source directory",
+    "Actual source UTC weekday and time slot in int64 history_features; 288 five-minute slots per day",
+    "Registered Gaussian, graph-convolution and feature-selection modules are included in checkpoints",
+    "All-layer optimizer/RNG continuation is checked exactly by test_runtime_stpgcn.py",
+    "Gaussian relation uses mathematically equivalent spatial/temporal factors"
+  ]
+}

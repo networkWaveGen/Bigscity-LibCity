@@ -18,6 +18,8 @@ ResLSTM 示例用 `--model ResLSTM` 生成，对 reslstm.json 执行相同训练
 
 STSGCN 示例用 `tools/make_runtime_fixture.py --directory <目录> --model STSGCN` 生成，对 stsgcn.json 使用相同的 train/evaluate/resume 命令。示例启用图掩码，不需要 retain_graph。module_type 可选 individual/sharing，filters 的每个块内部宽度须相同，历史长度必须大于块数的两倍；act_type 可选 GLU/relu。默认图为 .rel 距离倒数图，训练为原尺度 Huber，阈值在 training.loss.delta 设置；需要排除原始零目标时显式选择 masked_huber。模型推理只读取历史 X，完整配置、有意修复和边界见 [模型说明](models_zh.md)。
 
+STPGCN 示例用 `--model STPGCN` 生成，对 stpgcn.json 使用相同 train/evaluate/resume 命令。C/L/d 设置通道/层数/位置嵌入，alpha 是有向空间跳数上限，beta 是当前时段之前的历史范围；两者允许为零。日历从原子真实 UTC 时间戳生成独立 int64 history_features，不需要把星期、时刻加入数值 X。采样间隔须整除一天，按午夜计算时段。全部关系、卷积与选择层均参与训练并写入检查点；高斯关系采用数学等价的空间/时间分解，不增加专用训练循环。语义修订、范围与限制见 [模型说明](models_zh.md)。
+
 ## GRU 完整例子
 
 从源码根目录运行，数据、缓存和输出都可放在仓库外：
